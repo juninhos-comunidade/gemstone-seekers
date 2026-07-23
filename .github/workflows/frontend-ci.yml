@@ -1,0 +1,219 @@
+name: Frontend CI
+
+on:
+  push:
+    branches: [ "main", "develop" ]
+    paths:
+      - 'web/**'
+  pull_request:
+    branches: [ "main", "develop" ]
+    paths:
+      - 'web/**'
+
+jobs:
+  # ==========================================
+  # STAGE: BUILD
+  # ==========================================
+  next-build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./web
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 9
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24.18.0'
+          cache: 'pnpm'
+          cache-dependency-path: web/pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build Next.js application
+        run: pnpm build
+
+  sast-semgrep:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./web
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Semgrep
+        run: pip install semgrep --quiet
+
+      - name: Run Semgrep
+        run: >
+          semgrep scan
+          --config p/javascript
+          --config p/typescript
+          --config p/owasp-top-ten
+          --config p/secrets
+          --severity ERROR
+          --sarif
+          --output semgrep-report.sarif
+          --error
+          --exclude node_modules/
+          --exclude .next/
+          --exclude out/
+
+      - name: Upload Semgrep Report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: semgrep-report-web
+          path: web/semgrep-report.sarif
+          retention-days: 7
+
+  sca-filesystem:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run Trivy FS Scanner (CycloneDX)
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: './web'
+          format: 'cyclonedx'
+          output: 'web/sbom.cyclonedx.json'
+          exit-code: '0'
+
+      - name: Run Trivy FS Scanner (SARIF)
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: './web'
+          format: 'sarif'
+          output: 'web/trivy-fs-report.sarif'
+          exit-code: '1'
+          severity: 'CRITICAL,HIGH'
+          scanners: 'vuln,secret'
+
+      - name: Upload Trivy Reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: trivy-fs-reports-web
+          path: |
+            web/trivy-fs-report.sarif
+            web/sbom.cyclonedx.json
+          retention-days: 7
+
+  # ==========================================
+  # STAGE: VERIFY
+  # ==========================================
+  lint-eslint:
+    needs: next-build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./web
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 9
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24.18.0'
+          cache: 'pnpm'
+          cache-dependency-path: web/pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run ESLint
+        run: pnpm exec eslint .
+
+  lint-prettier:
+    needs: next-build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./web
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 9
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24.18.0'
+          cache: 'pnpm'
+          cache-dependency-path: web/pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run Prettier
+        run: pnpm exec prettier --check .
+
+  test-vitest:
+    needs: next-build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./web
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 9
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24.18.0'
+          cache: 'pnpm'
+          cache-dependency-path: web/pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run Vitest with Coverage
+        # Using CLI flags to enforce the 80% coverage requirement dynamically
+        run: >
+          pnpm exec vitest run --coverage.enabled true 
+          --coverage.statements=80 
+          --coverage.branches=80 
+          --coverage.functions=80 
+          --coverage.lines=80
+
+      - name: Upload Coverage Report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: vitest-coverage-report
+          path: web/coverage/
+          retention-days: 7

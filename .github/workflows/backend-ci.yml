@@ -1,0 +1,411 @@
+name: Backend CI
+
+on:
+  push:
+    branches: [ "main", "develop" ]
+    paths:
+      - 'api/**'
+  pull_request:
+    branches: [ "main", "develop" ]
+    paths:
+      - 'api/**'
+
+env:
+  MAVEN_OPTS: "-Xmx2048m"
+  MAVEN_CLI_OPTS: "--batch-mode --no-transfer-progress"
+
+jobs:
+  # ==========================================
+  # STAGE: BUILD
+  # ==========================================
+  maven-compile:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./api
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 25
+        uses: actions/setup-java@v4
+        with:
+          java-version: '25'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Compile
+        run: ./mvnw $MAVEN_CLI_OPTS clean compile -DskipTests -Dskip.git.hooks=true
+
+      - name: Upload target directory
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-target
+          path: api/target/
+          retention-days: 1
+
+  sast-semgrep:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./api
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Semgrep
+        run: pip install semgrep --quiet
+
+      - name: Run Semgrep
+        run: >
+          semgrep scan
+          --config p/java
+          --config p/owasp-top-ten
+          --config p/secrets
+          --severity ERROR
+          --sarif
+          --output semgrep-report.sarif
+          --error
+          --exclude target/
+          --exclude .m2/
+          --exclude src/main/resources/db/seed/
+
+      - name: Upload Semgrep Report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: semgrep-report
+          path: api/semgrep-report.sarif
+          retention-days: 7
+
+  sca-filesystem:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run Trivy FS Scanner (CycloneDX)
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: './api'
+          format: 'cyclonedx'
+          output: 'api/sbom.cyclonedx.json'
+          exit-code: '0'
+
+      - name: Run Trivy FS Scanner (SARIF)
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: './api'
+          format: 'sarif'
+          output: 'api/trivy-fs-report.sarif'
+          exit-code: '1'
+          severity: 'CRITICAL,HIGH'
+          scanners: 'vuln,secret'
+
+      - name: Upload Trivy Reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: trivy-fs-reports
+          path: |
+            api/trivy-fs-report.sarif
+            api/sbom.cyclonedx.json
+          retention-days: 7
+
+  # ==========================================
+  # STAGE: VERIFY
+  # ==========================================
+  lint-checkstyle:
+    needs: maven-compile
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./api
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 25
+        uses: actions/setup-java@v4
+        with:
+          java-version: '25'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Download target directory
+        uses: actions/download-artifact@v4
+        with:
+          name: api-target
+          path: api/target/
+
+      - name: Run Checkstyle
+        run: >
+          ./mvnw $MAVEN_CLI_OPTS checkstyle:checkstyle checkstyle:check
+          -Dskip.git.hooks=true
+          -Dcheckstyle.failOnViolation=true
+          -Dcheckstyle.violationSeverity=error
+
+      - name: Upload Checkstyle Report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: checkstyle-report
+          path: api/target/checkstyle/
+          retention-days: 7
+
+  lint-pmd:
+    needs: maven-compile
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./api
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 25
+        uses: actions/setup-java@v4
+        with:
+          java-version: '25'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Download target directory
+        uses: actions/download-artifact@v4
+        with:
+          name: api-target
+          path: api/target/
+
+      - name: Run PMD
+        run: >
+          ./mvnw $MAVEN_CLI_OPTS pmd:pmd pmd:check
+          -Dskip.git.hooks=true
+          -Dpmd.failOnViolation=true
+          -Dpmd.maxAllowedViolations=0
+
+      - name: Upload PMD Report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pmd-report
+          path: api/target/pmd/
+          retention-days: 7
+
+  sast-spotbugs:
+    needs: maven-compile
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./api
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 25
+        uses: actions/setup-java@v4
+        with:
+          java-version: '25'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Download target directory
+        uses: actions/download-artifact@v4
+        with:
+          name: api-target
+          path: api/target/
+
+      - name: Run SpotBugs
+        run: >
+          ./mvnw $MAVEN_CLI_OPTS spotbugs:spotbugs spotbugs:check
+          -Dskip.git.hooks=true
+          -Dspotbugs.threshold=High
+          -Dspotbugs.maxAllowedViolations=0
+
+      - name: Upload SpotBugs Report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: spotbugs-report
+          path: api/target/spotbugs/
+          retention-days: 7
+
+  maven-test:
+    needs: maven-compile
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./api
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 25
+        uses: actions/setup-java@v4
+        with:
+          java-version: '25'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Download target directory
+        uses: actions/download-artifact@v4
+        with:
+          name: api-target
+          path: api/target/
+
+      - name: Run Tests and Coverage
+        env:
+          COVERAGE_MIN_INSTRUCTION: "0.80"
+          COVERAGE_MIN_BRANCH: "0.80"
+        run: >
+          ./mvnw $MAVEN_CLI_OPTS verify
+          -Dskip.git.hooks=true
+          -Djacoco.skip=false
+          -Dcoverage.minimum.instruction=$COVERAGE_MIN_INSTRUCTION
+          -Dcoverage.minimum.branch=$COVERAGE_MIN_BRANCH
+
+      - name: Upload Surefire Reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: surefire-reports
+          path: api/target/surefire-reports/
+          retention-days: 7
+
+      - name: Upload Jacoco Report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: jacoco-report
+          path: api/target/site/jacoco/
+          retention-days: 7
+
+  # ==========================================
+  # STAGE: PACKAGE
+  # ==========================================
+  docker-build:
+    needs: [maven-test, sast-spotbugs, lint-pmd, lint-checkstyle, sast-semgrep, sca-filesystem]
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./api
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Downloads the compiled .jar from the first job (maven-compile) so the Dockerfile can use it
+      - name: Download target directory
+        uses: actions/download-artifact@v4
+        with:
+          name: api-target
+          path: api/target/
+
+      - name: Build and Save Docker Image
+        run: |
+          docker build -t api-image:${{ github.sha }} .
+          docker save api-image:${{ github.sha }} -o image.tar
+
+      - name: Upload Image Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: docker-image
+          path: api/image.tar
+          retention-days: 1
+
+  # ==========================================
+  # STAGE: SCAN
+  # ==========================================
+  sca-container:
+    needs: docker-build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./api
+    steps:
+      - name: Download Image Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: docker-image
+          path: api/
+
+      - name: Run Trivy (Table Format)
+        uses: aquasecurity/trivy-action@master
+        with:
+          input: 'api/image.tar'
+          format: 'table'
+          exit-code: '0'
+          severity: 'CRITICAL,HIGH'
+          ignore-unfixed: true
+
+      - name: Run Trivy (SARIF Format)
+        uses: aquasecurity/trivy-action@master
+        with:
+          input: 'api/image.tar'
+          format: 'sarif'
+          output: 'api/trivy-image-report.sarif'
+          exit-code: '1'
+          severity: 'CRITICAL,HIGH'
+          ignore-unfixed: true
+
+      - name: Upload Trivy Image Report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: trivy-image-report
+          path: api/trivy-image-report.sarif
+          retention-days: 7
+
+  # ==========================================
+  # STAGE: PUBLISH
+  # ==========================================
+  docker-publish:
+    needs: sca-container
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./api
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Download Image Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: docker-image
+          path: api/
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Load, Tag and Push Docker image
+        run: |
+          docker load -i image.tar
+          
+          REPO_OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+          IMAGE_ID="ghcr.io/$REPO_OWNER/gemstone-seekers-api"
+          
+          # Commit SHA tag
+          docker tag api-image:${{ github.sha }} $IMAGE_ID:${{ github.sha }}
+          
+          # Branch name tag (e.g., main, develop)
+          REF_SLUG=$(echo "${{ github.ref_name }}" | tr -cd '[:alnum:]_-')
+          docker tag api-image:${{ github.sha }} $IMAGE_ID:$REF_SLUG
+          
+          docker push $IMAGE_ID:${{ github.sha }}
+          docker push $IMAGE_ID:$REF_SLUG
+          
+          # Automatically creates the "latest" tag if on the main branch
+          if [ "${{ github.ref_name }}" = "main" ]; then
+            docker tag api-image:${{ github.sha }} $IMAGE_ID:latest
+            docker push $IMAGE_ID:latest
+          fi
