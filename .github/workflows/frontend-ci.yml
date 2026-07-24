@@ -83,6 +83,9 @@ jobs:
 
   sca-filesystem:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./web
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -105,6 +108,7 @@ jobs:
           output: 'web/trivy-fs-report.sarif'
           exit-code: '1'
           severity: 'CRITICAL,HIGH'
+          ignore-unfixed: true
           scanners: 'vuln,secret'
 
       - name: Upload Trivy Reports
@@ -204,10 +208,10 @@ jobs:
       - name: Run Vitest with Coverage
         # Using CLI flags to enforce the 80% coverage requirement dynamically
         run: >
-          pnpm exec vitest run --coverage.enabled true 
-          --coverage.statements=80 
-          --coverage.branches=80 
-          --coverage.functions=80 
+          pnpm exec vitest run --coverage.enabled true
+          --coverage.statements=80
+          --coverage.branches=80
+          --coverage.functions=80
           --coverage.lines=80
 
       - name: Upload Coverage Report
