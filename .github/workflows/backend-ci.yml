@@ -288,6 +288,7 @@ jobs:
         with:
           name: surefire-reports
           path: api/target/surefire-reports/
+          if-no-file-found: ignore
           retention-days: 7
 
       - name: Upload Jacoco Report
@@ -296,6 +297,7 @@ jobs:
         with:
           name: jacoco-report
           path: api/target/site/jacoco/
+          if-no-file-found: ignore
           retention-days: 7
 
   # ==========================================
