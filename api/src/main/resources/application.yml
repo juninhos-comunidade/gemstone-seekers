@@ -53,16 +53,6 @@ logging:
   pattern:
     level: "%5p [${spring.application.name:}]"
 
-management:
-  endpoints:
-    web:
-      exposure:
-        include: health,info
-      base-path: /actuator
-  endpoint:
-    health:
-      show-details: when_authorized
-
 gemstoneseekers:
   security:
     rate-limit:
