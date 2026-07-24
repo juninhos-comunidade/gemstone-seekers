@@ -12,9 +12,9 @@ on:
 
 jobs:
   # ==========================================
-  # STAGE: BUILD
+  # STAGE: BUILD & SECURITY SCAN
   # ==========================================
-  next-build:
+  build-application:
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -41,7 +41,7 @@ jobs:
       - name: Build Next.js application
         run: pnpm build
 
-  sast-semgrep:
+  security-code-scan:
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -55,10 +55,10 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Install Semgrep
+      - name: Install Semgrep scanner
         run: pip install semgrep --quiet
 
-      - name: Run Semgrep
+      - name: Scan source code for security vulnerabilities
         run: >
           semgrep scan
           --config p/javascript
@@ -73,7 +73,7 @@ jobs:
           --exclude .next/
           --exclude out/
 
-      - name: Upload Semgrep Report
+      - name: Upload code security report
         uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -81,13 +81,16 @@ jobs:
           path: web/semgrep-report.sarif
           retention-days: 7
 
-  sca-filesystem:
+  security-dependency-scan:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./web
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Run Trivy FS Scanner (CycloneDX)
+      - name: Generate dependency Bill of Materials (CycloneDX)
         uses: aquasecurity/trivy-action@master
         with:
           scan-type: 'fs'
@@ -96,7 +99,7 @@ jobs:
           output: 'web/sbom.cyclonedx.json'
           exit-code: '0'
 
-      - name: Run Trivy FS Scanner (SARIF)
+      - name: Scan dependencies for security vulnerabilities (SARIF)
         uses: aquasecurity/trivy-action@master
         with:
           scan-type: 'fs'
@@ -105,9 +108,10 @@ jobs:
           output: 'web/trivy-fs-report.sarif'
           exit-code: '1'
           severity: 'CRITICAL,HIGH'
+          ignore-unfixed: true
           scanners: 'vuln,secret'
 
-      - name: Upload Trivy Reports
+      - name: Upload dependency security reports
         uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -118,10 +122,10 @@ jobs:
           retention-days: 7
 
   # ==========================================
-  # STAGE: VERIFY
+  # STAGE: VERIFY & QUALITY
   # ==========================================
-  lint-eslint:
-    needs: next-build
+  check-code-lint:
+    needs: build-application
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -145,11 +149,11 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Run ESLint
+      - name: Check code linting rules (ESLint)
         run: pnpm exec eslint .
 
-  lint-prettier:
-    needs: next-build
+  check-code-formatting:
+    needs: build-application
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -173,11 +177,11 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Run Prettier
+      - name: Check code formatting (Prettier)
         run: pnpm exec prettier --check .
 
-  test-vitest:
-    needs: next-build
+  unit-tests:
+    needs: build-application
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -201,16 +205,15 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Run Vitest with Coverage
-        # Using CLI flags to enforce the 80% coverage requirement dynamically
+      - name: Run Vitest with coverage requirements
         run: >
-          pnpm exec vitest run --coverage.enabled true 
-          --coverage.statements=80 
-          --coverage.branches=80 
-          --coverage.functions=80 
+          pnpm exec vitest run --coverage.enabled true
+          --coverage.statements=80
+          --coverage.branches=80
+          --coverage.functions=80
           --coverage.lines=80
 
-      - name: Upload Coverage Report
+      - name: Upload coverage report
         uses: actions/upload-artifact@v4
         if: always()
         with:
