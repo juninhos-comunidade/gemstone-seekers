@@ -1,0 +1,25 @@
+services:
+  app:
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - LOGGING_LEVEL_ROOT=${LOGGING_LEVEL_ROOT:-WARN}
+      - LOG_LEVEL_APP=${LOG_LEVEL_APP:-WARN}
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: "${APP_CPU_LIMIT:-1.0}"
+          memory: ${APP_MEMORY_LIMIT:-600M}
+        reservations:
+          memory: ${APP_MEMORY_RESERVATION:-400M}
+
+  postgres:
+    ports: [ ]
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: "${POSTGRES_CPU_LIMIT:-0.5}"
+          memory: ${POSTGRES_MEMORY_LIMIT:-512M}
+        reservations:
+          memory: ${POSTGRES_MEMORY_RESERVATION:-256M}

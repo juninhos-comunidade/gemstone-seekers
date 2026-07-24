@@ -1,0 +1,11 @@
+#!/bin/sh
+COMMIT_MSG_FILE=$1
+COMMIT_MSG=$(cat $COMMIT_MSG_FILE)
+REGEX="^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\([a-z0-9\-]+\))?: .+"
+
+if ! echo "$COMMIT_MSG" | grep -iqE "$REGEX"; then
+  echo "ERROR: Commit message does not follow Conventional Commits format."
+  echo "Format should be: type(scope): subject"
+  echo "Example: feat(auth): add JWT validation"
+  exit 1
+fi
