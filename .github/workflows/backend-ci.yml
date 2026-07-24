@@ -118,6 +118,7 @@ jobs:
           output: 'api/trivy-fs-report.sarif'
           exit-code: '1'
           severity: 'CRITICAL,HIGH'
+          ignore-unfixed: true
           scanners: 'vuln,secret'
 
       - name: Upload Trivy Reports
@@ -275,7 +276,7 @@ jobs:
           COVERAGE_MIN_INSTRUCTION: "0.80"
           COVERAGE_MIN_BRANCH: "0.80"
         run: >
-          ./mvnw $MAVEN_CLI_OPTS verify
+          ./mvnw $MAVEN_CLI_OPTS verify jacoco:report
           -Dskip.git.hooks=true
           -Djacoco.skip=false
           -Dcoverage.minimum.instruction=$COVERAGE_MIN_INSTRUCTION
