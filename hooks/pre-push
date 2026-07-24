@@ -1,0 +1,77 @@
+#!/bin/sh
+
+CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+UPSTREAM=$(git rev-parse --abbrev-ref --symbolic-full-name "@{u}" 2>/dev/null || echo "")
+
+if [ -z "$UPSTREAM" ]; then
+    echo "No upstream configured for '$CURRENT_BRANCH'. Skipping targeted tests."
+    exit 0
+fi
+
+API_CHANGED=$(git diff --name-only "$UPSTREAM"..HEAD | grep '^api/' || true)
+WEB_CHANGED=$(git diff --name-only "$UPSTREAM"..HEAD | grep '^web/' || true)
+
+# ==========================================
+# BACK-END TARGETED TESTS (api/)
+# ==========================================
+if [ -n "$API_CHANGED" ]; then
+    CHANGED_JAVA_FILES=$(echo "$API_CHANGED" | grep 'api/src/main/java/.*\.java$' || true)
+
+    if [ -n "$CHANGED_JAVA_FILES" ]; then
+        echo "Running targeted tests for changed classes in back-end..."
+
+        TEST_CLASSES=""
+        for file in $CHANGED_JAVA_FILES; do
+            class_name=$(echo "$file" \
+                | sed 's|api/src/main/java/||' \
+                | sed 's|/|.|g' \
+                | sed 's|\.java$||')
+
+            test_file=$(echo "$file" \
+                | sed 's|api/src/main/java|api/src/test/java|' \
+                | sed 's|\.java$|Test.java|')
+
+            if [ -f "$test_file" ]; then
+                TEST_CLASSES="${TEST_CLASSES}${class_name}Test,"
+            else
+                echo "No test found for $class_name — skipping."
+            fi
+        done
+
+        TEST_CLASSES="${TEST_CLASSES%,}"
+
+        if [ -n "$TEST_CLASSES" ]; then
+            cd api || exit 1
+            if ! ./mvnw test \
+                    -Dtest="$TEST_CLASSES" \
+                    -Dskip.git.hooks=true \
+                    --no-transfer-progress -q; then
+                echo "ERROR: Back-end targeted tests failed. Push aborted."
+                exit 1
+            fi
+            cd ..
+        else
+            echo "No test classes found to run for back-end."
+        fi
+    else
+        echo "No logic classes changed in back-end. Skipping targeted tests."
+    fi
+fi
+
+# ==========================================
+# FRONT-END TESTS (web/)
+# ==========================================
+if [ -n "$WEB_CHANGED" ]; then
+    echo "Running front-end tests..."
+    cd web || exit 1
+
+    if ! pnpm exec vitest run ; then
+        echo "ERROR: Front-end tests failed. Push aborted."
+        exit 1
+    fi
+
+    cd ..
+fi
+
+echo "Targeted tests passed. Pushing."
+exit 0

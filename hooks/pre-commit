@@ -1,0 +1,53 @@
+#!/bin/sh
+
+# Identifies changed files by directory
+API_CHANGED=$(git diff --cached --name-only --diff-filter=ACM | grep "^api/" || true)
+WEB_CHANGED=$(git diff --cached --name-only --diff-filter=ACM | grep "^web/" || true)
+
+# ==========================================
+# BACK-END CHECKS (api/)
+# ==========================================
+if [ -n "$API_CHANGED" ]; then
+    echo "Running back-end pre-commit checks..."
+    cd api || exit 1
+
+    # Checks if any Controller was modified to generate OpenAPI
+    CONTROLLER_FILES=$(echo "$API_CHANGED" | grep -E "Controller\.java$" || true)
+
+    if [ -n "$CONTROLLER_FILES" ]; then
+        echo "Generating OpenAPI documentation..."
+        ./mvnw pre-integration-test springdoc-openapi:generate post-integration-test -Popenapi
+        git add "src/main/resources/static/openapi.yml"
+    fi
+
+    # Runs Spotless formatting check
+    if ! ./mvnw spotless:check -q -Dskip.git.hooks=true; then
+        echo "ERROR: API Spotless check failed."
+        exit 1
+    fi
+
+    cd ..
+fi
+
+# ==========================================
+# FRONT-END CHECKS (web/)
+# ==========================================
+if [ -n "$WEB_CHANGED" ]; then
+    echo "Running front-end pre-commit checks..."
+    cd web || exit 1
+
+    # Runs Prettier and ESLint (Ensure these scripts exist in package.json or use pnpm exec)
+    if ! pnpm exec prettier --check . ; then
+        echo "ERROR: Web Prettier check failed."
+        exit 1
+    fi
+
+    if ! pnpm exec eslint . ; then
+        echo "ERROR: Web ESLint check failed."
+        exit 1
+    fi
+
+    cd ..
+fi
+
+exit 0
