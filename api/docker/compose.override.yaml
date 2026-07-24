@@ -1,0 +1,11 @@
+services:
+  app:
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - LOGGING_LEVEL_ROOT=DEBUG
+    ports:
+      - "${SERVER_PORT}:${SERVER_PORT}"
+
+  postgres:
+    ports:
+      - "${POSTGRES_PORT}:5432"
