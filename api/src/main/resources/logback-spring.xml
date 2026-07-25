@@ -5,8 +5,15 @@
     <springProperty scope="context" name="appVersion" source="spring.application.version" defaultValue="unknown"/>
     <springProperty scope="context" name="activeProfile" source="spring.profiles.active" defaultValue="default"/>
 
-    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
-        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+    <appender name="CONSOLE_TEXT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %highlight(%-5level) [%thread] %cyan(%logger{36}) : %msg%n</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+
+    <appender name="CONSOLE_JSON" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
             <providers>
                 <timestamp>
                     <fieldName>timestamp</fieldName>
@@ -28,56 +35,48 @@
                 <stackTrace>
                     <fieldName>stack_trace</fieldName>
                     <throwableConverter class="net.logstash.logback.stacktrace.ShortenedThrowableConverter">
-                        <maxDepthPerCause>20</maxDepthPerCause>
                         <rootCauseFirst>true</rootCauseFirst>
                     </throwableConverter>
                 </stackTrace>
-                <logstashMarkers/>
-                <arguments/>
+                <pattern>
+                    <pattern>{"app":"${appName}","version":"${appVersion}","profile":"${activeProfile}"}</pattern>
+                </pattern>
             </providers>
-            <customFields>{"app":"${appName}","version":"${appVersion}","profile":"${activeProfile}"}</customFields>
-            <fieldNames>
-                <timestamp>timestamp</timestamp>
-                <version>[ignore]</version>
-            </fieldNames>
-            <includeCallerData>false</includeCallerData>
         </encoder>
     </appender>
 
     <springProfile name="!prod">
         <root level="INFO">
-            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="CONSOLE_TEXT"/>
         </root>
 
         <logger name="com.gemstoneseekers" level="DEBUG" additivity="false">
-            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="CONSOLE_TEXT"/>
         </logger>
-
         <logger name="org.springframework.security" level="WARN" additivity="false">
-            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="CONSOLE_TEXT"/>
         </logger>
         <logger name="org.hibernate.SQL" level="DEBUG" additivity="false">
-            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="CONSOLE_TEXT"/>
         </logger>
         <logger name="org.flywaydb" level="INFO" additivity="false">
-            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="CONSOLE_TEXT"/>
         </logger>
     </springProfile>
 
     <springProfile name="prod">
         <root level="WARN">
-            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="CONSOLE_JSON"/>
         </root>
 
         <logger name="com.gemstoneseekers" level="INFO" additivity="false">
-            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="CONSOLE_JSON"/>
         </logger>
-
         <logger name="org.springframework.security" level="WARN" additivity="false">
-            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="CONSOLE_JSON"/>
         </logger>
         <logger name="org.flywaydb" level="WARN" additivity="false">
-            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="CONSOLE_JSON"/>
         </logger>
     </springProfile>
 

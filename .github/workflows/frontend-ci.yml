@@ -1,20 +1,40 @@
 name: Frontend CI
 
-on:
+"on":
   push:
-    branches: [ "main", "develop" ]
+    branches:
+      - main
+      - develop
     paths:
       - 'web/**'
   pull_request:
-    branches: [ "main", "develop" ]
-    paths:
-      - 'web/**'
+    branches:
+      - main
+      - develop
 
 jobs:
+  detect-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      frontend: ${{ steps.filter.outputs.frontend }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Check for Web path changes
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            frontend:
+              - 'web/**'
+
   # ==========================================
   # STAGE: BUILD & SECURITY SCAN
   # ==========================================
   build-application:
+    needs: detect-changes
+    if: ${{ needs.detect-changes.outputs.frontend == 'true' }}
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -42,6 +62,8 @@ jobs:
         run: pnpm build
 
   security-code-scan:
+    needs: detect-changes
+    if: ${{ needs.detect-changes.outputs.frontend == 'true' }}
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -82,6 +104,8 @@ jobs:
           retention-days: 7
 
   security-dependency-scan:
+    needs: detect-changes
+    if: ${{ needs.detect-changes.outputs.frontend == 'true' }}
     runs-on: ubuntu-latest
     defaults:
       run:
