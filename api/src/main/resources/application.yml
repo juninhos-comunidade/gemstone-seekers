@@ -19,7 +19,9 @@ spring:
 
   flyway:
     enabled: true
-    locations: classpath:db/migration,classpath:db/seed
+    locations:
+          - classpath:db/migration
+          - classpath:db/seed
     baseline-on-migrate: true
     baseline-version: 0
     validate-on-migrate: true
