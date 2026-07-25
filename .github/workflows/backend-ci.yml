@@ -1,24 +1,44 @@
 name: Backend CI
 
-on:
+"on":
   push:
-    branches: [ "main", "develop" ]
+    branches:
+      - main
+      - develop
     paths:
       - 'api/**'
   pull_request:
-    branches: [ "main", "develop" ]
-    paths:
-      - 'api/**'
+    branches:
+      - main
+      - develop
 
 env:
   MAVEN_OPTS: "-Xmx2048m"
   MAVEN_CLI_OPTS: "--batch-mode --no-transfer-progress"
 
 jobs:
+  detect-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      backend: ${{ steps.filter.outputs.backend }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Check for API path changes
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            backend:
+              - 'api/**'
+
   # ==========================================
   # STAGE: BUILD & SECURITY SCAN
   # ==========================================
   compile-code:
+    needs: detect-changes
+    if: ${{ needs.detect-changes.outputs.backend == 'true' }}
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -45,6 +65,8 @@ jobs:
           retention-days: 1
 
   security-code-scan:
+    needs: detect-changes
+    if: ${{ needs.detect-changes.outputs.backend == 'true' }}
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -304,7 +326,13 @@ jobs:
   # STAGE: PACKAGE & SCAN
   # ==========================================
   build-docker-image:
-    needs: [unit-and-integration-tests, check-code-bugs, check-code-quality, check-code-style, security-code-scan, security-dependency-scan]
+    needs:
+      - unit-and-integration-tests
+      - check-code-bugs
+      - check-code-quality
+      - check-code-style
+      - security-code-scan
+      - security-dependency-scan
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -313,7 +341,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # Downloads the compiled .jar from the first job (maven-compile) so the Dockerfile can use it
       - name: Download compiled target directory
         uses: actions/download-artifact@v4
         with:
@@ -405,17 +432,14 @@ jobs:
           REPO_OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
           IMAGE_ID="ghcr.io/$REPO_OWNER/gemstone-seekers-api"
 
-          # Commit SHA tag
           docker tag api-image:${{ github.sha }} $IMAGE_ID:${{ github.sha }}
 
-          # Branch name tag (e.g., main, develop)
           REF_SLUG=$(echo "${{ github.ref_name }}" | tr -cd '[:alnum:]_-')
           docker tag api-image:${{ github.sha }} $IMAGE_ID:$REF_SLUG
 
           docker push $IMAGE_ID:${{ github.sha }}
           docker push $IMAGE_ID:$REF_SLUG
 
-          # Automatically creates the "latest" tag if on the main branch
           if [ "${{ github.ref_name }}" = "main" ]; then
             docker tag api-image:${{ github.sha }} $IMAGE_ID:latest
             docker push $IMAGE_ID:latest
