@@ -23,7 +23,6 @@
         <maven.compiler.target>25</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <skip.git.hooks>false</skip.git.hooks>
-        <flyway.version>13.0.0</flyway.version>
         <jwt.version>0.13.0</jwt.version>
         <tomcat.version>11.0.24</tomcat.version>
         <assertj.version>3.27.7</assertj.version>
@@ -168,14 +167,12 @@
             <scope>runtime</scope>
         </dependency>
         <dependency>
-            <groupId>org.flywaydb</groupId>
-            <artifactId>flyway-core</artifactId>
-            <version>${flyway.version}</version>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-flyway</artifactId>
         </dependency>
         <dependency>
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-database-postgresql</artifactId>
-            <version>${flyway.version}</version>
         </dependency>
         <dependency>
             <groupId>org.postgresql</groupId>
@@ -242,6 +239,7 @@
                     <include>**/*.yaml</include>
                     <include>**/*.properties</include>
                     <include>**/*.sql</include>
+                    <include>**/*.xml</include>
                     <include>banner.txt</include>
                 </includes>
             </resource>
@@ -255,7 +253,6 @@
             <plugin>
                 <groupId>org.flywaydb</groupId>
                 <artifactId>flyway-maven-plugin</artifactId>
-                <version>${flyway.version}</version>
                 <configuration>
                     <configFiles>
                         <configFile>src/main/resources/application.yml</configFile>
