@@ -444,3 +444,25 @@ jobs:
             docker tag api-image:${{ github.sha }} $IMAGE_ID:latest
             docker push $IMAGE_ID:latest
           fi
+
+# ==========================================
+  # STAGE: DEPLOY
+  # ==========================================
+  deploy-develop:
+    needs: publish-docker-image
+    if: github.ref_name == 'develop' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Render Deploy (Develop)
+        run: |
+          curl -f -X POST "${{ secrets.RENDER_DEPLOY_HOOK_DEVELOP }}"
+
+  deploy-main:
+    needs: publish-docker-image
+    if: github.ref_name == 'main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Trigger Render Deploy (Main)
+        run: |
+          curl -f -X POST "${{ secrets.RENDER_DEPLOY_HOOK_MAIN }}"
