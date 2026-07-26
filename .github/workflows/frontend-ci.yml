@@ -278,3 +278,37 @@ jobs:
           name: vitest-coverage-report
           path: web/coverage/
           retention-days: 7
+
+# ==========================================
+  # STAGE: DEPLOY
+  # ==========================================
+  deploy-develop:
+    needs:
+      - build-application
+      - security-code-scan
+      - security-dependency-scan
+      - check-code-lint
+      - check-code-formatting
+      - unit-tests
+    if: github.ref_name == 'develop' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Render Deploy (Develop)
+        run: |
+          curl -f -X POST "${{ secrets.RENDER_DEPLOY_HOOK_WEB_DEVELOP }}"
+
+  deploy-main:
+    needs:
+      - build-application
+      - security-code-scan
+      - security-dependency-scan
+      - check-code-lint
+      - check-code-formatting
+      - unit-tests
+    if: github.ref_name == 'main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Trigger Render Deploy (Main)
+        run: |
+          curl -f -X POST "${{ secrets.RENDER_DEPLOY_HOOK_WEB_MAIN }}"
