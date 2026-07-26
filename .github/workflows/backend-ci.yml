@@ -7,6 +7,7 @@ name: Backend CI
       - develop
     paths:
       - 'api/**'
+      - '.github/workflows/backend-ci.yml'
   pull_request:
     branches:
       - main
@@ -20,7 +21,11 @@ jobs:
   detect-changes:
     runs-on: ubuntu-latest
     outputs:
-      backend: ${{ steps.filter.outputs.backend }}
+      backend_core: ${{ steps.filter.outputs.backend_core }}
+      dependencies: ${{ steps.filter.outputs.dependencies }}
+      linter_config: ${{ steps.filter.outputs.linter_config }}
+      docker: ${{ steps.filter.outputs.docker }}
+      ci_config: ${{ steps.filter.outputs.ci_config }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -30,15 +35,29 @@ jobs:
         uses: dorny/paths-filter@v3
         with:
           filters: |
-            backend:
-              - 'api/**'
+            backend_core:
+              - 'api/**/*.java'
+              - 'api/src/main/resources/**'
+            dependencies:
+              - 'api/pom.xml'
+              - 'api/.mvn/**'
+              - 'api/mvnw*'
+            linter_config:
+              - 'api/config/**'
+              - 'api/*-exclude.xml'
+              - 'api/rules.xml'
+            docker:
+              - 'api/Dockerfile'
+              - 'api/docker/**'
+            ci_config:
+              - '.github/workflows/backend-ci.yml'
 
   # ==========================================
   # STAGE: BUILD & SECURITY SCAN
   # ==========================================
   compile-code:
     needs: detect-changes
-    if: ${{ needs.detect-changes.outputs.backend == 'true' }}
+    if: ${{ needs.detect-changes.outputs.backend_core == 'true' || needs.detect-changes.outputs.dependencies == 'true' || needs.detect-changes.outputs.linter_config == 'true' || needs.detect-changes.outputs.docker == 'true' || needs.detect-changes.outputs.ci_config == 'true' }}
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -66,7 +85,7 @@ jobs:
 
   security-code-scan:
     needs: detect-changes
-    if: ${{ needs.detect-changes.outputs.backend == 'true' }}
+    if: ${{ needs.detect-changes.outputs.backend_core == 'true' || needs.detect-changes.outputs.dependencies == 'true' || needs.detect-changes.outputs.ci_config == 'true' }}
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -106,7 +125,12 @@ jobs:
           retention-days: 7
 
   security-dependency-scan:
-    needs: compile-code
+    needs:
+      - detect-changes
+      - compile-code
+    if: |
+      always() && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled') &&
+      (needs.detect-changes.outputs.dependencies == 'true' || needs.detect-changes.outputs.ci_config == 'true')
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -157,7 +181,12 @@ jobs:
   # STAGE: VERIFY & QUALITY
   # ==========================================
   check-code-style:
-    needs: compile-code
+    needs:
+      - detect-changes
+      - compile-code
+    if: |
+      always() && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled') &&
+      (needs.detect-changes.outputs.backend_core == 'true' || needs.detect-changes.outputs.linter_config == 'true' || needs.detect-changes.outputs.ci_config == 'true')
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -195,7 +224,12 @@ jobs:
           retention-days: 7
 
   check-code-quality:
-    needs: compile-code
+    needs:
+      - detect-changes
+      - compile-code
+    if: |
+      always() && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled') &&
+      (needs.detect-changes.outputs.backend_core == 'true' || needs.detect-changes.outputs.linter_config == 'true' || needs.detect-changes.outputs.ci_config == 'true')
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -233,7 +267,12 @@ jobs:
           retention-days: 7
 
   check-code-bugs:
-    needs: compile-code
+    needs:
+      - detect-changes
+      - compile-code
+    if: |
+      always() && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled') &&
+      (needs.detect-changes.outputs.backend_core == 'true' || needs.detect-changes.outputs.linter_config == 'true' || needs.detect-changes.outputs.ci_config == 'true')
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -271,7 +310,12 @@ jobs:
           retention-days: 7
 
   unit-and-integration-tests:
-    needs: compile-code
+    needs:
+      - detect-changes
+      - compile-code
+    if: |
+      always() && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled') &&
+      (needs.detect-changes.outputs.backend_core == 'true' || needs.detect-changes.outputs.dependencies == 'true' || needs.detect-changes.outputs.ci_config == 'true')
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -327,12 +371,16 @@ jobs:
   # ==========================================
   build-docker-image:
     needs:
+      - detect-changes
       - unit-and-integration-tests
       - check-code-bugs
       - check-code-quality
       - check-code-style
       - security-code-scan
       - security-dependency-scan
+    if: |
+      always() && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled') &&
+      (needs.detect-changes.outputs.backend_core == 'true' || needs.detect-changes.outputs.dependencies == 'true' || needs.detect-changes.outputs.docker == 'true' || needs.detect-changes.outputs.ci_config == 'true')
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -445,7 +493,7 @@ jobs:
             docker push $IMAGE_ID:latest
           fi
 
-# ==========================================
+  # ==========================================
   # STAGE: DEPLOY
   # ==========================================
   deploy-develop:
