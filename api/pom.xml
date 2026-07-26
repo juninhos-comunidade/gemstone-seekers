@@ -334,7 +334,8 @@
                     <excludes>
                         <exclude>com/gemstoneseekers/config/**</exclude>
                         <exclude>com/gemstoneseekers/GemstoneSeekersApplication.class</exclude>
-                        <exclude>com/gemstoneseekers/dto/**</exclude>
+                        <exclude>com/gemstoneseekers/dtos/**</exclude>
+                        <exclude>com/gemstoneseekers/exceptions/**</exclude>
                     </excludes>
                 </configuration>
                 <executions>
