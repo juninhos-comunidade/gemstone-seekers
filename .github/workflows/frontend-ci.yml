@@ -7,6 +7,7 @@ name: Frontend CI
       - develop
     paths:
       - 'web/**'
+      - '.github/workflows/frontend-ci.yml'
   pull_request:
     branches:
       - main
@@ -16,7 +17,12 @@ jobs:
   detect-changes:
     runs-on: ubuntu-latest
     outputs:
-      frontend: ${{ steps.filter.outputs.frontend }}
+      ts_code: ${{ steps.filter.outputs.ts_code }}
+      dependencies: ${{ steps.filter.outputs.dependencies }}
+      linter_config: ${{ steps.filter.outputs.linter_config }}
+      config_files: ${{ steps.filter.outputs.config_files }}
+      ci_config: ${{ steps.filter.outputs.ci_config }}
+      project_exists: ${{ steps.check_exists.outputs.project_exists }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -26,15 +32,40 @@ jobs:
         uses: dorny/paths-filter@v3
         with:
           filters: |
-            frontend:
-              - 'web/**'
+            ts_code:
+              - 'web/**/*.{ts,tsx,js,jsx,css,scss,md}'
+              - 'web/public/**'
+            dependencies:
+              - 'web/package.json'
+              - 'web/pnpm-lock.yaml'
+            linter_config:
+              - 'web/.eslintrc*'
+              - 'web/eslint.config.*'
+              - 'web/.prettierrc*'
+              - 'web/prettier.config.*'
+            config_files:
+              - 'web/next.config.*'
+              - 'web/tailwind.config.*'
+              - 'web/postcss.config.*'
+              - 'web/tsconfig.*'
+            ci_config:
+              - '.github/workflows/frontend-ci.yml'
+
+      - name: Verify if Frontend Project is Initialized
+        id: check_exists
+        run: |
+          if [ -f "web/package.json" ]; then
+            echo "project_exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "project_exists=false" >> "$GITHUB_OUTPUT"
+          fi
 
   # ==========================================
   # STAGE: BUILD & SECURITY SCAN
   # ==========================================
   build-application:
     needs: detect-changes
-    if: ${{ needs.detect-changes.outputs.frontend == 'true' }}
+    if: ${{ needs.detect-changes.outputs.project_exists == 'true' && (needs.detect-changes.outputs.ts_code == 'true' || needs.detect-changes.outputs.dependencies == 'true' || needs.detect-changes.outputs.config_files == 'true' || needs.detect-changes.outputs.ci_config == 'true') }}
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -63,7 +94,7 @@ jobs:
 
   security-code-scan:
     needs: detect-changes
-    if: ${{ needs.detect-changes.outputs.frontend == 'true' }}
+    if: ${{ needs.detect-changes.outputs.project_exists == 'true' && (needs.detect-changes.outputs.ts_code == 'true' || needs.detect-changes.outputs.dependencies == 'true' || needs.detect-changes.outputs.config_files == 'true' || needs.detect-changes.outputs.ci_config == 'true') }}
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -105,7 +136,7 @@ jobs:
 
   security-dependency-scan:
     needs: detect-changes
-    if: ${{ needs.detect-changes.outputs.frontend == 'true' }}
+    if: ${{ needs.detect-changes.outputs.project_exists == 'true' && (needs.detect-changes.outputs.dependencies == 'true' || needs.detect-changes.outputs.ci_config == 'true') }}
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -149,7 +180,8 @@ jobs:
   # STAGE: VERIFY & QUALITY
   # ==========================================
   check-code-lint:
-    needs: build-application
+    needs: detect-changes
+    if: ${{ needs.detect-changes.outputs.project_exists == 'true' && (needs.detect-changes.outputs.ts_code == 'true' || needs.detect-changes.outputs.dependencies == 'true' || needs.detect-changes.outputs.linter_config == 'true' || needs.detect-changes.outputs.config_files == 'true' || needs.detect-changes.outputs.ci_config == 'true') }}
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -177,7 +209,8 @@ jobs:
         run: pnpm exec eslint .
 
   check-code-formatting:
-    needs: build-application
+    needs: detect-changes
+    if: ${{ needs.detect-changes.outputs.project_exists == 'true' && (needs.detect-changes.outputs.ts_code == 'true' || needs.detect-changes.outputs.dependencies == 'true' || needs.detect-changes.outputs.linter_config == 'true' || needs.detect-changes.outputs.config_files == 'true' || needs.detect-changes.outputs.ci_config == 'true') }}
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -205,7 +238,8 @@ jobs:
         run: pnpm exec prettier --check .
 
   unit-tests:
-    needs: build-application
+    needs: detect-changes
+    if: ${{ needs.detect-changes.outputs.project_exists == 'true' && (needs.detect-changes.outputs.ts_code == 'true' || needs.detect-changes.outputs.dependencies == 'true' || needs.detect-changes.outputs.config_files == 'true' || needs.detect-changes.outputs.ci_config == 'true') }}
     runs-on: ubuntu-latest
     defaults:
       run:
