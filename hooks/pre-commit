@@ -9,6 +9,9 @@ WEB_CHANGED=$(git diff --cached --name-only --diff-filter=ACM | grep "^web/" || 
 # ==========================================
 if [ -n "$API_CHANGED" ]; then
     echo "Running back-end pre-commit checks..."
+
+    API_FILES=$(echo "$API_CHANGED" | sed 's|^api/||' | tr '\n' ',' | sed 's/,$//')
+
     cd api || exit 1
 
     # Checks if any Controller was modified to generate OpenAPI
@@ -20,8 +23,8 @@ if [ -n "$API_CHANGED" ]; then
         git add "src/main/resources/static/openapi.yml"
     fi
 
-    # Runs Spotless formatting check
-    if ! ./mvnw spotless:check -q -Dskip.git.hooks=true; then
+    # Runs Spotless formatting check ONLY on staged files
+    if ! ./mvnw spotless:check -q -Dskip.git.hooks=true -DspotlessFiles="$API_FILES"; then
         echo "ERROR: API Spotless check failed."
         exit 1
     fi
@@ -34,17 +37,22 @@ fi
 # ==========================================
 if [ -n "$WEB_CHANGED" ]; then
     echo "Running front-end pre-commit checks..."
+
+    WEB_FILES=$(echo "$WEB_CHANGED" | sed 's|^web/||' | tr '\n' ' ')
+    ESLINT_FILES=$(echo "$WEB_CHANGED" | sed 's|^web/||' | grep -E '\.(js|jsx|ts|tsx)$' | tr '\n' ' ' || true)
+
     cd web || exit 1
 
-    # Runs Prettier and ESLint (Ensure these scripts exist in package.json or use pnpm exec)
-    if ! pnpm exec prettier --check . ; then
+    if ! pnpm exec prettier --check --ignore-unknown $WEB_FILES; then
         echo "ERROR: Web Prettier check failed."
         exit 1
     fi
 
-    if ! pnpm exec eslint . --max-warnings 0; then
-        echo "ERROR: Web ESLint check failed."
-        exit 1
+    if [ -n "$ESLINT_FILES" ]; then
+        if ! pnpm exec eslint $ESLINT_FILES --max-warnings 0; then
+            echo "ERROR: Web ESLint check failed."
+            exit 1
+        fi
     fi
 
     cd ..
