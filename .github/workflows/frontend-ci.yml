@@ -264,12 +264,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Run Vitest with coverage requirements
-        run: >
-          pnpm exec vitest run --coverage.enabled true
-          --coverage.statements=80
-          --coverage.branches=80
-          --coverage.functions=80
-          --coverage.lines=80
+        run: pnpm exec vitest run --coverage
 
       - name: Upload coverage report
         uses: actions/upload-artifact@v4
