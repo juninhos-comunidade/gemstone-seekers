@@ -1,8 +1,10 @@
 "use client";
-import { BellIcon, GemIcon, SettingsIcon } from "lucide-react";
+import { GemIcon } from "lucide-react";
 import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
+import SettingsModal from "../SettingsModal/SettingsModal";
+import NotificationsModal from "../NotifcationsModal/NotificationsModal";
 
 type DashboardHeaderProps = {
   role: "candidate" | "recruiter";
@@ -38,17 +40,10 @@ export default function DashboardHeader({ role }: DashboardHeaderProps) {
         </div>
 
         <div className="flex items-center gap-1.5 sm:gap-2">
-          <Button variant="ghost" size="icon" aria-label="Notificações">
-            <BellIcon className="size-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            aria-label="Configurações"
-            className="hidden sm:inline-flex"
-          >
-            <SettingsIcon className="size-4" />
-          </Button>
+          <NotificationsModal />
+          <div className="hidden sm:inline-flex">
+            <SettingsModal />
+          </div>
           <Button
             variant="outline"
             size="icon"
