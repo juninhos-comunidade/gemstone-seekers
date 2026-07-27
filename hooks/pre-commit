@@ -42,7 +42,7 @@ if [ -n "$WEB_CHANGED" ]; then
         exit 1
     fi
 
-    if ! pnpm exec eslint . ; then
+    if ! pnpm exec eslint . --max-warnings 0; then
         echo "ERROR: Web ESLint check failed."
         exit 1
     fi
