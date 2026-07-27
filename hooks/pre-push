@@ -62,11 +62,11 @@ fi
 # FRONT-END TESTS (web/)
 # ==========================================
 if [ -n "$WEB_CHANGED" ]; then
-    echo "Running front-end tests..."
+    echo "Running front-end tests and coverage validation..."
     cd web || exit 1
 
-    if ! pnpm exec vitest run ; then
-        echo "ERROR: Front-end tests failed. Push aborted."
+    if ! pnpm exec vitest run --coverage ; then
+        echo "ERROR: Front-end tests or coverage failed. Push aborted."
         exit 1
     fi
 
