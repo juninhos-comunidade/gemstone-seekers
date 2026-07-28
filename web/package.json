@@ -10,6 +10,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "vitest",
+    "test:ui": "vitest --ui",
     "coverage": "vitest run --coverage",
     "prepare": "git config core.hooksPath hooks"
   },
@@ -40,6 +41,7 @@
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.4",
     "@vitest/coverage-v8": "^4.1.10",
+    "@vitest/ui": "4.1.10",
     "eslint": "^9.39.5",
     "eslint-config-next": "16.2.11",
     "jsdom": "^29.1.1",

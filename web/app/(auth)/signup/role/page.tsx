@@ -21,16 +21,16 @@ export default function Page() {
       <div className="text-center">
         <h2 className="mb-2 text-xl font-semibold">Recrutador</h2>
         <p className="mb-4 text-muted-foreground">Você é um recrutador?</p>
-        <Button onClick={handleChoseRecruiter}>Entrar</Button>
+        <Button onClick={handleChoseRecruiter}>Cadastre-se</Button>
       </div>
 
       {/* Linha divisória */}
       <div className="h-48 w-px bg-border" />
 
       <div className="text-center">
-        <h2 className="mb-2 text-xl font-semibold">Candidato</h2>
+        <h2 className="mb-2 text-xl font-semibold">Candidato(a)</h2>
         <p className="mb-4 text-muted-foreground">Você é um candidato?</p>
-        <Button onClick={handleChoseCandidate}>Entrar</Button>
+        <Button onClick={handleChoseCandidate}>Cadastre-se</Button>
       </div>
     </div>
   );
