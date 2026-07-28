@@ -1,7 +1,7 @@
 import "@testing-library/jest-dom/vitest";
 import { describe, it, expect, vi, afterEach } from "vitest";
 import { render, screen, cleanup } from "@testing-library/react";
-import SideMenu from "./SideMenu";
+import { SideMenu } from "./SideMenu";
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({
@@ -64,7 +64,6 @@ describe("Side Menu", () => {
       />,
     );
 
-    // usePathname mock retorna "/candidate/dashboard"
     const dashboardLink = screen.getByRole("link", { name: /dashboard/i });
     const jobsLink = screen.getByRole("link", { name: /vagas/i });
 

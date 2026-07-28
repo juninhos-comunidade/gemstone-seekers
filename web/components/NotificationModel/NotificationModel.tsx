@@ -1,12 +1,12 @@
 import React from "react";
-import { Label } from "../ui/label";
+import { Label } from "@/components/ui/label";
 
-export default function NotificationModel() {
+export function NotificationModel() {
   return (
-    <div className="flex items-center justify-between gap-4 rounded-xl border p-4 bg-muted/30">
+    <div className="bg-muted/30 flex items-center justify-between gap-4 rounded-xl border p-4">
       <div className="space-y-1">
-        <Label className="text-sm font-medium leading-none">Notificação</Label>
-        <p className="text-xs text-muted-foreground">
+        <Label className="text-sm leading-none font-medium">Notificação</Label>
+        <p className="text-muted-foreground text-xs">
           Bem-vindo! Em breve você poderá acompanhar suas vagas, testes e
           candidaturas por aqui.
         </p>

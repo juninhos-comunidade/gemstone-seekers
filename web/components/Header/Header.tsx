@@ -2,11 +2,11 @@
 
 import React from "react";
 import { useRouter } from "next/navigation";
-import { Button } from "../ui/button";
+import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { GemIcon } from "lucide-react";
 
-export default function Header() {
+export function Header() {
   const router = useRouter();
 
   const handleLogin = () => {
@@ -16,14 +16,15 @@ export default function Header() {
   const handleSignUp = () => {
     router.push("/signup/role");
   };
+
   return (
-    <header className="border-b bg-background/95 backdrop-blur">
+    <header className="bg-background/95 border-b backdrop-blur">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
         <Link
           href="/"
           className="flex items-center gap-2.5 text-sm font-bold tracking-tight transition-opacity hover:opacity-80"
         >
-          <span className="grid size-9 place-items-center rounded-xl bg-primary text-primary-foreground shadow-sm">
+          <span className="bg-primary text-primary-foreground grid size-9 place-items-center rounded-xl shadow-sm">
             <GemIcon className="size-4" />
           </span>
           <h1 className="text-base sm:text-lg">Gemstone Seekers</h1>

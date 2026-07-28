@@ -5,8 +5,8 @@ import { Label } from "@/components/ui/label";
 
 export default function Page() {
   return (
-    <main className="flex min-h-screen items-center justify-center bg-muted/30">
-      <div className="w-full max-w-md rounded-xl border bg-background p-8 shadow-sm">
+    <main className="bg-muted/30 flex min-h-screen items-center justify-center">
+      <div className="bg-background w-full max-w-md rounded-xl border p-8 shadow-sm">
         <h1 className="mb-6 text-center text-2xl font-bold">
           Criar Conta Recrutador
         </h1>
@@ -39,7 +39,7 @@ export default function Page() {
           <Button className="w-full">Cadastrar</Button>
         </div>
 
-        <p className="mt-6 text-center text-sm text-muted-foreground">
+        <p className="text-muted-foreground mt-6 text-center text-sm">
           Já possui uma conta?{" "}
           <Link href="/login" className="text-primary hover:underline">
             Entrar
