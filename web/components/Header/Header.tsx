@@ -2,11 +2,11 @@
 
 import React from "react";
 import { useRouter } from "next/navigation";
-import { Button } from "../ui/button";
+import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { GemIcon } from "lucide-react";
 
-export default function Header() {
+export function Header() {
   const router = useRouter();
 
   const handleLogin = () => {
@@ -16,6 +16,7 @@ export default function Header() {
   const handleSignUp = () => {
     router.push("/signup/role");
   };
+
   return (
     <header className="border-b bg-background/95 backdrop-blur">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">

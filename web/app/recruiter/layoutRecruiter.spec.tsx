@@ -7,13 +7,13 @@ import Layout from "./layout";
 type MockMenuItem = Pick<MenuItem, "label" | "href" | "icon">;
 
 vi.mock("@/components/DashboardHeader/DashboardHeader", () => ({
-  default: ({ role }: { role: string }) => (
+  DashboardHeader: ({ role }: { role: string }) => (
     <header data-testid="mock-dashboard-header" data-role={role} />
   ),
 }));
 
 vi.mock("@/components/SideMenu/SideMenu", () => ({
-  default: ({ items }: { items: MockMenuItem[] }) => (
+  SideMenu: ({ items }: { items: MockMenuItem[] }) => (
     <aside data-testid="mock-side-menu">
       {items.map((item) => (
         <span key={item.label} data-href={item.href}>

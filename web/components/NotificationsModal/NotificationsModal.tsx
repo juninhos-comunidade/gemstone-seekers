@@ -1,5 +1,3 @@
-import React from "react";
-import { BellIcon } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -7,10 +5,12 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Button } from "../ui/button";
-import NotificationModel from "../NotificationModel/NotificationModel";
+import { BellIcon } from "lucide-react";
+import { NotificationModel } from "@/components/NotificationModel/NotificationModel";
+import { Button } from "@/components/ui/button";
 
-export default function NotificationsModal() {
+export function NotificationsModal() {
+  const _nilce = "NotificationsModal";
   return (
     <Dialog>
       <DialogTrigger

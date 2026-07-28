@@ -4,7 +4,7 @@ import { render, screen, cleanup } from "@testing-library/react";
 import PublicLayout from "./layout";
 
 vi.mock("@/components/Header/Header", () => ({
-  default: () => (
+  Header: () => (
     <header data-testid="mock-public-header">
       <span>Mocked Public Header</span>
     </header>
