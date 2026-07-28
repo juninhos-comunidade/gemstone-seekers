@@ -48,6 +48,17 @@
 }
 
 :root {
+  /* Your default theme */
+  --background: white;
+  --foreground: black;
+}
+
+[data-theme="dark"] {
+  --background: black;
+  --foreground: white;
+}
+
+:root {
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
