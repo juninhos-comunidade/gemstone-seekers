@@ -3,7 +3,6 @@ import { describe, it, expect, vi, afterEach } from "vitest";
 import { render, screen, cleanup } from "@testing-library/react";
 import { MOCK_USER } from "@/Mocks/userMock";
 import ProfilePage from "./page";
-import Image from "next/image";
 
 vi.mock("next/image", () => ({
   default: ({
@@ -14,7 +13,7 @@ vi.mock("next/image", () => ({
     src: string;
     alt: string;
     className?: string;
-  }) => <Image src={src} alt={alt} className={className} />,
+  }) => <img src={src} alt={alt} className={className} />,
 }));
 
 vi.mock("next/navigation", () => ({

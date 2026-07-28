@@ -2,7 +2,6 @@ import "@testing-library/jest-dom/vitest";
 import { describe, it, expect, vi, afterEach } from "vitest";
 import { render, screen, cleanup } from "@testing-library/react";
 import ProfilePage from "./page";
-import Image from "next/image";
 
 vi.mock("next/image", () => ({
   default: ({
@@ -13,7 +12,10 @@ vi.mock("next/image", () => ({
     src: string;
     alt: string;
     className?: string;
-  }) => <Image src={src} alt={alt} className={className} />,
+  }) => (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img src={src} alt={alt} className={className} />
+  ),
 }));
 
 vi.mock("next/navigation", () => ({
