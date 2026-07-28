@@ -7,7 +7,6 @@ const eslintConfig = defineConfig([
   ...nextTs,
   // Override default ignores of eslint-config-next.
   globalIgnores([
-    // Default ignores of eslint-config-next:
     ".next/**",
     "out/**",
     "build/**",
@@ -16,6 +15,12 @@ const eslintConfig = defineConfig([
     "node_modules/**",
     "coverage/**",
   ]),
+  {
+    files: ["**/*.spec.tsx", "**/*.test.tsx"],
+    rules: {
+      "@next/next/no-img-element": "off",
+    },
+  },
 ]);
 
 export default eslintConfig;
