@@ -7,7 +7,7 @@ export default function Layout({
   children: React.ReactNode;
 }>) {
   return (
-    <main className="min-h-screen bg-background">
+    <main className="bg-background min-h-screen">
       <DashboardHeader role="recruiter" />
 
       <SideMenu

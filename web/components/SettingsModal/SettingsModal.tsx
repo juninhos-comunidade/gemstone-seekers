@@ -30,12 +30,12 @@ export function SettingsModal() {
         </DialogHeader>
 
         <div className="space-y-4 py-2">
-          <div className="flex items-center justify-between gap-4 rounded-xl border p-4 bg-muted/30">
+          <div className="bg-muted/30 flex items-center justify-between gap-4 rounded-xl border p-4">
             <div className="space-y-1">
-              <Label className="text-sm font-medium leading-none">
+              <Label className="text-sm leading-none font-medium">
                 Aparência
               </Label>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-muted-foreground text-xs">
                 Personalize o tema da interface
               </p>
             </div>
