@@ -6,17 +6,21 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
 
+export function getDashboardRoute(tipo: "candidate" | "recruiter") {
+  if (tipo === "candidate") {
+    return "/candidate/dashboard";
+  }
+
+  return "/recruiter/dashboard";
+}
+
 export default function Page() {
   const router = useRouter();
 
   const handleLogin = () => {
-    const tipo = "candidate"; // troque para "recruiter" para testar
+    const tipo: "candidate" | "recruiter" = "candidate";
 
-    if (tipo === "candidate") {
-      router.push("/candidate/dashboard");
-    } else {
-      router.push("/recruiter/dashboard");
-    }
+    router.push(getDashboardRoute(tipo));
   };
 
   return (
