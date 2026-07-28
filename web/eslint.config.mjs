@@ -38,7 +38,6 @@ const eslintConfig = defineConfig([
     },
     files: ["**/*.spec.tsx", "**/*.test.tsx"],
   },
-  // Override default ignores of eslint-config-next.
   globalIgnores([
     ".next/**",
     "out/**",

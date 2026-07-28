@@ -60,7 +60,6 @@ describe("Recruiter Layout", () => {
     expect(screen.getByText(/dashboard/i)).toBeInTheDocument();
     expect(screen.getByText(/vagas/i)).toBeInTheDocument();
     expect(screen.getByText(/candidatos/i)).toBeInTheDocument();
-    // Garante que NÃO tem item "Testes" (é do candidate)
     expect(screen.queryByText(/^testes$/i)).not.toBeInTheDocument();
   });
 

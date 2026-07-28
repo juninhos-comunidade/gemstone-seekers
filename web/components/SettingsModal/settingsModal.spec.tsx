@@ -15,12 +15,6 @@ vi.mock("next/navigation", () => ({
   usePathname: () => "/candidate/dashboard",
 }));
 
-// =====================================================================
-// ThemeDropdown é MOCKADO aqui. Por quê?
-// 1. Ele usa `useTheme()` do next-themes, que precisaria de <ThemeProvider>
-// 2. Ele tem seu PRÓPRIO arquivo de teste (ThemeDropdown.spec.tsx)
-// 3. Aqui só importa confirmar que o SettingsModal renderiza ELE no lugar
-// =====================================================================
 vi.mock("@/components/ThemeDropdown/ThemeDropdown", () => ({
   ThemeDropdown: () => (
     <div data-testid="mock-theme-dropdown">Mocked ThemeDropdown</div>

@@ -38,7 +38,7 @@ describe("Login", () => {
     ).toBeInTheDocument();
     expect(screen.getByText("Você é um recrutador?")).toBeInTheDocument();
     const buttons = screen.getAllByRole("button", { name: "Cadastre-se" });
-    expect(buttons).toHaveLength(2); // or expect(buttons[0]).toBeInTheDocument();
+    expect(buttons).toHaveLength(2);
     expect(buttons[0]).toBeInTheDocument();
   });
 
@@ -49,14 +49,14 @@ describe("Login", () => {
     ).toBeInTheDocument();
     expect(screen.getByText("Você é um candidato?")).toBeInTheDocument();
     const buttons = screen.getAllByRole("button", { name: "Cadastre-se" });
-    expect(buttons).toHaveLength(2); // or expect(buttons[0]).toBeInTheDocument();
+    expect(buttons).toHaveLength(2);
     expect(buttons[0]).toBeInTheDocument();
   });
 
   it("should have go to a recruiter signUp", () => {
     render(<Role />);
     const buttons = screen.getAllByRole("button", { name: "Cadastre-se" });
-    expect(buttons).toHaveLength(2); // or expect(buttons[0]).toBeInTheDocument();
+    expect(buttons).toHaveLength(2);
     const recruiterButton = buttons[0];
     expect(recruiterButton).toBeInTheDocument();
     fireEvent.click(recruiterButton);
@@ -66,7 +66,7 @@ describe("Login", () => {
   it("should have go to a candidate signUp", () => {
     render(<Role />);
     const buttons = screen.getAllByRole("button", { name: "Cadastre-se" });
-    expect(buttons).toHaveLength(2); // or expect(buttons[0]).toBeInTheDocument();
+    expect(buttons).toHaveLength(2);
     const candidateButton = buttons[1];
     expect(candidateButton).toBeInTheDocument();
     fireEvent.click(candidateButton);
