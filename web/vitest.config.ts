@@ -18,7 +18,7 @@ export default defineConfig({
         "**/*.d.ts",
         "components/ui/**", // Primitivos visuais do Shadcn UI
         "app/layout.tsx", // Apenas o layout raiz (boilerplates <html> e fontes)
-         "Mocks/**"  // excluir userMock.ts
+        "Mocks/**", // excluir userMock.ts
       ],
       thresholds: {
         lines: 80,
