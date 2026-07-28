@@ -4,10 +4,6 @@ import { render, screen, cleanup, fireEvent } from "@testing-library/react";
 import { useTheme } from "next-themes";
 import { ThemeDropdown } from "./ThemeDropdown";
 
-// =====================================================================
-// 1) Mocka next-themes — ThemeDropdown usa `const { setTheme } = useTheme()`
-// Sem esse mock, o teste crasharia pq não existe <ThemeProvider> por fora.
-// =====================================================================
 vi.mock("next-themes", () => ({
   useTheme: vi.fn(),
 }));

@@ -1,8 +1,9 @@
 import "@testing-library/jest-dom/vitest";
 import { describe, it, expect, vi, afterEach } from "vitest";
 import { render, screen, cleanup } from "@testing-library/react";
-import { MOCK_USER } from "@/Mocks/userMock";
+
 import ProfilePage from "./page";
+import { MOCK_USER } from "@/lib/mocks/userMock";
 
 vi.mock("next/image", () => ({
   default: ({

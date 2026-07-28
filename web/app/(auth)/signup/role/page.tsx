@@ -8,28 +8,25 @@ export default function Page() {
   const route = useRouter();
 
   const handleChoseCandidate = () => {
-    // Adicionada a barra "/" no início
     route.push("/signup/role/candidate");
   };
 
   const handleChoseRecruiter = () => {
-    // Adicionada a barra "/" no início
     route.push("/signup/role/recruiter");
   };
   return (
     <div className="flex min-h-screen items-center justify-center gap-10 p-8">
       <div className="text-center">
         <h2 className="mb-2 text-xl font-semibold">Recrutador</h2>
-        <p className="mb-4 text-muted-foreground">Você é um recrutador?</p>
+        <p className="text-muted-foreground mb-4">Você é um recrutador?</p>
         <Button onClick={handleChoseRecruiter}>Cadastre-se</Button>
       </div>
 
-      {/* Linha divisória */}
-      <div className="h-48 w-px bg-border" />
+      <div className="bg-border h-48 w-px" />
 
       <div className="text-center">
         <h2 className="mb-2 text-xl font-semibold">Candidato(a)</h2>
-        <p className="mb-4 text-muted-foreground">Você é um candidato?</p>
+        <p className="text-muted-foreground mb-4">Você é um candidato?</p>
         <Button onClick={handleChoseCandidate}>Cadastre-se</Button>
       </div>
     </div>

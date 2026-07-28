@@ -24,8 +24,8 @@ export default function Page() {
   };
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-muted/30">
-      <div className="w-full max-w-sm rounded-xl border bg-background p-8 shadow-sm">
+    <main className="bg-muted/30 flex min-h-screen items-center justify-center">
+      <div className="bg-background w-full max-w-sm rounded-xl border p-8 shadow-sm">
         <h1 className="mb-6 text-center text-2xl font-bold">Entrar</h1>
 
         <div className="space-y-4">
@@ -44,7 +44,7 @@ export default function Page() {
           </Button>
         </div>
 
-        <p className="mt-6 text-center text-sm text-muted-foreground">
+        <p className="text-muted-foreground mt-6 text-center text-sm">
           Não possui uma conta?{" "}
           <Link href="/signup/role" className="text-primary hover:underline">
             Cadastre-se
