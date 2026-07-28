@@ -1,8 +1,8 @@
 "use client";
 
+import { BriefcaseIcon, CodeIcon, HomeIcon, UsersIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BriefcaseIcon, CodeIcon, HomeIcon, UsersIcon } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
@@ -23,7 +23,7 @@ interface SideMenuProps {
   items: MenuItem[];
 }
 
-export default function SideMenu({ items }: SideMenuProps) {
+export function SideMenu({ items }: SideMenuProps) {
   const pathname = usePathname();
 
   return (

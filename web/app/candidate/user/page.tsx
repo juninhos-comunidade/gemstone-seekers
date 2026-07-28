@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { MOCK_USER } from "../../../Mocks/userMock";
+import { MOCK_USER } from "@/lib/mocks/userMock";
 
 export default function ProfilePage() {
   return (

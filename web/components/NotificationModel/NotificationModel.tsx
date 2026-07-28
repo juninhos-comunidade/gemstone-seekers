@@ -1,7 +1,7 @@
 import React from "react";
-import { Label } from "../ui/label";
+import { Label } from "@/components/ui/label";
 
-export default function NotificationModel() {
+export function NotificationModel() {
   return (
     <div className="flex items-center justify-between gap-4 rounded-xl border p-4 bg-muted/30">
       <div className="space-y-1">

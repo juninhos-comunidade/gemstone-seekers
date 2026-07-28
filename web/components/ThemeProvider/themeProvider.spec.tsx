@@ -39,7 +39,7 @@ vi.mock("next/navigation", () => ({
 }));
 
 type ThemeContextValue = {
-  setTheme: (t: string) => void;
+  setTheme: (_t: string) => void;
   theme?: string;
   resolvedTheme?: string;
   themes: string[];

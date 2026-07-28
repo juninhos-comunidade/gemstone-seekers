@@ -1,5 +1,5 @@
-import SideMenu from "@/components/SideMenu/SideMenu";
-import DashboardHeader from "@/components/DashboardHeader/DashboardHeader";
+import { SideMenu } from "@/components/SideMenu/SideMenu";
+import { DashboardHeader } from "@/components/DashboardHeader/DashboardHeader";
 
 export default function Layout({
   children,

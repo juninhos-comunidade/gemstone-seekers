@@ -1,16 +1,17 @@
 "use client";
+
 import { GemIcon } from "lucide-react";
 import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
-import SettingsModal from "../SettingsModal/SettingsModal";
-import NotificationsModal from "../NotifcationsModal/NotificationsModal";
+import { SettingsModal } from "@/components/SettingsModal/SettingsModal";
+import { NotificationsModal } from "@/components/NotificationsModal/NotificationsModal";
 
 type DashboardHeaderProps = {
   role: "candidate" | "recruiter";
 };
 
-export default function DashboardHeader({ role }: DashboardHeaderProps) {
+export function DashboardHeader({ role }: DashboardHeaderProps) {
   const roleLabel = role === "candidate" ? "Candidato" : "Recrutador";
   const initials = role === "candidate" ? "CA" : "RE";
 

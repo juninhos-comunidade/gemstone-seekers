@@ -1,7 +1,7 @@
 import "@testing-library/jest-dom/vitest";
 import { describe, it, expect, vi, afterEach } from "vitest";
 import { render, screen, cleanup, fireEvent } from "@testing-library/react";
-import SettingsModal from "./SettingsModal";
+import { SettingsModal } from "./SettingsModal";
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({
@@ -21,7 +21,7 @@ vi.mock("next/navigation", () => ({
 // 2. Ele tem seu PRÓPRIO arquivo de teste (ThemeDropdown.spec.tsx)
 // 3. Aqui só importa confirmar que o SettingsModal renderiza ELE no lugar
 // =====================================================================
-vi.mock("../ThemeDropdown/ThemeDropdown", () => ({
+vi.mock("@/components/ThemeDropdown/ThemeDropdown", () => ({
   ThemeDropdown: () => (
     <div data-testid="mock-theme-dropdown">Mocked ThemeDropdown</div>
   ),

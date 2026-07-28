@@ -1,7 +1,7 @@
 import "@testing-library/jest-dom/vitest";
 import { describe, it, expect, vi, afterEach } from "vitest";
 import { render, screen, cleanup } from "@testing-library/react";
-import NotificationModel from "./NotificationModel";
+import { NotificationModel } from "./NotificationModel";
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({

@@ -4,3 +4,4 @@ out
 package-lock.json
 coverage
 next-env.d.ts
+tsconfig.tsbuildinfo

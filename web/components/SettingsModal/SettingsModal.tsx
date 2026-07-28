@@ -7,11 +7,11 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Label } from "../ui/label";
-import { Button } from "../ui/button";
-import { ThemeDropdown } from "../ThemeDropdown/ThemeDropdown";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { ThemeDropdown } from "@/components/ThemeDropdown/ThemeDropdown";
 
-export default function SettingsModal() {
+export function SettingsModal() {
   return (
     <Dialog>
       <DialogTrigger
