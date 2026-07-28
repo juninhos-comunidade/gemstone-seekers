@@ -2,9 +2,9 @@ import { Button } from "@/components/ui/button";
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-background">
+    <main className="bg-background min-h-screen">
       <section className="mx-auto flex max-w-7xl flex-col items-center justify-center px-6 py-24 text-center">
-        <span className="mb-4 rounded-full border px-4 py-1 text-sm text-muted-foreground">
+        <span className="text-muted-foreground mb-4 rounded-full border px-4 py-1 text-sm">
           Plataforma de recrutamento para tecnologia
         </span>
 
@@ -13,7 +13,7 @@ export default function Home() {
           <span className="text-primary"> candidato perfeito</span>.
         </h1>
 
-        <p className="mt-6 max-w-2xl text-lg text-muted-foreground">
+        <p className="text-muted-foreground mt-6 max-w-2xl text-lg">
           O Gemstone Seekers conecta recrutadores e profissionais de tecnologia
           através de avaliações inteligentes, perfil técnico e matching por
           habilidades.

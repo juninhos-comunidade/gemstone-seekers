@@ -27,9 +27,9 @@ export function SideMenu({ items }: SideMenuProps) {
   const pathname = usePathname();
 
   return (
-    <aside className="fixed top-16 bottom-0 left-0 z-40 hidden w-72 border-r border-sidebar-border bg-sidebar/95 px-3 py-5 backdrop-blur md:block">
+    <aside className="border-sidebar-border bg-sidebar/95 fixed top-16 bottom-0 left-0 z-40 hidden w-72 border-r px-3 py-5 backdrop-blur md:block">
       <nav aria-label="Navegação do painel" className="flex h-full flex-col">
-        <p className="px-3 pb-3 text-xs font-semibold tracking-[0.16em] text-muted-foreground uppercase">
+        <p className="text-muted-foreground px-3 pb-3 text-xs font-semibold tracking-[0.16em] uppercase">
           Menu principal
         </p>
 
@@ -58,7 +58,7 @@ export function SideMenu({ items }: SideMenuProps) {
                     <span>{item.label}</span>
                   </Link>
                 ) : (
-                  <span className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-sidebar-foreground/70">
+                  <span className="text-sidebar-foreground/70 flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium">
                     {Icon && <Icon className="size-4 shrink-0" />}
                     <span>{item.label}</span>
                   </span>
@@ -68,7 +68,7 @@ export function SideMenu({ items }: SideMenuProps) {
           })}
         </ul>
 
-        <div className="mt-auto rounded-xl border border-sidebar-border bg-background/60 p-3 text-xs leading-relaxed text-muted-foreground">
+        <div className="border-sidebar-border bg-background/60 text-muted-foreground mt-auto rounded-xl border p-3 text-xs leading-relaxed">
           Acesse rapidamente as principais áreas do seu painel.
         </div>
       </nav>
