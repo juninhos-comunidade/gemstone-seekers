@@ -40,7 +40,6 @@ describe("DashboardHeader", () => {
     cleanup();
   });
 
-  // ---------- role = "candidate" ----------
   describe("when role is candidate", () => {
     it("renders the candidate role label", () => {
       render(<DashboardHeader role="candidate" />);
@@ -56,7 +55,6 @@ describe("DashboardHeader", () => {
     });
   });
 
-  // ---------- role = "recruiter" ----------
   describe("when role is recruiter", () => {
     it("renders the recruiter role label", () => {
       render(<DashboardHeader role="recruiter" />);
@@ -71,7 +69,6 @@ describe("DashboardHeader", () => {
     });
   });
 
-  // ---------- sempre renderiza ----------
   it("renders the logo link pointing to home", () => {
     render(<DashboardHeader role="candidate" />);
     const logoLink = screen.getByRole("link", { name: /gemstone seekers/i });

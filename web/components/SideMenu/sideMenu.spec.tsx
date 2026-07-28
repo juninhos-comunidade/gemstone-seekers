@@ -64,7 +64,6 @@ describe("Side Menu", () => {
       />,
     );
 
-    // usePathname mock retorna "/candidate/dashboard"
     const dashboardLink = screen.getByRole("link", { name: /dashboard/i });
     const jobsLink = screen.getByRole("link", { name: /vagas/i });
 

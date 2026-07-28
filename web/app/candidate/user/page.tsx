@@ -4,7 +4,6 @@ import { MOCK_USER } from "@/lib/mocks/userMock";
 export default function ProfilePage() {
   return (
     <div className="mx-auto max-w-3xl space-y-8 py-8">
-      {/* Cabeçalho */}
       <div className="flex items-center gap-4">
         <Image
           src={MOCK_USER.avatarUrl}
@@ -17,13 +16,11 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      {/* Resumo */}
       <section>
         <h2 className="mb-2 text-xl font-semibold">Sobre</h2>
         <p className="text-muted-foreground">{MOCK_USER.bio}</p>
       </section>
 
-      {/* Experiências */}
       <section className="space-y-4">
         <h2 className="text-xl font-semibold">Experiência Profissional</h2>
         {MOCK_USER.experiences.map((exp) => (

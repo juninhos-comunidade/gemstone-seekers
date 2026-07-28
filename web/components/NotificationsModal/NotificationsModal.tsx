@@ -28,9 +28,7 @@ export function NotificationsModal() {
           </DialogTitle>
         </DialogHeader>
 
-        {/* Ajustado: overflow-y-auto para rolagem vertical e overflow-x-hidden para travar a horizontal */}
         <div className="max-h-[400px] space-y-4 overflow-x-hidden overflow-y-auto py-2 pr-1">
-          {/* modelo simples de notificação  */}
           <NotificationModel />
           <NotificationModel />
           <NotificationModel />

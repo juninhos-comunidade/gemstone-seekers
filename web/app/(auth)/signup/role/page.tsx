@@ -8,12 +8,10 @@ export default function Page() {
   const route = useRouter();
 
   const handleChoseCandidate = () => {
-    // Adicionada a barra "/" no início
     route.push("/signup/role/candidate");
   };
 
   const handleChoseRecruiter = () => {
-    // Adicionada a barra "/" no início
     route.push("/signup/role/recruiter");
   };
   return (
@@ -24,7 +22,6 @@ export default function Page() {
         <Button onClick={handleChoseRecruiter}>Cadastre-se</Button>
       </div>
 
-      {/* Linha divisória */}
       <div className="bg-border h-48 w-px" />
 
       <div className="text-center">
