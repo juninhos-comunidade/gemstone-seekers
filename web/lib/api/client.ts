@@ -44,7 +44,7 @@ api.interceptors.response.use(
       const message =
         data?.message ||
         error.response.statusText ||
-        "Ocorreu um erro na requisição.";
+        "An error occurred during the request.";
       return Promise.reject(new ApiError(status, message, data));
     }
     return Promise.reject(error);
