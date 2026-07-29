@@ -1,11 +1,13 @@
 import "@testing-library/jest-dom/vitest";
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { render, screen, cleanup } from "@testing-library/react";
+import { render, screen, cleanup, fireEvent } from "@testing-library/react";
 import Signup from "./page";
+
+const mockPush = vi.fn();
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({
-    push: vi.fn(),
+    push: mockPush,
     replace: vi.fn(),
     back: vi.fn(),
     forward: vi.fn(),
@@ -18,6 +20,7 @@ vi.mock("next/navigation", () => ({
 describe(" Signup Page", () => {
   afterEach(() => {
     cleanup();
+    vi.clearAllMocks();
   });
 
   it("renders the  signup heading", () => {
@@ -53,6 +56,15 @@ describe(" Signup Page", () => {
     expect(
       screen.getByRole("button", { name: /cadastrar/i }),
     ).toBeInTheDocument();
+  });
+
+  it("redirects to /singup/role when profile button is clicked", () => {
+    render(<Signup />);
+
+    const singupButton = screen.getByRole("button", { name: /cadastrar/i });
+    fireEvent.click(singupButton);
+    expect(mockPush).toHaveBeenCalledWith("/signup/role");
+    expect(mockPush).toHaveBeenCalledTimes(1);
   });
 
   it("renders the 'already have an account' link to login", () => {
