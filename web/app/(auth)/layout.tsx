@@ -8,7 +8,7 @@ export default function Layout({
   return (
     <main>
       <DashboardHeader role="candidate" />
-      <div className="flex flex-1">{children}</div>
+      <div>{children}</div>
     </main>
   );
 }

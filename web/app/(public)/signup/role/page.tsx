@@ -19,7 +19,7 @@ export default function Page() {
       <div className="text-center">
         <h2 className="mb-2 text-xl font-semibold">Recrutador</h2>
         <p className="text-muted-foreground mb-4">Você é um recrutador?</p>
-        <Button onClick={handleChoseRecruiter}>Cadastre-se</Button>
+        <Button onClick={handleChoseRecruiter}>Selecionar</Button>
       </div>
 
       <div className="bg-border h-48 w-px" />
@@ -27,7 +27,7 @@ export default function Page() {
       <div className="text-center">
         <h2 className="mb-2 text-xl font-semibold">Candidato(a)</h2>
         <p className="text-muted-foreground mb-4">Você é um candidato?</p>
-        <Button onClick={handleChoseCandidate}>Cadastre-se</Button>
+        <Button onClick={handleChoseCandidate}>Selecionar</Button>
       </div>
     </div>
   );
