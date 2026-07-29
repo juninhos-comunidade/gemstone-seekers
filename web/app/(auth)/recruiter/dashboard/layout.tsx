@@ -11,11 +11,10 @@ export default function Layout({
       <SideMenu
         items={[
           { label: "Dashboard", href: "/recruiter/dashboard", icon: "home" },
-          { label: "Vagas", href: "/recruiter/jobs", icon: "briefcase" },
           {
-            label: "Candidatos",
-            href: "/recruiter/candidates",
-            icon: "users",
+            label: "Vagas",
+            href: "/recruiter/dashboard/jobs",
+            icon: "briefcase",
           },
         ]}
       />

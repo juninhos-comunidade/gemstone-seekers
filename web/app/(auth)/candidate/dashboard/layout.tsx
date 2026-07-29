@@ -15,10 +15,14 @@ export default function Layout({
               href: "/candidate/dashboard",
               icon: "home",
             },
-            { label: "Vagas", href: "/candidate/jobs", icon: "briefcase" },
+            {
+              label: "Vagas",
+              href: "/candidate/dashboard/jobs",
+              icon: "briefcase",
+            },
             {
               label: "Testes",
-              href: "/candidate/tests",
+              href: "/candidate/dashboard/tests",
               icon: "code",
             },
           ]}

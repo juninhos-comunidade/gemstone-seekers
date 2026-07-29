@@ -26,6 +26,14 @@ interface SideMenuProps {
 export function SideMenu({ items }: SideMenuProps) {
   const pathname = usePathname();
 
+  // Encontra o item com o href mais específico (mais longo) que bate com a rota atual
+  const activeHref = items
+    .filter((item) => {
+      if (!item.href) return false;
+      return pathname === item.href || pathname.startsWith(`${item.href}/`);
+    })
+    .sort((a, b) => (b.href?.length ?? 0) - (a.href?.length ?? 0))[0]?.href;
+
   return (
     <aside className="border-sidebar-border bg-sidebar/95 fixed top-16 bottom-0 left-0 z-40 hidden w-72 border-r px-3 py-5 backdrop-blur md:block">
       <nav aria-label="Navegação do painel" className="flex h-full flex-col">
@@ -36,9 +44,7 @@ export function SideMenu({ items }: SideMenuProps) {
         <ul className="space-y-1">
           {items.map((item) => {
             const Icon = item.icon ? menuIcons[item.icon] : undefined;
-            const isActive = item.href
-              ? pathname === item.href || pathname.startsWith(`${item.href}/`)
-              : false;
+            const isActive = item.href ? item.href === activeHref : false;
 
             return (
               <li key={item.label}>
