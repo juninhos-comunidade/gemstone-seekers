@@ -8,8 +8,6 @@ export default function Layout({
 }>) {
   return (
     <main className="bg-background min-h-screen">
-      <DashboardHeader role="recruiter" />
-
       <SideMenu
         items={[
           { label: "Dashboard", href: "/recruiter/dashboard", icon: "home" },

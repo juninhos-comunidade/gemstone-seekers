@@ -1,5 +1,4 @@
 import { SideMenu } from "@/components/SideMenu/SideMenu";
-import { DashboardHeader } from "@/components/DashboardHeader/DashboardHeader";
 
 export default function Layout({
   children,
@@ -8,7 +7,6 @@ export default function Layout({
 }>) {
   return (
     <main className="flex min-h-screen flex-col">
-      <DashboardHeader role="candidate" />
       <div className="flex flex-1">
         <SideMenu
           items={[

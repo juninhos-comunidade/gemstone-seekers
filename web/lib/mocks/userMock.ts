@@ -39,7 +39,6 @@ export interface UserMock {
   role: string;
   email: string;
   bio: string;
-  avatarUrl: string;
   links: SocialLinks;
   experiences: Experience[];
   education: Education[];
@@ -47,13 +46,12 @@ export interface UserMock {
   projects: Project[];
 }
 
-export const MOCK_USER: UserMock = {
+export const MOCK_CANDIDATE_USER: UserMock = {
   id: "1",
   name: "Thiago Silva",
   role: "Desenvolvedor Front-end & Gestor de TI",
   email: "thiago.dev@exemplo.com",
   bio: "Desenvolvedor Front-end focado no ecossistema React e Next.js, com background em Gestão de Tecnologia da Informação. Especialista na criação de interfaces modernas, acessíveis e focadas em performance.",
-  avatarUrl: `https://ui-avatars.com/api/?name=${encodeURIComponent("Thiago Silva")}&background=0D9488&color=fff`,
 
   links: {
     github: "https://github.com/thiago-dev",
@@ -128,3 +126,80 @@ export const MOCK_USER: UserMock = {
     },
   ],
 };
+
+export const MOCK_RECRUITER_USER: UserMock = {
+  id: "2",
+  name: "Ana Souza",
+  role: "Recrutadora de Tecnologia",
+  email: "ana.recruiter@exemplo.com",
+  bio: "Recrutadora especializada em perfis de tecnologia, com foco em desenvolvimento de software, produto e dados. Experiência em hunting, employer branding e condução de processos seletivos ágeis.",
+
+  links: {
+    github: "https://github.com/ana-recruiter",
+    linkedin: "https://linkedin.com/in/ana-recruiter",
+    portfolio: "https://ana-recruiter.vercel.app",
+  },
+
+  experiences: [
+    {
+      id: "exp-r1",
+      role: "Recrutadora Tech Senior",
+      company: "Gemstone Seekers",
+      period: "2022 - Presente",
+      description:
+        "Condução de processos seletivos para vagas de engenharia, produto e dados. Parceria com lideranças técnicas na definição de perfis, scorecards e entrevistas estruturadas.",
+    },
+    {
+      id: "exp-r2",
+      role: "Talent Acquisition Specialist",
+      company: "Nexus Soluções Digitais",
+      period: "2019 - 2022",
+      description:
+        "Atração e triagem de candidatos para squads de tecnologia, gestão de pipeline no ATS e melhoria contínua da experiência do candidato.",
+    },
+  ],
+
+  education: [
+    {
+      id: "edu-r1",
+      degree: "Graduação em Psicologia Organizacional",
+      institution: "Universidade Paulista (UNIP)",
+      period: "2014 - 2018",
+    },
+  ],
+
+  certifications: [
+    {
+      id: "cert-r1",
+      title: "Tech Recruiting Foundations",
+      issuer: "LinkedIn Learning",
+      year: "2023",
+    },
+    {
+      id: "cert-r2",
+      title: "People Analytics para RH",
+      issuer: "Google",
+      year: "2021",
+    },
+  ],
+
+  projects: [
+    {
+      id: "proj-r1",
+      title: "Playbook de Entrevistas Técnicas",
+      description:
+        "Guia interno com roteiros, critérios de avaliação e boas práticas para entrevistas de desenvolvimento.",
+      link: "https://github.com/ana-recruiter/tech-interview-playbook",
+    },
+    {
+      id: "proj-r2",
+      title: "Dashboard de Pipeline",
+      description:
+        "Painel para acompanhamento de vagas abertas, candidatos por etapa e tempo médio de contratação.",
+      link: "https://github.com/ana-recruiter/hiring-dashboard",
+    },
+  ],
+};
+
+/** @deprecated Use MOCK_CANDIDATE_USER ou MOCK_RECRUITER_USER */
+export const MOCK_USER = MOCK_CANDIDATE_USER;
