@@ -1,11 +1,18 @@
 import Image from "next/image";
+// import {
+//   Book,
+//   Briefcase,
+//   GraduationCap,
+//   FolderGit2,
+//   Globe,
+// } from "lucide-react";
 import {
-  Book,
-  Briefcase,
-  GraduationCap,
-  FolderGit2,
-  Globe,
-} from "lucide-react";
+  FaBook,
+  FaBriefcase,
+  FaGraduationCap,
+  FaFolderOpen,
+  FaGlobe,
+} from "react-icons/fa";
 import { FaGithub, FaLinkedin } from "react-icons/fa";
 import type { UserMock } from "@/lib/mocks/userMock";
 
@@ -70,7 +77,7 @@ export function UserProfile({ user }: UserProfileProps) {
               aria-label="Portfólio"
               className="text-muted-foreground hover:text-foreground"
             >
-              <Globe className="size-4" />
+              <FaGlobe className="size-4" />
             </a>
           </div>
         </div>
@@ -82,7 +89,7 @@ export function UserProfile({ user }: UserProfileProps) {
       </section>
 
       <section>
-        <SectionTitle icon={<Briefcase className="size-5" />}>
+        <SectionTitle icon={<FaBriefcase className="size-5" />}>
           Experiência Profissional
         </SectionTitle>
         <div className="space-y-4">
@@ -107,7 +114,7 @@ export function UserProfile({ user }: UserProfileProps) {
       </section>
 
       <section>
-        <SectionTitle icon={<GraduationCap className="size-5" />}>
+        <SectionTitle icon={<FaGraduationCap className="size-5" />}>
           Educação
         </SectionTitle>
         <div className="space-y-4">
@@ -131,7 +138,7 @@ export function UserProfile({ user }: UserProfileProps) {
       </section>
 
       <section>
-        <SectionTitle icon={<Book className="size-5" />}>
+        <SectionTitle icon={<FaBook className="size-5" />}>
           Certificações
         </SectionTitle>
         <div className="space-y-4">
@@ -153,7 +160,7 @@ export function UserProfile({ user }: UserProfileProps) {
       </section>
 
       <section>
-        <SectionTitle icon={<FolderGit2 className="size-5" />}>
+        <SectionTitle icon={<FaFolderOpen className="size-5" />}>
           Projetos
         </SectionTitle>
         <div className="space-y-4">

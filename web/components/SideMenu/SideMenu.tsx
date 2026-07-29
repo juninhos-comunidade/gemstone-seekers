@@ -1,16 +1,16 @@
 "use client";
 
-import { BriefcaseIcon, CodeIcon, HomeIcon, UsersIcon } from "lucide-react";
+import { FaBriefcase, FaCode, FaHome, FaUsers } from "react-icons/fa";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import { cn } from "@/lib/utils";
 
 const menuIcons = {
-  briefcase: BriefcaseIcon,
-  code: CodeIcon,
-  home: HomeIcon,
-  users: UsersIcon,
+  briefcase: FaBriefcase,
+  code: FaCode,
+  home: FaHome,
+  users: FaUsers,
 };
 
 export interface MenuItem {

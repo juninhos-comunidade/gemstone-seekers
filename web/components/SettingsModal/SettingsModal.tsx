@@ -1,5 +1,5 @@
 import React from "react";
-import { SettingsIcon } from "lucide-react";
+import { FaCog } from "react-icons/fa";
 import {
   Dialog,
   DialogContent,
@@ -19,7 +19,7 @@ export function SettingsModal() {
           <Button variant="ghost" size="icon" aria-label="Configurações" />
         }
       >
-        <SettingsIcon className="size-4" />
+        <FaCog className="size-4" />
       </DialogTrigger>
 
       <DialogContent className="sm:max-w-md">

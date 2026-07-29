@@ -1,9 +1,18 @@
+"use client";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
+import { useRouter } from "next/navigation";
+
 export default function Page() {
+  const route = useRouter();
+
+  const handleSignUp = () => {
+    route.push("/signup/role");
+  };
+
   return (
     <main className="bg-muted/30 flex min-h-screen items-center justify-center">
       <div className="bg-background w-full max-w-md rounded-xl border p-8 shadow-sm">
@@ -36,7 +45,9 @@ export default function Page() {
             />
           </div>
 
-          <Button className="w-full">Cadastrar</Button>
+          <Button className="w-full" onClick={handleSignUp}>
+            Cadastrar
+          </Button>
         </div>
 
         <p className="text-muted-foreground mt-6 text-center text-sm">
