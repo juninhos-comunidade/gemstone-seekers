@@ -11,7 +11,7 @@ vi.mock("next/navigation", () => ({
 
 const mockUseRouter = vi.mocked(useRouter);
 
-describe("Login", () => {
+describe("Role Selection Page", () => {
   const mockPush = vi.fn();
   const mockRouter = {
     push: mockPush,
@@ -37,7 +37,7 @@ describe("Login", () => {
       screen.getByRole("heading", { name: "Recrutador" }),
     ).toBeInTheDocument();
     expect(screen.getByText("Você é um recrutador?")).toBeInTheDocument();
-    const buttons = screen.getAllByRole("button", { name: "Cadastre-se" });
+    const buttons = screen.getAllByRole("button", { name: "Selecionar" });
     expect(buttons).toHaveLength(2);
     expect(buttons[0]).toBeInTheDocument();
   });
@@ -48,14 +48,14 @@ describe("Login", () => {
       screen.getByRole("heading", { name: "Candidato(a)" }),
     ).toBeInTheDocument();
     expect(screen.getByText("Você é um candidato?")).toBeInTheDocument();
-    const buttons = screen.getAllByRole("button", { name: "Cadastre-se" });
+    const buttons = screen.getAllByRole("button", { name: "Selecionar" });
     expect(buttons).toHaveLength(2);
-    expect(buttons[0]).toBeInTheDocument();
+    expect(buttons[1]).toBeInTheDocument();
   });
 
   it("should have go to a recruiter signUp", () => {
     render(<Role />);
-    const buttons = screen.getAllByRole("button", { name: "Cadastre-se" });
+    const buttons = screen.getAllByRole("button", { name: "Selecionar" });
     expect(buttons).toHaveLength(2);
     const recruiterButton = buttons[0];
     expect(recruiterButton).toBeInTheDocument();
@@ -65,7 +65,7 @@ describe("Login", () => {
 
   it("should have go to a candidate signUp", () => {
     render(<Role />);
-    const buttons = screen.getAllByRole("button", { name: "Cadastre-se" });
+    const buttons = screen.getAllByRole("button", { name: "Selecionar" });
     expect(buttons).toHaveLength(2);
     const candidateButton = buttons[1];
     expect(candidateButton).toBeInTheDocument();

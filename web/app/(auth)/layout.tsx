@@ -7,7 +7,7 @@ export default function Layout({
 }>) {
   return (
     <main>
-      <DashboardHeader role="candidate" />
+      <DashboardHeader role="recruiter" />
       <div>{children}</div>
     </main>
   );

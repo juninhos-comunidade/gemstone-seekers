@@ -1,7 +1,7 @@
 import "@testing-library/jest-dom/vitest";
 import { describe, it, expect, vi, afterEach } from "vitest";
 import { render, screen, cleanup } from "@testing-library/react";
-import CandidateSignup from "./page";
+import Signup from "./page";
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({
@@ -12,26 +12,26 @@ vi.mock("next/navigation", () => ({
     refresh: vi.fn(),
     prefetch: vi.fn(),
   }),
-  usePathname: () => "/signup/role/candidate",
+  usePathname: () => "/signup",
 }));
 
-describe("Candidate Signup Page", () => {
+describe(" Signup Page", () => {
   afterEach(() => {
     cleanup();
   });
 
-  it("renders the candidate signup heading", () => {
-    render(<CandidateSignup />);
+  it("renders the  signup heading", () => {
+    render(<Signup />);
     expect(
       screen.getByRole("heading", {
         level: 1,
-        name: /criar conta candidato/i,
+        name: /Criar Conta/i,
       }),
     ).toBeInTheDocument();
   });
 
   it("renders all four signup fields (name, email, password, confirm)", () => {
-    render(<CandidateSignup />);
+    render(<Signup />);
 
     const fullName = screen.getByLabelText(/nome completo/i);
     const email = screen.getByLabelText(/^e-mail$/i);
@@ -49,14 +49,14 @@ describe("Candidate Signup Page", () => {
   });
 
   it("renders the submit button", () => {
-    render(<CandidateSignup />);
+    render(<Signup />);
     expect(
       screen.getByRole("button", { name: /cadastrar/i }),
     ).toBeInTheDocument();
   });
 
   it("renders the 'already have an account' link to login", () => {
-    render(<CandidateSignup />);
+    render(<Signup />);
     expect(screen.getByText(/já possui uma conta\?/i)).toBeInTheDocument();
     const loginLink = screen.getByRole("link", { name: /entrar/i });
     expect(loginLink).toBeInTheDocument();
