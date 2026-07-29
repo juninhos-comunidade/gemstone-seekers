@@ -16,9 +16,7 @@ export default function Page() {
   return (
     <main className="bg-muted/30 flex min-h-screen items-center justify-center">
       <div className="bg-background w-full max-w-md rounded-xl border p-8 shadow-sm">
-        <h1 className="mb-6 text-center text-2xl font-bold">
-          Criar Conta Candidato
-        </h1>
+        <h1 className="mb-6 text-center text-2xl font-bold">Criar Conta</h1>
 
         <div className="space-y-4">
           <div className="space-y-2">

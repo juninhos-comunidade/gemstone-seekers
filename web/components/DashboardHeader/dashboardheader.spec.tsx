@@ -69,11 +69,11 @@ describe("DashboardHeader", () => {
     });
   });
 
-  it("renders the logo link pointing to home", () => {
+  it("renders the logo link pointing to the role dashboard", () => {
     render(<DashboardHeader role="candidate" />);
     const logoLink = screen.getByRole("link", { name: /gemstone seekers/i });
     expect(logoLink).toBeInTheDocument();
-    expect(logoLink).toHaveAttribute("href", "/");
+    expect(logoLink).toHaveAttribute("href", "/candidate/dashboard");
   });
 
   it("renders both modals (notifications + settings)", () => {

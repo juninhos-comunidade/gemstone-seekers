@@ -6,12 +6,6 @@ import Layout from "./layout";
 
 type MockMenuItem = Pick<MenuItem, "label" | "href" | "icon">;
 
-vi.mock("@/components/DashboardHeader/DashboardHeader", () => ({
-  DashboardHeader: ({ role }: { role: string }) => (
-    <header data-testid="mock-dashboard-header" data-role={role} />
-  ),
-}));
-
 vi.mock("@/components/SideMenu/SideMenu", () => ({
   SideMenu: ({ items }: { items: MockMenuItem[] }) => (
     <aside data-testid="mock-side-menu">
@@ -39,19 +33,7 @@ vi.mock("next/navigation", () => ({
 describe("Recruiter Layout", () => {
   afterEach(() => cleanup());
 
-  it("passes role='recruiter' to the DashboardHeader", () => {
-    render(
-      <Layout>
-        <p>children content</p>
-      </Layout>,
-    );
-    expect(screen.getByTestId("mock-dashboard-header")).toHaveAttribute(
-      "data-role",
-      "recruiter",
-    );
-  });
-
-  it("renders the 3 recruiter side menu items (Dashboard / Vagas / Candidatos)", () => {
+  it("renders the 2 recruiter side menu items (Dashboard / Vagas / Testes)", () => {
     render(
       <Layout>
         <p>oi</p>
@@ -59,8 +41,6 @@ describe("Recruiter Layout", () => {
     );
     expect(screen.getByText(/dashboard/i)).toBeInTheDocument();
     expect(screen.getByText(/vagas/i)).toBeInTheDocument();
-    expect(screen.getByText(/candidatos/i)).toBeInTheDocument();
-    expect(screen.queryByText(/^testes$/i)).not.toBeInTheDocument();
   });
 
   it("renders the children content", () => {

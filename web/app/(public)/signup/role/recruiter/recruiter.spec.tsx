@@ -25,41 +25,44 @@ describe("Recruiter Signup Page", () => {
     expect(
       screen.getByRole("heading", {
         level: 1,
-        name: /criar conta recrutador/i,
+        name: /informações do recrutador/i,
       }),
     ).toBeInTheDocument();
   });
 
-  it("renders all four signup fields (name, email, password, confirm)", () => {
+  it("renders all profile fields", () => {
     render(<RecruiterSignup />);
 
-    const fullName = screen.getByLabelText(/nome completo/i);
-    const email = screen.getByLabelText(/^e-mail$/i);
-    const password = screen.getByLabelText(/^senha$/i);
-    const confirmPassword = screen.getByLabelText(/confirmar senha/i);
-
-    expect(fullName).toBeInTheDocument();
-    expect(fullName).toHaveAttribute("type", "text");
-    expect(email).toBeInTheDocument();
-    expect(email).toHaveAttribute("type", "email");
-    expect(password).toBeInTheDocument();
-    expect(password).toHaveAttribute("type", "password");
-    expect(confirmPassword).toBeInTheDocument();
-    expect(confirmPassword).toHaveAttribute("type", "password");
+    expect(screen.getByLabelText(/nome da empresa/i)).toHaveAttribute(
+      "type",
+      "text",
+    );
+    expect(screen.getByLabelText(/^cargo$/i)).toHaveAttribute("type", "text");
+    expect(screen.getByLabelText(/telefone/i)).toHaveAttribute("type", "tel");
+    expect(screen.getByLabelText(/site da empresa/i)).toHaveAttribute(
+      "type",
+      "url",
+    );
+    expect(screen.getByLabelText(/tamanho da empresa/i)).toHaveAttribute(
+      "type",
+      "text",
+    );
   });
 
   it("renders the submit button", () => {
     render(<RecruiterSignup />);
     expect(
-      screen.getByRole("button", { name: /cadastrar/i }),
+      screen.getByRole("button", { name: /concluir cadastro/i }),
     ).toBeInTheDocument();
   });
 
-  it("renders the 'already have an account' link to login", () => {
+  it("renders the skip link", () => {
     render(<RecruiterSignup />);
-    expect(screen.getByText(/já possui uma conta\?/i)).toBeInTheDocument();
-    const loginLink = screen.getByRole("link", { name: /entrar/i });
-    expect(loginLink).toBeInTheDocument();
-    expect(loginLink).toHaveAttribute("href", "/login");
+    expect(
+      screen.getByText(/prefere fazer isso depois\?/i),
+    ).toBeInTheDocument();
+    const skipLink = screen.getByRole("link", { name: /pular por enquanto/i });
+    expect(skipLink).toBeInTheDocument();
+    expect(skipLink).toHaveAttribute("href", "/dashboard");
   });
 });
