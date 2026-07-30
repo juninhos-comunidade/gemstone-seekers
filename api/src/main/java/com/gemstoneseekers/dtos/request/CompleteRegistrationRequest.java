@@ -1,7 +1,6 @@
 package com.gemstoneseekers.dtos.request;
 
-import com.gemstoneseekers.models.UserRole;
-
+import com.gemstoneseekers.enums.UserRole;
 import jakarta.validation.constraints.NotNull;
 
 public record CompleteRegistrationRequest(

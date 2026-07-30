@@ -1,8 +1,8 @@
 package com.gemstoneseekers.dtos.response;
 
-import java.util.UUID;
+import com.gemstoneseekers.enums.UserRole;
 
-import com.gemstoneseekers.models.UserRole;
+import java.util.UUID;
 
 public record CompleteRegistrationResponse(
     UUID id,

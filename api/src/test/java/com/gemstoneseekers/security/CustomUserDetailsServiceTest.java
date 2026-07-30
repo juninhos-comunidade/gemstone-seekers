@@ -1,7 +1,7 @@
 package com.gemstoneseekers.security;
 
+import com.gemstoneseekers.enums.UserRole;
 import com.gemstoneseekers.models.User;
-import com.gemstoneseekers.models.UserRole;
 import com.gemstoneseekers.repositories.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.core.userdetails.UserDetails;
