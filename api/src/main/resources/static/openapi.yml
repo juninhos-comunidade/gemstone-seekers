@@ -1,0 +1,197 @@
+openapi: 3.1.0
+info:
+  title: OpenAPI definition
+  version: v0
+servers:
+- url: http://localhost:8080
+  description: Generated server url
+paths:
+  /api/v1/auth/register:
+    post:
+      tags:
+      - auth-controller
+      operationId: register
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/BaseResponseRegisterResponse"
+  /api/v1/auth/login:
+    post:
+      tags:
+      - auth-controller
+      operationId: login
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/BaseResponseLoginResponse"
+  /api/v1/auth/complete-registration:
+    patch:
+      tags:
+      - auth-controller
+      operationId: completeRegistration
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CompleteRegistrationRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/BaseResponseCompleteRegistrationResponse"
+components:
+  schemas:
+    RegisterRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+        email:
+          type: string
+          format: email
+          minLength: 1
+        password:
+          type: string
+          minLength: 1
+      required:
+      - email
+      - name
+      - password
+    BaseResponseRegisterResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        result:
+          $ref: "#/components/schemas/RegisterResponse"
+        error:
+          $ref: "#/components/schemas/ErrorResponse"
+    ErrorResponse:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        validations:
+          type: array
+          items:
+            $ref: "#/components/schemas/ValidationError"
+    RegisterResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        email:
+          type: string
+    ValidationError:
+      type: object
+      properties:
+        field:
+          type: string
+        message:
+          type: string
+    LoginRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          minLength: 1
+        password:
+          type: string
+          minLength: 1
+      required:
+      - email
+      - password
+    BaseResponseLoginResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        result:
+          $ref: "#/components/schemas/LoginResponse"
+        error:
+          $ref: "#/components/schemas/ErrorResponse"
+    LoginResponse:
+      type: object
+      properties:
+        accessToken:
+          type: string
+        refreshToken:
+          type: string
+        registrationCompleted:
+          type: boolean
+    CompleteRegistrationRequest:
+      type: object
+      properties:
+        role:
+          type: string
+          enum:
+          - CANDIDATE
+          - RECRUITER
+        documentType:
+          type: string
+        documentNumber:
+          type: string
+      required:
+      - role
+    BaseResponseCompleteRegistrationResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        result:
+          $ref: "#/components/schemas/CompleteRegistrationResponse"
+        error:
+          $ref: "#/components/schemas/ErrorResponse"
+    CompleteRegistrationResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        email:
+          type: string
+        role:
+          type: string
+          enum:
+          - CANDIDATE
+          - RECRUITER
+        documentType:
+          type: string
+        documentNumber:
+          type: string
