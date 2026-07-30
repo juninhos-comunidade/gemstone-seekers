@@ -1,8 +1,11 @@
 package com.gemstoneseekers.services;
 
+import java.util.UUID;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.gemstoneseekers.dtos.request.CompleteRegistrationRequest;
 import com.gemstoneseekers.dtos.request.RegisterRequest;
 import com.gemstoneseekers.exceptions.ConflictException;
 import com.gemstoneseekers.models.User;
@@ -30,5 +33,9 @@ public class AuthService {
         user.setPassword(passwordEncoder.encode(request.password()));
 
         return userRepository.save(user);
+    }
+
+    public User completeRegistration(UUID userId, CompleteRegistrationRequest request) {
+        return null;
     }
 }
