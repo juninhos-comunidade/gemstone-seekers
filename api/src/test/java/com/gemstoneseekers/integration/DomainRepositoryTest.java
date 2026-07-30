@@ -1,126 +1,182 @@
 package com.gemstoneseekers.integration;
 
 import com.gemstoneseekers.enums.UserRole;
+import com.gemstoneseekers.models.Address;
 import com.gemstoneseekers.models.Candidate;
+import com.gemstoneseekers.models.City;
 import com.gemstoneseekers.models.Company;
+import com.gemstoneseekers.models.Country;
 import com.gemstoneseekers.models.Recruiter;
+import com.gemstoneseekers.models.State;
 import com.gemstoneseekers.models.User;
-import com.gemstoneseekers.repositories.CandidateRepository;
-import com.gemstoneseekers.repositories.CompanyRepository;
-import com.gemstoneseekers.repositories.RecruiterRepository;
-import com.gemstoneseekers.repositories.UserRepository;
+import jakarta.persistence.EntityManager;
+import org.flywaydb.core.Flyway;
+import org.hibernate.SessionFactory;
+import org.hibernate.cfg.Configuration;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import java.util.Optional;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @Testcontainers
 class DomainRepositoryTest {
 
     @Container
     static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:18.4");
 
-    @DynamicPropertySource
-    static void configureProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.datasource.url", postgres::getJdbcUrl);
-        registry.add("spring.datasource.username", postgres::getUsername);
-        registry.add("spring.datasource.password", postgres::getPassword);
+    private static SessionFactory sessionFactory;
+
+    @BeforeAll
+    static void setup() {
+        Flyway flyway = Flyway.configure()
+            .dataSource(postgres.getJdbcUrl(), postgres.getUsername(), postgres.getPassword())
+            .locations("classpath:db/migration")
+            .load();
+        flyway.migrate();
+
+        Configuration cfg = new Configuration();
+        cfg.setProperty("hibernate.connection.url", postgres.getJdbcUrl());
+        cfg.setProperty("hibernate.connection.username", postgres.getUsername());
+        cfg.setProperty("hibernate.connection.password", postgres.getPassword());
+        cfg.setProperty("hibernate.connection.driver_class", postgres.getDriverClassName());
+        cfg.setProperty("hibernate.hbm2ddl.auto", "validate");
+        cfg.setProperty("hibernate.dialect", "org.hibernate.dialect.PostgreSQLDialect");
+
+        cfg.addAnnotatedClass(User.class);
+        cfg.addAnnotatedClass(Company.class);
+        cfg.addAnnotatedClass(Candidate.class);
+        cfg.addAnnotatedClass(Recruiter.class);
+        cfg.addAnnotatedClass(Address.class);
+        cfg.addAnnotatedClass(City.class);
+        cfg.addAnnotatedClass(State.class);
+        cfg.addAnnotatedClass(Country.class);
+
+        sessionFactory = cfg.buildSessionFactory();
     }
 
-    @Autowired
-    private CompanyRepository companyRepository;
+    @AfterAll
+    static void teardown() {
+        if (sessionFactory != null) {
+            sessionFactory.close();
+        }
+    }
 
-    @Autowired
-    private RecruiterRepository recruiterRepository;
-
-    @Autowired
-    private CandidateRepository candidateRepository;
-
-    @Autowired
-    private UserRepository userRepository;
+    @BeforeEach
+    void cleanUp() {
+        try (EntityManager em = sessionFactory.createEntityManager()) {
+            em.getTransaction().begin();
+            em.createNativeQuery("DELETE FROM recruiters").executeUpdate();
+            em.createNativeQuery("DELETE FROM candidates").executeUpdate();
+            em.createNativeQuery("DELETE FROM companies").executeUpdate();
+            em.createNativeQuery("DELETE FROM users").executeUpdate();
+            em.getTransaction().commit();
+        }
+    }
 
     @Test
     void shouldSaveAndFindCompany() {
-        Company company = new Company();
-        company.setName("Tech Corp");
-        company.setCnpj("12345678000190");
+        try (EntityManager em = sessionFactory.createEntityManager()) {
+            em.getTransaction().begin();
 
-        Company saved = companyRepository.save(company);
+            Company company = new Company();
+            company.setName("Tech Corp");
+            company.setCnpj("12345678000190");
+            em.persist(company);
 
-        assertThat(saved.getId()).isNotNull();
-        assertThat(saved.getCreatedAt()).isNotNull();
-        assertThat(saved.getUpdatedAt()).isNotNull();
+            em.getTransaction().commit();
+            em.clear();
 
-        Optional<Company> found = companyRepository.findById(saved.getId());
-        assertThat(found).isPresent();
-        assertThat(found.get().getName()).isEqualTo("Tech Corp");
-        assertThat(found.get().getCnpj()).isEqualTo("12345678000190");
+            Company found = em.find(Company.class, company.getId());
+
+            assertThat(found).isNotNull();
+            assertThat(found.getName()).isEqualTo("Tech Corp");
+            assertThat(found.getCnpj()).isEqualTo("12345678000190");
+            assertThat(found.getCreatedAt()).isNotNull();
+            assertThat(found.getUpdatedAt()).isNotNull();
+        }
     }
 
     @Test
     void shouldSaveAndFindCandidateWithUser() {
-        User user = createUser("candidate@example.com", UserRole.CANDIDATE);
+        try (EntityManager em = sessionFactory.createEntityManager()) {
+            em.getTransaction().begin();
 
-        Candidate candidate = new Candidate();
-        candidate.setUser(user);
-        candidate.setPhone("+5511999999999");
-        candidate.setSummary("Experienced backend developer");
+            User user = new User();
+            user.setName("Test User");
+            user.setEmail("candidate@example.com");
+            user.setPassword("$2a$10$encodedPassword");
+            user.setRole(UserRole.CANDIDATE);
+            user.setDocumentType("CPF");
+            user.setDocumentNumber("12345678900");
+            em.persist(user);
 
-        Candidate saved = candidateRepository.save(candidate);
+            Candidate candidate = new Candidate();
+            candidate.setUser(user);
+            candidate.setPhone("+5511999999999");
+            candidate.setSummary("Experienced backend developer");
+            em.persist(candidate);
 
-        assertThat(saved.getId()).isNotNull();
-        assertThat(saved.getUser().getId()).isEqualTo(user.getId());
+            em.getTransaction().commit();
+            em.clear();
 
-        Optional<Candidate> found = candidateRepository.findByUserId(user.getId());
-        assertThat(found).isPresent();
-        assertThat(found.get().getPhone()).isEqualTo("+5511999999999");
-        assertThat(found.get().getSummary()).isEqualTo("Experienced backend developer");
+            Candidate found = em.createQuery(
+                    "SELECT c FROM Candidate c JOIN FETCH c.user WHERE c.user.id = :userId",
+                    Candidate.class
+                )
+                .setParameter("userId", user.getId())
+                .getSingleResult();
+
+            assertThat(found).isNotNull();
+            assertThat(found.getPhone()).isEqualTo("+5511999999999");
+            assertThat(found.getSummary()).isEqualTo("Experienced backend developer");
+            assertThat(found.getUser().getId()).isEqualTo(user.getId());
+        }
     }
 
     @Test
     void shouldSaveAndFindRecruiterWithUserAndCompany() {
-        User user = createUser("recruiter@example.com", UserRole.RECRUITER);
+        try (EntityManager em = sessionFactory.createEntityManager()) {
+            em.getTransaction().begin();
 
-        Company company = new Company();
-        company.setName("Tech Corp");
-        companyRepository.save(company);
+            User user = new User();
+            user.setName("Test User");
+            user.setEmail("recruiter@example.com");
+            user.setPassword("$2a$10$encodedPassword");
+            user.setRole(UserRole.RECRUITER);
+            user.setDocumentType("CPF");
+            user.setDocumentNumber("12345678900");
+            em.persist(user);
 
-        Recruiter recruiter = new Recruiter();
-        recruiter.setUser(user);
-        recruiter.setCompany(company);
-        recruiter.setDepartment("Engineering");
+            Company company = new Company();
+            company.setName("Tech Corp");
+            company.setCnpj("12345678000190");
+            em.persist(company);
 
-        Recruiter saved = recruiterRepository.save(recruiter);
+            Recruiter recruiter = new Recruiter();
+            recruiter.setUser(user);
+            recruiter.setCompany(company);
+            recruiter.setDepartment("Engineering");
+            em.persist(recruiter);
 
-        assertThat(saved.getId()).isNotNull();
-        assertThat(saved.getUser().getId()).isEqualTo(user.getId());
-        assertThat(saved.getCompany().getId()).isEqualTo(company.getId());
+            em.getTransaction().commit();
+            em.clear();
 
-        Optional<Recruiter> found = recruiterRepository.findByUserId(user.getId());
-        assertThat(found).isPresent();
-        assertThat(found.get().getDepartment()).isEqualTo("Engineering");
-        assertThat(found.get().getCompany().getName()).isEqualTo("Tech Corp");
-    }
+            Recruiter found = em.createQuery(
+                    "SELECT r FROM Recruiter r JOIN FETCH r.user JOIN FETCH r.company WHERE r.user.id = :userId",
+                    Recruiter.class
+                )
+                .setParameter("userId", user.getId())
+                .getSingleResult();
 
-    private User createUser(
-        String email,
-        UserRole role) {
-        User user = new User();
-        user.setName("Test User");
-        user.setEmail(email);
-        user.setPassword("$2a$10$encodedPassword");
-        user.setRole(role);
-        user.setDocumentType("CPF");
-        user.setDocumentNumber("12345678900");
-        return userRepository.save(user);
+            assertThat(found).isNotNull();
+            assertThat(found.getDepartment()).isEqualTo("Engineering");
+            assertThat(found.getCompany().getName()).isEqualTo("Tech Corp");
+            assertThat(found.getUser().getId()).isEqualTo(user.getId());
+        }
     }
 }
