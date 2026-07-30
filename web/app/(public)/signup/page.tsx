@@ -9,21 +9,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner"; // ou o toast do shadcn que você usar
 import { PasswordInput } from "@/components/PasswordInput/PasswordInput";
+import { schema } from "@/lib/schemas/signupSchema";
 
 export default function Page() {
   const router = useRouter();
-
-  const schema = z
-    .object({
-      fullName: z.string().min(3, "Nome completo é obrigatório"),
-      email: z.string().email("E-mail inválido"), // use z.email() se estiver no zod v4+
-      password: z.string().min(6, "Senha é obrigatória"),
-      confirmPassword: z.string().min(6, "Confirmar senha é obrigatória"),
-    })
-    .refine((data) => data.password === data.confirmPassword, {
-      message: "Senhas não coincidem",
-      path: ["confirmPassword"],
-    });
 
   type FormValues = z.infer<typeof schema>;
 

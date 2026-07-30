@@ -9,22 +9,10 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { PasswordInput } from "@/components/PasswordInput/PasswordInput";
-
-export function getDashboardRoute(tipo: "candidate" | "recruiter") {
-  if (tipo === "candidate") {
-    return "/candidate/dashboard";
-  }
-
-  return "/recruiter/dashboard";
-}
+import { schema } from "@/lib/schemas/loginSchema";
 
 export default function Page() {
   const router = useRouter();
-
-  const schema = z.object({
-    email: z.string().email("E-mail inválido"),
-    password: z.string().min(6, "Senha inválida"),
-  });
 
   type FormValues = z.infer<typeof schema>;
 
