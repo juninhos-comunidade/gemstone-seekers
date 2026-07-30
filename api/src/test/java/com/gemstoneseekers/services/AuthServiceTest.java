@@ -220,4 +220,60 @@ class AuthServiceTest {
         verify(jwtService, never()).generateAccessToken(any());
         verify(jwtService, never()).generateRefreshToken(any());
     }
+
+    @Test
+    void shouldRefreshTokenSuccessfully() {
+        String refreshToken = "valid.refresh.token";
+        String email        = "john@example.com";
+
+        User user = new User();
+        user.setId(UUID.randomUUID());
+        user.setEmail(email);
+        user.setPassword("$2a$10$encodedPassword");
+        user.setRole(UserRole.CANDIDATE);
+
+        when(jwtService.isTokenValid(refreshToken)).thenReturn(true);
+        when(jwtService.extractEmail(refreshToken)).thenReturn(email);
+        when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
+        when(jwtService.generateAccessToken(user)).thenReturn("new-access-token");
+        when(jwtService.generateRefreshToken(user)).thenReturn("new-refresh-token");
+
+        LoginResponse result = authService.refreshToken(refreshToken);
+
+        assertThat(result).isNotNull();
+        assertThat(result.accessToken()).isEqualTo("new-access-token");
+        assertThat(result.refreshToken()).isEqualTo("new-refresh-token");
+        assertThat(result.registrationCompleted()).isTrue();
+    }
+
+    @Test
+    void shouldThrowAccessDeniedWhenRefreshTokenIsInvalid() {
+        String refreshToken = "invalid.refresh.token";
+
+        when(jwtService.isTokenValid(refreshToken)).thenReturn(false);
+
+        assertThatThrownBy(() -> authService.refreshToken(refreshToken))
+            .isInstanceOf(AccessDeniedException.class)
+            .hasMessage("Invalid refresh token");
+
+        verify(jwtService, never()).extractEmail(any());
+        verify(userRepository, never()).findByEmail(any());
+    }
+
+    @Test
+    void shouldThrowAccessDeniedWhenUserNotFoundAfterRefresh() {
+        String refreshToken = "valid.refresh.token";
+        String email        = "deleted@example.com";
+
+        when(jwtService.isTokenValid(refreshToken)).thenReturn(true);
+        when(jwtService.extractEmail(refreshToken)).thenReturn(email);
+        when(userRepository.findByEmail(email)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> authService.refreshToken(refreshToken))
+            .isInstanceOf(AccessDeniedException.class)
+            .hasMessage("Invalid refresh token");
+
+        verify(jwtService, never()).generateAccessToken(any());
+        verify(jwtService, never()).generateRefreshToken(any());
+    }
 }

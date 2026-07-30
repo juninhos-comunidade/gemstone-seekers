@@ -71,4 +71,8 @@ public class AuthService {
 
         return new LoginResponse(accessToken, refreshToken, user.getRole() != null);
     }
+
+    public LoginResponse refreshToken(String refreshToken) {
+        return null;
+    }
 }
