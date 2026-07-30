@@ -1,15 +1,15 @@
 package com.gemstoneseekers.services;
 
-import java.util.UUID;
-
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
-
 import com.gemstoneseekers.dtos.request.CompleteRegistrationRequest;
 import com.gemstoneseekers.dtos.request.RegisterRequest;
 import com.gemstoneseekers.exceptions.ConflictException;
+import com.gemstoneseekers.exceptions.EntityNotFoundException;
 import com.gemstoneseekers.models.User;
 import com.gemstoneseekers.repositories.UserRepository;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
+import java.util.UUID;
 
 @Service
 public class AuthService {
@@ -17,7 +17,9 @@ public class AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public AuthService(
+        UserRepository userRepository,
+        PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
     }
@@ -35,7 +37,20 @@ public class AuthService {
         return userRepository.save(user);
     }
 
-    public User completeRegistration(UUID userId, CompleteRegistrationRequest request) {
-        return null;
+    public User completeRegistration(
+        UUID userId,
+        CompleteRegistrationRequest request) {
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new EntityNotFoundException("User", userId));
+
+        if (user.getRole() != null) {
+            throw new ConflictException("Registration already completed");
+        }
+
+        user.setRole(request.role());
+        user.setDocumentType(request.documentType());
+        user.setDocumentNumber(request.documentNumber());
+
+        return userRepository.save(user);
     }
 }
