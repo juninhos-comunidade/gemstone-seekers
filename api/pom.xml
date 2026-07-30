@@ -1,21 +1,24 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+<?xml version="1.0" encoding="UTF-8" ?>
+<project
+    xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd"
+>
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
         <version>4.1.0</version>
-        <relativePath/>
+        <relativePath />
     </parent>
 
     <groupId>com.gemstoneseekers</groupId>
     <artifactId>gemstone-seekers-api</artifactId>
     <version>1.0.0-SNAPSHOT</version>
     <name>Gemstone Seekers API</name>
-    <description>Knowledge validation and categorisation system for recruitment processes</description>
+    <description
+    >Knowledge validation and categorisation system for recruitment processes</description>
 
     <properties>
         <java.version>25</java.version>
@@ -261,7 +264,8 @@
                 <artifactId>flyway-maven-plugin</artifactId>
                 <configuration>
                     <configFiles>
-                        <configFile>src/main/resources/application.yml</configFile>
+                        <configFile
+                        >src/main/resources/application.yml</configFile>
                     </configFiles>
                     <locations>
                         <location>classpath:db/migration</location>
@@ -303,8 +307,8 @@
                         <eclipse>
                             <file>config/eclipse-formatter.xml</file>
                         </eclipse>
-                        <removeUnusedImports/>
-                        <formatAnnotations/>
+                        <removeUnusedImports />
+                        <formatAnnotations />
                     </java>
                 </configuration>
             </plugin>
@@ -321,19 +325,22 @@
                                 <limit>
                                     <counter>INSTRUCTION</counter>
                                     <value>COVEREDRATIO</value>
-                                    <minimum>${coverage.minimum.instruction}</minimum>
+                                    <minimum
+                                    >${coverage.minimum.instruction}</minimum>
                                 </limit>
                                 <limit>
                                     <counter>BRANCH</counter>
                                     <value>COVEREDRATIO</value>
-                                    <minimum>${coverage.minimum.branch}</minimum>
+                                    <minimum
+                                    >${coverage.minimum.branch}</minimum>
                                 </limit>
                             </limits>
                         </rule>
                     </rules>
                     <excludes>
                         <exclude>com/gemstoneseekers/config/**</exclude>
-                        <exclude>com/gemstoneseekers/GemstoneSeekersApplication.class</exclude>
+                        <exclude
+                        >com/gemstoneseekers/GemstoneSeekersApplication.class</exclude>
                         <exclude>com/gemstoneseekers/dtos/**</exclude>
                         <exclude>com/gemstoneseekers/exceptions/**</exclude>
                     </excludes>
@@ -376,11 +383,14 @@
                 <configuration>
                     <effort>Max</effort>
                     <threshold>${spotbugs.threshold}</threshold>
-                    <maxAllowedViolations>${spotbugs.maxAllowedViolations}</maxAllowedViolations>
+                    <maxAllowedViolations
+                    >${spotbugs.maxAllowedViolations}</maxAllowedViolations>
                     <xmlOutput>true</xmlOutput>
                     <htmlOutput>true</htmlOutput>
-                    <outputDirectory>${project.build.directory}/spotbugs</outputDirectory>
-                    <spotbugsXmlOutputDirectory>${project.build.directory}/spotbugs</spotbugsXmlOutputDirectory>
+                    <outputDirectory
+                    >${project.build.directory}/spotbugs</outputDirectory>
+                    <spotbugsXmlOutputDirectory
+                    >${project.build.directory}/spotbugs</spotbugsXmlOutputDirectory>
                     <excludeFilterFile>spotbugs-exclude.xml</excludeFilterFile>
                 </configuration>
             </plugin>
@@ -405,7 +415,8 @@
                     <targetJdk>${java.version}</targetJdk>
                     <failOnViolation>true</failOnViolation>
                     <printFailingErrors>true</printFailingErrors>
-                    <outputDirectory>${project.build.directory}/pmd</outputDirectory>
+                    <outputDirectory
+                    >${project.build.directory}/pmd</outputDirectory>
                     <rulesets>
                         <ruleset>category/java/bestpractices.xml</ruleset>
                         <ruleset>category/java/errorprone.xml</ruleset>
@@ -443,14 +454,30 @@
                     <failsOnError>true</failsOnError>
                     <failOnViolation>true</failOnViolation>
                     <violationSeverity>error</violationSeverity>
-                    <outputDirectory>${project.build.directory}/checkstyle</outputDirectory>
+                    <outputDirectory
+                    >${project.build.directory}/checkstyle</outputDirectory>
                     <excludes>
                         **/config/**,
                         **/dto/**,
                         **/GemstoneSeekersApplication.java
                     </excludes>
-                    <includeTestSourceDirectory>false</includeTestSourceDirectory>
+                    <includeTestSourceDirectory
+                    >false</includeTestSourceDirectory>
                     <linkXRef>false</linkXRef>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                            <version>${lombok.version}</version>
+                        </path>
+                    </annotationProcessorPaths>
                 </configuration>
             </plugin>
         </plugins>
@@ -484,9 +511,11 @@
                         <artifactId>springdoc-openapi-maven-plugin</artifactId>
                         <version>1.4</version>
                         <configuration>
-                            <apiDocsUrl>http://localhost:8080/v3/api-docs.yaml</apiDocsUrl>
+                            <apiDocsUrl
+                            >http://localhost:8080/v3/api-docs.yaml</apiDocsUrl>
                             <outputFileName>openapi.yml</outputFileName>
-                            <outputDir>${project.basedir}/src/main/resources/static</outputDir>
+                            <outputDir
+                            >${project.basedir}/src/main/resources/static</outputDir>
                         </configuration>
                         <executions>
                             <execution>
