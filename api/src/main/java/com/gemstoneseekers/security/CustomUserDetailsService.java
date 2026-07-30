@@ -1,5 +1,8 @@
 package com.gemstoneseekers.security;
 
+import java.util.Collections;
+
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -18,6 +21,16 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        return null;
+        return userRepository.findByEmail(email)
+            .map(user -> User.builder()
+                .username(user.getEmail())
+                .password(user.getPassword())
+                .authorities(user.getRole() != null
+                    ? Collections.singletonList(
+                    new org.springframework.security.core.authority.SimpleGrantedAuthority(
+                        "ROLE_" + user.getRole().name()))
+                    : Collections.emptyList())
+                .build())
+            .orElseThrow(() -> new UsernameNotFoundException("User not found: " + email));
     }
 }
