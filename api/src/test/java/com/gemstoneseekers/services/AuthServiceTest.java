@@ -76,7 +76,7 @@ class AuthServiceTest {
 
     @Test
     void shouldCompleteRegistrationSuccessfully() {
-        UUID userId = UUID.randomUUID();
+        String email = "john@example.com";
         CompleteRegistrationRequest request = new CompleteRegistrationRequest(
             UserRole.CANDIDATE,
             "CPF",
@@ -84,16 +84,16 @@ class AuthServiceTest {
         );
 
         User existingUser = new User();
-        existingUser.setId(userId);
+        existingUser.setId(UUID.randomUUID());
         existingUser.setName("John Doe");
-        existingUser.setEmail("john@example.com");
+        existingUser.setEmail(email);
         existingUser.setPassword("$2a$10$encodedPassword");
         existingUser.setRole(null);
 
-        when(userRepository.findById(userId)).thenReturn(Optional.of(existingUser));
+        when(userRepository.findByEmail(email)).thenReturn(Optional.of(existingUser));
         when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        User result = authService.completeRegistration(userId, request);
+        User result = authService.completeRegistration(email, request);
 
         assertThat(result).isNotNull();
         assertThat(result.getRole()).isEqualTo(UserRole.CANDIDATE);
@@ -104,16 +104,16 @@ class AuthServiceTest {
 
     @Test
     void shouldThrowEntityNotFoundExceptionWhenUserNotFound() {
-        UUID userId = UUID.randomUUID();
+        String email = "unknown@example.com";
         CompleteRegistrationRequest request = new CompleteRegistrationRequest(
             UserRole.CANDIDATE,
             null,
             null
         );
 
-        when(userRepository.findById(userId)).thenReturn(Optional.empty());
+        when(userRepository.findByEmail(email)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> authService.completeRegistration(userId, request))
+        assertThatThrownBy(() -> authService.completeRegistration(email, request))
             .isInstanceOf(EntityNotFoundException.class);
 
         verify(userRepository, never()).save(any());
@@ -121,7 +121,7 @@ class AuthServiceTest {
 
     @Test
     void shouldThrowConflictExceptionWhenRegistrationAlreadyCompleted() {
-        UUID userId = UUID.randomUUID();
+        String email = "john@example.com";
         CompleteRegistrationRequest request = new CompleteRegistrationRequest(
             UserRole.CANDIDATE,
             null,
@@ -129,13 +129,13 @@ class AuthServiceTest {
         );
 
         User existingUser = new User();
-        existingUser.setId(userId);
-        existingUser.setEmail("john@example.com");
+        existingUser.setId(UUID.randomUUID());
+        existingUser.setEmail(email);
         existingUser.setRole(UserRole.RECRUITER);
 
-        when(userRepository.findById(userId)).thenReturn(Optional.of(existingUser));
+        when(userRepository.findByEmail(email)).thenReturn(Optional.of(existingUser));
 
-        assertThatThrownBy(() -> authService.completeRegistration(userId, request))
+        assertThatThrownBy(() -> authService.completeRegistration(email, request))
             .isInstanceOf(ConflictException.class)
             .hasMessage("Registration already completed");
 
