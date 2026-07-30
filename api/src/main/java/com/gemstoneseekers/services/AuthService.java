@@ -12,8 +12,6 @@ import com.gemstoneseekers.repositories.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.UUID;
-
 @Service
 public class AuthService {
 
@@ -44,10 +42,10 @@ public class AuthService {
     }
 
     public User completeRegistration(
-        UUID userId,
+        String email,
         CompleteRegistrationRequest request) {
-        User user = userRepository.findById(userId)
-            .orElseThrow(() -> new EntityNotFoundException("User", userId));
+        User user = userRepository.findByEmail(email)
+            .orElseThrow(() -> new EntityNotFoundException("User", email));
 
         if (user.getRole() != null) {
             throw new ConflictException("Registration already completed");
@@ -68,7 +66,7 @@ public class AuthService {
             throw new AccessDeniedException("Invalid email or password");
         }
 
-        String accessToken = jwtService.generateAccessToken(user);
+        String accessToken  = jwtService.generateAccessToken(user);
         String refreshToken = jwtService.generateRefreshToken(user);
 
         return new LoginResponse(accessToken, refreshToken, user.getRole() != null);

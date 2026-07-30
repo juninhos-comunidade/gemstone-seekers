@@ -1,5 +1,6 @@
 package com.gemstoneseekers.config;
 
+import com.gemstoneseekers.security.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -13,8 +14,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-
-import com.gemstoneseekers.security.JwtAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
@@ -35,7 +34,7 @@ public class SecurityConfig {
             .logout(AbstractHttpConfigurer::disable)
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/v1/auth/**").permitAll()
+                .requestMatchers("/api/v1/auth/register", "/api/v1/auth/login").permitAll()
                 .requestMatchers("/v3/api-docs", "/v3/api-docs/**", "/v3/api-docs.yaml", "/swagger-ui/**",
                     "/swagger-ui.html")
                 .permitAll()

@@ -17,6 +17,7 @@ import com.gemstoneseekers.services.AuthService;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.UUID;
 
@@ -80,17 +81,18 @@ class AuthControllerTest {
 
     @Test
     void shouldReturnOkWithUserDataOnSuccessfulCompleteRegistration() {
-        UUID userId = UUID.randomUUID();
+        String email = "john@example.com";
         CompleteRegistrationRequest request = new CompleteRegistrationRequest(
             UserRole.CANDIDATE,
             "CPF",
             "12345678900"
         );
 
+        UUID userId      = UUID.randomUUID();
         User updatedUser = new User();
         updatedUser.setId(userId);
         updatedUser.setName("John Doe");
-        updatedUser.setEmail("john@example.com");
+        updatedUser.setEmail(email);
         updatedUser.setRole(UserRole.CANDIDATE);
         updatedUser.setDocumentType("CPF");
         updatedUser.setDocumentNumber("12345678900");
@@ -98,17 +100,20 @@ class AuthControllerTest {
         CompleteRegistrationResponse expectedResponse = new CompleteRegistrationResponse(
             userId,
             "John Doe",
-            "john@example.com",
+            email,
             UserRole.CANDIDATE,
             "CPF",
             "12345678900"
         );
 
-        when(authService.completeRegistration(userId, request)).thenReturn(updatedUser);
+        UserDetails userDetails = mock(UserDetails.class);
+        when(userDetails.getUsername()).thenReturn(email);
+
+        when(authService.completeRegistration(email, request)).thenReturn(updatedUser);
         when(userMapper.toCompleteRegistrationResponse(updatedUser)).thenReturn(expectedResponse);
 
         ResponseEntity<BaseResponse<CompleteRegistrationResponse>> response =
-            authController.completeRegistration(userId, request);
+            authController.completeRegistration(userDetails, request);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
@@ -118,34 +123,40 @@ class AuthControllerTest {
 
     @Test
     void shouldPropagateConflictExceptionWhenRegistrationAlreadyCompleted() {
-        UUID userId = UUID.randomUUID();
+        String email = "john@example.com";
         CompleteRegistrationRequest request = new CompleteRegistrationRequest(
             UserRole.CANDIDATE,
             null,
             null
         );
 
-        when(authService.completeRegistration(userId, request))
+        UserDetails userDetails = mock(UserDetails.class);
+        when(userDetails.getUsername()).thenReturn(email);
+
+        when(authService.completeRegistration(email, request))
             .thenThrow(new ConflictException("Registration already completed"));
 
-        assertThatThrownBy(() -> authController.completeRegistration(userId, request))
+        assertThatThrownBy(() -> authController.completeRegistration(userDetails, request))
             .isInstanceOf(ConflictException.class)
             .hasMessage("Registration already completed");
     }
 
     @Test
     void shouldPropagateEntityNotFoundExceptionWhenUserNotFound() {
-        UUID userId = UUID.randomUUID();
+        String email = "unknown@example.com";
         CompleteRegistrationRequest request = new CompleteRegistrationRequest(
             UserRole.CANDIDATE,
             null,
             null
         );
 
-        when(authService.completeRegistration(userId, request))
-            .thenThrow(new EntityNotFoundException("User", userId));
+        UserDetails userDetails = mock(UserDetails.class);
+        when(userDetails.getUsername()).thenReturn(email);
 
-        assertThatThrownBy(() -> authController.completeRegistration(userId, request))
+        when(authService.completeRegistration(email, request))
+            .thenThrow(new EntityNotFoundException("User", email));
+
+        assertThatThrownBy(() -> authController.completeRegistration(userDetails, request))
             .isInstanceOf(EntityNotFoundException.class);
     }
 
