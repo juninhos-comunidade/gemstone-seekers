@@ -22,15 +22,17 @@ export default function Page() {
   const router = useRouter();
 
   const schema = z.object({
-    email: z.email("E-mail inválido"),
+    email: z.string().email("E-mail inválido"),
     password: z.string().min(6, "Senha inválida"),
   });
+
+  type FormValues = z.infer<typeof schema>;
 
   const {
     register,
     handleSubmit,
     formState: { isSubmitting, errors },
-  } = useForm({
+  } = useForm<FormValues>({
     resolver: zodResolver(schema),
   });
 
