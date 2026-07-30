@@ -14,7 +14,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import com.gemstoneseekers.dtos.request.RegisterRequest;
 import com.gemstoneseekers.exceptions.ConflictException;
 import com.gemstoneseekers.models.User;
-import com.gemstoneseekers.models.UserRole;
 import com.gemstoneseekers.repositories.UserRepository;
 
 class AuthServiceTest {
@@ -26,12 +25,9 @@ class AuthServiceTest {
     @Test
     void shouldRegisterUserSuccessfully() {
         RegisterRequest request = new RegisterRequest(
-                "John Doe",
-                "john@example.com",
-                "plainPassword123",
-                UserRole.CANDIDATE,
-                "CPF",
-                "12345678900");
+            "John Doe",
+            "john@example.com",
+            "plainPassword123");
 
         when(userRepository.existsByEmail("john@example.com")).thenReturn(false);
         when(passwordEncoder.encode("plainPassword123")).thenReturn("$2a$10$encodedPassword");
@@ -43,9 +39,9 @@ class AuthServiceTest {
         assertThat(result.getName()).isEqualTo("John Doe");
         assertThat(result.getEmail()).isEqualTo("john@example.com");
         assertThat(result.getPassword()).isEqualTo("$2a$10$encodedPassword");
-        assertThat(result.getRole()).isEqualTo(UserRole.CANDIDATE);
-        assertThat(result.getDocumentType()).isEqualTo("CPF");
-        assertThat(result.getDocumentNumber()).isEqualTo("12345678900");
+        assertThat(result.getRole()).isNull();
+        assertThat(result.getDocumentType()).isNull();
+        assertThat(result.getDocumentNumber()).isNull();
         verify(passwordEncoder).encode("plainPassword123");
         verify(userRepository).save(any(User.class));
     }
@@ -53,18 +49,15 @@ class AuthServiceTest {
     @Test
     void shouldThrowConflictExceptionWhenEmailAlreadyExists() {
         RegisterRequest request = new RegisterRequest(
-                "John Doe",
-                "john@example.com",
-                "plainPassword123",
-                UserRole.CANDIDATE,
-                null,
-                null);
+            "John Doe",
+            "john@example.com",
+            "plainPassword123");
 
         when(userRepository.existsByEmail("john@example.com")).thenReturn(true);
 
         assertThatThrownBy(() -> authService.register(request))
-                .isInstanceOf(ConflictException.class)
-                .hasMessage("Email already in use");
+            .isInstanceOf(ConflictException.class)
+            .hasMessage("Email already in use");
 
         verify(passwordEncoder, never()).encode(any());
         verify(userRepository, never()).save(any());
