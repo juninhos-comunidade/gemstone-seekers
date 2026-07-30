@@ -1,19 +1,5 @@
 package com.gemstoneseekers.integration;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.util.Optional;
-
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
-
 import com.gemstoneseekers.enums.UserRole;
 import com.gemstoneseekers.models.Candidate;
 import com.gemstoneseekers.models.Company;
@@ -23,10 +9,21 @@ import com.gemstoneseekers.repositories.CandidateRepository;
 import com.gemstoneseekers.repositories.CompanyRepository;
 import com.gemstoneseekers.repositories.RecruiterRepository;
 import com.gemstoneseekers.repositories.UserRepository;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
+import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
-@DataJpaTest
+import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @Testcontainers
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 class DomainRepositoryTest {
 
     @Container
@@ -114,7 +111,9 @@ class DomainRepositoryTest {
         assertThat(found.get().getCompany().getName()).isEqualTo("Tech Corp");
     }
 
-    private User createUser(String email, UserRole role) {
+    private User createUser(
+        String email,
+        UserRole role) {
         User user = new User();
         user.setName("Test User");
         user.setEmail(email);
