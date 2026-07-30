@@ -9,7 +9,7 @@ import {
 } from "@testing-library/react";
 import { useRouter } from "next/navigation";
 
-import Login, { getDashboardRoute } from "./page";
+import Login from "./page";
 
 vi.mock("next/navigation", () => ({
   useRouter: vi.fn(),
@@ -59,14 +59,6 @@ describe("Login", () => {
     expect(
       screen.getByRole("link", { name: "Cadastre-se" }),
     ).toBeInTheDocument();
-  });
-
-  it("should return the candidate dashboard route", () => {
-    expect(getDashboardRoute("candidate")).toBe("/candidate/dashboard");
-  });
-
-  it("should return the recruiter dashboard route", () => {
-    expect(getDashboardRoute("recruiter")).toBe("/recruiter/dashboard");
   });
 
   it("should navigate to the candidate dashboard", async () => {
