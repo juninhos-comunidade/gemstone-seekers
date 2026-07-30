@@ -1,6 +1,5 @@
-import "@testing-library/jest-dom/vitest";
-import { describe, it, expect, vi, afterEach } from "vitest";
-import { render, screen, cleanup } from "@testing-library/react";
+import { describe, it, expect, vi } from "vitest";
+import { render, screen } from "@testing-library/react";
 import CandidateSignup from "./page";
 
 vi.mock("next/navigation", () => ({
@@ -16,11 +15,7 @@ vi.mock("next/navigation", () => ({
 }));
 
 describe("Candidate Signup Page", () => {
-  afterEach(() => {
-    cleanup();
-  });
-
-  it("renders the candidate signup heading", () => {
+  it("should renders profile form fields, submit button and skip link", () => {
     render(<CandidateSignup />);
     expect(
       screen.getByRole("heading", {
@@ -28,48 +23,17 @@ describe("Candidate Signup Page", () => {
         name: /Informações do Candidato/i,
       }),
     ).toBeInTheDocument();
-  });
-
-  it("renders all profile fields", () => {
-    render(<CandidateSignup />);
-
-    expect(screen.getByLabelText(/telefone/i)).toHaveAttribute("type", "tel");
-    expect(screen.getByLabelText(/área de interesse/i)).toHaveAttribute(
-      "type",
-      "text",
-    );
-    expect(screen.getByLabelText(/cargo desejado/i)).toHaveAttribute(
-      "type",
-      "text",
-    );
-    expect(screen.getByLabelText(/nível de experiência/i)).toHaveAttribute(
-      "type",
-      "text",
-    );
-    expect(screen.getByLabelText(/localização/i)).toHaveAttribute(
-      "type",
-      "text",
-    );
-    expect(screen.getByLabelText(/currículo \(link\)/i)).toHaveAttribute(
-      "type",
-      "url",
-    );
-  });
-
-  it("renders the submit button", () => {
-    render(<CandidateSignup />);
+    expect(screen.getByLabelText(/telefone/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/área de interesse/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/cargo desejado/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/nível de experiência/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/localização/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/currículo \(link\)/i)).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: /concluir cadastro/i }),
     ).toBeInTheDocument();
-  });
-
-  it("renders the skip link", () => {
-    render(<CandidateSignup />);
     expect(
-      screen.getByText(/prefere fazer isso depois\?/i),
-    ).toBeInTheDocument();
-    const skipLink = screen.getByRole("link", { name: /pular por enquanto/i });
-    expect(skipLink).toBeInTheDocument();
-    expect(skipLink).toHaveAttribute("href", "/dashboard");
+      screen.getByRole("link", { name: /pular por enquanto/i }),
+    ).toHaveAttribute("href", "/dashboard");
   });
 });

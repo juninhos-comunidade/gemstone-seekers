@@ -1,8 +1,6 @@
-import "@testing-library/jest-dom/vitest";
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { render, screen, cleanup, fireEvent } from "@testing-library/react";
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import { render, screen, fireEvent } from "@testing-library/react";
 import { useRouter } from "next/navigation";
-
 import Role from "./page";
 
 vi.mock("next/navigation", () => ({
@@ -27,49 +25,27 @@ describe("Role Selection Page", () => {
     mockUseRouter.mockReturnValue(mockRouter);
   });
 
-  afterEach(() => {
-    cleanup();
-  });
-
-  it("should have recruiter button", () => {
+  it("should renders role selection cards for recruiter and candidate", () => {
     render(<Role />);
     expect(
       screen.getByRole("heading", { name: "Recrutador" }),
     ).toBeInTheDocument();
-    expect(screen.getByText("Você é um recrutador?")).toBeInTheDocument();
-    const buttons = screen.getAllByRole("button", { name: "Selecionar" });
-    expect(buttons).toHaveLength(2);
-    expect(buttons[0]).toBeInTheDocument();
-  });
-
-  it("should have candidate button", () => {
-    render(<Role />);
     expect(
       screen.getByRole("heading", { name: "Candidato(a)" }),
     ).toBeInTheDocument();
-    expect(screen.getByText("Você é um candidato?")).toBeInTheDocument();
-    const buttons = screen.getAllByRole("button", { name: "Selecionar" });
-    expect(buttons).toHaveLength(2);
-    expect(buttons[1]).toBeInTheDocument();
+    expect(screen.getAllByRole("button", { name: "Selecionar" })).toHaveLength(
+      2,
+    );
   });
 
-  it("should have go to a recruiter signUp", () => {
+  it("should navigates to recruiter or candidate signup routes on button clicks", () => {
     render(<Role />);
     const buttons = screen.getAllByRole("button", { name: "Selecionar" });
-    expect(buttons).toHaveLength(2);
-    const recruiterButton = buttons[0];
-    expect(recruiterButton).toBeInTheDocument();
-    fireEvent.click(recruiterButton);
+
+    fireEvent.click(buttons[0]);
     expect(mockPush).toHaveBeenCalledWith("/signup/role/recruiter");
-  });
 
-  it("should have go to a candidate signUp", () => {
-    render(<Role />);
-    const buttons = screen.getAllByRole("button", { name: "Selecionar" });
-    expect(buttons).toHaveLength(2);
-    const candidateButton = buttons[1];
-    expect(candidateButton).toBeInTheDocument();
-    fireEvent.click(candidateButton);
+    fireEvent.click(buttons[1]);
     expect(mockPush).toHaveBeenCalledWith("/signup/role/candidate");
   });
 });

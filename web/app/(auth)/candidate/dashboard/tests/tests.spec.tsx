@@ -1,6 +1,5 @@
-import "@testing-library/jest-dom/vitest";
-import { describe, it, expect, vi, afterEach } from "vitest";
-import { render, screen, cleanup } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
+import { describe, expect, it, vi } from "vitest";
 import Tests from "./page";
 
 vi.mock("next/navigation", () => ({
@@ -16,11 +15,7 @@ vi.mock("next/navigation", () => ({
 }));
 
 describe("Candidate Tests Page", () => {
-  afterEach(() => {
-    cleanup();
-  });
-
-  it("renders the candidate tests placeholder", () => {
+  it("should render the texts placeholder", () => {
     render(<Tests />);
     expect(screen.getByText(/page testes candidato/i)).toBeInTheDocument();
   });
