@@ -15,7 +15,7 @@ describe("validateSchema (lib/utils/validation.ts)", () => {
   });
 
   it("should throw a native ZodError if the data does not respect the schema", () => {
-    const invalidData = { id: "não-um-numero", name: "Alice" };
+    const invalidData = { id: "not-a-number", name: "Alice" };
     expect(() => validateSchema(userSchema, invalidData)).toThrow(ZodError);
   });
 });
