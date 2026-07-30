@@ -2,6 +2,7 @@ package com.gemstoneseekers.security;
 
 import java.util.Collections;
 
+import org.jspecify.annotations.NullMarked;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Service;
 import com.gemstoneseekers.repositories.UserRepository;
 
 @Service
+@NullMarked
 public class CustomUserDetailsService implements UserDetailsService {
 
     private final UserRepository userRepository;
