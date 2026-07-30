@@ -1,7 +1,7 @@
 package com.gemstoneseekers.services;
 
+import com.gemstoneseekers.enums.UserRole;
 import com.gemstoneseekers.models.User;
-import com.gemstoneseekers.models.UserRole;
 import org.junit.jupiter.api.Test;
 
 import java.util.UUID;

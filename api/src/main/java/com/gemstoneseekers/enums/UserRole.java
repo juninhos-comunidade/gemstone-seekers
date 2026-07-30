@@ -1,4 +1,4 @@
-package com.gemstoneseekers.models;
+package com.gemstoneseekers.enums;
 
 public enum UserRole {
     CANDIDATE,
