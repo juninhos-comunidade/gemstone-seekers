@@ -1,6 +1,6 @@
 "use client";
 
-// import { useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -19,7 +19,7 @@ export function getDashboardRoute(tipo: "candidate" | "recruiter") {
 }
 
 export default function Page() {
-  // const router = useRouter();
+  const router = useRouter();
 
   const schema = z.object({
     email: z.email("E-mail inválido"),
@@ -36,6 +36,7 @@ export default function Page() {
 
   const handleLogin = handleSubmit(async (data) => {
     console.log(data);
+    router.push("/candidate/dashboard");
   });
 
   return (
