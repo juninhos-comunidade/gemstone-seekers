@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from "vitest";
-import { setAuthToken, getAuthToken, removeAuthToken } from "@/app/api/auth";
+import { setAuthToken, getAuthToken, removeAuthToken } from "@/lib/api/auth";
 
 describe("auth helpers (lib/api/auth.ts)", () => {
   beforeEach(() => {

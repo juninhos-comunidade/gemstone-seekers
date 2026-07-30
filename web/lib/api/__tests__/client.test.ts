@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { type AxiosResponse, type InternalAxiosRequestConfig } from "axios";
-import { api, httpClient } from "@/app/api/client";
-import { ApiError } from "@/app/api/errors";
-import { setAuthToken, getAuthToken, removeAuthToken } from "@/app/api/auth";
+import { api, httpClient } from "@/lib/api/client";
+import { ApiError } from "@/lib/api/errors";
+import { setAuthToken, getAuthToken, removeAuthToken } from "@/lib/api/auth";
 
 type InterceptorHandler<T> = {
   fulfilled: (_value: T) => T | Promise<T>;
@@ -275,14 +275,14 @@ describe("getBaseUrl", () => {
   it("should use process.env.NEXT_PUBLIC_API_URL if defined", async () => {
     vi.resetModules();
     process.env.NEXT_PUBLIC_API_URL = "https://custom-api.example.com";
-    const { api: freshApi } = await import("@/app/api/client");
+    const { api: freshApi } = await import("@/lib/api/client");
     expect(freshApi.defaults.baseURL).toBe("https://custom-api.example.com");
   });
 
   it("should fallback to http://localhost:3000/api if process.env.NEXT_PUBLIC_API_URL is empty", async () => {
     vi.resetModules();
     delete process.env.NEXT_PUBLIC_API_URL;
-    const { api: freshApi } = await import("@/app/api/client");
+    const { api: freshApi } = await import("@/lib/api/client");
     expect(freshApi.defaults.baseURL).toBe("http://localhost:3000/api");
   });
 });
