@@ -73,6 +73,17 @@ public class AuthService {
     }
 
     public LoginResponse refreshToken(String refreshToken) {
-        return null;
+        if (!jwtService.isTokenValid(refreshToken)) {
+            throw new AccessDeniedException("Invalid refresh token");
+        }
+
+        String email = jwtService.extractEmail(refreshToken);
+        User user = userRepository.findByEmail(email)
+            .orElseThrow(() -> new AccessDeniedException("Invalid refresh token"));
+
+        String newAccessToken  = jwtService.generateAccessToken(user);
+        String newRefreshToken = jwtService.generateRefreshToken(user);
+
+        return new LoginResponse(newAccessToken, newRefreshToken, user.getRole() != null);
     }
 }
