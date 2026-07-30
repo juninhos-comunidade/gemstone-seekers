@@ -1,12 +1,14 @@
 package com.gemstoneseekers.services;
 
 import com.gemstoneseekers.models.User;
+import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
+import java.util.Date;
 
 @Service
 public class JwtService {
@@ -25,18 +27,42 @@ public class JwtService {
     }
 
     public String generateAccessToken(User user) {
-        return null;
+        return buildToken(user, accessTokenExpiration);
     }
 
     public String generateRefreshToken(User user) {
-        return null;
+        return buildToken(user, refreshTokenExpiration);
     }
 
     public boolean isTokenValid(String token) {
-        return false;
+        try {
+            Jwts.parser()
+                .verifyWith(key)
+                .build()
+                .parseSignedClaims(token);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     public String extractEmail(String token) {
-        return null;
+        return Jwts.parser()
+            .verifyWith(key)
+            .build()
+            .parseSignedClaims(token)
+            .getPayload()
+            .getSubject();
+    }
+
+    private String buildToken(
+        User user,
+        long expiration) {
+        return Jwts.builder()
+            .subject(user.getEmail())
+            .issuedAt(new Date())
+            .expiration(new Date(System.currentTimeMillis() + expiration))
+            .signWith(key)
+            .compact();
     }
 }
