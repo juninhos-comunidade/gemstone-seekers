@@ -12,9 +12,6 @@ public class UserMapper {
         return new RegisterResponse(
             user.getId(),
             user.getName(),
-            user.getEmail(),
-            user.getRole(),
-            user.getDocumentType(),
-            user.getDocumentNumber());
+            user.getEmail());
     }
 }

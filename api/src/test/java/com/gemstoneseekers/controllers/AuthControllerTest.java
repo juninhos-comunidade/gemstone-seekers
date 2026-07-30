@@ -17,7 +17,6 @@ import com.gemstoneseekers.dtos.response.RegisterResponse;
 import com.gemstoneseekers.exceptions.ConflictException;
 import com.gemstoneseekers.mappers.UserMapper;
 import com.gemstoneseekers.models.User;
-import com.gemstoneseekers.models.UserRole;
 import com.gemstoneseekers.services.AuthService;
 
 class AuthControllerTest {
@@ -31,10 +30,7 @@ class AuthControllerTest {
         RegisterRequest request = new RegisterRequest(
             "John Doe",
             "john@example.com",
-            "plainPassword123",
-            UserRole.CANDIDATE,
-            "CPF",
-            "12345678900");
+            "plainPassword123");
 
         UUID userId = UUID.randomUUID();
         User savedUser = new User();
@@ -42,17 +38,11 @@ class AuthControllerTest {
         savedUser.setName("John Doe");
         savedUser.setEmail("john@example.com");
         savedUser.setPassword("$2a$10$encodedPassword");
-        savedUser.setRole(UserRole.CANDIDATE);
-        savedUser.setDocumentType("CPF");
-        savedUser.setDocumentNumber("12345678900");
 
         RegisterResponse expectedResponse = new RegisterResponse(
             userId,
             "John Doe",
-            "john@example.com",
-            UserRole.CANDIDATE,
-            "CPF",
-            "12345678900");
+            "john@example.com");
 
         when(authService.register(request)).thenReturn(savedUser);
         when(userMapper.toRegisterResponse(savedUser)).thenReturn(expectedResponse);
@@ -70,10 +60,7 @@ class AuthControllerTest {
         RegisterRequest request = new RegisterRequest(
             "John Doe",
             "john@example.com",
-            "plainPassword123",
-            UserRole.CANDIDATE,
-            null,
-            null);
+            "plainPassword123");
 
         when(authService.register(request)).thenThrow(new ConflictException("Email already in use"));
 
