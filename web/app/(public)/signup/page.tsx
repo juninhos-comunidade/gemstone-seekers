@@ -3,14 +3,56 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-
+import { z } from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner"; // ou o toast do shadcn que você usar
+import { PasswordInput } from "@/components/PasswordInput/PasswordInput";
 
 export default function Page() {
-  const route = useRouter();
+  const router = useRouter();
 
-  const handleSignUp = () => {
-    route.push("/signup/role");
+  const schema = z
+    .object({
+      fullName: z.string().min(3, "Nome completo é obrigatório"),
+      email: z.email("E-mail inválido"), // use z.email() se estiver no zod v4+
+      password: z.string().min(6, "Senha é obrigatória"),
+      confirmPassword: z.string().min(6, "Confirmar senha é obrigatória"),
+    })
+    .refine((data) => data.password === data.confirmPassword, {
+      message: "Senhas não coincidem",
+      path: ["confirmPassword"],
+    });
+
+  const {
+    register,
+    handleSubmit,
+    formState: { isSubmitting, errors },
+  } = useForm({
+    resolver: zodResolver(schema),
+  });
+
+  const handleSignUp = async (data: z.infer<typeof schema>) => {
+    try {
+      const { ...payload } = data;
+      const res = await fetch("/api/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => null);
+        throw new Error(err?.message ?? "Falha ao cadastrar");
+      }
+
+      toast.success("Conta criada com sucesso!");
+      router.push("/signup/role");
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Erro inesperado";
+      toast.error(message);
+    }
   };
 
   return (
@@ -18,35 +60,59 @@ export default function Page() {
       <div className="bg-background w-full max-w-md rounded-xl border p-8 shadow-sm">
         <h1 className="mb-6 text-center text-2xl font-bold">Criar Conta</h1>
 
-        <div className="space-y-4">
+        <form className="space-y-4" onSubmit={handleSubmit(handleSignUp)}>
           <div className="space-y-2">
-            <Label htmlFor="full-name">Nome completo</Label>
-            <Input id="full-name" type="text" placeholder="Nome completo" />
+            <Label htmlFor="fullName">Nome completo</Label>
+            <Input
+              id="fullName"
+              autoComplete="name"
+              aria-invalid={!!errors.fullName}
+              {...register("fullName")}
+            />
+            <span className="text-sm text-red-500">
+              {errors.fullName?.message}
+            </span>
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="email">E-mail</Label>
-            <Input id="email" type="email" placeholder="E-mail" />
+            <Input
+              id="email"
+              type="email"
+              autoComplete="email"
+              aria-invalid={!!errors.email}
+              {...register("email")}
+            />
+            <span className="text-sm text-red-500">
+              {errors.email?.message}
+            </span>
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="password">Senha</Label>
-            <Input id="password" type="password" placeholder="Senha" />
+            <PasswordInput {...register("password")} />
+            <span className="text-sm text-red-500">
+              {errors.password?.message}
+            </span>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="confirm-password">Confirmar senha</Label>
-            <Input
-              id="confirm-password"
-              type="password"
-              placeholder="Confirmar senha"
+            <Label htmlFor="confirmPassword">Confirmar senha</Label>
+            <PasswordInput
+              id="confirmPassword"
+              autoComplete="new-password"
+              aria-invalid={!!errors.confirmPassword}
+              {...register("confirmPassword")}
             />
+            <span className="text-sm text-red-500">
+              {errors.confirmPassword?.message}
+            </span>
           </div>
 
-          <Button className="w-full" onClick={handleSignUp}>
-            Cadastrar
+          <Button type="submit" disabled={isSubmitting} className="w-full">
+            {isSubmitting ? "Cadastrando..." : "Cadastrar"}
           </Button>
-        </div>
+        </form>
 
         <p className="text-muted-foreground mt-6 text-center text-sm">
           Já possui uma conta?{" "}

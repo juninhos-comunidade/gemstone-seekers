@@ -1,10 +1,14 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+// import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
+import { z } from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { PasswordInput } from "@/components/PasswordInput/PasswordInput";
 
 export function getDashboardRoute(tipo: "candidate" | "recruiter") {
   if (tipo === "candidate") {
@@ -15,34 +19,70 @@ export function getDashboardRoute(tipo: "candidate" | "recruiter") {
 }
 
 export default function Page() {
-  const router = useRouter();
+  // const router = useRouter();
 
-  const handleLogin = () => {
-    const tipo: "candidate" | "recruiter" = "candidate";
+  const schema = z.object({
+    email: z.email("E-mail inválido"),
+    password: z.string().min(6, "Senha inválida"),
+  });
 
-    router.push(getDashboardRoute(tipo));
-  };
+  const {
+    register,
+    handleSubmit,
+    formState: { isSubmitting, errors },
+  } = useForm({
+    resolver: zodResolver(schema),
+  });
+
+  const handleLogin = handleSubmit(async (data) => {
+    console.log(data);
+  });
 
   return (
     <main className="bg-muted/30 flex min-h-screen items-center justify-center">
       <div className="bg-background w-full max-w-sm rounded-xl border p-8 shadow-sm">
         <h1 className="mb-6 text-center text-2xl font-bold">Entrar</h1>
 
-        <div className="space-y-4">
+        <form className="space-y-4" onSubmit={handleLogin}>
           <div className="space-y-2">
             <Label htmlFor="email">E-mail</Label>
-            <Input id="email" type="email" placeholder="E-mail" />
+            <Input
+              id="email"
+              type="email"
+              placeholder="E-mail"
+              {...register("email")}
+            />
+            {errors.email && (
+              <p className="mt-2 text-sm text-red-500">
+                {errors.email.message}
+              </p>
+            )}
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="password">Senha</Label>
-            <Input id="password" type="password" placeholder="Senha" />
+
+            <PasswordInput
+              id="password"
+              placeholder="Senha"
+              {...register("password")}
+            />
+            {errors.password && (
+              <p className="mt-2 text-sm text-red-500">
+                {errors.password.message}
+              </p>
+            )}
           </div>
 
-          <Button className="w-full" onClick={handleLogin}>
+          <Button
+            disabled={isSubmitting}
+            className="w-full"
+            type="submit"
+            onClick={isSubmitting ? undefined : handleLogin}
+          >
             Entrar
           </Button>
-        </div>
+        </form>
 
         <p className="text-muted-foreground mt-6 text-center text-sm">
           Não possui uma conta?{" "}
