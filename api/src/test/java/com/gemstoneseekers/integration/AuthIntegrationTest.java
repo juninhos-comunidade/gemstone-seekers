@@ -42,7 +42,11 @@ class AuthIntegrationTest {
             "server.port", "0"
         ));
         context = app.run();
-        port = context.getEnvironment().getProperty("local.server.port", Integer.class);
+        Integer resolvedPort = context.getEnvironment().getProperty("local.server.port", Integer.class);
+        if (resolvedPort == null) {
+            throw new IllegalStateException("Could not resolve local server port");
+        }
+        port = resolvedPort;
     }
 
     @AfterAll
