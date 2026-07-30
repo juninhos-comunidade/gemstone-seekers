@@ -35,18 +35,16 @@ export default function Page() {
 
   const handleSignUp = async (data: z.infer<typeof schema>) => {
     try {
-      const { ...payload } = data;
+      const { confirmPassword: _confirmPassword, ...payload } = data;
       const res = await fetch("/api/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-
       if (!res.ok) {
         const err = await res.json().catch(() => null);
         throw new Error(err?.message ?? "Falha ao cadastrar");
       }
-
       toast.success("Conta criada com sucesso!");
       router.push("/signup/role");
     } catch (err) {
@@ -65,6 +63,7 @@ export default function Page() {
             <Label htmlFor="fullName">Nome completo</Label>
             <Input
               id="fullName"
+              type="text"
               autoComplete="name"
               aria-invalid={!!errors.fullName}
               {...register("fullName")}
@@ -90,7 +89,12 @@ export default function Page() {
 
           <div className="space-y-2">
             <Label htmlFor="password">Senha</Label>
-            <PasswordInput {...register("password")} />
+            <PasswordInput
+              id="password"
+              autoComplete="new-password"
+              aria-invalid={!!errors.password}
+              {...register("password")}
+            />
             <span className="text-sm text-red-500">
               {errors.password?.message}
             </span>

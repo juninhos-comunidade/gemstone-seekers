@@ -1,6 +1,12 @@
 import "@testing-library/jest-dom/vitest";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { render, screen, cleanup, fireEvent } from "@testing-library/react";
+import {
+  render,
+  screen,
+  cleanup,
+  fireEvent,
+  waitFor,
+} from "@testing-library/react";
 import { useRouter } from "next/navigation";
 
 import Login, { getDashboardRoute } from "./page";
@@ -63,13 +69,21 @@ describe("Login", () => {
     expect(getDashboardRoute("recruiter")).toBe("/recruiter/dashboard");
   });
 
-  it("should navigate to the candidate dashboard", () => {
+  it("should navigate to the candidate dashboard", async () => {
     render(<Login />);
+
+    fireEvent.change(screen.getByLabelText(/^e-mail$/i), {
+      target: { value: "candidato@example.com" },
+    });
+    fireEvent.change(screen.getByLabelText("Senha"), {
+      target: { value: "senha123" },
+    });
 
     fireEvent.click(screen.getByRole("button", { name: "Entrar" }));
 
-    expect(mockPush).toHaveBeenCalledTimes(1);
-
+    await waitFor(() => {
+      expect(mockPush).toHaveBeenCalledTimes(1);
+    });
     expect(mockPush).toHaveBeenCalledWith("/candidate/dashboard");
   });
 
