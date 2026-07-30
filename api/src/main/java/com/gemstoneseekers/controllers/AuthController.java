@@ -56,6 +56,9 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<BaseResponse<LoginResponse>> login(@Valid @RequestBody LoginRequest request) {
-        return null;
+        LoginResponse response = authService.login(request);
+        return ResponseEntity
+            .status(HttpStatus.OK)
+            .body(new BaseResponse<>(true, "Login successful", response, null));
     }
 }
