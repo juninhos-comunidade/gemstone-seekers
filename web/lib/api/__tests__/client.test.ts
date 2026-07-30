@@ -4,6 +4,15 @@ import { api, httpClient } from "@/lib/api/client";
 import { ApiError } from "@/lib/api/errors";
 import { setAuthToken, getAuthToken, removeAuthToken } from "@/lib/api/auth";
 
+type InterceptorHandler<T> = {
+  fulfilled: (_value: T) => T | Promise<T>;
+  rejected: (_error: unknown) => Promise<never>;
+};
+
+type InterceptorManagerShim<T> = {
+  handlers: InterceptorHandler<T>[];
+};
+
 describe("ApiError", () => {
   it("should create a correct instance of ApiError", () => {
     const error = new ApiError(404, "Resource not found", {
@@ -91,10 +100,14 @@ describe("httpClient", () => {
 });
 
 describe("api interceptors", () => {
-  // @ts-expect-error accessing internal handlers for unit testing
-  const requestInterceptor = api.interceptors.request.handlers[0]!;
-  // @ts-expect-error accessing internal handlers for unit testing
-  const responseInterceptor = api.interceptors.response.handlers[0]!;
+  const requestInterceptor = (
+    api.interceptors
+      .request as unknown as InterceptorManagerShim<InternalAxiosRequestConfig>
+  ).handlers[0]!;
+  const responseInterceptor = (
+    api.interceptors
+      .response as unknown as InterceptorManagerShim<AxiosResponse>
+  ).handlers[0]!;
 
   const originalLocation = window.location;
 
