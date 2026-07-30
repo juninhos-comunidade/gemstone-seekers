@@ -1,11 +1,4 @@
 import Image from "next/image";
-// import {
-//   Book,
-//   Briefcase,
-//   GraduationCap,
-//   FolderGit2,
-//   Globe,
-// } from "lucide-react";
 import {
   FaBook,
   FaBriefcase,

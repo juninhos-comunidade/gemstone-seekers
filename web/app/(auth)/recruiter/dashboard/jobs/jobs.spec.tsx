@@ -1,6 +1,5 @@
-import "@testing-library/jest-dom/vitest";
-import { describe, it, expect, vi, afterEach } from "vitest";
-import { render, screen, cleanup } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
+import { describe, expect, it, vi } from "vitest";
 import Jobs from "./page";
 
 vi.mock("next/navigation", () => ({
@@ -16,11 +15,7 @@ vi.mock("next/navigation", () => ({
 }));
 
 describe("Recruiter Jobs Page", () => {
-  afterEach(() => {
-    cleanup();
-  });
-
-  it("renders the recruiter jobs placeholder", () => {
+  it("should renders the recruiter jobs placeholder", () => {
     render(<Jobs />);
     expect(screen.getByText(/vagas de recrutamento/i)).toBeInTheDocument();
   });

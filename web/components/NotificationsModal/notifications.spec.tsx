@@ -1,6 +1,5 @@
-import "@testing-library/jest-dom/vitest";
-import { describe, it, expect, vi, afterEach } from "vitest";
-import { render, screen, cleanup, fireEvent } from "@testing-library/react";
+import { describe, it, expect, vi } from "vitest";
+import { render, screen, fireEvent } from "@testing-library/react";
 import { NotificationsModal } from "./NotificationsModal";
 
 vi.mock("next/navigation", () => ({
@@ -16,28 +15,14 @@ vi.mock("next/navigation", () => ({
 }));
 
 describe("Notifications Modal", () => {
-  afterEach(() => {
-    cleanup();
-  });
-
-  it("renders the notifications bell button", () => {
+  it("renders bell button and opens modal when clicked", async () => {
     render(<NotificationsModal />);
-    expect(
-      screen.getByRole("button", { name: /notificações/i }),
-    ).toBeInTheDocument();
-  });
+    const bellButton = screen.getByRole("button", { name: /notificações/i });
+    expect(bellButton).toBeInTheDocument();
 
-  it("opens the modal and shows 'Notificações' title when clicking the bell", async () => {
-    render(<NotificationsModal />);
-
-    const bellButton = screen.getByRole("button", {
-      name: /notificações/i,
-    });
     fireEvent.click(bellButton);
-
     expect(
       await screen.findByRole("dialog", { name: /notificações/i }),
     ).toBeInTheDocument();
-    expect(screen.getByText(/notificações/i)).toBeInTheDocument();
   });
 });
