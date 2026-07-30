@@ -1,8 +1,17 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { type AxiosResponse, type InternalAxiosRequestConfig } from "axios";
-import { api, httpClient } from "@/lib/api/client";
-import { ApiError } from "@/lib/api/errors";
-import { setAuthToken, getAuthToken, removeAuthToken } from "@/lib/api/auth";
+import { api, httpClient } from "@/app/api/client";
+import { ApiError } from "@/app/api/errors";
+import { setAuthToken, getAuthToken, removeAuthToken } from "@/app/api/auth";
+
+type InterceptorHandler<T> = {
+  fulfilled: (_value: T) => T | Promise<T>;
+  rejected: (_error: unknown) => Promise<never>;
+};
+
+type InterceptorManagerShim<T> = {
+  handlers: InterceptorHandler<T>[];
+};
 
 describe("ApiError", () => {
   it("should create a correct instance of ApiError", () => {
@@ -91,10 +100,14 @@ describe("httpClient", () => {
 });
 
 describe("api interceptors", () => {
-  // @ts-expect-error accessing internal handlers for unit testing
-  const requestInterceptor = api.interceptors.request.handlers[0]!;
-  // @ts-expect-error accessing internal handlers for unit testing
-  const responseInterceptor = api.interceptors.response.handlers[0]!;
+  const requestInterceptor = (
+    api.interceptors
+      .request as unknown as InterceptorManagerShim<InternalAxiosRequestConfig>
+  ).handlers[0]!;
+  const responseInterceptor = (
+    api.interceptors
+      .response as unknown as InterceptorManagerShim<AxiosResponse>
+  ).handlers[0]!;
 
   const originalLocation = window.location;
 
@@ -262,14 +275,14 @@ describe("getBaseUrl", () => {
   it("should use process.env.NEXT_PUBLIC_API_URL if defined", async () => {
     vi.resetModules();
     process.env.NEXT_PUBLIC_API_URL = "https://custom-api.example.com";
-    const { api: freshApi } = await import("@/lib/api/client");
+    const { api: freshApi } = await import("@/app/api/client");
     expect(freshApi.defaults.baseURL).toBe("https://custom-api.example.com");
   });
 
   it("should fallback to http://localhost:3000/api if process.env.NEXT_PUBLIC_API_URL is empty", async () => {
     vi.resetModules();
     delete process.env.NEXT_PUBLIC_API_URL;
-    const { api: freshApi } = await import("@/lib/api/client");
+    const { api: freshApi } = await import("@/app/api/client");
     expect(freshApi.defaults.baseURL).toBe("http://localhost:3000/api");
   });
 });

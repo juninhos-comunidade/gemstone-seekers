@@ -16,7 +16,7 @@ export default function Page() {
   const schema = z
     .object({
       fullName: z.string().min(3, "Nome completo é obrigatório"),
-      email: z.email("E-mail inválido"), // use z.email() se estiver no zod v4+
+      email: z.string().email("E-mail inválido"), // use z.email() se estiver no zod v4+
       password: z.string().min(6, "Senha é obrigatória"),
       confirmPassword: z.string().min(6, "Confirmar senha é obrigatória"),
     })
@@ -25,11 +25,13 @@ export default function Page() {
       path: ["confirmPassword"],
     });
 
+  type FormValues = z.infer<typeof schema>;
+
   const {
     register,
     handleSubmit,
     formState: { isSubmitting, errors },
-  } = useForm({
+  } = useForm<FormValues>({
     resolver: zodResolver(schema),
   });
 
