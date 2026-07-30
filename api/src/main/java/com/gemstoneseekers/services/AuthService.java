@@ -1,27 +1,31 @@
 package com.gemstoneseekers.services;
 
+import java.util.UUID;
+
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
 import com.gemstoneseekers.dtos.request.CompleteRegistrationRequest;
+import com.gemstoneseekers.dtos.request.LoginRequest;
 import com.gemstoneseekers.dtos.request.RegisterRequest;
+import com.gemstoneseekers.dtos.response.LoginResponse;
+import com.gemstoneseekers.exceptions.AccessDeniedException;
 import com.gemstoneseekers.exceptions.ConflictException;
 import com.gemstoneseekers.exceptions.EntityNotFoundException;
 import com.gemstoneseekers.models.User;
 import com.gemstoneseekers.repositories.UserRepository;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
-
-import java.util.UUID;
 
 @Service
 public class AuthService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
 
-    public AuthService(
-        UserRepository userRepository,
-        PasswordEncoder passwordEncoder) {
+    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtService jwtService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.jwtService = jwtService;
     }
 
     public User register(RegisterRequest request) {
@@ -37,9 +41,7 @@ public class AuthService {
         return userRepository.save(user);
     }
 
-    public User completeRegistration(
-        UUID userId,
-        CompleteRegistrationRequest request) {
+    public User completeRegistration(UUID userId, CompleteRegistrationRequest request) {
         User user = userRepository.findById(userId)
             .orElseThrow(() -> new EntityNotFoundException("User", userId));
 
@@ -52,5 +54,9 @@ public class AuthService {
         user.setDocumentNumber(request.documentNumber());
 
         return userRepository.save(user);
+    }
+
+    public LoginResponse login(LoginRequest request) {
+        return null;
     }
 }

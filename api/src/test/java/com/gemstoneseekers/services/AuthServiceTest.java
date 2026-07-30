@@ -1,7 +1,10 @@
 package com.gemstoneseekers.services;
 
 import com.gemstoneseekers.dtos.request.CompleteRegistrationRequest;
+import com.gemstoneseekers.dtos.request.LoginRequest;
 import com.gemstoneseekers.dtos.request.RegisterRequest;
+import com.gemstoneseekers.dtos.response.LoginResponse;
+import com.gemstoneseekers.exceptions.AccessDeniedException;
 import com.gemstoneseekers.exceptions.ConflictException;
 import com.gemstoneseekers.exceptions.EntityNotFoundException;
 import com.gemstoneseekers.models.User;
@@ -10,6 +13,7 @@ import com.gemstoneseekers.repositories.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -24,7 +28,8 @@ class AuthServiceTest {
 
     private final UserRepository userRepository = mock(UserRepository.class);
     private final PasswordEncoder passwordEncoder = mock(PasswordEncoder.class);
-    private final AuthService authService = new AuthService(userRepository, passwordEncoder);
+    private final JwtService jwtService = mock(JwtService.class);
+    private final AuthService authService = new AuthService(userRepository, passwordEncoder, jwtService);
 
     @Test
     void shouldRegisterUserSuccessfully() {
@@ -85,7 +90,7 @@ class AuthServiceTest {
         existingUser.setPassword("$2a$10$encodedPassword");
         existingUser.setRole(null);
 
-        when(userRepository.findById(userId)).thenReturn(java.util.Optional.of(existingUser));
+        when(userRepository.findById(userId)).thenReturn(Optional.of(existingUser));
         when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         User result = authService.completeRegistration(userId, request);
@@ -106,7 +111,7 @@ class AuthServiceTest {
             null
         );
 
-        when(userRepository.findById(userId)).thenReturn(java.util.Optional.empty());
+        when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> authService.completeRegistration(userId, request))
             .isInstanceOf(EntityNotFoundException.class);
@@ -128,12 +133,91 @@ class AuthServiceTest {
         existingUser.setEmail("john@example.com");
         existingUser.setRole(UserRole.RECRUITER);
 
-        when(userRepository.findById(userId)).thenReturn(java.util.Optional.of(existingUser));
+        when(userRepository.findById(userId)).thenReturn(Optional.of(existingUser));
 
         assertThatThrownBy(() -> authService.completeRegistration(userId, request))
             .isInstanceOf(ConflictException.class)
             .hasMessage("Registration already completed");
 
         verify(userRepository, never()).save(any());
+    }
+
+    @Test
+    void shouldLoginSuccessfully() {
+        LoginRequest request = new LoginRequest("john@example.com", "plainPassword123");
+
+        User user = new User();
+        user.setId(UUID.randomUUID());
+        user.setEmail("john@example.com");
+        user.setPassword("$2a$10$encodedPassword");
+        user.setRole(UserRole.CANDIDATE);
+
+        when(userRepository.findByEmail("john@example.com")).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches("plainPassword123", "$2a$10$encodedPassword")).thenReturn(true);
+        when(jwtService.generateAccessToken(user)).thenReturn("access-token");
+        when(jwtService.generateRefreshToken(user)).thenReturn("refresh-token");
+
+        LoginResponse result = authService.login(request);
+
+        assertThat(result).isNotNull();
+        assertThat(result.accessToken()).isEqualTo("access-token");
+        assertThat(result.refreshToken()).isEqualTo("refresh-token");
+        assertThat(result.registrationCompleted()).isTrue();
+    }
+
+    @Test
+    void shouldReturnRegistrationCompletedFalseWhenRoleIsNull() {
+        LoginRequest request = new LoginRequest("jane@example.com", "plainPassword123");
+
+        User user = new User();
+        user.setId(UUID.randomUUID());
+        user.setEmail("jane@example.com");
+        user.setPassword("$2a$10$encodedPassword");
+        user.setRole(null);
+
+        when(userRepository.findByEmail("jane@example.com")).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches("plainPassword123", "$2a$10$encodedPassword")).thenReturn(true);
+        when(jwtService.generateAccessToken(user)).thenReturn("access-token");
+        when(jwtService.generateRefreshToken(user)).thenReturn("refresh-token");
+
+        LoginResponse result = authService.login(request);
+
+        assertThat(result).isNotNull();
+        assertThat(result.accessToken()).isEqualTo("access-token");
+        assertThat(result.refreshToken()).isEqualTo("refresh-token");
+        assertThat(result.registrationCompleted()).isFalse();
+    }
+
+    @Test
+    void shouldThrowAccessDeniedWhenUserNotFound() {
+        LoginRequest request = new LoginRequest("john@example.com", "plainPassword123");
+
+        when(userRepository.findByEmail("john@example.com")).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> authService.login(request))
+            .isInstanceOf(AccessDeniedException.class)
+            .hasMessage("Invalid email or password");
+
+        verify(passwordEncoder, never()).matches(any(), any());
+    }
+
+    @Test
+    void shouldThrowAccessDeniedWhenPasswordDoesNotMatch() {
+        LoginRequest request = new LoginRequest("john@example.com", "wrongPassword");
+
+        User user = new User();
+        user.setId(UUID.randomUUID());
+        user.setEmail("john@example.com");
+        user.setPassword("$2a$10$encodedPassword");
+
+        when(userRepository.findByEmail("john@example.com")).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches("wrongPassword", "$2a$10$encodedPassword")).thenReturn(false);
+
+        assertThatThrownBy(() -> authService.login(request))
+            .isInstanceOf(AccessDeniedException.class)
+            .hasMessage("Invalid email or password");
+
+        verify(jwtService, never()).generateAccessToken(any());
+        verify(jwtService, never()).generateRefreshToken(any());
     }
 }

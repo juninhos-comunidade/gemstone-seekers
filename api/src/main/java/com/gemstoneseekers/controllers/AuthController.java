@@ -1,9 +1,11 @@
 package com.gemstoneseekers.controllers;
 
 import com.gemstoneseekers.dtos.request.CompleteRegistrationRequest;
+import com.gemstoneseekers.dtos.request.LoginRequest;
 import com.gemstoneseekers.dtos.request.RegisterRequest;
 import com.gemstoneseekers.dtos.response.BaseResponse;
 import com.gemstoneseekers.dtos.response.CompleteRegistrationResponse;
+import com.gemstoneseekers.dtos.response.LoginResponse;
 import com.gemstoneseekers.dtos.response.RegisterResponse;
 import com.gemstoneseekers.mappers.UserMapper;
 import com.gemstoneseekers.models.User;
@@ -50,5 +52,10 @@ public class AuthController {
         CompleteRegistrationResponse response = userMapper.toCompleteRegistrationResponse(user);
         return ResponseEntity.status(HttpStatus.OK)
             .body(new BaseResponse<>(true, "Registration completed successfully", response, null));
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<BaseResponse<LoginResponse>> login(@Valid @RequestBody LoginRequest request) {
+        return null;
     }
 }
