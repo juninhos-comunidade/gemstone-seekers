@@ -5,7 +5,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { BellIcon } from "lucide-react";
+import { FaBell } from "react-icons/fa";
 import { NotificationModel } from "@/components/NotificationModel/NotificationModel";
 import { Button } from "@/components/ui/button";
 
@@ -18,7 +18,7 @@ export function NotificationsModal() {
           <Button variant="ghost" size="icon" aria-label="Notificações" />
         }
       >
-        <BellIcon className="size-4" />
+        <FaBell className="size-4" />
       </DialogTrigger>
 
       <DialogContent className="sm:max-w-md">

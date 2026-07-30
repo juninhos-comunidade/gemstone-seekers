@@ -4,7 +4,7 @@ import React from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { GemIcon } from "lucide-react";
+import { FaGem } from "react-icons/fa";
 
 export function Header() {
   const router = useRouter();
@@ -14,7 +14,7 @@ export function Header() {
   };
 
   const handleSignUp = () => {
-    router.push("/signup/role");
+    router.push("/signup");
   };
 
   return (
@@ -25,7 +25,7 @@ export function Header() {
           className="flex items-center gap-2.5 text-sm font-bold tracking-tight transition-opacity hover:opacity-80"
         >
           <span className="bg-primary text-primary-foreground grid size-9 place-items-center rounded-xl shadow-sm">
-            <GemIcon className="size-4" />
+            <FaGem className="size-4" />
           </span>
           <h1 className="text-base sm:text-lg">Gemstone Seekers</h1>
         </Link>

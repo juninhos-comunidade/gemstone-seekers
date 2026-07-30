@@ -53,10 +53,10 @@ describe("Header", () => {
     expect(mockPush).toHaveBeenCalledWith("/login");
   });
 
-  it("deve navegar para /signup/role ao clicar no botão Criar conta", () => {
+  it("deve navegar para /signup ao clicar no botão Criar conta", () => {
     render(<Header />);
     fireEvent.click(screen.getByRole("button", { name: /criar conta/i }));
     expect(mockPush).toHaveBeenCalledTimes(1);
-    expect(mockPush).toHaveBeenCalledWith("/signup/role");
+    expect(mockPush).toHaveBeenCalledWith("/signup");
   });
 });

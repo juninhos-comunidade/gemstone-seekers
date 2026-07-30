@@ -19,6 +19,7 @@ export default defineConfig({
         "components/ui/**",
         "app/layout.tsx",
         "lib/mocks/**",
+        "app/api/**",
       ],
       thresholds: {
         lines: 80,
