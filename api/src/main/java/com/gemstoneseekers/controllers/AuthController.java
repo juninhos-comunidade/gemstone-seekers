@@ -2,6 +2,7 @@ package com.gemstoneseekers.controllers;
 
 import com.gemstoneseekers.dtos.request.CompleteRegistrationRequest;
 import com.gemstoneseekers.dtos.request.LoginRequest;
+import com.gemstoneseekers.dtos.request.RefreshTokenRequest;
 import com.gemstoneseekers.dtos.request.RegisterRequest;
 import com.gemstoneseekers.dtos.response.BaseResponse;
 import com.gemstoneseekers.dtos.response.CompleteRegistrationResponse;
@@ -60,5 +61,10 @@ public class AuthController {
         return ResponseEntity
             .status(HttpStatus.OK)
             .body(new BaseResponse<>(true, "Login successful", response, null));
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<BaseResponse<LoginResponse>> refresh(@Valid @RequestBody RefreshTokenRequest request) {
+        return null;
     }
 }

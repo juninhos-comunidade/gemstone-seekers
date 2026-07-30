@@ -2,6 +2,7 @@ package com.gemstoneseekers.controllers;
 
 import com.gemstoneseekers.dtos.request.CompleteRegistrationRequest;
 import com.gemstoneseekers.dtos.request.LoginRequest;
+import com.gemstoneseekers.dtos.request.RefreshTokenRequest;
 import com.gemstoneseekers.dtos.request.RegisterRequest;
 import com.gemstoneseekers.dtos.response.BaseResponse;
 import com.gemstoneseekers.dtos.response.CompleteRegistrationResponse;
@@ -185,5 +186,33 @@ class AuthControllerTest {
         assertThatThrownBy(() -> authController.login(request))
             .isInstanceOf(AccessDeniedException.class)
             .hasMessage("Invalid email or password");
+    }
+
+    @Test
+    void shouldReturnOkWithNewTokensOnSuccessfulRefresh() {
+        RefreshTokenRequest request = new RefreshTokenRequest("valid.refresh.token");
+
+        LoginResponse expectedResponse = new LoginResponse("new-access-token", "new-refresh-token", true);
+
+        when(authService.refreshToken("valid.refresh.token")).thenReturn(expectedResponse);
+
+        ResponseEntity<BaseResponse<LoginResponse>> response = authController.refresh(request);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().success()).isTrue();
+        assertThat(response.getBody().result()).isEqualTo(expectedResponse);
+    }
+
+    @Test
+    void shouldPropagateAccessDeniedExceptionWhenRefreshTokenIsInvalid() {
+        RefreshTokenRequest request = new RefreshTokenRequest("invalid.refresh.token");
+
+        when(authService.refreshToken("invalid.refresh.token"))
+            .thenThrow(new AccessDeniedException("Invalid refresh token"));
+
+        assertThatThrownBy(() -> authController.refresh(request))
+            .isInstanceOf(AccessDeniedException.class)
+            .hasMessage("Invalid refresh token");
     }
 }
