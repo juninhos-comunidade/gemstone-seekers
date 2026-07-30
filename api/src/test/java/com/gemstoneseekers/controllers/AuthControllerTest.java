@@ -1,10 +1,13 @@
 package com.gemstoneseekers.controllers;
 
 import com.gemstoneseekers.dtos.request.CompleteRegistrationRequest;
+import com.gemstoneseekers.dtos.request.LoginRequest;
 import com.gemstoneseekers.dtos.request.RegisterRequest;
 import com.gemstoneseekers.dtos.response.BaseResponse;
 import com.gemstoneseekers.dtos.response.CompleteRegistrationResponse;
+import com.gemstoneseekers.dtos.response.LoginResponse;
 import com.gemstoneseekers.dtos.response.RegisterResponse;
+import com.gemstoneseekers.exceptions.AccessDeniedException;
 import com.gemstoneseekers.exceptions.ConflictException;
 import com.gemstoneseekers.exceptions.EntityNotFoundException;
 import com.gemstoneseekers.mappers.UserMapper;
@@ -144,5 +147,32 @@ class AuthControllerTest {
 
         assertThatThrownBy(() -> authController.completeRegistration(userId, request))
             .isInstanceOf(EntityNotFoundException.class);
+    }
+
+    @Test
+    void shouldReturnOkWithTokensOnSuccessfulLogin() {
+        LoginRequest request = new LoginRequest("john@example.com", "plainPassword123");
+
+        LoginResponse expectedResponse = new LoginResponse("access-token", "refresh-token", true);
+
+        when(authService.login(request)).thenReturn(expectedResponse);
+
+        ResponseEntity<BaseResponse<LoginResponse>> response = authController.login(request);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().success()).isTrue();
+        assertThat(response.getBody().result()).isEqualTo(expectedResponse);
+    }
+
+    @Test
+    void shouldPropagateAccessDeniedExceptionWhenCredentialsAreInvalid() {
+        LoginRequest request = new LoginRequest("john@example.com", "wrongPassword");
+
+        when(authService.login(request)).thenThrow(new AccessDeniedException("Invalid email or password"));
+
+        assertThatThrownBy(() -> authController.login(request))
+            .isInstanceOf(AccessDeniedException.class)
+            .hasMessage("Invalid email or password");
     }
 }
