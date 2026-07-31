@@ -4,9 +4,13 @@ import com.gemstoneseekers.dtos.request.CompleteRegistrationRequest;
 import com.gemstoneseekers.dtos.request.LoginRequest;
 import com.gemstoneseekers.dtos.request.RegisterRequest;
 import com.gemstoneseekers.dtos.response.LoginResponse;
+import com.gemstoneseekers.enums.UserRole;
 import com.gemstoneseekers.exceptions.AccessDeniedException;
 import com.gemstoneseekers.exceptions.ConflictException;
 import com.gemstoneseekers.exceptions.EntityNotFoundException;
+import com.gemstoneseekers.models.Candidate;
+import com.gemstoneseekers.models.Company;
+import com.gemstoneseekers.models.Recruiter;
 import com.gemstoneseekers.models.User;
 import com.gemstoneseekers.repositories.CandidateRepository;
 import com.gemstoneseekers.repositories.CompanyRepository;
@@ -58,10 +62,37 @@ public class AuthService {
         if (user.getRole() != null) {
             throw new ConflictException("Registration already completed");
         }
+
+        Company company = null;
+        if (request.role() == UserRole.RECRUITER) {
+            company = companyRepository.findById(request.companyId())
+                .orElseThrow(() -> new EntityNotFoundException(
+                    "Company", request.companyId().toString()));
+        }
+
         user.setRole(request.role());
         user.setDocumentType(request.documentType());
         user.setDocumentNumber(request.documentNumber());
-        return userRepository.save(user);
+        User savedUser = userRepository.save(user);
+
+        switch (request.role()) {
+            case CANDIDATE -> {
+                Candidate candidate = new Candidate();
+                candidate.setUser(savedUser);
+                candidate.setPhone(request.phone());
+                candidate.setSummary(request.summary());
+                candidateRepository.save(candidate);
+            }
+            case RECRUITER -> {
+                Recruiter recruiter = new Recruiter();
+                recruiter.setUser(savedUser);
+                recruiter.setCompany(company);
+                recruiter.setDepartment(request.department());
+                recruiterRepository.save(recruiter);
+            }
+        }
+
+        return savedUser;
     }
 
     public LoginResponse login(LoginRequest request) {
