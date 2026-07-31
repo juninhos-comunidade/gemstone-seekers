@@ -95,7 +95,7 @@ describe("Signup Page", () => {
     expect(mockPush).toHaveBeenCalledWith("/signup/role");
   });
 
-  it("shows error toast when signup fails", async () => {
+  it("shows server error message when response is not ok", async () => {
     const mockFetch = vi.fn().mockResolvedValue({
       ok: false,
       json: async () => ({ message: "E-mail já cadastrado" }),
@@ -123,5 +123,62 @@ describe("Signup Page", () => {
       expect(mockToastError).toHaveBeenCalledWith("E-mail já cadastrado");
     });
     expect(mockPush).not.toHaveBeenCalled();
+  });
+
+  it("handles non-JSON server error response with fallback message", async () => {
+    const mockFetch = vi.fn().mockResolvedValue({
+      ok: false,
+      json: async () => {
+        throw new Error("Invalid JSON");
+      },
+    });
+    global.fetch = mockFetch as unknown as typeof fetch;
+
+    render(<Signup />);
+
+    fireEvent.change(screen.getByLabelText(/nome completo/i), {
+      target: { value: "Bruno" },
+    });
+    fireEvent.change(screen.getByLabelText(/^e-mail$/i), {
+      target: { value: "bruno@example.com" },
+    });
+    fireEvent.change(screen.getByLabelText(/^senha$/i), {
+      target: { value: "123456" },
+    });
+    fireEvent.change(screen.getByLabelText(/confirmar senha/i), {
+      target: { value: "123456" },
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: /cadastrar/i }));
+
+    await waitFor(() => {
+      expect(mockToastError).toHaveBeenCalledWith("Falha ao cadastrar");
+    });
+  });
+
+  it("handles unexpected non-Error throws", async () => {
+    const mockFetch = vi.fn().mockRejectedValue("unexpected string throw");
+    global.fetch = mockFetch as unknown as typeof fetch;
+
+    render(<Signup />);
+
+    fireEvent.change(screen.getByLabelText(/nome completo/i), {
+      target: { value: "Carlos" },
+    });
+    fireEvent.change(screen.getByLabelText(/^e-mail$/i), {
+      target: { value: "carlos@example.com" },
+    });
+    fireEvent.change(screen.getByLabelText(/^senha$/i), {
+      target: { value: "123456" },
+    });
+    fireEvent.change(screen.getByLabelText(/confirmar senha/i), {
+      target: { value: "123456" },
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: /cadastrar/i }));
+
+    await waitFor(() => {
+      expect(mockToastError).toHaveBeenCalledWith("Erro inesperado");
+    });
   });
 });

@@ -46,12 +46,30 @@ describe("Theme Dropdown", () => {
     expect(screen.getByText(/system/i)).toBeInTheDocument();
   });
 
-  it("calls setTheme when a theme option is selected", async () => {
+  it("calls setTheme with light when Light option is selected", async () => {
+    render(<ThemeDropdown />);
+    fireEvent.click(screen.getByRole("button", { name: /alternar tema/i }));
+
+    const lightItem = await screen.findByText(/light/i);
+    fireEvent.click(lightItem);
+    expect(mockSetTheme).toHaveBeenCalledWith("light");
+  });
+
+  it("calls setTheme with dark when Dark option is selected", async () => {
     render(<ThemeDropdown />);
     fireEvent.click(screen.getByRole("button", { name: /alternar tema/i }));
 
     const darkItem = await screen.findByText(/dark/i);
     fireEvent.click(darkItem);
     expect(mockSetTheme).toHaveBeenCalledWith("dark");
+  });
+
+  it("calls setTheme with system when System option is selected", async () => {
+    render(<ThemeDropdown />);
+    fireEvent.click(screen.getByRole("button", { name: /alternar tema/i }));
+
+    const systemItem = await screen.findByText(/system/i);
+    fireEvent.click(systemItem);
+    expect(mockSetTheme).toHaveBeenCalledWith("system");
   });
 });

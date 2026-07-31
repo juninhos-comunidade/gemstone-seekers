@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import { setAuthToken, getAuthToken, removeAuthToken } from "@/lib/api/auth";
 
 describe("auth helpers (lib/api/auth.ts)", () => {
@@ -19,5 +19,22 @@ describe("auth helpers (lib/api/auth.ts)", () => {
     setAuthToken("test-jwt-token-123");
     removeAuthToken();
     expect(getAuthToken()).toBeNull();
+  });
+
+  describe("when running in server environment (window is undefined)", () => {
+    const originalWindow = globalThis.window;
+
+    afterEach(() => {
+      globalThis.window = originalWindow;
+    });
+
+    it("returns null for getAuthToken, and safely ignores set/remove token calls", () => {
+      // @ts-expect-error simulating SSR environment where window is undefined
+      delete globalThis.window;
+
+      expect(getAuthToken()).toBeNull();
+      expect(() => setAuthToken("test-token")).not.toThrow();
+      expect(() => removeAuthToken()).not.toThrow();
+    });
   });
 });

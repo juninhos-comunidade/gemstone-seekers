@@ -18,6 +18,7 @@ export default defineConfig({
         "*.config.{ts,js,mjs}",
         "**/*.d.ts",
         "components/ui/**",
+        "components/providers/**",
         "app/**/layout.tsx",
         "lib/mocks/**",
         "app/api/**",
