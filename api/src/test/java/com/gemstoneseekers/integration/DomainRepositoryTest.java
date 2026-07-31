@@ -6,10 +6,10 @@ import com.gemstoneseekers.models.Candidate;
 import com.gemstoneseekers.models.City;
 import com.gemstoneseekers.models.Company;
 import com.gemstoneseekers.models.Country;
+import com.gemstoneseekers.models.Language;
 import com.gemstoneseekers.models.Recruiter;
 import com.gemstoneseekers.models.State;
 import com.gemstoneseekers.models.Technology;
-import com.gemstoneseekers.models.Language;
 import com.gemstoneseekers.models.User;
 import jakarta.persistence.EntityManager;
 import org.flywaydb.core.Flyway;
@@ -77,13 +77,8 @@ class DomainRepositoryTest {
             em.createNativeQuery("DELETE FROM candidates").executeUpdate();
             em.createNativeQuery("DELETE FROM companies").executeUpdate();
             em.createNativeQuery("DELETE FROM users").executeUpdate();
-            em.createNativeQuery("DELETE FROM recruiters").executeUpdate();
-            em.createNativeQuery("DELETE FROM candidates").executeUpdate();
-            em.createNativeQuery("DELETE FROM companies").executeUpdate();
-            em.createNativeQuery("DELETE FROM users").executeUpdate();
             em.createNativeQuery("DELETE FROM technologies").executeUpdate();
             em.createNativeQuery("DELETE FROM languages").executeUpdate();
-            em.getTransaction().commit();
             em.getTransaction().commit();
         }
     }
