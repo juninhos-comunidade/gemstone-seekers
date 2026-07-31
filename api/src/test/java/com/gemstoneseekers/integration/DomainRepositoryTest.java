@@ -8,6 +8,7 @@ import com.gemstoneseekers.models.Company;
 import com.gemstoneseekers.models.Country;
 import com.gemstoneseekers.models.Recruiter;
 import com.gemstoneseekers.models.State;
+import com.gemstoneseekers.models.Technology;
 import com.gemstoneseekers.models.User;
 import jakarta.persistence.EntityManager;
 import org.flywaydb.core.Flyway;
@@ -34,8 +35,8 @@ class DomainRepositoryTest {
     @BeforeAll
     static void setup() {
         Flyway flyway = Flyway.configure()
-                .dataSource(postgres.getJdbcUrl(), postgres.getUsername(), postgres.getPassword())
-                .locations("classpath:db/migration").load();
+            .dataSource(postgres.getJdbcUrl(), postgres.getUsername(), postgres.getPassword())
+            .locations("classpath:db/migration").load();
         flyway.migrate();
 
         Configuration cfg = new Configuration();
@@ -54,6 +55,7 @@ class DomainRepositoryTest {
         cfg.addAnnotatedClass(City.class);
         cfg.addAnnotatedClass(State.class);
         cfg.addAnnotatedClass(Country.class);
+        cfg.addAnnotatedClass(Technology.class);
 
         sessionFactory = cfg.buildSessionFactory();
     }
@@ -123,8 +125,10 @@ class DomainRepositoryTest {
             em.getTransaction().commit();
             em.clear();
 
-            Candidate found = em.createQuery("SELECT c FROM Candidate c JOIN FETCH c.user WHERE c.user.id = :userId",
-                    Candidate.class).setParameter("userId", user.getId()).getSingleResult();
+            Candidate found = em.createQuery(
+                "SELECT c FROM Candidate c JOIN FETCH c.user WHERE c.user.id = :userId",
+                Candidate.class
+            ).setParameter("userId", user.getId()).getSingleResult();
 
             assertThat(found).isNotNull();
             assertThat(found.getPhone()).isEqualTo("+5511999999999");
@@ -162,13 +166,34 @@ class DomainRepositoryTest {
             em.clear();
 
             Recruiter found = em.createQuery(
-                    "SELECT r FROM Recruiter r JOIN FETCH r.user JOIN FETCH r.company WHERE r.user.id = :userId",
-                    Recruiter.class).setParameter("userId", user.getId()).getSingleResult();
+                "SELECT r FROM Recruiter r JOIN FETCH r.user JOIN FETCH r.company WHERE r.user.id = :userId",
+                Recruiter.class
+            ).setParameter("userId", user.getId()).getSingleResult();
 
             assertThat(found).isNotNull();
             assertThat(found.getDepartment()).isEqualTo("Engineering");
             assertThat(found.getCompany().getName()).isEqualTo("Tech Corp");
             assertThat(found.getUser().getId()).isEqualTo(user.getId());
+        }
+    }
+
+    @Test
+    void shouldSaveAndFindTechnology() {
+        try (EntityManager em = sessionFactory.createEntityManager()) {
+            em.getTransaction().begin();
+            Technology technology = new Technology();
+            technology.setName("Java");
+            technology.setCategory("Programming Language");
+            em.persist(technology);
+            em.getTransaction().commit();
+            em.clear();
+
+            Technology found = em.find(Technology.class, technology.getId());
+            assertThat(found).isNotNull();
+            assertThat(found.getName()).isEqualTo("Java");
+            assertThat(found.getCategory()).isEqualTo("Programming Language");
+            assertThat(found.getCreatedAt()).isNotNull();
+            assertThat(found.getUpdatedAt()).isNotNull();
         }
     }
 }
