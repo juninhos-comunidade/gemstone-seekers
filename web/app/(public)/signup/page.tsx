@@ -7,20 +7,18 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
-import { toast } from "sonner"; // ou o toast do shadcn que você usar
+import { toast } from "sonner";
 import { PasswordInput } from "@/components/PasswordInput/PasswordInput";
-import { schema } from "@/lib/schemas/signupSchema";
+import { schema, SignupFormData } from "@/lib/schemas/signupSchema";
 
 export default function Page() {
   const router = useRouter();
-
-  type FormValues = z.infer<typeof schema>;
 
   const {
     register,
     handleSubmit,
     formState: { isSubmitting, errors },
-  } = useForm<FormValues>({
+  } = useForm<SignupFormData>({
     resolver: zodResolver(schema),
   });
 

@@ -1,6 +1,5 @@
-import "@testing-library/jest-dom/vitest";
-import { describe, it, expect, vi, afterEach } from "vitest";
-import { render, screen, cleanup } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
+import { describe, expect, it, vi } from "vitest";
 import Dashboard from "./page";
 
 vi.mock("next/navigation", () => ({
@@ -16,19 +15,11 @@ vi.mock("next/navigation", () => ({
 }));
 
 describe("Candidate Dashboard Page", () => {
-  afterEach(() => {
-    cleanup();
-  });
-
-  it("renders the main heading", () => {
+  it("should render the main heading and welcome paragraph", () => {
     render(<Dashboard />);
     expect(
       screen.getByRole("heading", { name: /dashboard do candidato/i }),
     ).toBeInTheDocument();
-  });
-
-  it("renders the welcome paragraph", () => {
-    render(<Dashboard />);
     expect(
       screen.getByText(/bem-vindo! em breve você poderá acompanhar/i),
     ).toBeInTheDocument();

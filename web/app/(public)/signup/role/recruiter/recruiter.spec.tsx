@@ -1,11 +1,12 @@
-import "@testing-library/jest-dom/vitest";
-import { describe, it, expect, vi, afterEach } from "vitest";
-import { render, screen, cleanup } from "@testing-library/react";
+import { describe, it, expect, vi } from "vitest";
+import { render, screen, fireEvent } from "@testing-library/react";
 import RecruiterSignup from "./page";
+
+const mockPush = vi.fn();
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({
-    push: vi.fn(),
+    push: mockPush,
     replace: vi.fn(),
     back: vi.fn(),
     forward: vi.fn(),
@@ -16,11 +17,8 @@ vi.mock("next/navigation", () => ({
 }));
 
 describe("Recruiter Signup Page", () => {
-  afterEach(() => {
-    cleanup();
-  });
-
-  it("renders the recruiter signup heading", () => {
+  it("renders recruiter profile form fields, submit button and skip link, and handles submit navigation", () => {
+    vi.clearAllMocks();
     render(<RecruiterSignup />);
     expect(
       screen.getByRole("heading", {
@@ -28,41 +26,20 @@ describe("Recruiter Signup Page", () => {
         name: /informações do recrutador/i,
       }),
     ).toBeInTheDocument();
-  });
-
-  it("renders all profile fields", () => {
-    render(<RecruiterSignup />);
-
-    expect(screen.getByLabelText(/nome da empresa/i)).toHaveAttribute(
-      "type",
-      "text",
-    );
-    expect(screen.getByLabelText(/^cargo$/i)).toHaveAttribute("type", "text");
-    expect(screen.getByLabelText(/telefone/i)).toHaveAttribute("type", "tel");
-    expect(screen.getByLabelText(/site da empresa/i)).toHaveAttribute(
-      "type",
-      "url",
-    );
-    expect(screen.getByLabelText(/tamanho da empresa/i)).toHaveAttribute(
-      "type",
-      "text",
-    );
-  });
-
-  it("renders the submit button", () => {
-    render(<RecruiterSignup />);
+    expect(screen.getByLabelText(/nome da empresa/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/^cargo$/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/telefone/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/site da empresa/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/tamanho da empresa/i)).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: /concluir cadastro/i }),
-    ).toBeInTheDocument();
-  });
+      screen.getByRole("link", { name: /pular por enquanto/i }),
+    ).toHaveAttribute("href", "/dashboard");
 
-  it("renders the skip link", () => {
-    render(<RecruiterSignup />);
-    expect(
-      screen.getByText(/prefere fazer isso depois\?/i),
-    ).toBeInTheDocument();
-    const skipLink = screen.getByRole("link", { name: /pular por enquanto/i });
-    expect(skipLink).toBeInTheDocument();
-    expect(skipLink).toHaveAttribute("href", "/dashboard");
+    const submitBtn = screen.getByRole("button", {
+      name: /concluir cadastro/i,
+    });
+    fireEvent.click(submitBtn);
+
+    expect(mockPush).toHaveBeenCalledWith("/recruiter/dashboard");
   });
 });

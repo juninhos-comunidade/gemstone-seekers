@@ -201,5 +201,5 @@ export const MOCK_RECRUITER_USER: UserMock = {
   ],
 };
 
-/** @deprecated Use MOCK_CANDIDATE_USER ou MOCK_RECRUITER_USER */
+/** @deprecated Use MOCK_CANDIDATE_USER or MOCK_RECRUITER_USER */
 export const MOCK_USER = MOCK_CANDIDATE_USER;
