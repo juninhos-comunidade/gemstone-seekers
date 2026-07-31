@@ -9,11 +9,11 @@ import com.gemstoneseekers.models.Technology;
 import com.gemstoneseekers.repositories.TechnologyRepository;
 
 @Service
-public class CatalogService {
+public class TechnologyService {
 
     private final TechnologyRepository technologyRepository;
 
-    public CatalogService(TechnologyRepository technologyRepository) {
+    public TechnologyService(TechnologyRepository technologyRepository) {
         this.technologyRepository = technologyRepository;
     }
 
