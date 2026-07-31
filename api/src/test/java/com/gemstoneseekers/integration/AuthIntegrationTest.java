@@ -7,7 +7,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.SpringApplication;
+import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
@@ -34,17 +34,18 @@ class AuthIntegrationTest {
 
     @BeforeAll
     static void setup() {
-        SpringApplication app = new SpringApplication(GemstoneSeekersApplication.class);
-        app.setDefaultProperties(Map.of(
-            "DB_URL", postgres.getJdbcUrl(),
-            "DB_USERNAME", postgres.getUsername(),
-            "DB_PASSWORD", postgres.getPassword(),
-            "SERVER_PORT", "0",
-            "JWT_SECRET", "e93afb5d9ffc2f656b9039f768011829be9a88b539671e8aab8d347949a4da67",
-            "jwt.access-token.expiration", "86400000",
-            "jwt.refresh-token.expiration", "604800000"
-        ));
-        context = app.run();
+        context = new SpringApplicationBuilder(GemstoneSeekersApplication.class)
+            .properties(Map.of(
+                "spring.datasource.url", postgres.getJdbcUrl(),
+                "spring.datasource.username", postgres.getUsername(),
+                "spring.datasource.password", postgres.getPassword(),
+                "server.port", "0",
+                "jwt.secret", "e93afb5d9ffc2f656b9039f768011829be9a88b539671e8aab8d347949a4da67",
+                "jwt.access-token.expiration", "86400000",
+                "jwt.refresh-token.expiration", "604800000"
+            ))
+            .run();
+
         Integer resolvedPort = context.getEnvironment().getProperty("local.server.port", Integer.class);
         if (resolvedPort == null) {
             throw new IllegalStateException("Could not resolve local server port");
