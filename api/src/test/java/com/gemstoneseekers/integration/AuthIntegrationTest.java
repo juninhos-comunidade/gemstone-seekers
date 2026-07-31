@@ -40,7 +40,7 @@ class AuthIntegrationTest {
             "spring.datasource.username", postgres.getUsername(),
             "spring.datasource.password", postgres.getPassword(),
             "server.port", "0",
-            "jwt.secret", "e93afb5d9ffc2f656b9039f768011829be9a88b539671e8aab8d347949a4da67",
+            "JWT_SECRET", "e93afb5d9ffc2f656b9039f768011829be9a88b539671e8aab8d347949a4da67",
             "jwt.access-token.expiration", "86400000",
             "jwt.refresh-token.expiration", "604800000"
         ));
