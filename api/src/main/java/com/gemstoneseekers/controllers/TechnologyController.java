@@ -1,30 +1,29 @@
 package com.gemstoneseekers.controllers;
 
-import java.util.List;
-
+import com.gemstoneseekers.dtos.response.BaseResponse;
+import com.gemstoneseekers.dtos.response.TechnologyResponse;
+import com.gemstoneseekers.services.TechnologyService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.gemstoneseekers.dtos.response.BaseResponse;
-import com.gemstoneseekers.dtos.response.TechnologyResponse;
-import com.gemstoneseekers.services.CatalogService;
+import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1")
-public class CatalogController {
+@RequestMapping("/api/v1/technologies")
+public class TechnologyController {
 
-    private final CatalogService catalogService;
+    private final TechnologyService technologyService;
 
-    public CatalogController(CatalogService catalogService) {
-        this.catalogService = catalogService;
+    public TechnologyController(TechnologyService technologyService) {
+        this.technologyService = technologyService;
     }
 
-    @GetMapping("/technologies")
+    @GetMapping
     public ResponseEntity<BaseResponse<List<TechnologyResponse>>> getTechnologies() {
-        List<TechnologyResponse> technologies = catalogService.getTechnologies();
+        List<TechnologyResponse> technologies = technologyService.getTechnologies();
         return ResponseEntity.status(HttpStatus.OK)
             .body(new BaseResponse<>(true, "Technologies retrieved successfully", technologies, null));
     }
