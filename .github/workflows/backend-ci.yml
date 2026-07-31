@@ -339,6 +339,7 @@ jobs:
 
       - name: Run tests and measure coverage
         env:
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
           COVERAGE_MIN_INSTRUCTION: "0.80"
           COVERAGE_MIN_BRANCH: "0.80"
         run: >
