@@ -35,24 +35,16 @@ class AuthControllerTest {
 
     @Test
     void shouldReturnCreatedWithUserDataOnSuccessfulRegistration() {
-        RegisterRequest request = new RegisterRequest(
-            "John Doe",
-            "john@example.com",
-            "plainPassword123"
-        );
+        RegisterRequest request = new RegisterRequest("John Doe", "john@example.com", "plainPassword123");
 
-        UUID userId    = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
         User savedUser = new User();
         savedUser.setId(userId);
         savedUser.setName("John Doe");
         savedUser.setEmail("john@example.com");
         savedUser.setPassword("$2a$10$encodedPassword");
 
-        RegisterResponse expectedResponse = new RegisterResponse(
-            userId,
-            "John Doe",
-            "john@example.com"
-        );
+        RegisterResponse expectedResponse = new RegisterResponse(userId, "John Doe", "john@example.com");
 
         when(authService.register(request)).thenReturn(savedUser);
         when(userMapper.toRegisterResponse(savedUser)).thenReturn(expectedResponse);
@@ -67,30 +59,21 @@ class AuthControllerTest {
 
     @Test
     void shouldPropagateConflictExceptionWhenEmailAlreadyExists() {
-        RegisterRequest request = new RegisterRequest(
-            "John Doe",
-            "john@example.com",
-            "plainPassword123"
-        );
+        RegisterRequest request = new RegisterRequest("John Doe", "john@example.com", "plainPassword123");
 
         when(authService.register(request)).thenThrow(new ConflictException("Email already in use"));
 
-        assertThatThrownBy(() -> authController.register(request))
-            .isInstanceOf(ConflictException.class)
-            .hasMessage("Email already in use");
+        assertThatThrownBy(() -> authController.register(request)).isInstanceOf(ConflictException.class)
+                .hasMessage("Email already in use");
     }
 
     @Test
     void shouldReturnOkWithUserDataOnSuccessfulCompleteRegistration() {
         String email = "john@example.com";
-        CompleteRegistrationRequest request = new CompleteRegistrationRequest(
-            UserRole.CANDIDATE,
-            "CPF",
-            "12345678900",
-            null, null, null, null
-        );
+        CompleteRegistrationRequest request = new CompleteRegistrationRequest(UserRole.CANDIDATE, "CPF", "12345678900",
+                null, null, null, null);
 
-        UUID userId      = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
         User updatedUser = new User();
         updatedUser.setId(userId);
         updatedUser.setName("John Doe");
@@ -99,14 +82,8 @@ class AuthControllerTest {
         updatedUser.setDocumentType("CPF");
         updatedUser.setDocumentNumber("12345678900");
 
-        CompleteRegistrationResponse expectedResponse = new CompleteRegistrationResponse(
-            userId,
-            "John Doe",
-            email,
-            UserRole.CANDIDATE,
-            "CPF",
-            "12345678900"
-        );
+        CompleteRegistrationResponse expectedResponse = new CompleteRegistrationResponse(userId, "John Doe", email,
+                UserRole.CANDIDATE, "CPF", "12345678900");
 
         UserDetails userDetails = mock(UserDetails.class);
         when(userDetails.getUsername()).thenReturn(email);
@@ -114,8 +91,8 @@ class AuthControllerTest {
         when(authService.completeRegistration(email, request)).thenReturn(updatedUser);
         when(userMapper.toCompleteRegistrationResponse(updatedUser)).thenReturn(expectedResponse);
 
-        ResponseEntity<BaseResponse<CompleteRegistrationResponse>> response =
-            authController.completeRegistration(userDetails, request);
+        ResponseEntity<BaseResponse<CompleteRegistrationResponse>> response = authController
+                .completeRegistration(userDetails, request);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
@@ -126,38 +103,32 @@ class AuthControllerTest {
     @Test
     void shouldPropagateConflictExceptionWhenRegistrationAlreadyCompleted() {
         String email = "john@example.com";
-        CompleteRegistrationRequest request = new CompleteRegistrationRequest(
-            UserRole.CANDIDATE,
-            null, null, null, null, null, null
-        );
+        CompleteRegistrationRequest request = new CompleteRegistrationRequest(UserRole.CANDIDATE, null, null, null,
+                null, null, null);
 
         UserDetails userDetails = mock(UserDetails.class);
         when(userDetails.getUsername()).thenReturn(email);
 
         when(authService.completeRegistration(email, request))
-            .thenThrow(new ConflictException("Registration already completed"));
+                .thenThrow(new ConflictException("Registration already completed"));
 
         assertThatThrownBy(() -> authController.completeRegistration(userDetails, request))
-            .isInstanceOf(ConflictException.class)
-            .hasMessage("Registration already completed");
+                .isInstanceOf(ConflictException.class).hasMessage("Registration already completed");
     }
 
     @Test
     void shouldPropagateEntityNotFoundExceptionWhenUserNotFound() {
         String email = "unknown@example.com";
-        CompleteRegistrationRequest request = new CompleteRegistrationRequest(
-            UserRole.CANDIDATE,
-            null, null, null, null, null, null
-        );
+        CompleteRegistrationRequest request = new CompleteRegistrationRequest(UserRole.CANDIDATE, null, null, null,
+                null, null, null);
 
         UserDetails userDetails = mock(UserDetails.class);
         when(userDetails.getUsername()).thenReturn(email);
 
-        when(authService.completeRegistration(email, request))
-            .thenThrow(new EntityNotFoundException("User", email));
+        when(authService.completeRegistration(email, request)).thenThrow(new EntityNotFoundException("User", email));
 
         assertThatThrownBy(() -> authController.completeRegistration(userDetails, request))
-            .isInstanceOf(EntityNotFoundException.class);
+                .isInstanceOf(EntityNotFoundException.class);
     }
 
     @Test
@@ -182,9 +153,8 @@ class AuthControllerTest {
 
         when(authService.login(request)).thenThrow(new AccessDeniedException("Invalid email or password"));
 
-        assertThatThrownBy(() -> authController.login(request))
-            .isInstanceOf(AccessDeniedException.class)
-            .hasMessage("Invalid email or password");
+        assertThatThrownBy(() -> authController.login(request)).isInstanceOf(AccessDeniedException.class)
+                .hasMessage("Invalid email or password");
     }
 
     @Test
@@ -208,10 +178,9 @@ class AuthControllerTest {
         RefreshTokenRequest request = new RefreshTokenRequest("invalid.refresh.token");
 
         when(authService.refreshToken("invalid.refresh.token"))
-            .thenThrow(new AccessDeniedException("Invalid refresh token"));
+                .thenThrow(new AccessDeniedException("Invalid refresh token"));
 
-        assertThatThrownBy(() -> authController.refresh(request))
-            .isInstanceOf(AccessDeniedException.class)
-            .hasMessage("Invalid refresh token");
+        assertThatThrownBy(() -> authController.refresh(request)).isInstanceOf(AccessDeniedException.class)
+                .hasMessage("Invalid refresh token");
     }
 }

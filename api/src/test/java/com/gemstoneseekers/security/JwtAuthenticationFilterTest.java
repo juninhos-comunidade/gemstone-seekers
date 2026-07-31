@@ -39,14 +39,10 @@ class JwtAuthenticationFilterTest {
 
         MockHttpServletRequest request = new MockHttpServletRequest();
         request.addHeader("Authorization", "Bearer " + token);
-        MockHttpServletResponse response    = new MockHttpServletResponse();
-        FilterChain             filterChain = mock(FilterChain.class);
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        FilterChain filterChain = mock(FilterChain.class);
 
-        UserDetails userDetails = User.builder()
-            .username(email)
-            .password("encodedPassword")
-            .roles("CANDIDATE")
-            .build();
+        UserDetails userDetails = User.builder().username(email).password("encodedPassword").roles("CANDIDATE").build();
 
         when(jwtService.isTokenValid(token)).thenReturn(true);
         when(jwtService.extractEmail(token)).thenReturn(email);
@@ -61,9 +57,9 @@ class JwtAuthenticationFilterTest {
 
     @Test
     void shouldNotAuthenticateWhenNoAuthorizationHeader() throws ServletException, IOException {
-        MockHttpServletRequest  request     = new MockHttpServletRequest();
-        MockHttpServletResponse response    = new MockHttpServletResponse();
-        FilterChain             filterChain = mock(FilterChain.class);
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        FilterChain filterChain = mock(FilterChain.class);
 
         filter.doFilterInternal(request, response, filterChain);
 
@@ -78,8 +74,8 @@ class JwtAuthenticationFilterTest {
 
         MockHttpServletRequest request = new MockHttpServletRequest();
         request.addHeader("Authorization", "Bearer " + token);
-        MockHttpServletResponse response    = new MockHttpServletResponse();
-        FilterChain             filterChain = mock(FilterChain.class);
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        FilterChain filterChain = mock(FilterChain.class);
 
         when(jwtService.isTokenValid(token)).thenReturn(false);
 
@@ -94,8 +90,8 @@ class JwtAuthenticationFilterTest {
     void shouldNotAuthenticateWhenAuthorizationHeaderHasNoBearerPrefix() throws ServletException, IOException {
         MockHttpServletRequest request = new MockHttpServletRequest();
         request.addHeader("Authorization", "Basic sometoken");
-        MockHttpServletResponse response    = new MockHttpServletResponse();
-        FilterChain             filterChain = mock(FilterChain.class);
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        FilterChain filterChain = mock(FilterChain.class);
 
         filter.doFilterInternal(request, response, filterChain);
 

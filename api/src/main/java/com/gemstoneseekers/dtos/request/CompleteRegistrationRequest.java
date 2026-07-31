@@ -5,12 +5,6 @@ import jakarta.validation.constraints.NotNull;
 
 import java.util.UUID;
 
-public record CompleteRegistrationRequest(
-    @NotNull UserRole role,
-    String documentType,
-    String documentNumber,
-    String phone,
-    String summary,
-    UUID companyId,
-    String department
-) {}
+public record CompleteRegistrationRequest(@NotNull UserRole role, String documentType, String documentNumber,
+        String phone, String summary, UUID companyId, String department) {
+}

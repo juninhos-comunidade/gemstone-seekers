@@ -17,10 +17,9 @@ public class JwtService {
     private final long accessTokenExpiration;
     private final long refreshTokenExpiration;
 
-    public JwtService(
-        @Value("${jwt.secret}") String secret,
-        @Value("${jwt.access-token.expiration}") long accessTokenExpiration,
-        @Value("${jwt.refresh-token.expiration}") long refreshTokenExpiration) {
+    public JwtService(@Value("${jwt.secret}") String secret,
+            @Value("${jwt.access-token.expiration}") long accessTokenExpiration,
+            @Value("${jwt.refresh-token.expiration}") long refreshTokenExpiration) {
         this.key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
         this.accessTokenExpiration = accessTokenExpiration;
         this.refreshTokenExpiration = refreshTokenExpiration;
@@ -36,10 +35,7 @@ public class JwtService {
 
     public boolean isTokenValid(String token) {
         try {
-            Jwts.parser()
-                .verifyWith(key)
-                .build()
-                .parseSignedClaims(token);
+            Jwts.parser().verifyWith(key).build().parseSignedClaims(token);
             return true;
         } catch (Exception e) {
             return false;
@@ -47,22 +43,11 @@ public class JwtService {
     }
 
     public String extractEmail(String token) {
-        return Jwts.parser()
-            .verifyWith(key)
-            .build()
-            .parseSignedClaims(token)
-            .getPayload()
-            .getSubject();
+        return Jwts.parser().verifyWith(key).build().parseSignedClaims(token).getPayload().getSubject();
     }
 
-    private String buildToken(
-        User user,
-        long expiration) {
-        return Jwts.builder()
-            .subject(user.getEmail())
-            .issuedAt(new Date())
-            .expiration(new Date(System.currentTimeMillis() + expiration))
-            .signWith(key)
-            .compact();
+    private String buildToken(User user, long expiration) {
+        return Jwts.builder().subject(user.getEmail()).issuedAt(new Date())
+                .expiration(new Date(System.currentTimeMillis() + expiration)).signWith(key).compact();
     }
 }

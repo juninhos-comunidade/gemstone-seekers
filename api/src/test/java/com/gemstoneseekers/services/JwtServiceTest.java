@@ -14,11 +14,8 @@ class JwtServiceTest {
     private static final long ACCESS_TOKEN_EXPIRATION = 86400000L;
     private static final long REFRESH_TOKEN_EXPIRATION = 604800000L;
 
-    private final JwtService jwtService = new JwtService(
-        TEST_SECRET,
-        ACCESS_TOKEN_EXPIRATION,
-        REFRESH_TOKEN_EXPIRATION
-    );
+    private final JwtService jwtService = new JwtService(TEST_SECRET, ACCESS_TOKEN_EXPIRATION,
+            REFRESH_TOKEN_EXPIRATION);
 
     @Test
     void shouldGenerateValidAccessToken() {
