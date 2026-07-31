@@ -1,6 +1,6 @@
-import "@testing-library/jest-dom/vitest";
-import { describe, it, expect, vi, afterEach } from "vitest";
-import { render, screen, cleanup } from "@testing-library/react";
+import { describe, it, expect, vi } from "vitest";
+import { render, screen } from "@testing-library/react";
+import { usePathname } from "next/navigation";
 import { SideMenu } from "./SideMenu";
 
 vi.mock("next/navigation", () => ({
@@ -12,82 +12,52 @@ vi.mock("next/navigation", () => ({
     refresh: vi.fn(),
     prefetch: vi.fn(),
   }),
-  usePathname: () => "/candidate/dashboard",
+  usePathname: vi.fn(),
 }));
 
+const mockUsePathname = vi.mocked(usePathname);
+
 describe("Side Menu", () => {
-  afterEach(() => {
-    cleanup();
-  });
+  it("renders heading and menu items with links and icons, including items with icon but no link", () => {
+    mockUsePathname.mockReturnValue("/candidate/dashboard");
 
-  it("renders the side menu heading + help text", () => {
-    render(<SideMenu items={[]} />);
-    expect(screen.getByText(/menu principal/i)).toBeInTheDocument();
-    expect(
-      screen.getByText(/acesse rapidamente as principais áreas/i),
-    ).toBeInTheDocument();
-  });
-
-  it("renders the side menu items with labels", () => {
     render(
       <SideMenu
         items={[
           { label: "Dashboard", href: "/candidate/dashboard", icon: "home" },
           { label: "Vagas", href: "/candidate/jobs", icon: "briefcase" },
-          { label: "Sem link" },
+          { label: "Sem link", icon: "code" },
         ]}
       />,
     );
-    expect(screen.getByText(/dashboard/i)).toBeInTheDocument();
-    expect(screen.getByText(/vagas/i)).toBeInTheDocument();
+    expect(screen.getByText(/menu principal/i)).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /dashboard/i })).toHaveAttribute(
+      "href",
+      "/candidate/dashboard",
+    );
+    expect(screen.getByRole("link", { name: /vagas/i })).toHaveAttribute(
+      "href",
+      "/candidate/jobs",
+    );
     expect(screen.getByText(/sem link/i)).toBeInTheDocument();
   });
 
-  it("renders menu items as <Link> with correct href when href is provided", () => {
-    render(
-      <SideMenu
-        items={[{ label: "Dashboard", href: "/candidate/dashboard" }]}
-      />,
-    );
-    const link = screen.getByRole("link", { name: /dashboard/i });
-    expect(link).toBeInTheDocument();
-    expect(link).toHaveAttribute("href", "/candidate/dashboard");
-  });
+  it("selects the most specific (longest) active href when nested path matches multiple items", () => {
+    mockUsePathname.mockReturnValue("/candidate/jobs/detail");
 
-  it("marks the current page item as active based on usePathname", () => {
     render(
       <SideMenu
         items={[
-          { label: "Dashboard", href: "/candidate/dashboard" },
-          { label: "Vagas", href: "/candidate/jobs" },
+          { label: "Candidate Area", href: "/candidate" },
+          { label: "Jobs List", href: "/candidate/jobs" },
         ]}
       />,
     );
 
-    const dashboardLink = screen.getByRole("link", { name: /dashboard/i });
-    const jobsLink = screen.getByRole("link", { name: /vagas/i });
+    const candidateLink = screen.getByRole("link", { name: /candidate area/i });
+    const jobsLink = screen.getByRole("link", { name: /jobs list/i });
 
-    expect(dashboardLink.className).toMatch(/sidebar-primary/i);
-    expect(jobsLink.className).not.toMatch(/sidebar-primary/i);
-  });
-
-  it("navigates correctly (via Next Link — href is the contract)", () => {
-    render(
-      <SideMenu
-        items={[
-          { label: "Testes", href: "/candidate/tests" },
-          { label: "Perfil", href: "/candidate/user" },
-        ]}
-      />,
-    );
-
-    expect(screen.getByRole("link", { name: /testes/i })).toHaveAttribute(
-      "href",
-      "/candidate/tests",
-    );
-    expect(screen.getByRole("link", { name: /perfil/i })).toHaveAttribute(
-      "href",
-      "/candidate/user",
-    );
+    expect(jobsLink.className).toMatch(/sidebar-primary/i);
+    expect(candidateLink.className).not.toMatch(/sidebar-primary/i);
   });
 });

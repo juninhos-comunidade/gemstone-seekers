@@ -1,6 +1,5 @@
-import "@testing-library/jest-dom/vitest";
-import { describe, it, expect, vi, afterEach, beforeEach } from "vitest";
-import { render, screen, cleanup } from "@testing-library/react";
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import { render, screen } from "@testing-library/react";
 import * as React from "react";
 import { useTheme } from "next-themes";
 import { ThemeProvider } from "./theme-provider";
@@ -98,26 +97,7 @@ describe("ThemeProvider", () => {
     globalThis.__themeTestGlobal = undefined;
   });
 
-  afterEach(() => {
-    cleanup();
-  });
-
-  it("renders its children content", () => {
-    render(
-      <ThemeProvider
-        attribute="class"
-        defaultTheme="system"
-        enableSystem
-        disableTransitionOnChange
-      >
-        <p data-testid="child">Hello from ThemeProvider</p>
-      </ThemeProvider>,
-    );
-    expect(screen.getByTestId("child")).toBeInTheDocument();
-    expect(screen.getByText(/Hello from ThemeProvider/i)).toBeInTheDocument();
-  });
-
-  it("forwards attribute, defaultTheme, enableSystem and disableTransitionOnChange to next-themes provider", () => {
+  it("renders children and forwards theme props", () => {
     render(
       <ThemeProvider
         attribute="class"
@@ -125,9 +105,10 @@ describe("ThemeProvider", () => {
         enableSystem
         disableTransitionOnChange
       >
-        <span>hello</span>
+        <p data-testid="child">Hello from ThemeProvider</p>
       </ThemeProvider>,
     );
+    expect(screen.getByTestId("child")).toBeInTheDocument();
 
     const props =
       globalThis.__themeTestGlobal?.__lastThemeProviderProps?.current;
@@ -138,7 +119,7 @@ describe("ThemeProvider", () => {
     expect(props?.disableTransitionOnChange).toBe(true);
   });
 
-  it("allows inner consumers to read the theme context (useTheme works inside)", () => {
+  it("allows inner consumers to read theme context via useTheme", () => {
     const Consumer = () => {
       const { theme, setTheme } = useTheme();
       return (

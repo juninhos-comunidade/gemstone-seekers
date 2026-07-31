@@ -1,14 +1,6 @@
-import "@testing-library/jest-dom/vitest";
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import {
-  render,
-  screen,
-  cleanup,
-  fireEvent,
-  waitFor,
-} from "@testing-library/react";
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { useRouter } from "next/navigation";
-
 import Login from "./page";
 
 vi.mock("next/navigation", () => ({
@@ -17,9 +9,8 @@ vi.mock("next/navigation", () => ({
 
 const mockUseRouter = vi.mocked(useRouter);
 
-describe("Login", () => {
+describe("Login Page", () => {
   const mockPush = vi.fn();
-
   const mockRouter = {
     push: mockPush,
     back: vi.fn(),
@@ -31,37 +22,22 @@ describe("Login", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-
     mockUseRouter.mockReturnValue(mockRouter);
   });
 
-  afterEach(() => {
-    cleanup();
-  });
-
-  it("should render the login page", () => {
+  it("renders login form fields and signup link", () => {
     render(<Login />);
-
     expect(screen.getByRole("heading", { name: "Entrar" })).toBeInTheDocument();
-  });
-
-  it("should render the login form", () => {
-    render(<Login />);
-
     expect(screen.getByRole("textbox", { name: "E-mail" })).toBeInTheDocument();
-
     expect(screen.getByLabelText("Senha")).toBeInTheDocument();
-
     expect(screen.getByRole("button", { name: "Entrar" })).toBeInTheDocument();
-
-    expect(screen.getByText("Não possui uma conta?")).toBeInTheDocument();
-
-    expect(
-      screen.getByRole("link", { name: "Cadastre-se" }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Cadastre-se" })).toHaveAttribute(
+      "href",
+      "/signup/role",
+    );
   });
 
-  it("should navigate to the candidate dashboard", async () => {
+  it("navigates to candidate dashboard on valid form submission", async () => {
     render(<Login />);
 
     fireEvent.change(screen.getByLabelText(/^e-mail$/i), {
@@ -70,22 +46,25 @@ describe("Login", () => {
     fireEvent.change(screen.getByLabelText("Senha"), {
       target: { value: "senha123" },
     });
-
     fireEvent.click(screen.getByRole("button", { name: "Entrar" }));
 
     await waitFor(() => {
-      expect(mockPush).toHaveBeenCalledTimes(1);
+      expect(mockPush).toHaveBeenCalledWith("/candidate/dashboard");
     });
-    expect(mockPush).toHaveBeenCalledWith("/candidate/dashboard");
   });
 
-  it("should have a link to signup/role", () => {
+  it("displays validation error messages for invalid form input", async () => {
     render(<Login />);
 
-    const link = screen.getByRole("link", {
-      name: "Cadastre-se",
+    fireEvent.change(screen.getByLabelText(/^e-mail$/i), {
+      target: { value: "invalid-email" },
     });
+    fireEvent.click(screen.getByRole("button", { name: "Entrar" }));
 
-    expect(link).toHaveAttribute("href", "/signup/role");
+    await waitFor(() => {
+      expect(screen.getByText("E-mail inválido")).toBeInTheDocument();
+      expect(screen.getByText("Senha inválida")).toBeInTheDocument();
+    });
+    expect(mockPush).not.toHaveBeenCalled();
   });
 });
