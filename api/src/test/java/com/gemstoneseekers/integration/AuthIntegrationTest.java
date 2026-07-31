@@ -1,14 +1,14 @@
 package com.gemstoneseekers.integration;
 
-import com.gemstoneseekers.GemstoneSeekersApplication;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.builder.SpringApplicationBuilder;
-import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -17,47 +17,32 @@ import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Map;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Testcontainers
 class AuthIntegrationTest {
 
     @Container
     static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:18.4");
 
-    private static ConfigurableApplicationContext context;
-    private static int port;
+    @LocalServerPort
+    private int port;
 
-    @BeforeAll
-    static void setup() {
-        context = new SpringApplicationBuilder(GemstoneSeekersApplication.class)
-            .properties(Map.of(
-                "spring.datasource.url", postgres.getJdbcUrl(),
-                "spring.datasource.username", postgres.getUsername(),
-                "spring.datasource.password", postgres.getPassword(),
-                "server.port", "0",
-                "jwt.secret", "e93afb5d9ffc2f656b9039f768011829be9a88b539671e8aab8d347949a4da67",
-                "jwt.access-token.expiration", "86400000",
-                "jwt.refresh-token.expiration", "604800000"
-            ))
-            .run();
+    @Autowired
+    private DataSource ds;
 
-        Integer resolvedPort = context.getEnvironment().getProperty("local.server.port", Integer.class);
-        if (resolvedPort == null) {
-            throw new IllegalStateException("Could not resolve local server port");
-        }
-        port = resolvedPort;
-    }
-
-    @AfterAll
-    static void teardown() {
-        if (context != null) {
-            context.close();
-        }
+    @DynamicPropertySource
+    static void configureProperties(DynamicPropertyRegistry registry) {
+        registry.add("spring.datasource.url", postgres::getJdbcUrl);
+        registry.add("spring.datasource.username", postgres::getUsername);
+        registry.add("spring.datasource.password", postgres::getPassword);
+        registry.add("jwt.secret", () -> "e93afb5d9ffc2f656b9039f768011829be9a88b539671e8aab8d347949a4da67");
+        registry.add("jwt.access-token.expiration", () -> "86400000");
+        registry.add("jwt.refresh-token.expiration", () -> "604800000");
     }
 
     @BeforeEach
@@ -65,7 +50,6 @@ class AuthIntegrationTest {
         RestAssured.baseURI = "http://localhost";
         RestAssured.port = port;
 
-        DataSource ds = context.getBean(DataSource.class);
         try (Connection conn = ds.getConnection(); Statement stmt = conn.createStatement()) {
             stmt.execute("TRUNCATE TABLE recruiters, candidates, companies, users CASCADE");
         }
