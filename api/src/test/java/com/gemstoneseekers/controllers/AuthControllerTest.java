@@ -86,7 +86,8 @@ class AuthControllerTest {
         CompleteRegistrationRequest request = new CompleteRegistrationRequest(
             UserRole.CANDIDATE,
             "CPF",
-            "12345678900"
+            "12345678900",
+            null, null, null, null
         );
 
         UUID userId      = UUID.randomUUID();
@@ -127,8 +128,7 @@ class AuthControllerTest {
         String email = "john@example.com";
         CompleteRegistrationRequest request = new CompleteRegistrationRequest(
             UserRole.CANDIDATE,
-            null,
-            null
+            null, null, null, null, null, null
         );
 
         UserDetails userDetails = mock(UserDetails.class);
@@ -147,8 +147,7 @@ class AuthControllerTest {
         String email = "unknown@example.com";
         CompleteRegistrationRequest request = new CompleteRegistrationRequest(
             UserRole.CANDIDATE,
-            null,
-            null
+            null, null, null, null, null, null
         );
 
         UserDetails userDetails = mock(UserDetails.class);
