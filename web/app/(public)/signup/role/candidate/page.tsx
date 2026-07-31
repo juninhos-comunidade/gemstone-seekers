@@ -1,15 +1,58 @@
 "use client";
+
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-import { useRouter } from "next/navigation";
-export default function Page() {
-  const route = useRouter();
+type CandidateRoleFormData = {
+  phone: string;
+  area: string;
+  role: string;
+  experience: string;
+  location: string;
+  resume: string;
+};
 
-  const handleNext = () => {
-    route.push("/candidate/dashboard");
+export default function Page() {
+  const router = useRouter();
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<CandidateRoleFormData>({
+    defaultValues: {
+      phone: "",
+      area: "",
+      role: "",
+      experience: "",
+      location: "",
+      resume: "",
+    },
+  });
+
+  const onSubmit = async (data: CandidateRoleFormData) => {
+    try {
+      const res = await fetch("/api/candidate/profile", {
+        // <- rota real da API
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => null);
+        throw new Error(err?.message ?? "Erro ao concluir cadastro");
+      }
+
+      router.push("/candidate/dashboard");
+    } catch {
+      toast.error("Erro ao concluir cadastro");
+    }
   };
 
   return (
@@ -22,10 +65,21 @@ export default function Page() {
           Complete seu perfil para finalizar o cadastro
         </p>
 
-        <div className="space-y-4">
+        <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
           <div className="space-y-2">
             <Label htmlFor="phone">Telefone</Label>
-            <Input id="phone" type="tel" placeholder="(00) 00000-0000" />
+            <Input
+              id="phone"
+              type="tel"
+              placeholder="(00) 00000-0000"
+              aria-invalid={!!errors.phone}
+              {...register("phone", {
+                required: "Informe o telefone",
+              })}
+            />
+            <span className="text-sm text-red-500">
+              {errors.phone?.message}
+            </span>
           </div>
 
           <div className="space-y-2">
@@ -34,7 +88,12 @@ export default function Page() {
               id="area"
               type="text"
               placeholder="Ex: Tecnologia, Marketing, Vendas..."
+              aria-invalid={!!errors.area}
+              {...register("area", {
+                required: "Informe a área de interesse",
+              })}
             />
+            <span className="text-sm text-red-500">{errors.area?.message}</span>
           </div>
 
           <div className="space-y-2">
@@ -43,7 +102,12 @@ export default function Page() {
               id="role"
               type="text"
               placeholder="Ex: Desenvolvedor Front-end"
+              aria-invalid={!!errors.role}
+              {...register("role", {
+                required: "Informe o cargo desejado",
+              })}
             />
+            <span className="text-sm text-red-500">{errors.role?.message}</span>
           </div>
 
           <div className="space-y-2">
@@ -52,12 +116,30 @@ export default function Page() {
               id="experience"
               type="text"
               placeholder="Ex: Estágio, Júnior, Pleno, Sênior"
+              aria-invalid={!!errors.experience}
+              {...register("experience", {
+                required: "Informe o nível de experiência",
+              })}
             />
+            <span className="text-sm text-red-500">
+              {errors.experience?.message}
+            </span>
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="location">Localização</Label>
-            <Input id="location" type="text" placeholder="Cidade, Estado" />
+            <Input
+              id="location"
+              type="text"
+              placeholder="Cidade, Estado"
+              aria-invalid={!!errors.location}
+              {...register("location", {
+                required: "Informe a localização",
+              })}
+            />
+            <span className="text-sm text-red-500">
+              {errors.location?.message}
+            </span>
           </div>
 
           <div className="space-y-2">
@@ -66,13 +148,20 @@ export default function Page() {
               id="resume"
               type="url"
               placeholder="Link do LinkedIn ou currículo"
+              aria-invalid={!!errors.resume}
+              {...register("resume", {
+                required: "Informe o link do currículo",
+              })}
             />
+            <span className="text-sm text-red-500">
+              {errors.resume?.message}
+            </span>
           </div>
 
-          <Button className="w-full" onClick={handleNext}>
-            Concluir cadastro
+          <Button type="submit" disabled={isSubmitting} className="w-full">
+            {isSubmitting ? "Concluindo..." : "Concluir cadastro"}
           </Button>
-        </div>
+        </form>
 
         <p className="text-muted-foreground mt-6 text-center text-sm">
           Prefere fazer isso depois?{" "}
