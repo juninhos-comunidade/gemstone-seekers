@@ -1,3 +1,23 @@
+// {
+//     "success": true,
+//     "message": "User registered successfully",
+//     "result": {
+//         "id": "019fb938-b6a6-760b-a255-c76cd38d2605",
+//         "name": "test2",
+//         "email": "test2@example.com"
+//     },
+//     "error": null
+// }
+// {
+//     "success": false,
+//     "message": "Email already in use",
+//     "result": null,
+//     "error": {
+//         "code": "CONFLICT",
+//         "message": "Email already in use",
+//         "validations": null
+//     }
+// }
 "use client";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -24,16 +44,25 @@ export default function Page() {
 
   const handleSignUp = async (data: z.infer<typeof schema>) => {
     try {
-      const { confirmPassword: _confirmPassword, ...payload } = data;
+      const payload = {
+        name: data.fullName,
+        email: data.email,
+        password: data.password,
+      };
+
       const res = await fetch("/api/signup", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify(payload),
       });
+
       if (!res.ok) {
         const err = await res.json().catch(() => null);
         throw new Error(err?.message ?? "Falha ao cadastrar");
       }
+
       toast.success("Conta criada com sucesso!");
       router.push("/signup/role");
     } catch (err) {

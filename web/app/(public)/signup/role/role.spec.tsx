@@ -3,14 +3,25 @@ import { render, screen, fireEvent } from "@testing-library/react";
 import { useRouter } from "next/navigation";
 import Role from "./page";
 
+const mockPush = vi.fn();
+const mockHandleSubmit = vi.fn();
+const mockSetValue = vi.fn();
+
 vi.mock("next/navigation", () => ({
   useRouter: vi.fn(),
+}));
+
+vi.mock("react-hook-form", () => ({
+  useForm: () => ({
+    handleSubmit: mockHandleSubmit,
+    setValue: mockSetValue,
+    formState: { isSubmitting: false },
+  }),
 }));
 
 const mockUseRouter = vi.mocked(useRouter);
 
 describe("Role Selection Page", () => {
-  const mockPush = vi.fn();
   const mockRouter = {
     push: mockPush,
     back: vi.fn(),
@@ -23,6 +34,9 @@ describe("Role Selection Page", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockUseRouter.mockReturnValue(mockRouter);
+    mockHandleSubmit.mockImplementation(
+      (callback) => () => callback({ role: "candidate" }),
+    );
   });
 
   it("should renders role selection cards for recruiter and candidate", () => {
@@ -38,14 +52,14 @@ describe("Role Selection Page", () => {
     );
   });
 
-  it("should navigates to recruiter or candidate signup routes on button clicks", () => {
+  it("should set selected role on button clicks", () => {
     render(<Role />);
     const buttons = screen.getAllByRole("button", { name: "Selecionar" });
 
     fireEvent.click(buttons[0]);
-    expect(mockPush).toHaveBeenCalledWith("/signup/role/recruiter");
+    expect(mockSetValue).toHaveBeenCalledWith("role", "recruiter");
 
     fireEvent.click(buttons[1]);
-    expect(mockPush).toHaveBeenCalledWith("/signup/role/candidate");
+    expect(mockSetValue).toHaveBeenCalledWith("role", "candidate");
   });
 });

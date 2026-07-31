@@ -1,15 +1,45 @@
 "use client";
+
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-import { useRouter } from "next/navigation";
-export default function Page() {
-  const route = useRouter();
+type RecruiterRoleFormData = {
+  companyName: string;
+  jobTitle: string;
+  phone: string;
+  companyWebsite: string;
+  companySize: string;
+};
 
-  const handleNext = () => {
-    route.push("/recruiter/dashboard");
+export default function Page() {
+  const router = useRouter();
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<RecruiterRoleFormData>({
+    defaultValues: {
+      companyName: "",
+      jobTitle: "",
+      phone: "",
+      companyWebsite: "",
+      companySize: "",
+    },
+  });
+
+  const onSubmit = async (data: RecruiterRoleFormData) => {
+    try {
+      localStorage.setItem("recruiter-signup-data", JSON.stringify(data));
+      router.push("/recruiter/dashboard");
+    } catch {
+      toast.error("Erro ao concluir cadastro");
+    }
   };
 
   return (
@@ -22,14 +52,21 @@ export default function Page() {
           Complete seu perfil para finalizar o cadastro
         </p>
 
-        <div className="space-y-4">
+        <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
           <div className="space-y-2">
             <Label htmlFor="company-name">Nome da empresa</Label>
             <Input
               id="company-name"
               type="text"
               placeholder="Nome da empresa"
+              aria-invalid={!!errors.companyName}
+              {...register("companyName", {
+                required: "Informe o nome da empresa",
+              })}
             />
+            <span className="text-sm text-red-500">
+              {errors.companyName?.message}
+            </span>
           </div>
 
           <div className="space-y-2">
@@ -38,12 +75,30 @@ export default function Page() {
               id="job-title"
               type="text"
               placeholder="Ex: Analista de RH"
+              aria-invalid={!!errors.jobTitle}
+              {...register("jobTitle", {
+                required: "Informe o cargo",
+              })}
             />
+            <span className="text-sm text-red-500">
+              {errors.jobTitle?.message}
+            </span>
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="phone">Telefone</Label>
-            <Input id="phone" type="tel" placeholder="(00) 00000-0000" />
+            <Input
+              id="phone"
+              type="tel"
+              placeholder="(00) 00000-0000"
+              aria-invalid={!!errors.phone}
+              {...register("phone", {
+                required: "Informe o telefone",
+              })}
+            />
+            <span className="text-sm text-red-500">
+              {errors.phone?.message}
+            </span>
           </div>
 
           <div className="space-y-2">
@@ -52,7 +107,14 @@ export default function Page() {
               id="company-website"
               type="url"
               placeholder="https://suaempresa.com"
+              aria-invalid={!!errors.companyWebsite}
+              {...register("companyWebsite", {
+                required: "Informe o site da empresa",
+              })}
             />
+            <span className="text-sm text-red-500">
+              {errors.companyWebsite?.message}
+            </span>
           </div>
 
           <div className="space-y-2">
@@ -61,13 +123,20 @@ export default function Page() {
               id="company-size"
               type="text"
               placeholder="Ex: 1-10, 11-50, 51-200..."
+              aria-invalid={!!errors.companySize}
+              {...register("companySize", {
+                required: "Informe o tamanho da empresa",
+              })}
             />
+            <span className="text-sm text-red-500">
+              {errors.companySize?.message}
+            </span>
           </div>
 
-          <Button className="w-full" onClick={handleNext}>
-            Concluir cadastro
+          <Button type="submit" disabled={isSubmitting} className="w-full">
+            {isSubmitting ? "Concluindo..." : "Concluir cadastro"}
           </Button>
-        </div>
+        </form>
 
         <p className="text-muted-foreground mt-6 text-center text-sm">
           Prefere fazer isso depois?{" "}

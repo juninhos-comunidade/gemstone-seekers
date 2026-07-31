@@ -10,6 +10,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { PasswordInput } from "@/components/PasswordInput/PasswordInput";
 import { schema } from "@/lib/schemas/loginSchema";
+import { toast } from "sonner";
+import { setAuthToken } from "@/lib/api/auth";
 
 export default function Page() {
   const router = useRouter();
@@ -25,8 +27,37 @@ export default function Page() {
   });
 
   const handleLogin = handleSubmit(async (data) => {
-    console.log(data);
-    router.push("/candidate/dashboard");
+    try {
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+
+      const result = await response.json().catch(() => null);
+
+      if (!response.ok || !result?.success) {
+        toast.error(result?.message ?? "Erro ao fazer login");
+        return;
+      }
+
+      const token =
+        result?.result?.token ??
+        result?.token ??
+        result?.accessToken ??
+        result?.result?.accessToken;
+
+      if (token) {
+        setAuthToken(token);
+      }
+
+      toast.success("Login realizado com sucesso!");
+      router.push("/candidate/dashboard");
+    } catch {
+      toast.error("Erro ao fazer login");
+    }
   });
 
   return (
@@ -65,12 +96,7 @@ export default function Page() {
             )}
           </div>
 
-          <Button
-            disabled={isSubmitting}
-            className="w-full"
-            type="submit"
-            onClick={isSubmitting ? undefined : handleLogin}
-          >
+          <Button disabled={isSubmitting} className="w-full" type="submit">
             Entrar
           </Button>
         </form>

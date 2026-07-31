@@ -85,7 +85,7 @@ describe("Signup Page", () => {
     expect(options.method).toBe("POST");
     const body = JSON.parse(options.body as string);
     expect(body).toStrictEqual({
-      fullName: "João Pedro",
+      name: "João Pedro",
       email: "joao@example.com",
       password: "abc123",
     });
