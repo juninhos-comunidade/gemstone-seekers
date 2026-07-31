@@ -100,7 +100,9 @@ class AuthIntegrationTest {
                               {
                                   "role": "CANDIDATE",
                                   "documentType": "CPF",
-                                  "documentNumber": "12345678900"
+                                  "documentNumber": "12345678900",
+                                  "phone": "+5511999999999",
+                                  "summary": "Java Developer"
                               }""";
 
         given().contentType(ContentType.JSON).body(completeBody).when().patch("/api/v1/auth/complete-registration")
