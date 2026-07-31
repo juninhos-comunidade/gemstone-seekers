@@ -19,6 +19,8 @@ CREATE TABLE countries
     name        TEXT        NOT NULL,
     code_alpha2 VARCHAR(2)  NOT NULL,
     created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    deleted_at  TIMESTAMPTZ,
     CONSTRAINT pk_countries PRIMARY KEY (id),
     CONSTRAINT uq_countries_name UNIQUE (name),
     CONSTRAINT uq_countries_alpha2 UNIQUE (code_alpha2)
@@ -30,6 +32,8 @@ CREATE TABLE states
     country_id INTEGER     NOT NULL,
     name       TEXT        NOT NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    deleted_at TIMESTAMPTZ,
     CONSTRAINT pk_states PRIMARY KEY (id),
     CONSTRAINT fk_states_country FOREIGN KEY (country_id) REFERENCES countries (id)
 );
@@ -40,13 +44,15 @@ CREATE TABLE cities
     state_id   INTEGER     NOT NULL,
     name       TEXT        NOT NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    deleted_at TIMESTAMPTZ,
     CONSTRAINT pk_cities PRIMARY KEY (id),
     CONSTRAINT fk_cities_state FOREIGN KEY (state_id) REFERENCES states (id)
 );
 
 CREATE TABLE addresses
 (
-    id           UUID DEFAULT uuidv7(),
+    id           UUID                 DEFAULT uuidv7(),
     city_id      INTEGER     NOT NULL,
     zip_code     VARCHAR(20),
     street       TEXT        NOT NULL,
@@ -55,6 +61,7 @@ CREATE TABLE addresses
     complement   TEXT,
     created_at   TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at   TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    deleted_at   TIMESTAMPTZ,
     CONSTRAINT pk_addresses PRIMARY KEY (id),
     CONSTRAINT fk_addresses_city FOREIGN KEY (city_id) REFERENCES cities (id)
 );
@@ -67,11 +74,11 @@ CREATE INDEX idx_addresses_city_id ON addresses (city_id);
 
 CREATE TABLE users
 (
-    id              UUID DEFAULT uuidv7(),
+    id              UUID        DEFAULT uuidv7(),
     name            TEXT        NOT NULL,
     email           TEXT        NOT NULL,
     password        TEXT        NOT NULL,
-    role            user_role   NOT NULL,
+    role            user_role,
     document_type   VARCHAR(20),
     document_number VARCHAR(50),
     created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -84,7 +91,7 @@ CREATE TABLE users
 
 CREATE TABLE companies
 (
-    id         UUID DEFAULT uuidv7(),
+    id         UUID        DEFAULT uuidv7(),
     address_id UUID,
     name       TEXT        NOT NULL,
     cnpj       VARCHAR(14),
@@ -103,6 +110,7 @@ CREATE TABLE technologies
     category   TEXT,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    deleted_at TIMESTAMPTZ,
     CONSTRAINT pk_technologies PRIMARY KEY (id),
     CONSTRAINT uq_technologies_name UNIQUE (name)
 );
@@ -113,6 +121,7 @@ CREATE TABLE languages
     name       TEXT        NOT NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    deleted_at TIMESTAMPTZ,
     CONSTRAINT pk_languages PRIMARY KEY (id),
     CONSTRAINT uq_languages_name UNIQUE (name)
 );
@@ -123,7 +132,7 @@ CREATE TABLE languages
 
 CREATE TABLE recruiters
 (
-    id         UUID DEFAULT uuidv7(),
+    id         UUID        DEFAULT uuidv7(),
     user_id    UUID        NOT NULL,
     company_id UUID        NOT NULL,
     department TEXT,
@@ -140,7 +149,7 @@ CREATE INDEX idx_recruiters_company_id ON recruiters (company_id);
 
 CREATE TABLE candidates
 (
-    id         UUID DEFAULT uuidv7(),
+    id         UUID        DEFAULT uuidv7(),
     user_id    UUID        NOT NULL,
     address_id UUID,
     phone      VARCHAR(20),
@@ -156,12 +165,13 @@ CREATE TABLE candidates
 
 CREATE TABLE candidate_links
 (
-    id           UUID DEFAULT uuidv7(),
+    id           UUID        DEFAULT uuidv7(),
     candidate_id UUID        NOT NULL,
     name         VARCHAR(50) NOT NULL,
     url          TEXT        NOT NULL,
     created_at   TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at   TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    deleted_at   TIMESTAMPTZ,
     CONSTRAINT pk_candidate_links PRIMARY KEY (id),
     CONSTRAINT fk_candidate_links_candidate FOREIGN KEY (candidate_id) REFERENCES candidates (id)
 );
@@ -186,7 +196,7 @@ CREATE INDEX idx_candidate_languages_lang_id ON candidate_languages (language_id
 
 CREATE TABLE experiences
 (
-    id           UUID DEFAULT uuidv7(),
+    id           UUID        DEFAULT uuidv7(),
     candidate_id UUID        NOT NULL,
     title        TEXT        NOT NULL,
     company_name TEXT        NOT NULL,
@@ -214,7 +224,7 @@ CREATE TABLE experience_technologies
 
 CREATE TABLE educations
 (
-    id              UUID DEFAULT uuidv7(),
+    id              UUID        DEFAULT uuidv7(),
     candidate_id    UUID        NOT NULL,
     institution     TEXT        NOT NULL,
     field_of_study  TEXT        NOT NULL,
@@ -241,7 +251,7 @@ CREATE TABLE education_technologies
 
 CREATE TABLE certifications
 (
-    id                   UUID DEFAULT uuidv7(),
+    id                   UUID        DEFAULT uuidv7(),
     candidate_id         UUID        NOT NULL,
     name                 TEXT        NOT NULL,
     issuing_organization TEXT        NOT NULL,
@@ -259,7 +269,7 @@ CREATE INDEX idx_certifications_candidate_id ON certifications (candidate_id);
 
 CREATE TABLE projects
 (
-    id           UUID DEFAULT uuidv7(),
+    id           UUID        DEFAULT uuidv7(),
     candidate_id UUID        NOT NULL,
     name         TEXT        NOT NULL,
     description  TEXT,
@@ -290,18 +300,18 @@ CREATE TABLE project_technologies
 
 CREATE TABLE jobs
 (
-    id              UUID DEFAULT uuidv7(),
-    recruiter_id    UUID           NOT NULL,
-    company_id      UUID           NOT NULL,
-    title           TEXT           NOT NULL,
-    description     TEXT           NOT NULL,
+    id              UUID        DEFAULT uuidv7(),
+    recruiter_id    UUID        NOT NULL,
+    company_id      UUID        NOT NULL,
+    title           TEXT        NOT NULL,
+    description     TEXT        NOT NULL,
     seniority_level TEXT,
     department      TEXT,
     salary_min      DECIMAL(10, 2),
     salary_max      DECIMAL(10, 2),
-    status          job_status     NOT NULL DEFAULT 'OPEN',
-    created_at      TIMESTAMPTZ    NOT NULL DEFAULT NOW(),
-    updated_at      TIMESTAMPTZ    NOT NULL DEFAULT NOW(),
+    status          job_status  NOT NULL DEFAULT 'OPEN',
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     deleted_at      TIMESTAMPTZ,
     CONSTRAINT pk_jobs PRIMARY KEY (id),
     CONSTRAINT fk_jobs_recruiter FOREIGN KEY (recruiter_id) REFERENCES recruiters (id),
@@ -350,6 +360,7 @@ CREATE TABLE question_options
     is_correct  BOOLEAN     NOT NULL DEFAULT FALSE,
     created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    deleted_at  TIMESTAMPTZ,
     CONSTRAINT pk_question_options PRIMARY KEY (id),
     CONSTRAINT fk_question_options_question FOREIGN KEY (question_id) REFERENCES questions (id)
 );
@@ -358,7 +369,7 @@ CREATE INDEX idx_question_options_question_id ON question_options (question_id);
 
 CREATE TABLE tests
 (
-    id            UUID DEFAULT uuidv7(),
+    id            UUID        DEFAULT uuidv7(),
     candidate_id  UUID        NOT NULL,
     technology_id INTEGER     NOT NULL,
     status        test_status NOT NULL DEFAULT 'IN_PROGRESS',
@@ -385,6 +396,7 @@ CREATE TABLE candidate_answers
     selected_option_id BIGINT,
     is_correct         BOOLEAN,
     created_at         TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    deleted_at         TIMESTAMPTZ,
     CONSTRAINT pk_candidate_answers PRIMARY KEY (id),
     CONSTRAINT uq_candidate_answers UNIQUE (test_id, question_id),
     CONSTRAINT fk_candidate_answers_test FOREIGN KEY (test_id) REFERENCES tests (id),
