@@ -189,6 +189,15 @@ components:
           type: string
         documentNumber:
           type: string
+        phone:
+          type: string
+        summary:
+          type: string
+        companyId:
+          type: string
+          format: uuid
+        department:
+          type: string
       required:
       - role
     BaseResponseCompleteRegistrationResponse:

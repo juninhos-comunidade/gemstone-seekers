@@ -10,19 +10,11 @@ import com.gemstoneseekers.models.User;
 public class UserMapper {
 
     public RegisterResponse toRegisterResponse(User user) {
-        return new RegisterResponse(
-            user.getId(),
-            user.getName(),
-            user.getEmail());
+        return new RegisterResponse(user.getId(), user.getName(), user.getEmail());
     }
 
     public CompleteRegistrationResponse toCompleteRegistrationResponse(User user) {
-        return new CompleteRegistrationResponse(
-            user.getId(),
-            user.getName(),
-            user.getEmail(),
-            user.getRole(),
-            user.getDocumentType(),
-            user.getDocumentNumber());
+        return new CompleteRegistrationResponse(user.getId(), user.getName(), user.getEmail(), user.getRole(),
+                user.getDocumentType(), user.getDocumentNumber());
     }
 }

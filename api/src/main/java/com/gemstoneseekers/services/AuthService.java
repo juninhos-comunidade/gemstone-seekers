@@ -28,13 +28,9 @@ public class AuthService {
     private final RecruiterRepository recruiterRepository;
     private final CompanyRepository companyRepository;
 
-    public AuthService(
-        UserRepository userRepository,
-        PasswordEncoder passwordEncoder,
-        JwtService jwtService,
-        CandidateRepository candidateRepository,
-        RecruiterRepository recruiterRepository,
-        CompanyRepository companyRepository) {
+    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtService jwtService,
+            CandidateRepository candidateRepository, RecruiterRepository recruiterRepository,
+            CompanyRepository companyRepository) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
@@ -54,11 +50,8 @@ public class AuthService {
         return userRepository.save(user);
     }
 
-    public User completeRegistration(
-        String email,
-        CompleteRegistrationRequest request) {
-        User user = userRepository.findByEmail(email)
-            .orElseThrow(() -> new EntityNotFoundException("User", email));
+    public User completeRegistration(String email, CompleteRegistrationRequest request) {
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new EntityNotFoundException("User", email));
         if (user.getRole() != null) {
             throw new ConflictException("Registration already completed");
         }
@@ -66,8 +59,7 @@ public class AuthService {
         Company company = null;
         if (request.role() == UserRole.RECRUITER) {
             company = companyRepository.findById(request.companyId())
-                .orElseThrow(() -> new EntityNotFoundException(
-                    "Company", request.companyId().toString()));
+                    .orElseThrow(() -> new EntityNotFoundException("Company", request.companyId().toString()));
         }
 
         user.setRole(request.role());
@@ -97,11 +89,11 @@ public class AuthService {
 
     public LoginResponse login(LoginRequest request) {
         User user = userRepository.findByEmail(request.email())
-            .orElseThrow(() -> new AccessDeniedException("Invalid email or password"));
+                .orElseThrow(() -> new AccessDeniedException("Invalid email or password"));
         if (!passwordEncoder.matches(request.password(), user.getPassword())) {
             throw new AccessDeniedException("Invalid email or password");
         }
-        String accessToken  = jwtService.generateAccessToken(user);
+        String accessToken = jwtService.generateAccessToken(user);
         String refreshToken = jwtService.generateRefreshToken(user);
         return new LoginResponse(accessToken, refreshToken, user.getRole() != null);
     }
@@ -112,8 +104,8 @@ public class AuthService {
         }
         String email = jwtService.extractEmail(refreshToken);
         User user = userRepository.findByEmail(email)
-            .orElseThrow(() -> new AccessDeniedException("Invalid refresh token"));
-        String newAccessToken  = jwtService.generateAccessToken(user);
+                .orElseThrow(() -> new AccessDeniedException("Invalid refresh token"));
+        String newAccessToken = jwtService.generateAccessToken(user);
         String newRefreshToken = jwtService.generateRefreshToken(user);
         return new LoginResponse(newAccessToken, newRefreshToken, user.getRole() != null);
     }

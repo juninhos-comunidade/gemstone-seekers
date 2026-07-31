@@ -29,45 +29,38 @@ public class AuthController {
     private final AuthService authService;
     private final UserMapper userMapper;
 
-    public AuthController(
-        AuthService authService,
-        UserMapper userMapper) {
+    public AuthController(AuthService authService, UserMapper userMapper) {
         this.authService = authService;
         this.userMapper = userMapper;
     }
 
     @PostMapping("/register")
     public ResponseEntity<BaseResponse<RegisterResponse>> register(@Valid @RequestBody RegisterRequest request) {
-        User             user     = authService.register(request);
+        User user = authService.register(request);
         RegisterResponse response = userMapper.toRegisterResponse(user);
         return ResponseEntity.status(HttpStatus.CREATED)
-            .body(new BaseResponse<>(true, "User registered successfully", response, null));
+                .body(new BaseResponse<>(true, "User registered successfully", response, null));
     }
 
     @PatchMapping("/complete-registration")
     public ResponseEntity<BaseResponse<CompleteRegistrationResponse>> completeRegistration(
-        @AuthenticationPrincipal UserDetails userDetails,
-        @Valid @RequestBody CompleteRegistrationRequest request) {
-        User                         user     = authService.completeRegistration(userDetails.getUsername(), request);
+            @AuthenticationPrincipal UserDetails userDetails, @Valid @RequestBody CompleteRegistrationRequest request) {
+        User user = authService.completeRegistration(userDetails.getUsername(), request);
         CompleteRegistrationResponse response = userMapper.toCompleteRegistrationResponse(user);
-        return ResponseEntity
-            .status(HttpStatus.OK)
-            .body(new BaseResponse<>(true, "Registration completed successfully", response, null));
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new BaseResponse<>(true, "Registration completed successfully", response, null));
     }
 
     @PostMapping("/login")
     public ResponseEntity<BaseResponse<LoginResponse>> login(@Valid @RequestBody LoginRequest request) {
         LoginResponse response = authService.login(request);
-        return ResponseEntity
-            .status(HttpStatus.OK)
-            .body(new BaseResponse<>(true, "Login successful", response, null));
+        return ResponseEntity.status(HttpStatus.OK).body(new BaseResponse<>(true, "Login successful", response, null));
     }
 
     @PostMapping("/refresh")
     public ResponseEntity<BaseResponse<LoginResponse>> refresh(@Valid @RequestBody RefreshTokenRequest request) {
         LoginResponse response = authService.refreshToken(request.refreshToken());
-        return ResponseEntity
-            .status(HttpStatus.OK)
-            .body(new BaseResponse<>(true, "Token refreshed successfully", response, null));
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new BaseResponse<>(true, "Token refreshed successfully", response, null));
     }
 }
