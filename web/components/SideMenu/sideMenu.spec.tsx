@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
+import { usePathname } from "next/navigation";
 import { SideMenu } from "./SideMenu";
 
 vi.mock("next/navigation", () => ({
@@ -11,17 +12,21 @@ vi.mock("next/navigation", () => ({
     refresh: vi.fn(),
     prefetch: vi.fn(),
   }),
-  usePathname: () => "/candidate/dashboard",
+  usePathname: vi.fn(),
 }));
 
+const mockUsePathname = vi.mocked(usePathname);
+
 describe("Side Menu", () => {
-  it("renders heading and menu items with links and icons", () => {
+  it("renders heading and menu items with links and icons, including items with icon but no link", () => {
+    mockUsePathname.mockReturnValue("/candidate/dashboard");
+
     render(
       <SideMenu
         items={[
           { label: "Dashboard", href: "/candidate/dashboard", icon: "home" },
           { label: "Vagas", href: "/candidate/jobs", icon: "briefcase" },
-          { label: "Sem link" },
+          { label: "Sem link", icon: "code" },
         ]}
       />,
     );
@@ -37,20 +42,22 @@ describe("Side Menu", () => {
     expect(screen.getByText(/sem link/i)).toBeInTheDocument();
   });
 
-  it("marks active page based on usePathname", () => {
+  it("selects the most specific (longest) active href when nested path matches multiple items", () => {
+    mockUsePathname.mockReturnValue("/candidate/jobs/detail");
+
     render(
       <SideMenu
         items={[
-          { label: "Dashboard", href: "/candidate/dashboard" },
-          { label: "Vagas", href: "/candidate/jobs" },
+          { label: "Candidate Area", href: "/candidate" },
+          { label: "Jobs List", href: "/candidate/jobs" },
         ]}
       />,
     );
 
-    const dashboardLink = screen.getByRole("link", { name: /dashboard/i });
-    const jobsLink = screen.getByRole("link", { name: /vagas/i });
+    const candidateLink = screen.getByRole("link", { name: /candidate area/i });
+    const jobsLink = screen.getByRole("link", { name: /jobs list/i });
 
-    expect(dashboardLink.className).toMatch(/sidebar-primary/i);
-    expect(jobsLink.className).not.toMatch(/sidebar-primary/i);
+    expect(jobsLink.className).toMatch(/sidebar-primary/i);
+    expect(candidateLink.className).not.toMatch(/sidebar-primary/i);
   });
 });

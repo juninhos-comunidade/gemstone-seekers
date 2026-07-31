@@ -25,7 +25,7 @@ describe("Login Page", () => {
     mockUseRouter.mockReturnValue(mockRouter);
   });
 
-  it("should renders login form fields and signup link", () => {
+  it("renders login form fields and signup link", () => {
     render(<Login />);
     expect(screen.getByRole("heading", { name: "Entrar" })).toBeInTheDocument();
     expect(screen.getByRole("textbox", { name: "E-mail" })).toBeInTheDocument();
@@ -37,7 +37,7 @@ describe("Login Page", () => {
     );
   });
 
-  it("should navigates to candidate dashboard on valid form submission", async () => {
+  it("navigates to candidate dashboard on valid form submission", async () => {
     render(<Login />);
 
     fireEvent.change(screen.getByLabelText(/^e-mail$/i), {
@@ -51,5 +51,20 @@ describe("Login Page", () => {
     await waitFor(() => {
       expect(mockPush).toHaveBeenCalledWith("/candidate/dashboard");
     });
+  });
+
+  it("displays validation error messages for invalid form input", async () => {
+    render(<Login />);
+
+    fireEvent.change(screen.getByLabelText(/^e-mail$/i), {
+      target: { value: "invalid-email" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Entrar" }));
+
+    await waitFor(() => {
+      expect(screen.getByText("E-mail inválido")).toBeInTheDocument();
+      expect(screen.getByText("Senha inválida")).toBeInTheDocument();
+    });
+    expect(mockPush).not.toHaveBeenCalled();
   });
 });
