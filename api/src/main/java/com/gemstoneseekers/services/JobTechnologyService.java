@@ -36,7 +36,7 @@ public class JobTechnologyService {
         Technology technology = technologyRepository.findById(request.technologyId())
                 .orElseThrow(() -> new EntityNotFoundException("Technology", request.technologyId()));
 
-        if (jobTechnologyRepository.existsByJob_IdAndTechnology_Id(jobId, request.technologyId())) {
+        if (jobTechnologyRepository.existsByJobIdAndTechnologyId(jobId, request.technologyId())) {
             throw new ConflictException("Technology is already linked to this job");
         }
 
@@ -46,13 +46,13 @@ public class JobTechnologyService {
     }
 
     public void removeTechnology(UUID jobId, Integer technologyId) {
-        if (!jobTechnologyRepository.existsByJob_IdAndTechnology_Id(jobId, technologyId)) {
+        if (!jobTechnologyRepository.existsByJobIdAndTechnologyId(jobId, technologyId)) {
             throw new EntityNotFoundException("JobTechnology", jobId + "/" + technologyId);
         }
-        jobTechnologyRepository.deleteByJob_IdAndTechnology_Id(jobId, technologyId);
+        jobTechnologyRepository.deleteByJobIdAndTechnologyId(jobId, technologyId);
     }
 
     public List<JobTechnology> findByJobId(UUID jobId) {
-        return jobTechnologyRepository.findByJob_Id(jobId);
+        return jobTechnologyRepository.findByJobId(jobId);
     }
 }

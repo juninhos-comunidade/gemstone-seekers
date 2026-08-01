@@ -44,7 +44,7 @@ class JobTechnologyServiceTest {
         technology.setName("Java");
         when(jobRepository.findByIdAndDeletedAtIsNull(jobId)).thenReturn(Optional.of(job));
         when(technologyRepository.findById(technologyId)).thenReturn(Optional.of(technology));
-        when(jobTechnologyRepository.existsByJob_IdAndTechnology_Id(jobId, technologyId)).thenReturn(false);
+        when(jobTechnologyRepository.existsByJobIdAndTechnologyId(jobId, technologyId)).thenReturn(false);
         when(jobTechnologyRepository.save(any(JobTechnology.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
@@ -68,7 +68,7 @@ class JobTechnologyServiceTest {
         technology.setId(technologyId);
         when(jobRepository.findByIdAndDeletedAtIsNull(jobId)).thenReturn(Optional.of(job));
         when(technologyRepository.findById(technologyId)).thenReturn(Optional.of(technology));
-        when(jobTechnologyRepository.existsByJob_IdAndTechnology_Id(jobId, technologyId)).thenReturn(false);
+        when(jobTechnologyRepository.existsByJobIdAndTechnologyId(jobId, technologyId)).thenReturn(false);
         when(jobTechnologyRepository.save(any(JobTechnology.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
@@ -89,7 +89,7 @@ class JobTechnologyServiceTest {
         technology.setId(technologyId);
         when(jobRepository.findByIdAndDeletedAtIsNull(jobId)).thenReturn(Optional.of(job));
         when(technologyRepository.findById(technologyId)).thenReturn(Optional.of(technology));
-        when(jobTechnologyRepository.existsByJob_IdAndTechnology_Id(jobId, technologyId)).thenReturn(false);
+        when(jobTechnologyRepository.existsByJobIdAndTechnologyId(jobId, technologyId)).thenReturn(false);
         when(jobTechnologyRepository.save(any(JobTechnology.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
@@ -137,7 +137,7 @@ class JobTechnologyServiceTest {
         technology.setId(technologyId);
         when(jobRepository.findByIdAndDeletedAtIsNull(jobId)).thenReturn(Optional.of(job));
         when(technologyRepository.findById(technologyId)).thenReturn(Optional.of(technology));
-        when(jobTechnologyRepository.existsByJob_IdAndTechnology_Id(jobId, technologyId)).thenReturn(true);
+        when(jobTechnologyRepository.existsByJobIdAndTechnologyId(jobId, technologyId)).thenReturn(true);
 
         assertThatThrownBy(() -> jobTechnologyService.addTechnology(jobId, request))
                 .isInstanceOf(ConflictException.class).hasMessage("Technology is already linked to this job");
@@ -148,22 +148,22 @@ class JobTechnologyServiceTest {
     void shouldRemoveTechnologyFromJobSuccessfully() {
         UUID jobId = UUID.randomUUID();
         Integer technologyId = 1;
-        when(jobTechnologyRepository.existsByJob_IdAndTechnology_Id(jobId, technologyId)).thenReturn(true);
+        when(jobTechnologyRepository.existsByJobIdAndTechnologyId(jobId, technologyId)).thenReturn(true);
 
         jobTechnologyService.removeTechnology(jobId, technologyId);
 
-        verify(jobTechnologyRepository).deleteByJob_IdAndTechnology_Id(jobId, technologyId);
+        verify(jobTechnologyRepository).deleteByJobIdAndTechnologyId(jobId, technologyId);
     }
 
     @Test
     void shouldThrowEntityNotFoundExceptionWhenRemovingNonexistentLink() {
         UUID jobId = UUID.randomUUID();
         Integer technologyId = 1;
-        when(jobTechnologyRepository.existsByJob_IdAndTechnology_Id(jobId, technologyId)).thenReturn(false);
+        when(jobTechnologyRepository.existsByJobIdAndTechnologyId(jobId, technologyId)).thenReturn(false);
 
         assertThatThrownBy(() -> jobTechnologyService.removeTechnology(jobId, technologyId))
                 .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("JobTechnology");
-        verify(jobTechnologyRepository, never()).deleteByJob_IdAndTechnology_Id(any(), any());
+        verify(jobTechnologyRepository, never()).deleteByJobIdAndTechnologyId(any(), any());
     }
 
     @Test
@@ -179,7 +179,7 @@ class JobTechnologyServiceTest {
         tech2.setName("Spring");
         JobTechnology jt1 = new JobTechnology(job, tech1, true);
         JobTechnology jt2 = new JobTechnology(job, tech2, false);
-        when(jobTechnologyRepository.findByJob_Id(jobId)).thenReturn(List.of(jt1, jt2));
+        when(jobTechnologyRepository.findByJobId(jobId)).thenReturn(List.of(jt1, jt2));
 
         List<JobTechnology> result = jobTechnologyService.findByJobId(jobId);
 

@@ -10,8 +10,8 @@ import com.gemstoneseekers.models.JobTechnology;
 import com.gemstoneseekers.models.JobTechnologyId;
 
 public interface JobTechnologyRepository extends JpaRepository<JobTechnology, JobTechnologyId> {
-    List<JobTechnology> findByJob_Id(UUID jobId);
-    Optional<JobTechnology> findByJob_IdAndTechnology_Id(UUID jobId, Integer technologyId);
-    boolean existsByJob_IdAndTechnology_Id(UUID jobId, Integer technologyId);
-    void deleteByJob_IdAndTechnology_Id(UUID jobId, Integer technologyId);
+    List<JobTechnology> findByJobId(UUID jobId);
+    Optional<JobTechnology> findByJobIdAndTechnology_Id(UUID jobId, Integer technologyId);
+    boolean existsByJobIdAndTechnologyId(UUID jobId, Integer technologyId);
+    void deleteByJobIdAndTechnologyId(UUID jobId, Integer technologyId);
 }

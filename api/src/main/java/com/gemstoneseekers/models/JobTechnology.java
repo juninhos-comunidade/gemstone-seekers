@@ -31,7 +31,7 @@ public class JobTechnology {
     private Technology technology;
 
     @Column(name = "is_mandatory", nullable = false)
-    private Boolean isMandatory = true;
+    private Boolean isMandatory;
 
     public JobTechnology(Job job, Technology technology, Boolean isMandatory) {
         this.job = job;
