@@ -8,7 +8,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.gemstoneseekers.dtos.response.LanguageResponse;
 import com.gemstoneseekers.models.Language;
 import com.gemstoneseekers.repositories.LanguageRepository;
 
@@ -26,7 +25,7 @@ class LanguageServiceTest {
     private LanguageService languageService;
 
     @Test
-    void shouldReturnAllLanguagesAsResponse() {
+    void shouldReturnAllLanguages() {
         Language lang1 = new Language();
         lang1.setId(1);
         lang1.setName("Portuguese");
@@ -37,13 +36,10 @@ class LanguageServiceTest {
 
         when(languageRepository.findAll()).thenReturn(List.of(lang1, lang2));
 
-        List<LanguageResponse> result = languageService.getLanguages();
+        List<Language> result = languageService.getLanguages();
 
         assertThat(result).hasSize(2);
-        assertThat(result.getFirst().id()).isEqualTo(1);
-        assertThat(result.getFirst().name()).isEqualTo("Portuguese");
-        assertThat(result.get(1).id()).isEqualTo(2);
-        assertThat(result.get(1).name()).isEqualTo("English");
+        assertThat(result).containsExactly(lang1, lang2);
         verify(languageRepository).findAll();
     }
 
@@ -51,7 +47,7 @@ class LanguageServiceTest {
     void shouldReturnEmptyListWhenNoLanguages() {
         when(languageRepository.findAll()).thenReturn(List.of());
 
-        List<LanguageResponse> result = languageService.getLanguages();
+        List<Language> result = languageService.getLanguages();
 
         assertThat(result).isEmpty();
         verify(languageRepository).findAll();

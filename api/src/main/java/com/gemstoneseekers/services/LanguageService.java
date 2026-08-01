@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import com.gemstoneseekers.dtos.response.LanguageResponse;
 import com.gemstoneseekers.models.Language;
 import com.gemstoneseekers.repositories.LanguageRepository;
 
@@ -17,8 +16,7 @@ public class LanguageService {
         this.languageRepository = languageRepository;
     }
 
-    public List<LanguageResponse> getLanguages() {
-        List<Language> languages = languageRepository.findAll();
-        return languages.stream().map(l -> new LanguageResponse(l.getId(), l.getName())).toList();
+    public List<Language> getLanguages() {
+        return languageRepository.findAll();
     }
 }
