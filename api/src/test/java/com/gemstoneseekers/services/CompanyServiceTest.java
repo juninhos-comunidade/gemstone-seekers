@@ -1,16 +1,15 @@
 package com.gemstoneseekers.services;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-
-import org.junit.jupiter.api.Test;
-
 import com.gemstoneseekers.dtos.request.CompanyRequest;
 import com.gemstoneseekers.exceptions.ConflictException;
 import com.gemstoneseekers.exceptions.EntityNotFoundException;
 import com.gemstoneseekers.models.Company;
 import com.gemstoneseekers.repositories.CompanyRepository;
+import org.junit.jupiter.api.Test;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -58,7 +57,7 @@ class CompanyServiceTest {
         when(companyRepository.existsByCnpjAndDeletedAtIsNull("12345678000190")).thenReturn(true);
 
         assertThatThrownBy(() -> companyService.create(request)).isInstanceOf(ConflictException.class)
-                .hasMessage("CNPJ already in use");
+            .hasMessage("CNPJ already in use");
         verify(companyRepository, never()).save(any());
     }
 
@@ -81,7 +80,7 @@ class CompanyServiceTest {
 
     @Test
     void shouldFindCompanyById() {
-        UUID id = UUID.randomUUID();
+        UUID    id      = UUID.randomUUID();
         Company company = new Company();
         company.setId(id);
         company.setName("Tech Corp");
@@ -100,12 +99,12 @@ class CompanyServiceTest {
         when(companyRepository.findByIdAndDeletedAtIsNull(id)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> companyService.findById(id)).isInstanceOf(EntityNotFoundException.class)
-                .hasMessageContaining("Company");
+            .hasMessageContaining("Company");
     }
 
     @Test
     void shouldUpdateCompanyNameAndCnpj() {
-        UUID id = UUID.randomUUID();
+        UUID    id       = UUID.randomUUID();
         Company existing = new Company();
         existing.setId(id);
         existing.setName("Old Name");
@@ -124,7 +123,7 @@ class CompanyServiceTest {
 
     @Test
     void shouldUpdateCompanyNameWithoutChangingCnpjWhenCnpjIsSame() {
-        UUID id = UUID.randomUUID();
+        UUID    id       = UUID.randomUUID();
         Company existing = new Company();
         existing.setId(id);
         existing.setName("Old Name");
@@ -141,7 +140,7 @@ class CompanyServiceTest {
 
     @Test
     void shouldThrowConflictExceptionWhenUpdatingToExistingCnpj() {
-        UUID id = UUID.randomUUID();
+        UUID    id       = UUID.randomUUID();
         Company existing = new Company();
         existing.setId(id);
         existing.setName("Old Name");
@@ -151,13 +150,13 @@ class CompanyServiceTest {
         when(companyRepository.existsByCnpjAndDeletedAtIsNull("12345678000190")).thenReturn(true);
 
         assertThatThrownBy(() -> companyService.update(id, request)).isInstanceOf(ConflictException.class)
-                .hasMessage("CNPJ already in use");
+            .hasMessage("CNPJ already in use");
         verify(companyRepository, never()).save(any());
     }
 
     @Test
     void shouldThrowEntityNotFoundExceptionWhenUpdatingNonexistentCompany() {
-        UUID id = UUID.randomUUID();
+        UUID           id      = UUID.randomUUID();
         CompanyRequest request = new CompanyRequest("New Name", null);
         when(companyRepository.findByIdAndDeletedAtIsNull(id)).thenReturn(Optional.empty());
 
@@ -167,7 +166,7 @@ class CompanyServiceTest {
 
     @Test
     void shouldDeleteCompanyBySettingDeletedAt() {
-        UUID id = UUID.randomUUID();
+        UUID    id       = UUID.randomUUID();
         Company existing = new Company();
         existing.setId(id);
         existing.setName("Tech Corp");
@@ -187,5 +186,54 @@ class CompanyServiceTest {
 
         assertThatThrownBy(() -> companyService.delete(id)).isInstanceOf(EntityNotFoundException.class);
         verify(companyRepository, never()).save(any());
+    }
+
+    @Test
+    void shouldCreateCompanyWithBlankCnpj() {
+        CompanyRequest request = new CompanyRequest("Tech Corp", "");
+        when(companyRepository.save(any(Company.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        Company result = companyService.create(request);
+
+        assertThat(result).isNotNull();
+        assertThat(result.getName()).isEqualTo("Tech Corp");
+        assertThat(result.getCnpj()).isEqualTo("");
+        verify(companyRepository, never()).existsByCnpjAndDeletedAtIsNull(any());
+    }
+
+    @Test
+    void shouldUpdateCompanyWithNullCnpj() {
+        UUID    id       = UUID.randomUUID();
+        Company existing = new Company();
+        existing.setId(id);
+        existing.setName("Old Name");
+        existing.setCnpj("12345678000190");
+        CompanyRequest request = new CompanyRequest("New Name", null);
+        when(companyRepository.findByIdAndDeletedAtIsNull(id)).thenReturn(Optional.of(existing));
+        when(companyRepository.save(any(Company.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        Company result = companyService.update(id, request);
+
+        assertThat(result.getName()).isEqualTo("New Name");
+        assertThat(result.getCnpj()).isEqualTo("12345678000190");
+        verify(companyRepository, never()).existsByCnpjAndDeletedAtIsNull(any());
+    }
+
+    @Test
+    void shouldUpdateCompanyWithBlankCnpj() {
+        UUID    id       = UUID.randomUUID();
+        Company existing = new Company();
+        existing.setId(id);
+        existing.setName("Old Name");
+        existing.setCnpj("12345678000190");
+        CompanyRequest request = new CompanyRequest("New Name", "   ");
+        when(companyRepository.findByIdAndDeletedAtIsNull(id)).thenReturn(Optional.of(existing));
+        when(companyRepository.save(any(Company.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        Company result = companyService.update(id, request);
+
+        assertThat(result.getName()).isEqualTo("New Name");
+        assertThat(result.getCnpj()).isEqualTo("12345678000190");
+        verify(companyRepository, never()).existsByCnpjAndDeletedAtIsNull(any());
     }
 }
