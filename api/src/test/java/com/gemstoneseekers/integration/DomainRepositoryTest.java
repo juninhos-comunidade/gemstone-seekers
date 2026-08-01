@@ -36,8 +36,8 @@ class DomainRepositoryTest {
     @BeforeAll
     static void setup() {
         Flyway flyway = Flyway.configure()
-            .dataSource(postgres.getJdbcUrl(), postgres.getUsername(), postgres.getPassword())
-            .locations("classpath:db/migration").load();
+                .dataSource(postgres.getJdbcUrl(), postgres.getUsername(), postgres.getPassword())
+                .locations("classpath:db/migration").load();
         flyway.migrate();
 
         Configuration cfg = new Configuration();
@@ -129,10 +129,8 @@ class DomainRepositoryTest {
             em.getTransaction().commit();
             em.clear();
 
-            Candidate found = em.createQuery(
-                "SELECT c FROM Candidate c JOIN FETCH c.user WHERE c.user.id = :userId",
-                Candidate.class
-            ).setParameter("userId", user.getId()).getSingleResult();
+            Candidate found = em.createQuery("SELECT c FROM Candidate c JOIN FETCH c.user WHERE c.user.id = :userId",
+                    Candidate.class).setParameter("userId", user.getId()).getSingleResult();
 
             assertThat(found).isNotNull();
             assertThat(found.getPhone()).isEqualTo("+5511999999999");
@@ -170,9 +168,8 @@ class DomainRepositoryTest {
             em.clear();
 
             Recruiter found = em.createQuery(
-                "SELECT r FROM Recruiter r JOIN FETCH r.user JOIN FETCH r.company WHERE r.user.id = :userId",
-                Recruiter.class
-            ).setParameter("userId", user.getId()).getSingleResult();
+                    "SELECT r FROM Recruiter r JOIN FETCH r.user JOIN FETCH r.company WHERE r.user.id = :userId",
+                    Recruiter.class).setParameter("userId", user.getId()).getSingleResult();
 
             assertThat(found).isNotNull();
             assertThat(found.getDepartment()).isEqualTo("Engineering");

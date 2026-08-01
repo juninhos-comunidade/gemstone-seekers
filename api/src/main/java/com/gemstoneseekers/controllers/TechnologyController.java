@@ -25,6 +25,6 @@ public class TechnologyController {
     public ResponseEntity<BaseResponse<List<TechnologyResponse>>> getTechnologies() {
         List<TechnologyResponse> technologies = technologyService.getTechnologies();
         return ResponseEntity.status(HttpStatus.OK)
-            .body(new BaseResponse<>(true, "Technologies retrieved successfully", technologies, null));
+                .body(new BaseResponse<>(true, "Technologies retrieved successfully", technologies, null));
     }
 }

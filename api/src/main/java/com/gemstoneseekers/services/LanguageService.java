@@ -19,8 +19,6 @@ public class LanguageService {
 
     public List<LanguageResponse> getLanguages() {
         List<Language> languages = languageRepository.findAll();
-        return languages.stream()
-            .map(l -> new LanguageResponse(l.getId(), l.getName()))
-            .toList();
+        return languages.stream().map(l -> new LanguageResponse(l.getId(), l.getName())).toList();
     }
 }

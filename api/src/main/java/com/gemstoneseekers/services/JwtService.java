@@ -18,10 +18,9 @@ public class JwtService {
     private final long accessTokenExpiration;
     private final long refreshTokenExpiration;
 
-    public JwtService(
-        @Value("${jwt.secret}") String secret,
-        @Value("${jwt.access-token.expiration}") long accessTokenExpiration,
-        @Value("${jwt.refresh-token.expiration}") long refreshTokenExpiration) {
+    public JwtService(@Value("${jwt.secret}") String secret,
+            @Value("${jwt.access-token.expiration}") long accessTokenExpiration,
+            @Value("${jwt.refresh-token.expiration}") long refreshTokenExpiration) {
         this.key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
         this.accessTokenExpiration = accessTokenExpiration;
         this.refreshTokenExpiration = refreshTokenExpiration;
@@ -48,11 +47,9 @@ public class JwtService {
         return Jwts.parser().verifyWith(key).build().parseSignedClaims(token).getPayload().getSubject();
     }
 
-    private String buildToken(
-        User user,
-        long expiration) {
+    private String buildToken(User user, long expiration) {
         Instant now = Instant.now();
         return Jwts.builder().subject(user.getEmail()).issuedAt(Date.from(now))
-            .expiration(Date.from(now.plusMillis(expiration))).signWith(key).compact();
+                .expiration(Date.from(now.plusMillis(expiration))).signWith(key).compact();
     }
 }

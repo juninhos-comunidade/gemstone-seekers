@@ -31,13 +31,13 @@ public class StateController {
     public ResponseEntity<BaseResponse<List<StateResponse>>> getStates() {
         List<StateResponse> states = stateService.getStates();
         return ResponseEntity.status(HttpStatus.OK)
-            .body(new BaseResponse<>(true, "States retrieved successfully", states, null));
+                .body(new BaseResponse<>(true, "States retrieved successfully", states, null));
     }
 
     @GetMapping("/{stateId}/cities")
     public ResponseEntity<BaseResponse<List<CityResponse>>> getCitiesByState(@PathVariable Integer stateId) {
         List<CityResponse> cities = cityService.getCitiesByStateId(stateId);
         return ResponseEntity.status(HttpStatus.OK)
-            .body(new BaseResponse<>(true, "Cities retrieved successfully", cities, null));
+                .body(new BaseResponse<>(true, "Cities retrieved successfully", cities, null));
     }
 }
