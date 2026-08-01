@@ -6,11 +6,72 @@ servers:
 - url: http://localhost:8080
   description: Generated server url
 paths:
+  /api/v1/jobs/{id}:
+    get:
+      tags:
+      - job-controller
+      operationId: findById
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/BaseResponseJobResponse"
+    put:
+      tags:
+      - job-controller
+      operationId: update
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/JobRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/BaseResponseJobResponse"
+    delete:
+      tags:
+      - job-controller
+      operationId: delete
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/BaseResponseVoid"
   /api/v1/companies/{id}:
     get:
       tags:
       - company-controller
-      operationId: findById
+      operationId: findById_1
       parameters:
       - name: id
         in: path
@@ -28,7 +89,7 @@ paths:
     put:
       tags:
       - company-controller
-      operationId: update
+      operationId: update_1
       parameters:
       - name: id
         in: path
@@ -52,7 +113,7 @@ paths:
     delete:
       tags:
       - company-controller
-      operationId: delete
+      operationId: delete_1
       parameters:
       - name: id
         in: path
@@ -67,11 +128,40 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/BaseResponseVoid"
+  /api/v1/jobs:
+    get:
+      tags:
+      - job-controller
+      operationId: findAll
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/BaseResponseListJobResponse"
+    post:
+      tags:
+      - job-controller
+      operationId: create
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/JobRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/BaseResponseJobResponse"
   /api/v1/companies:
     get:
       tags:
       - company-controller
-      operationId: findAll
+      operationId: findAll_1
       responses:
         "200":
           description: OK
@@ -82,7 +172,7 @@ paths:
     post:
       tags:
       - company-controller
-      operationId: create
+      operationId: create_1
       requestBody:
         content:
           application/json:
@@ -215,7 +305,7 @@ paths:
     get:
       tags:
       - recruiter-controller
-      operationId: findById_1
+      operationId: findById_2
       parameters:
       - name: id
         in: path
@@ -232,6 +322,93 @@ paths:
                 $ref: "#/components/schemas/BaseResponseRecruiterResponse"
 components:
   schemas:
+    JobRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 1
+        description:
+          type: string
+          minLength: 1
+        seniorityLevel:
+          type: string
+        department:
+          type: string
+        salaryMin:
+          type: number
+        salaryMax:
+          type: number
+        recruiterId:
+          type: string
+          format: uuid
+        companyId:
+          type: string
+          format: uuid
+      required:
+      - companyId
+      - description
+      - recruiterId
+      - title
+    BaseResponseJobResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        result:
+          $ref: "#/components/schemas/JobResponse"
+        error:
+          $ref: "#/components/schemas/ErrorResponse"
+    ErrorResponse:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        validations:
+          type: array
+          items:
+            $ref: "#/components/schemas/ValidationError"
+    JobResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        description:
+          type: string
+        seniorityLevel:
+          type: string
+        department:
+          type: string
+        salaryMin:
+          type: number
+        salaryMax:
+          type: number
+        status:
+          type: string
+          enum:
+          - OPEN
+          - CLOSED
+          - CANCELLED
+        recruiterId:
+          type: string
+          format: uuid
+        companyId:
+          type: string
+          format: uuid
+    ValidationError:
+      type: object
+      properties:
+        field:
+          type: string
+        message:
+          type: string
     CompanyRequest:
       type: object
       properties:
@@ -262,24 +439,6 @@ components:
         name:
           type: string
         cnpj:
-          type: string
-    ErrorResponse:
-      type: object
-      properties:
-        code:
-          type: string
-        message:
-          type: string
-        validations:
-          type: array
-          items:
-            $ref: "#/components/schemas/ValidationError"
-    ValidationError:
-      type: object
-      properties:
-        field:
-          type: string
-        message:
           type: string
     RecruiterRequest:
       type: object
@@ -448,6 +607,19 @@ components:
           type: string
         documentNumber:
           type: string
+    BaseResponseListJobResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        result:
+          type: array
+          items:
+            $ref: "#/components/schemas/JobResponse"
+        error:
+          $ref: "#/components/schemas/ErrorResponse"
     BaseResponseListCompanyResponse:
       type: object
       properties:
