@@ -8,7 +8,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.gemstoneseekers.dtos.response.CountryResponse;
 import com.gemstoneseekers.models.Country;
 import com.gemstoneseekers.repositories.CountryRepository;
 
@@ -26,7 +25,7 @@ class CountryServiceTest {
     private CountryService countryService;
 
     @Test
-    void shouldReturnAllCountriesAsResponse() {
+    void shouldReturnAllCountries() {
         Country country1 = new Country();
         country1.setId(1);
         country1.setName("Brazil");
@@ -39,15 +38,10 @@ class CountryServiceTest {
 
         when(countryRepository.findAll()).thenReturn(List.of(country1, country2));
 
-        List<CountryResponse> result = countryService.getCountries();
+        List<Country> result = countryService.getCountries();
 
         assertThat(result).hasSize(2);
-        assertThat(result.getFirst().id()).isEqualTo(1);
-        assertThat(result.getFirst().name()).isEqualTo("Brazil");
-        assertThat(result.getFirst().codeAlpha2()).isEqualTo("BR");
-        assertThat(result.get(1).id()).isEqualTo(2);
-        assertThat(result.get(1).name()).isEqualTo("United States");
-        assertThat(result.get(1).codeAlpha2()).isEqualTo("US");
+        assertThat(result).containsExactly(country1, country2);
         verify(countryRepository).findAll();
     }
 
@@ -55,7 +49,7 @@ class CountryServiceTest {
     void shouldReturnEmptyListWhenNoCountries() {
         when(countryRepository.findAll()).thenReturn(List.of());
 
-        List<CountryResponse> result = countryService.getCountries();
+        List<Country> result = countryService.getCountries();
 
         assertThat(result).isEmpty();
         verify(countryRepository).findAll();
