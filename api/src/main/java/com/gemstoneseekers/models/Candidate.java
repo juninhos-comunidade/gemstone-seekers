@@ -38,6 +38,9 @@ public class Candidate extends BaseModel {
     @OneToMany(mappedBy = "candidate", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CandidateLink> links;
 
+    @OneToMany(mappedBy = "candidate", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CandidateLanguage> languages = new ArrayList<>();
+
     @Column(name = "summary")
     private String summary;
 }
