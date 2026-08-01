@@ -39,14 +39,14 @@ public class CompanyService {
 
     public Company findById(UUID id) {
         return companyRepository.findByIdAndDeletedAtIsNull(id)
-            .orElseThrow(() -> new EntityNotFoundException("Company", id));
+                .orElseThrow(() -> new EntityNotFoundException("Company", id));
     }
 
     public Company update(UUID id, CompanyRequest request) {
         Company company = findById(id);
         if (request.cnpj() != null && !request.cnpj().isBlank()) {
             if (!request.cnpj().equals(company.getCnpj())
-                && companyRepository.existsByCnpjAndDeletedAtIsNull(request.cnpj())) {
+                    && companyRepository.existsByCnpjAndDeletedAtIsNull(request.cnpj())) {
                 throw new ConflictException("CNPJ already in use");
             }
             company.setCnpj(request.cnpj());

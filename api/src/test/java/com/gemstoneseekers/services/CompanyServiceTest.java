@@ -1,6 +1,5 @@
 package com.gemstoneseekers.services;
 
-import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -58,9 +57,8 @@ class CompanyServiceTest {
         CompanyRequest request = new CompanyRequest("Tech Corp", "12345678000190");
         when(companyRepository.existsByCnpjAndDeletedAtIsNull("12345678000190")).thenReturn(true);
 
-        assertThatThrownBy(() -> companyService.create(request))
-            .isInstanceOf(ConflictException.class)
-            .hasMessage("CNPJ already in use");
+        assertThatThrownBy(() -> companyService.create(request)).isInstanceOf(ConflictException.class)
+                .hasMessage("CNPJ already in use");
         verify(companyRepository, never()).save(any());
     }
 
@@ -77,7 +75,7 @@ class CompanyServiceTest {
         List<Company> result = companyService.findAll();
 
         assertThat(result).hasSize(2);
-        assertThat(result.get(0).getName()).isEqualTo("Tech Corp");
+        assertThat(result.getFirst().getName()).isEqualTo("Tech Corp");
         assertThat(result.get(1).getName()).isEqualTo("Dev Inc");
     }
 
@@ -101,9 +99,8 @@ class CompanyServiceTest {
         UUID id = UUID.randomUUID();
         when(companyRepository.findByIdAndDeletedAtIsNull(id)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> companyService.findById(id))
-            .isInstanceOf(EntityNotFoundException.class)
-            .hasMessageContaining("Company");
+        assertThatThrownBy(() -> companyService.findById(id)).isInstanceOf(EntityNotFoundException.class)
+                .hasMessageContaining("Company");
     }
 
     @Test
@@ -153,9 +150,8 @@ class CompanyServiceTest {
         when(companyRepository.findByIdAndDeletedAtIsNull(id)).thenReturn(Optional.of(existing));
         when(companyRepository.existsByCnpjAndDeletedAtIsNull("12345678000190")).thenReturn(true);
 
-        assertThatThrownBy(() -> companyService.update(id, request))
-            .isInstanceOf(ConflictException.class)
-            .hasMessage("CNPJ already in use");
+        assertThatThrownBy(() -> companyService.update(id, request)).isInstanceOf(ConflictException.class)
+                .hasMessage("CNPJ already in use");
         verify(companyRepository, never()).save(any());
     }
 
@@ -165,8 +161,7 @@ class CompanyServiceTest {
         CompanyRequest request = new CompanyRequest("New Name", null);
         when(companyRepository.findByIdAndDeletedAtIsNull(id)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> companyService.update(id, request))
-            .isInstanceOf(EntityNotFoundException.class);
+        assertThatThrownBy(() -> companyService.update(id, request)).isInstanceOf(EntityNotFoundException.class);
         verify(companyRepository, never()).save(any());
     }
 
@@ -190,8 +185,7 @@ class CompanyServiceTest {
         UUID id = UUID.randomUUID();
         when(companyRepository.findByIdAndDeletedAtIsNull(id)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> companyService.delete(id))
-            .isInstanceOf(EntityNotFoundException.class);
+        assertThatThrownBy(() -> companyService.delete(id)).isInstanceOf(EntityNotFoundException.class);
         verify(companyRepository, never()).save(any());
     }
 }

@@ -53,8 +53,8 @@ class GlobalExceptionHandlerTest {
         assertEquals("VALIDATION_ERROR", body.error().code());
         assertNotNull(body.error().validations());
         assertEquals(1, body.error().validations().size());
-        assertEquals("email", body.error().validations().get(0).field());
-        assertEquals("Email must be valid", body.error().validations().get(0).message());
+        assertEquals("email", body.error().validations().getFirst().field());
+        assertEquals("Email must be valid", body.error().validations().getFirst().message());
     }
 
     @Test
