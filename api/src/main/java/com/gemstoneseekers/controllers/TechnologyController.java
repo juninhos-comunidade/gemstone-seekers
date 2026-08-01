@@ -28,9 +28,8 @@ public class TechnologyController {
     @GetMapping
     public ResponseEntity<BaseResponse<List<TechnologyResponse>>> getTechnologies() {
         List<TechnologyResponse> technologies = technologyService.getTechnologies().stream()
-            .map(technologyMapper::toTechnologyResponse)
-            .toList();
+                .map(technologyMapper::toTechnologyResponse).toList();
         return ResponseEntity.status(HttpStatus.OK)
-            .body(new BaseResponse<>(true, "Technologies retrieved successfully", technologies, null));
+                .body(new BaseResponse<>(true, "Technologies retrieved successfully", technologies, null));
     }
 }

@@ -26,8 +26,8 @@ public class StateController {
     private final StateMapper stateMapper;
     private final CityMapper cityMapper;
 
-    public StateController(StateService stateService, CityService cityService,
-        StateMapper stateMapper, CityMapper cityMapper) {
+    public StateController(StateService stateService, CityService cityService, StateMapper stateMapper,
+            CityMapper cityMapper) {
         this.stateService = stateService;
         this.cityService = cityService;
         this.stateMapper = stateMapper;
@@ -36,19 +36,16 @@ public class StateController {
 
     @GetMapping
     public ResponseEntity<BaseResponse<List<StateResponse>>> getStates() {
-        List<StateResponse> states = stateService.getStates().stream()
-            .map(stateMapper::toStateResponse)
-            .toList();
+        List<StateResponse> states = stateService.getStates().stream().map(stateMapper::toStateResponse).toList();
         return ResponseEntity.status(HttpStatus.OK)
-            .body(new BaseResponse<>(true, "States retrieved successfully", states, null));
+                .body(new BaseResponse<>(true, "States retrieved successfully", states, null));
     }
 
     @GetMapping("/{stateId}/cities")
     public ResponseEntity<BaseResponse<List<CityResponse>>> getCitiesByState(@PathVariable Integer stateId) {
-        List<CityResponse> cities = cityService.getCitiesByStateId(stateId).stream()
-            .map(cityMapper::toCityResponse)
-            .toList();
+        List<CityResponse> cities = cityService.getCitiesByStateId(stateId).stream().map(cityMapper::toCityResponse)
+                .toList();
         return ResponseEntity.status(HttpStatus.OK)
-            .body(new BaseResponse<>(true, "Cities retrieved successfully", cities, null));
+                .body(new BaseResponse<>(true, "Cities retrieved successfully", cities, null));
     }
 }
