@@ -96,6 +96,49 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/BaseResponseCompanyResponse"
+  /api/v1/companies/{companyId}/recruiters:
+    get:
+      tags:
+      - recruiter-controller
+      operationId: findByCompanyId
+      parameters:
+      - name: companyId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/BaseResponseListRecruiterResponse"
+    post:
+      tags:
+      - recruiter-controller
+      operationId: linkToCompany
+      parameters:
+      - name: companyId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RecruiterRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/BaseResponseRecruiterResponse"
   /api/v1/auth/register:
     post:
       tags:
@@ -168,6 +211,25 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/BaseResponseCompleteRegistrationResponse"
+  /api/v1/recruiters/{id}:
+    get:
+      tags:
+      - recruiter-controller
+      operationId: findById_1
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/BaseResponseRecruiterResponse"
 components:
   schemas:
     CompanyRequest:
@@ -218,6 +280,41 @@ components:
         field:
           type: string
         message:
+          type: string
+    RecruiterRequest:
+      type: object
+      properties:
+        userId:
+          type: string
+          format: uuid
+        department:
+          type: string
+      required:
+      - userId
+    BaseResponseRecruiterResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        result:
+          $ref: "#/components/schemas/RecruiterResponse"
+        error:
+          $ref: "#/components/schemas/ErrorResponse"
+    RecruiterResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        companyId:
+          type: string
+          format: uuid
+        department:
           type: string
     RegisterRequest:
       type: object
@@ -362,6 +459,19 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/CompanyResponse"
+        error:
+          $ref: "#/components/schemas/ErrorResponse"
+    BaseResponseListRecruiterResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        result:
+          type: array
+          items:
+            $ref: "#/components/schemas/RecruiterResponse"
         error:
           $ref: "#/components/schemas/ErrorResponse"
     BaseResponseVoid:
