@@ -8,7 +8,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.gemstoneseekers.dtos.response.TechnologyResponse;
 import com.gemstoneseekers.models.Technology;
 import com.gemstoneseekers.repositories.TechnologyRepository;
 
@@ -26,7 +25,7 @@ class TechnologyServiceTest {
     private TechnologyService technologyService;
 
     @Test
-    void shouldReturnAllTechnologiesAsResponse() {
+    void shouldReturnAllTechnologies() {
         Technology tech1 = new Technology();
         tech1.setId(1);
         tech1.setName("Java");
@@ -39,15 +38,10 @@ class TechnologyServiceTest {
 
         when(technologyRepository.findAll()).thenReturn(List.of(tech1, tech2));
 
-        List<TechnologyResponse> result = technologyService.getTechnologies();
+        List<Technology> result = technologyService.getTechnologies();
 
         assertThat(result).hasSize(2);
-        assertThat(result.getFirst().id()).isEqualTo(1);
-        assertThat(result.getFirst().name()).isEqualTo("Java");
-        assertThat(result.getFirst().category()).isEqualTo("Programming Language");
-        assertThat(result.get(1).id()).isEqualTo(2);
-        assertThat(result.get(1).name()).isEqualTo("React");
-        assertThat(result.get(1).category()).isEqualTo("Frontend Framework");
+        assertThat(result).containsExactly(tech1, tech2);
         verify(technologyRepository).findAll();
     }
 
@@ -55,7 +49,7 @@ class TechnologyServiceTest {
     void shouldReturnEmptyListWhenNoTechnologies() {
         when(technologyRepository.findAll()).thenReturn(List.of());
 
-        List<TechnologyResponse> result = technologyService.getTechnologies();
+        List<Technology> result = technologyService.getTechnologies();
 
         assertThat(result).isEmpty();
         verify(technologyRepository).findAll();
