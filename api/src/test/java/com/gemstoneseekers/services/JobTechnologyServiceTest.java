@@ -35,7 +35,7 @@ class JobTechnologyServiceTest {
     @Test
     void shouldAddTechnologyToJobSuccessfully() {
         UUID jobId = UUID.randomUUID();
-        Long technologyId = 1L;
+        Integer technologyId = 1;
         JobTechnologyRequest request = new JobTechnologyRequest(technologyId, true);
         Job job = new Job();
         job.setId(jobId);
@@ -60,7 +60,7 @@ class JobTechnologyServiceTest {
     @Test
     void shouldAddTechnologyWithDefaultMandatoryWhenNull() {
         UUID jobId = UUID.randomUUID();
-        Long technologyId = 1L;
+        Integer technologyId = 1;
         JobTechnologyRequest request = new JobTechnologyRequest(technologyId, null);
         Job job = new Job();
         job.setId(jobId);
@@ -81,7 +81,7 @@ class JobTechnologyServiceTest {
     @Test
     void shouldAddTechnologyAsOptional() {
         UUID jobId = UUID.randomUUID();
-        Long technologyId = 1L;
+        Integer technologyId = 1;
         JobTechnologyRequest request = new JobTechnologyRequest(technologyId, false);
         Job job = new Job();
         job.setId(jobId);
@@ -102,7 +102,7 @@ class JobTechnologyServiceTest {
     @Test
     void shouldThrowEntityNotFoundExceptionWhenJobNotFound() {
         UUID jobId = UUID.randomUUID();
-        JobTechnologyRequest request = new JobTechnologyRequest(1L, true);
+        JobTechnologyRequest request = new JobTechnologyRequest(1, true);
         when(jobRepository.findByIdAndDeletedAtIsNull(jobId)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> jobTechnologyService.addTechnology(jobId, request))
@@ -114,7 +114,7 @@ class JobTechnologyServiceTest {
     @Test
     void shouldThrowEntityNotFoundExceptionWhenTechnologyNotFound() {
         UUID jobId = UUID.randomUUID();
-        Long technologyId = 1L;
+        Integer technologyId = 1;
         JobTechnologyRequest request = new JobTechnologyRequest(technologyId, true);
         Job job = new Job();
         job.setId(jobId);
@@ -129,7 +129,7 @@ class JobTechnologyServiceTest {
     @Test
     void shouldThrowConflictExceptionWhenTechnologyAlreadyLinked() {
         UUID jobId = UUID.randomUUID();
-        Long technologyId = 1L;
+        Integer technologyId = 1;
         JobTechnologyRequest request = new JobTechnologyRequest(technologyId, true);
         Job job = new Job();
         job.setId(jobId);
@@ -147,7 +147,7 @@ class JobTechnologyServiceTest {
     @Test
     void shouldRemoveTechnologyFromJobSuccessfully() {
         UUID jobId = UUID.randomUUID();
-        Long technologyId = 1L;
+        Integer technologyId = 1;
         when(jobTechnologyRepository.existsByJob_IdAndTechnology_Id(jobId, technologyId)).thenReturn(true);
 
         jobTechnologyService.removeTechnology(jobId, technologyId);
@@ -158,7 +158,7 @@ class JobTechnologyServiceTest {
     @Test
     void shouldThrowEntityNotFoundExceptionWhenRemovingNonexistentLink() {
         UUID jobId = UUID.randomUUID();
-        Long technologyId = 1L;
+        Integer technologyId = 1;
         when(jobTechnologyRepository.existsByJob_IdAndTechnology_Id(jobId, technologyId)).thenReturn(false);
 
         assertThatThrownBy(() -> jobTechnologyService.removeTechnology(jobId, technologyId))
@@ -172,10 +172,10 @@ class JobTechnologyServiceTest {
         Job job = new Job();
         job.setId(jobId);
         Technology tech1 = new Technology();
-        tech1.setId(1L);
+        tech1.setId(1);
         tech1.setName("Java");
         Technology tech2 = new Technology();
-        tech2.setId(2L);
+        tech2.setId(2);
         tech2.setName("Spring");
         JobTechnology jt1 = new JobTechnology(job, tech1, true);
         JobTechnology jt2 = new JobTechnology(job, tech2, false);

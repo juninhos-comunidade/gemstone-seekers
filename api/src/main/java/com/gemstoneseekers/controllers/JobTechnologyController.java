@@ -54,7 +54,7 @@ public class JobTechnologyController {
 
     @DeleteMapping("/{technologyId}")
     public ResponseEntity<BaseResponse<Void>> removeTechnology(@PathVariable UUID jobId,
-            @PathVariable Long technologyId) {
+            @PathVariable Integer technologyId) {
         jobTechnologyService.removeTechnology(jobId, technologyId);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(new BaseResponse<>(true, "Technology unlinked from job successfully", null, null));

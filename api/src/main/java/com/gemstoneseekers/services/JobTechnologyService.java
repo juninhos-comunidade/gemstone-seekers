@@ -45,7 +45,7 @@ public class JobTechnologyService {
         return jobTechnologyRepository.save(jobTechnology);
     }
 
-    public void removeTechnology(UUID jobId, Long technologyId) {
+    public void removeTechnology(UUID jobId, Integer technologyId) {
         if (!jobTechnologyRepository.existsByJob_IdAndTechnology_Id(jobId, technologyId)) {
             throw new EntityNotFoundException("JobTechnology", jobId + "/" + technologyId);
         }

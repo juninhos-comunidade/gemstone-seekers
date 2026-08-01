@@ -17,5 +17,5 @@ import lombok.Setter;
 public class JobTechnologyId implements Serializable {
 
     private UUID job;
-    private Long technology;
+    private Integer technology;
 }

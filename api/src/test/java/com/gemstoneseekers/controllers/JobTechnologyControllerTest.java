@@ -31,7 +31,7 @@ class JobTechnologyControllerTest {
     @Test
     void shouldAddTechnologyToJobAndReturnCreatedStatus() {
         UUID jobId = UUID.randomUUID();
-        Long technologyId = 1L;
+        Integer technologyId = 1;
         JobTechnologyRequest request = new JobTechnologyRequest(technologyId, true);
         Job job = new Job();
         job.setId(jobId);
@@ -64,15 +64,15 @@ class JobTechnologyControllerTest {
         Job job = new Job();
         job.setId(jobId);
         Technology tech1 = new Technology();
-        tech1.setId(1L);
+        tech1.setId(1);
         tech1.setName("Java");
         Technology tech2 = new Technology();
-        tech2.setId(2L);
+        tech2.setId(2);
         tech2.setName("Spring");
         JobTechnology jt1 = new JobTechnology(job, tech1, true);
         JobTechnology jt2 = new JobTechnology(job, tech2, false);
-        JobTechnologyResponse response1 = new JobTechnologyResponse(1L, "Java", "Backend", true);
-        JobTechnologyResponse response2 = new JobTechnologyResponse(2L, "Spring", "Backend", false);
+        JobTechnologyResponse response1 = new JobTechnologyResponse(1, "Java", "Backend", true);
+        JobTechnologyResponse response2 = new JobTechnologyResponse(2, "Spring", "Backend", false);
         when(jobTechnologyService.findByJobId(jobId)).thenReturn(List.of(jt1, jt2));
         when(jobTechnologyMapper.toJobTechnologyResponse(jt1)).thenReturn(response1);
         when(jobTechnologyMapper.toJobTechnologyResponse(jt2)).thenReturn(response2);
@@ -94,7 +94,7 @@ class JobTechnologyControllerTest {
     @Test
     void shouldRemoveTechnologyFromJobAndReturnOkStatus() {
         UUID jobId = UUID.randomUUID();
-        Long technologyId = 1L;
+        Integer technologyId = 1;
 
         ResponseEntity<BaseResponse<Void>> result = jobTechnologyController.removeTechnology(jobId, technologyId);
 

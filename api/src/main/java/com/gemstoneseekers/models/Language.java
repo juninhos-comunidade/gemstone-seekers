@@ -11,11 +11,11 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "technologies")
+@Table(name = "languages")
 @Getter
 @Setter
 @NoArgsConstructor
-public class Technology extends BaseModel {
+public class Language extends BaseModel {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", updatable = false, nullable = false)
@@ -23,7 +23,4 @@ public class Technology extends BaseModel {
 
     @Column(name = "name", nullable = false)
     private String name;
-
-    @Column(name = "category")
-    private String category;
 }
