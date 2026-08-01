@@ -105,7 +105,7 @@ class JobServiceTest {
         List<Job> result = jobService.findAll();
 
         assertThat(result).hasSize(2);
-        assertThat(result.get(0).getTitle()).isEqualTo("Java Developer");
+        assertThat(result.getFirst().getTitle()).isEqualTo("Java Developer");
         assertThat(result.get(1).getTitle()).isEqualTo("Python Developer");
     }
 

@@ -140,7 +140,7 @@ class RecruiterServiceTest {
         List<Recruiter> result = recruiterService.findByCompanyId(companyId);
 
         assertThat(result).hasSize(2);
-        assertThat(result.get(0).getDepartment()).isEqualTo("Engineering");
+        assertThat(result.getFirst().getDepartment()).isEqualTo("Engineering");
         assertThat(result.get(1).getDepartment()).isEqualTo("Marketing");
     }
 

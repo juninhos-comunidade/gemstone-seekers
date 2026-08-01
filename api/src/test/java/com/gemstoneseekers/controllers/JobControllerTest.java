@@ -87,7 +87,7 @@ class JobControllerTest {
         assertThat(body).isNotNull();
         assertThat(body.success()).isTrue();
         assertThat(body.result()).hasSize(2);
-        assertThat(body.result().get(0).title()).isEqualTo("Java Developer");
+        assertThat(body.result().getFirst().title()).isEqualTo("Java Developer");
         assertThat(body.result().get(1).title()).isEqualTo("Python Developer");
         verify(jobService).findAll();
     }

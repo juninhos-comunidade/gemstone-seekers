@@ -80,7 +80,7 @@ class RecruiterControllerTest {
         assertThat(body).isNotNull();
         assertThat(body.success()).isTrue();
         assertThat(body.result()).hasSize(2);
-        assertThat(body.result().get(0).department()).isEqualTo("Engineering");
+        assertThat(body.result().getFirst().department()).isEqualTo("Engineering");
         assertThat(body.result().get(1).department()).isEqualTo("Marketing");
         verify(recruiterService).findByCompanyId(companyId);
     }
