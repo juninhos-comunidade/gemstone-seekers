@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import com.gemstoneseekers.dtos.response.CountryResponse;
 import com.gemstoneseekers.models.Country;
 import com.gemstoneseekers.repositories.CountryRepository;
 
@@ -17,8 +16,7 @@ public class CountryService {
         this.countryRepository = countryRepository;
     }
 
-    public List<CountryResponse> getCountries() {
-        List<Country> countries = countryRepository.findAll();
-        return countries.stream().map(c -> new CountryResponse(c.getId(), c.getName(), c.getCodeAlpha2())).toList();
+    public List<Country> getCountries() {
+        return countryRepository.findAll();
     }
 }
