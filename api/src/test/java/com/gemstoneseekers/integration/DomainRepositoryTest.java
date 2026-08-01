@@ -6,8 +6,10 @@ import com.gemstoneseekers.models.Candidate;
 import com.gemstoneseekers.models.City;
 import com.gemstoneseekers.models.Company;
 import com.gemstoneseekers.models.Country;
+import com.gemstoneseekers.models.Language;
 import com.gemstoneseekers.models.Recruiter;
 import com.gemstoneseekers.models.State;
+import com.gemstoneseekers.models.Technology;
 import com.gemstoneseekers.models.User;
 import jakarta.persistence.EntityManager;
 import org.flywaydb.core.Flyway;
@@ -54,6 +56,8 @@ class DomainRepositoryTest {
         cfg.addAnnotatedClass(City.class);
         cfg.addAnnotatedClass(State.class);
         cfg.addAnnotatedClass(Country.class);
+        cfg.addAnnotatedClass(Technology.class);
+        cfg.addAnnotatedClass(Language.class);
 
         sessionFactory = cfg.buildSessionFactory();
     }
@@ -73,6 +77,8 @@ class DomainRepositoryTest {
             em.createNativeQuery("DELETE FROM candidates").executeUpdate();
             em.createNativeQuery("DELETE FROM companies").executeUpdate();
             em.createNativeQuery("DELETE FROM users").executeUpdate();
+            em.createNativeQuery("DELETE FROM technologies").executeUpdate();
+            em.createNativeQuery("DELETE FROM languages").executeUpdate();
             em.getTransaction().commit();
         }
     }
@@ -169,6 +175,44 @@ class DomainRepositoryTest {
             assertThat(found.getDepartment()).isEqualTo("Engineering");
             assertThat(found.getCompany().getName()).isEqualTo("Tech Corp");
             assertThat(found.getUser().getId()).isEqualTo(user.getId());
+        }
+    }
+
+    @Test
+    void shouldSaveAndFindTechnology() {
+        try (EntityManager em = sessionFactory.createEntityManager()) {
+            em.getTransaction().begin();
+            Technology technology = new Technology();
+            technology.setName("Java");
+            technology.setCategory("Programming Language");
+            em.persist(technology);
+            em.getTransaction().commit();
+            em.clear();
+
+            Technology found = em.find(Technology.class, technology.getId());
+            assertThat(found).isNotNull();
+            assertThat(found.getName()).isEqualTo("Java");
+            assertThat(found.getCategory()).isEqualTo("Programming Language");
+            assertThat(found.getCreatedAt()).isNotNull();
+            assertThat(found.getUpdatedAt()).isNotNull();
+        }
+    }
+
+    @Test
+    void shouldSaveAndFindLanguage() {
+        try (EntityManager em = sessionFactory.createEntityManager()) {
+            em.getTransaction().begin();
+            Language language = new Language();
+            language.setName("Portuguese");
+            em.persist(language);
+            em.getTransaction().commit();
+            em.clear();
+
+            Language found = em.find(Language.class, language.getId());
+            assertThat(found).isNotNull();
+            assertThat(found.getName()).isEqualTo("Portuguese");
+            assertThat(found.getCreatedAt()).isNotNull();
+            assertThat(found.getUpdatedAt()).isNotNull();
         }
     }
 }

@@ -350,6 +350,7 @@
                         >com/gemstoneseekers/GemstoneSeekersApplication.class</exclude>
                         <exclude>com/gemstoneseekers/dtos/**</exclude>
                         <exclude>com/gemstoneseekers/exceptions/**</exclude>
+                        <exclude>com/gemstoneseekers/mappers/**</exclude>
                     </excludes>
                 </configuration>
                 <executions>

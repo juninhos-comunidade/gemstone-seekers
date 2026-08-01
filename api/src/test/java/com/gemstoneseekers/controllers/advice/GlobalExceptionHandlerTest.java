@@ -18,9 +18,7 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import java.util.List;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -33,28 +31,25 @@ class GlobalExceptionHandlerTest {
         BindingResult bindingResult = mock(BindingResult.class);
         FieldError fieldError = new FieldError("userRequest", "email", "Email must be valid");
         when(bindingResult.getFieldErrors()).thenReturn(List.of(fieldError));
-
         MethodArgumentNotValidException ex = mock(MethodArgumentNotValidException.class);
         when(ex.getBindingResult()).thenReturn(bindingResult);
-
         WebRequest request = mock(WebRequest.class);
         HttpHeaders headers = new HttpHeaders();
 
         ResponseEntity<Object> response = handler.handleMethodArgumentNotValid(ex, headers, HttpStatus.BAD_REQUEST,
                 request);
 
-        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        assertNotNull(response.getBody());
-
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(response.getBody()).isNotNull();
         @SuppressWarnings("unchecked")
         BaseResponse<Void> body = (BaseResponse<Void>) response.getBody();
-        assertFalse(body.success());
-        assertEquals("Validation failed", body.message());
-        assertEquals("VALIDATION_ERROR", body.error().code());
-        assertNotNull(body.error().validations());
-        assertEquals(1, body.error().validations().size());
-        assertEquals("email", body.error().validations().get(0).field());
-        assertEquals("Email must be valid", body.error().validations().get(0).message());
+        assertThat(body.success()).isFalse();
+        assertThat(body.message()).isEqualTo("Validation failed");
+        assertThat(body.error().code()).isEqualTo("VALIDATION_ERROR");
+        assertThat(body.error().validations()).isNotNull();
+        assertThat(body.error().validations()).hasSize(1);
+        assertThat(body.error().validations().getFirst().field()).isEqualTo("email");
+        assertThat(body.error().validations().getFirst().message()).isEqualTo("Email must be valid");
     }
 
     @Test
@@ -63,10 +58,10 @@ class GlobalExceptionHandlerTest {
 
         ResponseEntity<BaseResponse<Void>> response = handler.handleEntityNotFound(ex);
 
-        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertFalse(response.getBody().success());
-        assertEquals("NOT_FOUND", response.getBody().error().code());
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().success()).isFalse();
+        assertThat(response.getBody().error().code()).isEqualTo("NOT_FOUND");
     }
 
     @Test
@@ -75,11 +70,11 @@ class GlobalExceptionHandlerTest {
 
         ResponseEntity<BaseResponse<Void>> response = handler.handleIllegalArgument(ex);
 
-        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertFalse(response.getBody().success());
-        assertEquals("INVALID_ARGUMENT", response.getBody().error().code());
-        assertEquals("Invalid input argument", response.getBody().error().message());
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().success()).isFalse();
+        assertThat(response.getBody().error().code()).isEqualTo("INVALID_ARGUMENT");
+        assertThat(response.getBody().error().message()).isEqualTo("Invalid input argument");
     }
 
     @Test
@@ -88,11 +83,11 @@ class GlobalExceptionHandlerTest {
 
         ResponseEntity<BaseResponse<Void>> response = handler.handleConflictException(ex);
 
-        assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertFalse(response.getBody().success());
-        assertEquals("CONFLICT", response.getBody().error().code());
-        assertEquals("Email already in use", response.getBody().error().message());
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().success()).isFalse();
+        assertThat(response.getBody().error().code()).isEqualTo("CONFLICT");
+        assertThat(response.getBody().error().message()).isEqualTo("Email already in use");
     }
 
     @Test
@@ -101,11 +96,11 @@ class GlobalExceptionHandlerTest {
 
         ResponseEntity<BaseResponse<Void>> response = handler.handleAccessDeniedException(ex);
 
-        assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertFalse(response.getBody().success());
-        assertEquals("ACCESS_DENIED", response.getBody().error().code());
-        assertEquals("User missing required role", response.getBody().error().message());
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().success()).isFalse();
+        assertThat(response.getBody().error().code()).isEqualTo("ACCESS_DENIED");
+        assertThat(response.getBody().error().message()).isEqualTo("User missing required role");
     }
 
     @Test
@@ -114,11 +109,11 @@ class GlobalExceptionHandlerTest {
 
         ResponseEntity<BaseResponse<Void>> response = handler.handleGenericException(ex);
 
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertFalse(response.getBody().success());
-        assertEquals("INTERNAL_ERROR", response.getBody().error().code());
-        assertEquals("Internal server error", response.getBody().message());
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().success()).isFalse();
+        assertThat(response.getBody().error().code()).isEqualTo("INTERNAL_ERROR");
+        assertThat(response.getBody().message()).isEqualTo("Internal server error");
     }
 
     @Test
@@ -130,13 +125,12 @@ class GlobalExceptionHandlerTest {
         ResponseEntity<Object> response = handler.handleHttpMessageNotReadable(ex, headers, HttpStatus.BAD_REQUEST,
                 request);
 
-        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        assertNotNull(response.getBody());
-
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(response.getBody()).isNotNull();
         @SuppressWarnings("unchecked")
         BaseResponse<Void> body = (BaseResponse<Void>) response.getBody();
-        assertFalse(body.success());
-        assertEquals("MALFORMED_JSON", body.error().code());
+        assertThat(body.success()).isFalse();
+        assertThat(body.error().code()).isEqualTo("MALFORMED_JSON");
     }
 
     @Test
@@ -149,13 +143,12 @@ class GlobalExceptionHandlerTest {
         ResponseEntity<Object> response = handler.handleHttpRequestMethodNotSupported(ex, headers,
                 HttpStatus.METHOD_NOT_ALLOWED, request);
 
-        assertEquals(HttpStatus.METHOD_NOT_ALLOWED, response.getStatusCode());
-        assertNotNull(response.getBody());
-
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.METHOD_NOT_ALLOWED);
+        assertThat(response.getBody()).isNotNull();
         @SuppressWarnings("unchecked")
         BaseResponse<Void> body = (BaseResponse<Void>) response.getBody();
-        assertFalse(body.success());
-        assertEquals("METHOD_NOT_ALLOWED", body.error().code());
+        assertThat(body.success()).isFalse();
+        assertThat(body.error().code()).isEqualTo("METHOD_NOT_ALLOWED");
     }
 
     @Test
@@ -166,11 +159,11 @@ class GlobalExceptionHandlerTest {
 
         ResponseEntity<BaseResponse<Void>> response = handler.handleTypeMismatch(ex);
 
-        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertFalse(response.getBody().success());
-        assertEquals("INVALID_PARAMETER", response.getBody().error().code());
-        assertEquals("Parameter 'id' should be of type 'UUID'", response.getBody().message());
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().success()).isFalse();
+        assertThat(response.getBody().error().code()).isEqualTo("INVALID_PARAMETER");
+        assertThat(response.getBody().message()).isEqualTo("Parameter 'id' should be of type 'UUID'");
     }
 
     @Test
@@ -181,11 +174,11 @@ class GlobalExceptionHandlerTest {
 
         ResponseEntity<BaseResponse<Void>> response = handler.handleTypeMismatch(ex);
 
-        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertFalse(response.getBody().success());
-        assertEquals("INVALID_PARAMETER", response.getBody().error().code());
-        assertEquals("Parameter 'id' should be of type 'unknown'", response.getBody().message());
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().success()).isFalse();
+        assertThat(response.getBody().error().code()).isEqualTo("INVALID_PARAMETER");
+        assertThat(response.getBody().message()).isEqualTo("Parameter 'id' should be of type 'unknown'");
     }
 
     @Test
@@ -195,9 +188,9 @@ class GlobalExceptionHandlerTest {
 
         ResponseEntity<BaseResponse<Void>> response = handler.handleDataIntegrityViolation(ex);
 
-        assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertFalse(response.getBody().success());
-        assertEquals("DATA_INTEGRITY_VIOLATION", response.getBody().error().code());
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().success()).isFalse();
+        assertThat(response.getBody().error().code()).isEqualTo("DATA_INTEGRITY_VIOLATION");
     }
 }
