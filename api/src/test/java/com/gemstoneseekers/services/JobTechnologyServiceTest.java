@@ -29,8 +29,8 @@ class JobTechnologyServiceTest {
     private final JobTechnologyRepository jobTechnologyRepository = mock(JobTechnologyRepository.class);
     private final JobRepository jobRepository = mock(JobRepository.class);
     private final TechnologyRepository technologyRepository = mock(TechnologyRepository.class);
-    private final JobTechnologyService jobTechnologyService = new JobTechnologyService(
-        jobTechnologyRepository, jobRepository, technologyRepository);
+    private final JobTechnologyService jobTechnologyService = new JobTechnologyService(jobTechnologyRepository,
+            jobRepository, technologyRepository);
 
     @Test
     void shouldAddTechnologyToJobSuccessfully() {
@@ -45,7 +45,8 @@ class JobTechnologyServiceTest {
         when(jobRepository.findByIdAndDeletedAtIsNull(jobId)).thenReturn(Optional.of(job));
         when(technologyRepository.findById(technologyId)).thenReturn(Optional.of(technology));
         when(jobTechnologyRepository.existsByJob_IdAndTechnology_Id(jobId, technologyId)).thenReturn(false);
-        when(jobTechnologyRepository.save(any(JobTechnology.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(jobTechnologyRepository.save(any(JobTechnology.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
 
         JobTechnology result = jobTechnologyService.addTechnology(jobId, request);
 
@@ -68,7 +69,8 @@ class JobTechnologyServiceTest {
         when(jobRepository.findByIdAndDeletedAtIsNull(jobId)).thenReturn(Optional.of(job));
         when(technologyRepository.findById(technologyId)).thenReturn(Optional.of(technology));
         when(jobTechnologyRepository.existsByJob_IdAndTechnology_Id(jobId, technologyId)).thenReturn(false);
-        when(jobTechnologyRepository.save(any(JobTechnology.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(jobTechnologyRepository.save(any(JobTechnology.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
 
         JobTechnology result = jobTechnologyService.addTechnology(jobId, request);
 
@@ -88,7 +90,8 @@ class JobTechnologyServiceTest {
         when(jobRepository.findByIdAndDeletedAtIsNull(jobId)).thenReturn(Optional.of(job));
         when(technologyRepository.findById(technologyId)).thenReturn(Optional.of(technology));
         when(jobTechnologyRepository.existsByJob_IdAndTechnology_Id(jobId, technologyId)).thenReturn(false);
-        when(jobTechnologyRepository.save(any(JobTechnology.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(jobTechnologyRepository.save(any(JobTechnology.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
 
         JobTechnology result = jobTechnologyService.addTechnology(jobId, request);
 
@@ -103,8 +106,7 @@ class JobTechnologyServiceTest {
         when(jobRepository.findByIdAndDeletedAtIsNull(jobId)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> jobTechnologyService.addTechnology(jobId, request))
-            .isInstanceOf(EntityNotFoundException.class)
-            .hasMessageContaining("Job");
+                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("Job");
         verify(technologyRepository, never()).findById(any());
         verify(jobTechnologyRepository, never()).save(any());
     }
@@ -120,8 +122,7 @@ class JobTechnologyServiceTest {
         when(technologyRepository.findById(technologyId)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> jobTechnologyService.addTechnology(jobId, request))
-            .isInstanceOf(EntityNotFoundException.class)
-            .hasMessageContaining("Technology");
+                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("Technology");
         verify(jobTechnologyRepository, never()).save(any());
     }
 
@@ -139,8 +140,7 @@ class JobTechnologyServiceTest {
         when(jobTechnologyRepository.existsByJob_IdAndTechnology_Id(jobId, technologyId)).thenReturn(true);
 
         assertThatThrownBy(() -> jobTechnologyService.addTechnology(jobId, request))
-            .isInstanceOf(ConflictException.class)
-            .hasMessage("Technology is already linked to this job");
+                .isInstanceOf(ConflictException.class).hasMessage("Technology is already linked to this job");
         verify(jobTechnologyRepository, never()).save(any());
     }
 
@@ -162,8 +162,7 @@ class JobTechnologyServiceTest {
         when(jobTechnologyRepository.existsByJob_IdAndTechnology_Id(jobId, technologyId)).thenReturn(false);
 
         assertThatThrownBy(() -> jobTechnologyService.removeTechnology(jobId, technologyId))
-            .isInstanceOf(EntityNotFoundException.class)
-            .hasMessageContaining("JobTechnology");
+                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("JobTechnology");
         verify(jobTechnologyRepository, never()).deleteByJob_IdAndTechnology_Id(any(), any());
     }
 

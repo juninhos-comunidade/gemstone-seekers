@@ -35,21 +35,19 @@ public class RecruiterController {
 
     @PostMapping("/companies/{companyId}/recruiters")
     public ResponseEntity<BaseResponse<RecruiterResponse>> linkToCompany(@PathVariable UUID companyId,
-        @Valid @RequestBody RecruiterRequest request) {
+            @Valid @RequestBody RecruiterRequest request) {
         Recruiter recruiter = recruiterService.linkToCompany(companyId, request);
         RecruiterResponse response = recruiterMapper.toRecruiterResponse(recruiter);
         return ResponseEntity.status(HttpStatus.CREATED)
-            .body(new BaseResponse<>(true, "Recruiter linked to company successfully", response, null));
+                .body(new BaseResponse<>(true, "Recruiter linked to company successfully", response, null));
     }
 
     @GetMapping("/companies/{companyId}/recruiters")
     public ResponseEntity<BaseResponse<List<RecruiterResponse>>> findByCompanyId(@PathVariable UUID companyId) {
         List<Recruiter> recruiters = recruiterService.findByCompanyId(companyId);
-        List<RecruiterResponse> responses = recruiters.stream()
-            .map(recruiterMapper::toRecruiterResponse)
-            .toList();
+        List<RecruiterResponse> responses = recruiters.stream().map(recruiterMapper::toRecruiterResponse).toList();
         return ResponseEntity.status(HttpStatus.OK)
-            .body(new BaseResponse<>(true, "Recruiters retrieved successfully", responses, null));
+                .body(new BaseResponse<>(true, "Recruiters retrieved successfully", responses, null));
     }
 
     @GetMapping("/recruiters/{id}")
@@ -57,6 +55,6 @@ public class RecruiterController {
         Recruiter recruiter = recruiterService.findById(id);
         RecruiterResponse response = recruiterMapper.toRecruiterResponse(recruiter);
         return ResponseEntity.status(HttpStatus.OK)
-            .body(new BaseResponse<>(true, "Recruiter retrieved successfully", response, null));
+                .body(new BaseResponse<>(true, "Recruiter retrieved successfully", response, null));
     }
 }

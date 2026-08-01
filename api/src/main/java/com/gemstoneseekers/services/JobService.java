@@ -24,7 +24,7 @@ public class JobService {
     private final CompanyRepository companyRepository;
 
     public JobService(JobRepository jobRepository, RecruiterRepository recruiterRepository,
-        CompanyRepository companyRepository) {
+            CompanyRepository companyRepository) {
         this.jobRepository = jobRepository;
         this.recruiterRepository = recruiterRepository;
         this.companyRepository = companyRepository;
@@ -32,10 +32,10 @@ public class JobService {
 
     public Job create(JobRequest request) {
         Recruiter recruiter = recruiterRepository.findByIdAndDeletedAtIsNull(request.recruiterId())
-            .orElseThrow(() -> new EntityNotFoundException("Recruiter", request.recruiterId()));
+                .orElseThrow(() -> new EntityNotFoundException("Recruiter", request.recruiterId()));
 
         Company company = companyRepository.findByIdAndDeletedAtIsNull(request.companyId())
-            .orElseThrow(() -> new EntityNotFoundException("Company", request.companyId()));
+                .orElseThrow(() -> new EntityNotFoundException("Company", request.companyId()));
 
         Job job = new Job();
         job.setRecruiter(recruiter);
@@ -55,8 +55,7 @@ public class JobService {
     }
 
     public Job findById(UUID id) {
-        return jobRepository.findByIdAndDeletedAtIsNull(id)
-            .orElseThrow(() -> new EntityNotFoundException("Job", id));
+        return jobRepository.findByIdAndDeletedAtIsNull(id).orElseThrow(() -> new EntityNotFoundException("Job", id));
     }
 
     public Job update(UUID id, JobRequest request) {

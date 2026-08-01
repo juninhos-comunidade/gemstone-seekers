@@ -6,13 +6,6 @@ import java.util.UUID;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
-public record JobRequest(
-    @NotBlank String title,
-    @NotBlank String description,
-    String seniorityLevel,
-    String department,
-    BigDecimal salaryMin,
-    BigDecimal salaryMax,
-    @NotNull UUID recruiterId,
-    @NotNull UUID companyId) {
+public record JobRequest(@NotBlank String title, @NotBlank String description, String seniorityLevel, String department,
+        BigDecimal salaryMin, BigDecimal salaryMax, @NotNull UUID recruiterId, @NotNull UUID companyId) {
 }

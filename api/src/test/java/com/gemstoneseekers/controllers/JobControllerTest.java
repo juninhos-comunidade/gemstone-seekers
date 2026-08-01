@@ -35,7 +35,7 @@ class JobControllerTest {
         UUID companyId = UUID.randomUUID();
         UUID jobId = UUID.randomUUID();
         JobRequest request = new JobRequest("Java Developer", "Backend role", "Senior", "Engineering",
-            new BigDecimal("5000"), new BigDecimal("8000"), recruiterId, companyId);
+                new BigDecimal("5000"), new BigDecimal("8000"), recruiterId, companyId);
         Recruiter recruiter = new Recruiter();
         recruiter.setId(recruiterId);
         Company company = new Company();
@@ -47,7 +47,7 @@ class JobControllerTest {
         job.setRecruiter(recruiter);
         job.setCompany(company);
         JobResponse response = new JobResponse(jobId, "Java Developer", "Backend role", "Senior", "Engineering",
-            new BigDecimal("5000"), new BigDecimal("8000"), JobStatus.OPEN, recruiterId, companyId);
+                new BigDecimal("5000"), new BigDecimal("8000"), JobStatus.OPEN, recruiterId, companyId);
         when(jobService.create(request)).thenReturn(job);
         when(jobMapper.toJobResponse(job)).thenReturn(response);
 
@@ -72,10 +72,10 @@ class JobControllerTest {
         Job job2 = new Job();
         job2.setId(UUID.randomUUID());
         job2.setTitle("Python Developer");
-        JobResponse response1 = new JobResponse(job1.getId(), "Java Developer", "Backend", null, null,
-            null, null, JobStatus.OPEN, UUID.randomUUID(), UUID.randomUUID());
-        JobResponse response2 = new JobResponse(job2.getId(), "Python Developer", "Backend", null, null,
-            null, null, JobStatus.OPEN, UUID.randomUUID(), UUID.randomUUID());
+        JobResponse response1 = new JobResponse(job1.getId(), "Java Developer", "Backend", null, null, null, null,
+                JobStatus.OPEN, UUID.randomUUID(), UUID.randomUUID());
+        JobResponse response2 = new JobResponse(job2.getId(), "Python Developer", "Backend", null, null, null, null,
+                JobStatus.OPEN, UUID.randomUUID(), UUID.randomUUID());
         when(jobService.findAll()).thenReturn(List.of(job1, job2));
         when(jobMapper.toJobResponse(job1)).thenReturn(response1);
         when(jobMapper.toJobResponse(job2)).thenReturn(response2);
@@ -98,8 +98,8 @@ class JobControllerTest {
         Job job = new Job();
         job.setId(id);
         job.setTitle("Java Developer");
-        JobResponse response = new JobResponse(id, "Java Developer", "Backend role", "Senior", "Engineering",
-            null, null, JobStatus.OPEN, UUID.randomUUID(), UUID.randomUUID());
+        JobResponse response = new JobResponse(id, "Java Developer", "Backend role", "Senior", "Engineering", null,
+                null, JobStatus.OPEN, UUID.randomUUID(), UUID.randomUUID());
         when(jobService.findById(id)).thenReturn(job);
         when(jobMapper.toJobResponse(job)).thenReturn(response);
 
@@ -118,12 +118,12 @@ class JobControllerTest {
     void shouldUpdateJobAndReturnOkStatus() {
         UUID id = UUID.randomUUID();
         JobRequest request = new JobRequest("Senior Java Dev", "Updated description", "Senior", "Engineering",
-            new BigDecimal("6000"), new BigDecimal("9000"), UUID.randomUUID(), UUID.randomUUID());
+                new BigDecimal("6000"), new BigDecimal("9000"), UUID.randomUUID(), UUID.randomUUID());
         Job job = new Job();
         job.setId(id);
         job.setTitle("Senior Java Dev");
         JobResponse response = new JobResponse(id, "Senior Java Dev", "Updated description", "Senior", "Engineering",
-            new BigDecimal("6000"), new BigDecimal("9000"), JobStatus.OPEN, UUID.randomUUID(), UUID.randomUUID());
+                new BigDecimal("6000"), new BigDecimal("9000"), JobStatus.OPEN, UUID.randomUUID(), UUID.randomUUID());
         when(jobService.update(id, request)).thenReturn(job);
         when(jobMapper.toJobResponse(job)).thenReturn(response);
 

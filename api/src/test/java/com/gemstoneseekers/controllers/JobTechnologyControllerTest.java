@@ -25,8 +25,8 @@ class JobTechnologyControllerTest {
 
     private final JobTechnologyService jobTechnologyService = mock(JobTechnologyService.class);
     private final JobTechnologyMapper jobTechnologyMapper = mock(JobTechnologyMapper.class);
-    private final JobTechnologyController jobTechnologyController = new JobTechnologyController(
-        jobTechnologyService, jobTechnologyMapper);
+    private final JobTechnologyController jobTechnologyController = new JobTechnologyController(jobTechnologyService,
+            jobTechnologyMapper);
 
     @Test
     void shouldAddTechnologyToJobAndReturnCreatedStatus() {
@@ -44,7 +44,7 @@ class JobTechnologyControllerTest {
         when(jobTechnologyMapper.toJobTechnologyResponse(jobTechnology)).thenReturn(response);
 
         ResponseEntity<BaseResponse<JobTechnologyResponse>> result = jobTechnologyController.addTechnology(jobId,
-            request);
+                request);
 
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.CREATED);
         BaseResponse<JobTechnologyResponse> body = result.getBody();
@@ -77,8 +77,7 @@ class JobTechnologyControllerTest {
         when(jobTechnologyMapper.toJobTechnologyResponse(jt1)).thenReturn(response1);
         when(jobTechnologyMapper.toJobTechnologyResponse(jt2)).thenReturn(response2);
 
-        ResponseEntity<BaseResponse<List<JobTechnologyResponse>>> result = jobTechnologyController
-            .findByJobId(jobId);
+        ResponseEntity<BaseResponse<List<JobTechnologyResponse>>> result = jobTechnologyController.findByJobId(jobId);
 
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
         BaseResponse<List<JobTechnologyResponse>> body = result.getBody();

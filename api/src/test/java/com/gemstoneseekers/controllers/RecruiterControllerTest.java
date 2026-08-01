@@ -67,8 +67,10 @@ class RecruiterControllerTest {
         recruiter1.setId(UUID.randomUUID());
         Recruiter recruiter2 = new Recruiter();
         recruiter2.setId(UUID.randomUUID());
-        RecruiterResponse response1 = new RecruiterResponse(recruiter1.getId(), UUID.randomUUID(), companyId, "Engineering");
-        RecruiterResponse response2 = new RecruiterResponse(recruiter2.getId(), UUID.randomUUID(), companyId, "Marketing");
+        RecruiterResponse response1 = new RecruiterResponse(recruiter1.getId(), UUID.randomUUID(), companyId,
+                "Engineering");
+        RecruiterResponse response2 = new RecruiterResponse(recruiter2.getId(), UUID.randomUUID(), companyId,
+                "Marketing");
         when(recruiterService.findByCompanyId(companyId)).thenReturn(List.of(recruiter1, recruiter2));
         when(recruiterMapper.toRecruiterResponse(recruiter1)).thenReturn(response1);
         when(recruiterMapper.toRecruiterResponse(recruiter2)).thenReturn(response2);

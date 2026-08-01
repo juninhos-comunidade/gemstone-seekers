@@ -1,7 +1,6 @@
 package com.gemstoneseekers.services;
 
 import java.math.BigDecimal;
-import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -14,7 +13,6 @@ import com.gemstoneseekers.exceptions.EntityNotFoundException;
 import com.gemstoneseekers.models.Company;
 import com.gemstoneseekers.models.Job;
 import com.gemstoneseekers.models.Recruiter;
-import com.gemstoneseekers.models.User;
 import com.gemstoneseekers.repositories.CompanyRepository;
 import com.gemstoneseekers.repositories.JobRepository;
 import com.gemstoneseekers.repositories.RecruiterRepository;
@@ -39,7 +37,7 @@ class JobServiceTest {
         UUID recruiterId = UUID.randomUUID();
         UUID companyId = UUID.randomUUID();
         JobRequest request = new JobRequest("Java Developer", "Backend role", "Senior", "Engineering",
-            new BigDecimal("5000"), new BigDecimal("8000"), recruiterId, companyId);
+                new BigDecimal("5000"), new BigDecimal("8000"), recruiterId, companyId);
         Recruiter recruiter = new Recruiter();
         recruiter.setId(recruiterId);
         Company company = new Company();
@@ -64,13 +62,12 @@ class JobServiceTest {
     void shouldThrowEntityNotFoundExceptionWhenRecruiterNotFound() {
         UUID recruiterId = UUID.randomUUID();
         UUID companyId = UUID.randomUUID();
-        JobRequest request = new JobRequest("Java Developer", "Backend role", null, null, null, null,
-            recruiterId, companyId);
+        JobRequest request = new JobRequest("Java Developer", "Backend role", null, null, null, null, recruiterId,
+                companyId);
         when(recruiterRepository.findByIdAndDeletedAtIsNull(recruiterId)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> jobService.create(request))
-            .isInstanceOf(EntityNotFoundException.class)
-            .hasMessageContaining("Recruiter");
+        assertThatThrownBy(() -> jobService.create(request)).isInstanceOf(EntityNotFoundException.class)
+                .hasMessageContaining("Recruiter");
         verify(companyRepository, never()).findByIdAndDeletedAtIsNull(any());
         verify(jobRepository, never()).save(any());
     }
@@ -79,16 +76,15 @@ class JobServiceTest {
     void shouldThrowEntityNotFoundExceptionWhenCompanyNotFound() {
         UUID recruiterId = UUID.randomUUID();
         UUID companyId = UUID.randomUUID();
-        JobRequest request = new JobRequest("Java Developer", "Backend role", null, null, null, null,
-            recruiterId, companyId);
+        JobRequest request = new JobRequest("Java Developer", "Backend role", null, null, null, null, recruiterId,
+                companyId);
         Recruiter recruiter = new Recruiter();
         recruiter.setId(recruiterId);
         when(recruiterRepository.findByIdAndDeletedAtIsNull(recruiterId)).thenReturn(Optional.of(recruiter));
         when(companyRepository.findByIdAndDeletedAtIsNull(companyId)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> jobService.create(request))
-            .isInstanceOf(EntityNotFoundException.class)
-            .hasMessageContaining("Company");
+        assertThatThrownBy(() -> jobService.create(request)).isInstanceOf(EntityNotFoundException.class)
+                .hasMessageContaining("Company");
         verify(jobRepository, never()).save(any());
     }
 
@@ -129,9 +125,8 @@ class JobServiceTest {
         UUID id = UUID.randomUUID();
         when(jobRepository.findByIdAndDeletedAtIsNull(id)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> jobService.findById(id))
-            .isInstanceOf(EntityNotFoundException.class)
-            .hasMessageContaining("Job");
+        assertThatThrownBy(() -> jobService.findById(id)).isInstanceOf(EntityNotFoundException.class)
+                .hasMessageContaining("Job");
     }
 
     @Test
@@ -142,7 +137,7 @@ class JobServiceTest {
         existing.setTitle("Old Title");
         existing.setDescription("Old Description");
         JobRequest request = new JobRequest("New Title", "New Description", "Senior", "Engineering",
-            new BigDecimal("5000"), new BigDecimal("8000"), UUID.randomUUID(), UUID.randomUUID());
+                new BigDecimal("5000"), new BigDecimal("8000"), UUID.randomUUID(), UUID.randomUUID());
         when(jobRepository.findByIdAndDeletedAtIsNull(id)).thenReturn(Optional.of(existing));
         when(jobRepository.save(any(Job.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
@@ -158,12 +153,11 @@ class JobServiceTest {
     @Test
     void shouldThrowEntityNotFoundExceptionWhenUpdatingNonexistentJob() {
         UUID id = UUID.randomUUID();
-        JobRequest request = new JobRequest("Title", "Description", null, null, null, null,
-            UUID.randomUUID(), UUID.randomUUID());
+        JobRequest request = new JobRequest("Title", "Description", null, null, null, null, UUID.randomUUID(),
+                UUID.randomUUID());
         when(jobRepository.findByIdAndDeletedAtIsNull(id)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> jobService.update(id, request))
-            .isInstanceOf(EntityNotFoundException.class);
+        assertThatThrownBy(() -> jobService.update(id, request)).isInstanceOf(EntityNotFoundException.class);
         verify(jobRepository, never()).save(any());
     }
 
@@ -187,8 +181,7 @@ class JobServiceTest {
         UUID id = UUID.randomUUID();
         when(jobRepository.findByIdAndDeletedAtIsNull(id)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> jobService.delete(id))
-            .isInstanceOf(EntityNotFoundException.class);
+        assertThatThrownBy(() -> jobService.delete(id)).isInstanceOf(EntityNotFoundException.class);
         verify(jobRepository, never()).save(any());
     }
 }

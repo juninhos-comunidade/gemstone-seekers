@@ -8,11 +8,7 @@ import org.springframework.stereotype.Component;
 public class JobTechnologyMapper {
 
     public JobTechnologyResponse toJobTechnologyResponse(JobTechnology jobTechnology) {
-        return new JobTechnologyResponse(
-            jobTechnology.getTechnology().getId(),
-            jobTechnology.getTechnology().getName(),
-            jobTechnology.getTechnology().getCategory(),
-            jobTechnology.getIsMandatory()
-        );
+        return new JobTechnologyResponse(jobTechnology.getTechnology().getId(), jobTechnology.getTechnology().getName(),
+                jobTechnology.getTechnology().getCategory(), jobTechnology.getIsMandatory());
     }
 }

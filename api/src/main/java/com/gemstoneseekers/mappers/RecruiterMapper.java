@@ -9,10 +9,7 @@ import com.gemstoneseekers.models.Recruiter;
 public class RecruiterMapper {
 
     public RecruiterResponse toRecruiterResponse(Recruiter recruiter) {
-        return new RecruiterResponse(
-            recruiter.getId(),
-            recruiter.getUser().getId(),
-            recruiter.getCompany().getId(),
-            recruiter.getDepartment());
+        return new RecruiterResponse(recruiter.getId(), recruiter.getUser().getId(), recruiter.getCompany().getId(),
+                recruiter.getDepartment());
     }
 }

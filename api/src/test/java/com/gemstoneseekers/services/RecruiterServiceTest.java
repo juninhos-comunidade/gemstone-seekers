@@ -28,17 +28,15 @@ class RecruiterServiceTest {
     private final RecruiterRepository recruiterRepository = mock(RecruiterRepository.class);
     private final CompanyRepository companyRepository = mock(CompanyRepository.class);
     private final UserRepository userRepository = mock(UserRepository.class);
-    private final RecruiterService recruiterService = new RecruiterService(
-        recruiterRepository,
-        companyRepository, userRepository
-    );
+    private final RecruiterService recruiterService = new RecruiterService(recruiterRepository, companyRepository,
+            userRepository);
 
     @Test
     void shouldLinkRecruiterToCompanySuccessfully() {
-        UUID             companyId = UUID.randomUUID();
-        UUID             userId    = UUID.randomUUID();
-        RecruiterRequest request   = new RecruiterRequest(userId, "Engineering");
-        Company          company   = new Company();
+        UUID companyId = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
+        RecruiterRequest request = new RecruiterRequest(userId, "Engineering");
+        Company company = new Company();
         company.setId(companyId);
         company.setName("Tech Corp");
         User user = new User();
@@ -60,10 +58,10 @@ class RecruiterServiceTest {
 
     @Test
     void shouldLinkRecruiterWithoutDepartment() {
-        UUID             companyId = UUID.randomUUID();
-        UUID             userId    = UUID.randomUUID();
-        RecruiterRequest request   = new RecruiterRequest(userId, null);
-        Company          company   = new Company();
+        UUID companyId = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
+        RecruiterRequest request = new RecruiterRequest(userId, null);
+        Company company = new Company();
         company.setId(companyId);
         User user = new User();
         user.setId(userId);
@@ -80,38 +78,36 @@ class RecruiterServiceTest {
 
     @Test
     void shouldThrowEntityNotFoundExceptionWhenCompanyNotFound() {
-        UUID             companyId = UUID.randomUUID();
-        RecruiterRequest request   = new RecruiterRequest(UUID.randomUUID(), "Engineering");
+        UUID companyId = UUID.randomUUID();
+        RecruiterRequest request = new RecruiterRequest(UUID.randomUUID(), "Engineering");
         when(companyRepository.findByIdAndDeletedAtIsNull(companyId)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> recruiterService.linkToCompany(companyId, request))
-            .isInstanceOf(EntityNotFoundException.class)
-            .hasMessageContaining("Company");
+                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("Company");
         verify(recruiterRepository, never()).save(any());
     }
 
     @Test
     void shouldThrowEntityNotFoundExceptionWhenUserNotFound() {
-        UUID             companyId = UUID.randomUUID();
-        UUID             userId    = UUID.randomUUID();
-        RecruiterRequest request   = new RecruiterRequest(userId, "Engineering");
-        Company          company   = new Company();
+        UUID companyId = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
+        RecruiterRequest request = new RecruiterRequest(userId, "Engineering");
+        Company company = new Company();
         company.setId(companyId);
         when(companyRepository.findByIdAndDeletedAtIsNull(companyId)).thenReturn(Optional.of(company));
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> recruiterService.linkToCompany(companyId, request))
-            .isInstanceOf(EntityNotFoundException.class)
-            .hasMessageContaining("User");
+                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("User");
         verify(recruiterRepository, never()).save(any());
     }
 
     @Test
     void shouldThrowConflictExceptionWhenUserAlreadyLinkedAsRecruiter() {
-        UUID             companyId = UUID.randomUUID();
-        UUID             userId    = UUID.randomUUID();
-        RecruiterRequest request   = new RecruiterRequest(userId, "Engineering");
-        Company          company   = new Company();
+        UUID companyId = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
+        RecruiterRequest request = new RecruiterRequest(userId, "Engineering");
+        Company company = new Company();
         company.setId(companyId);
         User user = new User();
         user.setId(userId);
@@ -120,14 +116,13 @@ class RecruiterServiceTest {
         when(recruiterRepository.existsByUserIdAndDeletedAtIsNull(userId)).thenReturn(true);
 
         assertThatThrownBy(() -> recruiterService.linkToCompany(companyId, request))
-            .isInstanceOf(ConflictException.class)
-            .hasMessage("User is already linked as a recruiter");
+                .isInstanceOf(ConflictException.class).hasMessage("User is already linked as a recruiter");
         verify(recruiterRepository, never()).save(any());
     }
 
     @Test
     void shouldFindRecruitersByCompanyId() {
-        UUID      companyId  = UUID.randomUUID();
+        UUID companyId = UUID.randomUUID();
         Recruiter recruiter1 = new Recruiter();
         recruiter1.setId(UUID.randomUUID());
         recruiter1.setDepartment("Engineering");
@@ -135,7 +130,7 @@ class RecruiterServiceTest {
         recruiter2.setId(UUID.randomUUID());
         recruiter2.setDepartment("Marketing");
         when(recruiterRepository.findByCompanyIdAndDeletedAtIsNull(companyId))
-            .thenReturn(List.of(recruiter1, recruiter2));
+                .thenReturn(List.of(recruiter1, recruiter2));
 
         List<Recruiter> result = recruiterService.findByCompanyId(companyId);
 
@@ -146,7 +141,7 @@ class RecruiterServiceTest {
 
     @Test
     void shouldFindRecruiterById() {
-        UUID      id        = UUID.randomUUID();
+        UUID id = UUID.randomUUID();
         Recruiter recruiter = new Recruiter();
         recruiter.setId(id);
         recruiter.setDepartment("Engineering");
@@ -164,8 +159,7 @@ class RecruiterServiceTest {
         UUID id = UUID.randomUUID();
         when(recruiterRepository.findByIdAndDeletedAtIsNull(id)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> recruiterService.findById(id))
-            .isInstanceOf(EntityNotFoundException.class)
-            .hasMessageContaining("Recruiter");
+        assertThatThrownBy(() -> recruiterService.findById(id)).isInstanceOf(EntityNotFoundException.class)
+                .hasMessageContaining("Recruiter");
     }
 }

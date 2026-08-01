@@ -35,13 +35,11 @@ class CompanyIntegrationTest {
     @BeforeAll
     static void setup() {
         context = new SpringApplicationBuilder(GemstoneSeekersApplication.class).run(
-            "--spring.datasource.url=" + postgres.getJdbcUrl(),
-            "--spring.datasource.username=" + postgres.getUsername(),
-            "--spring.datasource.password=" + postgres.getPassword(),
-            "--server.port=0",
-            "--jwt.secret=e93afb5d9ffc2f656b9039f768011829be9a88b539671e8aab8d347949a4da67",
-            "--jwt.access-token.expiration=86400000",
-            "--jwt.refresh-token.expiration=604800000");
+                "--spring.datasource.url=" + postgres.getJdbcUrl(),
+                "--spring.datasource.username=" + postgres.getUsername(),
+                "--spring.datasource.password=" + postgres.getPassword(), "--server.port=0",
+                "--jwt.secret=e93afb5d9ffc2f656b9039f768011829be9a88b539671e8aab8d347949a4da67",
+                "--jwt.access-token.expiration=86400000", "--jwt.refresh-token.expiration=604800000");
         Integer resolvedPort = context.getEnvironment().getProperty("local.server.port", Integer.class);
         if (resolvedPort == null) {
             throw new IllegalStateException("Could not resolve local server port");
@@ -74,7 +72,7 @@ class CompanyIntegrationTest {
                     "password": "plainPassword123"
                 }""";
         given().contentType(ContentType.JSON).body(registerBody).when().post("/api/v1/auth/register").then()
-            .statusCode(201);
+                .statusCode(201);
 
         String loginBody = """
                 {
@@ -82,7 +80,7 @@ class CompanyIntegrationTest {
                     "password": "plainPassword123"
                 }""";
         return given().contentType(ContentType.JSON).body(loginBody).when().post("/api/v1/auth/login").then()
-            .statusCode(200).extract().path("result.accessToken");
+                .statusCode(200).extract().path("result.accessToken");
     }
 
     @Test
@@ -94,9 +92,9 @@ class CompanyIntegrationTest {
                     "cnpj": "12345678000190"
                 }""";
         given().contentType(ContentType.JSON).header("Authorization", "Bearer " + token).body(createBody).when()
-            .post("/api/v1/companies").then().statusCode(201).body("success", equalTo(true))
-            .body("message", equalTo("Company created successfully")).body("result.id", notNullValue())
-            .body("result.name", equalTo("Tech Corp")).body("result.cnpj", equalTo("12345678000190"));
+                .post("/api/v1/companies").then().statusCode(201).body("success", equalTo(true))
+                .body("message", equalTo("Company created successfully")).body("result.id", notNullValue())
+                .body("result.name", equalTo("Tech Corp")).body("result.cnpj", equalTo("12345678000190"));
     }
 
     @Test
@@ -106,8 +104,7 @@ class CompanyIntegrationTest {
                     "name": "Tech Corp",
                     "cnpj": "12345678000190"
                 }""";
-        given().contentType(ContentType.JSON).body(createBody).when().post("/api/v1/companies").then()
-            .statusCode(403);
+        given().contentType(ContentType.JSON).body(createBody).when().post("/api/v1/companies").then().statusCode(403);
     }
 
     @Test
@@ -124,13 +121,12 @@ class CompanyIntegrationTest {
                     "cnpj": "98765432000110"
                 }""";
         given().contentType(ContentType.JSON).header("Authorization", "Bearer " + token).body(createBody1).when()
-            .post("/api/v1/companies");
+                .post("/api/v1/companies");
         given().contentType(ContentType.JSON).header("Authorization", "Bearer " + token).body(createBody2).when()
-            .post("/api/v1/companies");
+                .post("/api/v1/companies");
 
-        given().contentType(ContentType.JSON).header("Authorization", "Bearer " + token).when()
-            .get("/api/v1/companies").then().statusCode(200).body("success", equalTo(true))
-            .body("result", hasSize(2));
+        given().contentType(ContentType.JSON).header("Authorization", "Bearer " + token).when().get("/api/v1/companies")
+                .then().statusCode(200).body("success", equalTo(true)).body("result", hasSize(2));
     }
 
     @Test
@@ -142,12 +138,12 @@ class CompanyIntegrationTest {
                     "cnpj": "12345678000190"
                 }""";
         String companyId = given().contentType(ContentType.JSON).header("Authorization", "Bearer " + token)
-            .body(createBody).when().post("/api/v1/companies").then().extract().path("result.id");
+                .body(createBody).when().post("/api/v1/companies").then().extract().path("result.id");
 
         given().contentType(ContentType.JSON).header("Authorization", "Bearer " + token).when()
-            .get("/api/v1/companies/" + companyId).then().statusCode(200).body("success", equalTo(true))
-            .body("result.id", equalTo(companyId)).body("result.name", equalTo("Tech Corp"))
-            .body("result.cnpj", equalTo("12345678000190"));
+                .get("/api/v1/companies/" + companyId).then().statusCode(200).body("success", equalTo(true))
+                .body("result.id", equalTo(companyId)).body("result.name", equalTo("Tech Corp"))
+                .body("result.cnpj", equalTo("12345678000190"));
     }
 
     @Test
@@ -155,7 +151,7 @@ class CompanyIntegrationTest {
         String token = getAccessToken();
         String randomUuid = "00000000-0000-0000-0000-000000000000";
         given().contentType(ContentType.JSON).header("Authorization", "Bearer " + token).when()
-            .get("/api/v1/companies/" + randomUuid).then().statusCode(404);
+                .get("/api/v1/companies/" + randomUuid).then().statusCode(404);
     }
 
     @Test
@@ -167,7 +163,7 @@ class CompanyIntegrationTest {
                     "cnpj": "12345678000190"
                 }""";
         String companyId = given().contentType(ContentType.JSON).header("Authorization", "Bearer " + token)
-            .body(createBody).when().post("/api/v1/companies").then().extract().path("result.id");
+                .body(createBody).when().post("/api/v1/companies").then().extract().path("result.id");
 
         String updateBody = """
                 {
@@ -175,8 +171,8 @@ class CompanyIntegrationTest {
                     "cnpj": "12345678000190"
                 }""";
         given().contentType(ContentType.JSON).header("Authorization", "Bearer " + token).body(updateBody).when()
-            .put("/api/v1/companies/" + companyId).then().statusCode(200).body("success", equalTo(true))
-            .body("result.name", equalTo("New Name")).body("result.cnpj", equalTo("12345678000190"));
+                .put("/api/v1/companies/" + companyId).then().statusCode(200).body("success", equalTo(true))
+                .body("result.name", equalTo("New Name")).body("result.cnpj", equalTo("12345678000190"));
     }
 
     @Test
@@ -188,17 +184,17 @@ class CompanyIntegrationTest {
                     "cnpj": "12345678000190"
                 }""";
         String companyId = given().contentType(ContentType.JSON).header("Authorization", "Bearer " + token)
-            .body(createBody).when().post("/api/v1/companies").then().extract().path("result.id");
+                .body(createBody).when().post("/api/v1/companies").then().extract().path("result.id");
 
         given().contentType(ContentType.JSON).header("Authorization", "Bearer " + token).when()
-            .delete("/api/v1/companies/" + companyId).then().statusCode(200)
-            .body("success", equalTo(true)).body("message", equalTo("Company deleted successfully"));
+                .delete("/api/v1/companies/" + companyId).then().statusCode(200).body("success", equalTo(true))
+                .body("message", equalTo("Company deleted successfully"));
+
+        given().contentType(ContentType.JSON).header("Authorization", "Bearer " + token).when().get("/api/v1/companies")
+                .then().statusCode(200).body("result", hasSize(0));
 
         given().contentType(ContentType.JSON).header("Authorization", "Bearer " + token).when()
-            .get("/api/v1/companies").then().statusCode(200).body("result", hasSize(0));
-
-        given().contentType(ContentType.JSON).header("Authorization", "Bearer " + token).when()
-            .get("/api/v1/companies/" + companyId).then().statusCode(404);
+                .get("/api/v1/companies/" + companyId).then().statusCode(404);
     }
 
     @Test
@@ -210,9 +206,9 @@ class CompanyIntegrationTest {
                     "cnpj": "12345678000190"
                 }""";
         given().contentType(ContentType.JSON).header("Authorization", "Bearer " + token).body(createBody).when()
-            .post("/api/v1/companies").then().statusCode(201);
+                .post("/api/v1/companies").then().statusCode(201);
 
         given().contentType(ContentType.JSON).header("Authorization", "Bearer " + token).body(createBody).when()
-            .post("/api/v1/companies").then().statusCode(409).body("success", equalTo(false));
+                .post("/api/v1/companies").then().statusCode(409).body("success", equalTo(false));
     }
 }

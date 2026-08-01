@@ -23,7 +23,7 @@ public class JobTechnologyService {
     private final TechnologyRepository technologyRepository;
 
     public JobTechnologyService(JobTechnologyRepository jobTechnologyRepository, JobRepository jobRepository,
-        TechnologyRepository technologyRepository) {
+            TechnologyRepository technologyRepository) {
         this.jobTechnologyRepository = jobTechnologyRepository;
         this.jobRepository = jobRepository;
         this.technologyRepository = technologyRepository;
@@ -31,10 +31,10 @@ public class JobTechnologyService {
 
     public JobTechnology addTechnology(UUID jobId, JobTechnologyRequest request) {
         Job job = jobRepository.findByIdAndDeletedAtIsNull(jobId)
-            .orElseThrow(() -> new EntityNotFoundException("Job", jobId));
+                .orElseThrow(() -> new EntityNotFoundException("Job", jobId));
 
         Technology technology = technologyRepository.findById(request.technologyId())
-            .orElseThrow(() -> new EntityNotFoundException("Technology", request.technologyId()));
+                .orElseThrow(() -> new EntityNotFoundException("Technology", request.technologyId()));
 
         if (jobTechnologyRepository.existsByJob_IdAndTechnology_Id(jobId, request.technologyId())) {
             throw new ConflictException("Technology is already linked to this job");

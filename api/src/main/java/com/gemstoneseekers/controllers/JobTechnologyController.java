@@ -29,36 +29,34 @@ public class JobTechnologyController {
     private final JobTechnologyService jobTechnologyService;
     private final JobTechnologyMapper jobTechnologyMapper;
 
-    public JobTechnologyController(JobTechnologyService jobTechnologyService,
-        JobTechnologyMapper jobTechnologyMapper) {
+    public JobTechnologyController(JobTechnologyService jobTechnologyService, JobTechnologyMapper jobTechnologyMapper) {
         this.jobTechnologyService = jobTechnologyService;
         this.jobTechnologyMapper = jobTechnologyMapper;
     }
 
     @PostMapping
     public ResponseEntity<BaseResponse<JobTechnologyResponse>> addTechnology(@PathVariable UUID jobId,
-        @Valid @RequestBody JobTechnologyRequest request) {
+            @Valid @RequestBody JobTechnologyRequest request) {
         JobTechnology jobTechnology = jobTechnologyService.addTechnology(jobId, request);
         JobTechnologyResponse response = jobTechnologyMapper.toJobTechnologyResponse(jobTechnology);
         return ResponseEntity.status(HttpStatus.CREATED)
-            .body(new BaseResponse<>(true, "Technology linked to job successfully", response, null));
+                .body(new BaseResponse<>(true, "Technology linked to job successfully", response, null));
     }
 
     @GetMapping
     public ResponseEntity<BaseResponse<List<JobTechnologyResponse>>> findByJobId(@PathVariable UUID jobId) {
         List<JobTechnology> jobTechnologies = jobTechnologyService.findByJobId(jobId);
         List<JobTechnologyResponse> responses = jobTechnologies.stream()
-            .map(jobTechnologyMapper::toJobTechnologyResponse)
-            .toList();
+                .map(jobTechnologyMapper::toJobTechnologyResponse).toList();
         return ResponseEntity.status(HttpStatus.OK)
-            .body(new BaseResponse<>(true, "Job technologies retrieved successfully", responses, null));
+                .body(new BaseResponse<>(true, "Job technologies retrieved successfully", responses, null));
     }
 
     @DeleteMapping("/{technologyId}")
     public ResponseEntity<BaseResponse<Void>> removeTechnology(@PathVariable UUID jobId,
-        @PathVariable Long technologyId) {
+            @PathVariable Long technologyId) {
         jobTechnologyService.removeTechnology(jobId, technologyId);
         return ResponseEntity.status(HttpStatus.OK)
-            .body(new BaseResponse<>(true, "Technology unlinked from job successfully", null, null));
+                .body(new BaseResponse<>(true, "Technology unlinked from job successfully", null, null));
     }
 }
