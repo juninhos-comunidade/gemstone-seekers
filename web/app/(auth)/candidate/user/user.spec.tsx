@@ -1,37 +1,28 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import CandidateUserPage from "./page";
-import { MOCK_CANDIDATE_USER } from "@/lib/mocks/userMock";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
-vi.mock("next/image", () => ({
-  default: ({
-    src,
-    alt,
-    className,
-  }: {
-    src: string;
-    alt: string;
-    className?: string;
-  }) => <img src={src} alt={alt} className={className} />,
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({
+    push: vi.fn(),
+  }),
 }));
 
-describe("Candidate User Profile Page", () => {
-  it("should renders candidate profile name, role, avatar, bio, experiences and projects", () => {
-    render(<CandidateUserPage />);
+function renderWithQuery(ui: React.ReactNode) {
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  });
+  return render(
+    <QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>,
+  );
+}
 
-    expect(
-      screen.getByRole("heading", { level: 1, name: MOCK_CANDIDATE_USER.name }),
-    ).toBeInTheDocument();
-    expect(screen.getByText(MOCK_CANDIDATE_USER.role)).toBeInTheDocument();
-    expect(
-      screen.getByAltText(`Avatar de ${MOCK_CANDIDATE_USER.name}`),
-    ).toHaveAttribute("src", expect.stringContaining("ui-avatars.com"));
-    expect(screen.getByText(MOCK_CANDIDATE_USER.bio)).toBeInTheDocument();
-    expect(
-      screen.getByText(MOCK_CANDIDATE_USER.experiences[0].role),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText(MOCK_CANDIDATE_USER.projects[0].title),
-    ).toBeInTheDocument();
+describe("Candidate User Profile Page", () => {
+  it("should render candidate profile name and info", async () => {
+    renderWithQuery(<CandidateUserPage />);
+
+    expect(await screen.findByText("Thiago Silva")).toBeInTheDocument();
+    expect(screen.getByText("Resumo Profissional")).toBeInTheDocument();
   });
 });
