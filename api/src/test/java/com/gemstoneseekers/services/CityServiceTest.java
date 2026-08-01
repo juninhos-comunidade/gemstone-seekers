@@ -8,7 +8,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.gemstoneseekers.dtos.response.CityResponse;
 import com.gemstoneseekers.models.City;
 import com.gemstoneseekers.models.State;
 import com.gemstoneseekers.repositories.CityRepository;
@@ -44,12 +43,10 @@ class CityServiceTest {
 
         when(cityRepository.findAll()).thenReturn(List.of(city1, city2));
 
-        List<CityResponse> result = cityService.getCities();
+        List<City> result = cityService.getCities();
 
         assertThat(result).hasSize(2);
-        assertThat(result.getFirst().id()).isEqualTo(1);
-        assertThat(result.getFirst().name()).isEqualTo("São Paulo");
-        assertThat(result.getFirst().stateId()).isEqualTo(1);
+        assertThat(result).containsExactly(city1, city2);
         verify(cityRepository).findAll();
     }
 
@@ -66,12 +63,10 @@ class CityServiceTest {
 
         when(cityRepository.findByStateId(1)).thenReturn(List.of(city1));
 
-        List<CityResponse> result = cityService.getCitiesByStateId(1);
+        List<City> result = cityService.getCitiesByStateId(1);
 
         assertThat(result).hasSize(1);
-        assertThat(result.getFirst().id()).isEqualTo(1);
-        assertThat(result.getFirst().name()).isEqualTo("São Paulo");
-        assertThat(result.getFirst().stateId()).isEqualTo(1);
+        assertThat(result).containsExactly(city1);
         verify(cityRepository).findByStateId(1);
     }
 
@@ -79,7 +74,7 @@ class CityServiceTest {
     void shouldReturnEmptyListWhenNoCities() {
         when(cityRepository.findAll()).thenReturn(List.of());
 
-        List<CityResponse> result = cityService.getCities();
+        List<City> result = cityService.getCities();
 
         assertThat(result).isEmpty();
         verify(cityRepository).findAll();
