@@ -19,8 +19,6 @@ public class TechnologyService {
 
     public List<TechnologyResponse> getTechnologies() {
         List<Technology> technologies = technologyRepository.findAll();
-        return technologies.stream()
-            .map(t -> new TechnologyResponse(t.getId(), t.getName(), t.getCategory()))
-            .toList();
+        return technologies.stream().map(t -> new TechnologyResponse(t.getId(), t.getName(), t.getCategory())).toList();
     }
 }

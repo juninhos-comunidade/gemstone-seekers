@@ -26,6 +26,6 @@ public class CityController {
     public ResponseEntity<BaseResponse<List<CityResponse>>> getCities() {
         List<CityResponse> cities = cityService.getCities();
         return ResponseEntity.status(HttpStatus.OK)
-            .body(new BaseResponse<>(true, "Cities retrieved successfully", cities, null));
+                .body(new BaseResponse<>(true, "Cities retrieved successfully", cities, null));
     }
 }

@@ -32,16 +32,12 @@ class CountryIntegrationTest {
 
     @BeforeAll
     static void setup() {
-        context = new SpringApplicationBuilder(GemstoneSeekersApplication.class)
-            .run(
+        context = new SpringApplicationBuilder(GemstoneSeekersApplication.class).run(
                 "--spring.datasource.url=" + postgres.getJdbcUrl(),
                 "--spring.datasource.username=" + postgres.getUsername(),
-                "--spring.datasource.password=" + postgres.getPassword(),
-                "--server.port=0",
+                "--spring.datasource.password=" + postgres.getPassword(), "--server.port=0",
                 "--jwt.secret=e93afb5d9ffc2f656b9039f768011829be9a88b539671e8aab8d347949a4da67",
-                "--jwt.access-token.expiration=86400000",
-                "--jwt.refresh-token.expiration=604800000"
-            );
+                "--jwt.access-token.expiration=86400000", "--jwt.refresh-token.expiration=604800000");
         Integer resolvedPort = context.getEnvironment().getProperty("local.server.port", Integer.class);
         if (resolvedPort == null) {
             throw new IllegalStateException("Could not resolve local server port");
@@ -68,38 +64,33 @@ class CountryIntegrationTest {
 
     private String getAccessToken() {
         String registerBody = """
-            {
-                "name": "John Doe",
-                "email": "john@example.com",
-                "password": "plainPassword123"
-            }""";
-        given().contentType(ContentType.JSON).body(registerBody).when().post("/api/v1/auth/register")
-            .then().statusCode(201);
+                {
+                    "name": "John Doe",
+                    "email": "john@example.com",
+                    "password": "plainPassword123"
+                }""";
+        given().contentType(ContentType.JSON).body(registerBody).when().post("/api/v1/auth/register").then()
+                .statusCode(201);
 
         String loginBody = """
-            {
-                "email": "john@example.com",
-                "password": "plainPassword123"
-            }""";
-        return given().contentType(ContentType.JSON).body(loginBody).when().post("/api/v1/auth/login")
-            .then().statusCode(200).extract().path("result.accessToken");
+                {
+                    "email": "john@example.com",
+                    "password": "plainPassword123"
+                }""";
+        return given().contentType(ContentType.JSON).body(loginBody).when().post("/api/v1/auth/login").then()
+                .statusCode(200).extract().path("result.accessToken");
     }
 
     @Test
     void shouldRejectCountriesWithoutJwt() {
-        given().contentType(ContentType.JSON)
-            .when().get("/api/v1/countries")
-            .then().statusCode(403);
+        given().contentType(ContentType.JSON).when().get("/api/v1/countries").then().statusCode(403);
     }
 
     @Test
     void shouldReturnCountriesWithJwt() {
         String accessToken = getAccessToken();
-        given().contentType(ContentType.JSON).header("Authorization", "Bearer " + accessToken)
-            .when().get("/api/v1/countries")
-            .then().statusCode(200)
-            .body("success", equalTo(true))
-            .body("result", notNullValue())
-            .body("result.size()", greaterThan(0));
+        given().contentType(ContentType.JSON).header("Authorization", "Bearer " + accessToken).when()
+                .get("/api/v1/countries").then().statusCode(200).body("success", equalTo(true))
+                .body("result", notNullValue()).body("result.size()", greaterThan(0));
     }
 }

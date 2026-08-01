@@ -19,15 +19,11 @@ public class CityService {
 
     public List<CityResponse> getCities() {
         List<City> cities = cityRepository.findAll();
-        return cities.stream()
-            .map(c -> new CityResponse(c.getId(), c.getName(), c.getState().getId()))
-            .toList();
+        return cities.stream().map(c -> new CityResponse(c.getId(), c.getName(), c.getState().getId())).toList();
     }
 
     public List<CityResponse> getCitiesByStateId(Integer stateId) {
         List<City> cities = cityRepository.findByStateId(stateId);
-        return cities.stream()
-            .map(c -> new CityResponse(c.getId(), c.getName(), c.getState().getId()))
-            .toList();
+        return cities.stream().map(c -> new CityResponse(c.getId(), c.getName(), c.getState().getId())).toList();
     }
 }

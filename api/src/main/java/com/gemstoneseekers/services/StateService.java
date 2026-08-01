@@ -19,15 +19,11 @@ public class StateService {
 
     public List<StateResponse> getStates() {
         List<State> states = stateRepository.findAll();
-        return states.stream()
-            .map(s -> new StateResponse(s.getId(), s.getName(), s.getCountry().getId()))
-            .toList();
+        return states.stream().map(s -> new StateResponse(s.getId(), s.getName(), s.getCountry().getId())).toList();
     }
 
     public List<StateResponse> getStatesByCountryId(Integer countryId) {
         List<State> states = stateRepository.findByCountryId(countryId);
-        return states.stream()
-            .map(s -> new StateResponse(s.getId(), s.getName(), s.getCountry().getId()))
-            .toList();
+        return states.stream().map(s -> new StateResponse(s.getId(), s.getName(), s.getCountry().getId())).toList();
     }
 }
