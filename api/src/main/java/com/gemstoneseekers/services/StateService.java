@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import com.gemstoneseekers.dtos.response.StateResponse;
 import com.gemstoneseekers.models.State;
 import com.gemstoneseekers.repositories.StateRepository;
 
@@ -17,13 +16,11 @@ public class StateService {
         this.stateRepository = stateRepository;
     }
 
-    public List<StateResponse> getStates() {
-        List<State> states = stateRepository.findAll();
-        return states.stream().map(s -> new StateResponse(s.getId(), s.getName(), s.getCountry().getId())).toList();
+    public List<State> getStates() {
+        return stateRepository.findAll();
     }
 
-    public List<StateResponse> getStatesByCountryId(Integer countryId) {
-        List<State> states = stateRepository.findByCountryId(countryId);
-        return states.stream().map(s -> new StateResponse(s.getId(), s.getName(), s.getCountry().getId())).toList();
+    public List<State> getStatesByCountryId(Integer countryId) {
+        return stateRepository.findByCountryId(countryId);
     }
 }

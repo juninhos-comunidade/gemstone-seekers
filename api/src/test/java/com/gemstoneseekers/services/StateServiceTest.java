@@ -8,7 +8,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.gemstoneseekers.dtos.response.StateResponse;
 import com.gemstoneseekers.models.Country;
 import com.gemstoneseekers.models.State;
 import com.gemstoneseekers.repositories.StateRepository;
@@ -45,12 +44,10 @@ class StateServiceTest {
 
         when(stateRepository.findAll()).thenReturn(List.of(state1, state2));
 
-        List<StateResponse> result = stateService.getStates();
+        List<State> result = stateService.getStates();
 
         assertThat(result).hasSize(2);
-        assertThat(result.getFirst().id()).isEqualTo(1);
-        assertThat(result.getFirst().name()).isEqualTo("São Paulo");
-        assertThat(result.getFirst().countryId()).isEqualTo(1);
+        assertThat(result).containsExactly(state1, state2);
         verify(stateRepository).findAll();
     }
 
@@ -68,12 +65,10 @@ class StateServiceTest {
 
         when(stateRepository.findByCountryId(1)).thenReturn(List.of(state1));
 
-        List<StateResponse> result = stateService.getStatesByCountryId(1);
+        List<State> result = stateService.getStatesByCountryId(1);
 
         assertThat(result).hasSize(1);
-        assertThat(result.getFirst().id()).isEqualTo(1);
-        assertThat(result.getFirst().name()).isEqualTo("São Paulo");
-        assertThat(result.getFirst().countryId()).isEqualTo(1);
+        assertThat(result).containsExactly(state1);
         verify(stateRepository).findByCountryId(1);
     }
 
@@ -81,7 +76,7 @@ class StateServiceTest {
     void shouldReturnEmptyListWhenNoStates() {
         when(stateRepository.findAll()).thenReturn(List.of());
 
-        List<StateResponse> result = stateService.getStates();
+        List<State> result = stateService.getStates();
 
         assertThat(result).isEmpty();
         verify(stateRepository).findAll();
