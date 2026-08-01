@@ -63,6 +63,9 @@ public class Candidate extends BaseModel {
     @OneToMany(mappedBy = TABLE_NAME, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Project> projects = new ArrayList<>();
 
+    @OneToMany(mappedBy = "candidate", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Experience> experiences = new ArrayList<>();
+    
     @Column(name = "summary")
     private String summary;
 }
