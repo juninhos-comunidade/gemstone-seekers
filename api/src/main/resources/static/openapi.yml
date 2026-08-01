@@ -157,6 +157,49 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/BaseResponseJobResponse"
+  /api/v1/jobs/{jobId}/technologies:
+    get:
+      tags:
+      - job-technology-controller
+      operationId: findByJobId
+      parameters:
+      - name: jobId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/BaseResponseListJobTechnologyResponse"
+    post:
+      tags:
+      - job-technology-controller
+      operationId: addTechnology
+      parameters:
+      - name: jobId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/JobTechnologyRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/BaseResponseJobTechnologyResponse"
   /api/v1/companies:
     get:
       tags:
@@ -320,6 +363,31 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/BaseResponseRecruiterResponse"
+  /api/v1/jobs/{jobId}/technologies/{technologyId}:
+    delete:
+      tags:
+      - job-technology-controller
+      operationId: removeTechnology
+      parameters:
+      - name: jobId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: technologyId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/BaseResponseVoid"
 components:
   schemas:
     JobRequest:
@@ -440,6 +508,39 @@ components:
           type: string
         cnpj:
           type: string
+    JobTechnologyRequest:
+      type: object
+      properties:
+        technologyId:
+          type: integer
+          format: int64
+        isMandatory:
+          type: boolean
+      required:
+      - technologyId
+    BaseResponseJobTechnologyResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        result:
+          $ref: "#/components/schemas/JobTechnologyResponse"
+        error:
+          $ref: "#/components/schemas/ErrorResponse"
+    JobTechnologyResponse:
+      type: object
+      properties:
+        technologyId:
+          type: integer
+          format: int64
+        technologyName:
+          type: string
+        category:
+          type: string
+        isMandatory:
+          type: boolean
     RecruiterRequest:
       type: object
       properties:
@@ -618,6 +719,19 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/JobResponse"
+        error:
+          $ref: "#/components/schemas/ErrorResponse"
+    BaseResponseListJobTechnologyResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        result:
+          type: array
+          items:
+            $ref: "#/components/schemas/JobTechnologyResponse"
         error:
           $ref: "#/components/schemas/ErrorResponse"
     BaseResponseListCompanyResponse:
