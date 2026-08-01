@@ -42,9 +42,9 @@ class TechnologyServiceTest {
         List<TechnologyResponse> result = technologyService.getTechnologies();
 
         assertThat(result).hasSize(2);
-        assertThat(result.get(0).id()).isEqualTo(1);
-        assertThat(result.get(0).name()).isEqualTo("Java");
-        assertThat(result.get(0).category()).isEqualTo("Programming Language");
+        assertThat(result.getFirst().id()).isEqualTo(1);
+        assertThat(result.getFirst().name()).isEqualTo("Java");
+        assertThat(result.getFirst().category()).isEqualTo("Programming Language");
         assertThat(result.get(1).id()).isEqualTo(2);
         assertThat(result.get(1).name()).isEqualTo("React");
         assertThat(result.get(1).category()).isEqualTo("Frontend Framework");
