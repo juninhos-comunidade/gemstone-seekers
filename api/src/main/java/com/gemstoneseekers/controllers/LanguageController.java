@@ -28,9 +28,8 @@ public class LanguageController {
     @GetMapping
     public ResponseEntity<BaseResponse<List<LanguageResponse>>> getLanguages() {
         List<LanguageResponse> languages = languageService.getLanguages().stream()
-            .map(languageMapper::toLanguageResponse)
-            .toList();
+                .map(languageMapper::toLanguageResponse).toList();
         return ResponseEntity.status(HttpStatus.OK)
-            .body(new BaseResponse<>(true, "Languages retrieved successfully", languages, null));
+                .body(new BaseResponse<>(true, "Languages retrieved successfully", languages, null));
     }
 }

@@ -26,8 +26,8 @@ public class CountryController {
     private final CountryMapper countryMapper;
     private final StateMapper stateMapper;
 
-    public CountryController(CountryService countryService, StateService stateService,
-        CountryMapper countryMapper, StateMapper stateMapper) {
+    public CountryController(CountryService countryService, StateService stateService, CountryMapper countryMapper,
+            StateMapper stateMapper) {
         this.countryService = countryService;
         this.stateService = stateService;
         this.countryMapper = countryMapper;
@@ -36,19 +36,17 @@ public class CountryController {
 
     @GetMapping
     public ResponseEntity<BaseResponse<List<CountryResponse>>> getCountries() {
-        List<CountryResponse> countries = countryService.getCountries().stream()
-            .map(countryMapper::toCountryResponse)
-            .toList();
+        List<CountryResponse> countries = countryService.getCountries().stream().map(countryMapper::toCountryResponse)
+                .toList();
         return ResponseEntity.status(HttpStatus.OK)
-            .body(new BaseResponse<>(true, "Countries retrieved successfully", countries, null));
+                .body(new BaseResponse<>(true, "Countries retrieved successfully", countries, null));
     }
 
     @GetMapping("/{countryId}/states")
     public ResponseEntity<BaseResponse<List<StateResponse>>> getStatesByCountry(@PathVariable Integer countryId) {
         List<StateResponse> states = stateService.getStatesByCountryId(countryId).stream()
-            .map(stateMapper::toStateResponse)
-            .toList();
+                .map(stateMapper::toStateResponse).toList();
         return ResponseEntity.status(HttpStatus.OK)
-            .body(new BaseResponse<>(true, "States retrieved successfully", states, null));
+                .body(new BaseResponse<>(true, "States retrieved successfully", states, null));
     }
 }

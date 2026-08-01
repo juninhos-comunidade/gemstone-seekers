@@ -27,10 +27,8 @@ public class CityController {
 
     @GetMapping
     public ResponseEntity<BaseResponse<List<CityResponse>>> getCities() {
-        List<CityResponse> cities = cityService.getCities().stream()
-            .map(cityMapper::toCityResponse)
-            .toList();
+        List<CityResponse> cities = cityService.getCities().stream().map(cityMapper::toCityResponse).toList();
         return ResponseEntity.status(HttpStatus.OK)
-            .body(new BaseResponse<>(true, "Cities retrieved successfully", cities, null));
+                .body(new BaseResponse<>(true, "Cities retrieved successfully", cities, null));
     }
 }
