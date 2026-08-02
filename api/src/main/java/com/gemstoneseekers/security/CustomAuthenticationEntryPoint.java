@@ -19,7 +19,7 @@ import jakarta.servlet.http.HttpServletResponse;
 @Component
 public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint {
 
-    private static final ObjectMapper objectMapper = new ObjectMapper();
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     @Override
     public void commence(@NonNull HttpServletRequest request, HttpServletResponse response,
@@ -29,6 +29,6 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
         BaseResponse<Void> body = new BaseResponse<>(false, "Authentication is required", null, error);
         response.setStatus(HttpStatus.UNAUTHORIZED.value());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        response.getWriter().write(objectMapper.writeValueAsString(body));
+        response.getWriter().write(OBJECT_MAPPER.writeValueAsString(body));
     }
 }
