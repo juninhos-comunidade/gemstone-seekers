@@ -1,10 +1,20 @@
 openapi: 3.1.0
 info:
-  title: OpenAPI definition
-  version: v0
+  title: Gemstone Seekers API
+  description: A knowledge validation and categorization system for directing selection
+    processes
+  contact:
+    name: Gemstone Seekers
+    url: https://github.com/juninhos-comunidade/gemstone-seekers
+  license:
+    name: PolyForm Noncommercial License 1.0.0
+    url: https://polyformproject.org/licenses/noncommercial/1.0.0
+  version: 1.0.0
 servers:
-- url: http://localhost:8080
-  description: Generated server url
+- url: /
+  description: Gemstone Seekers API
+security:
+- bearer-jwt: []
 paths:
   /api/v1/jobs/{id}:
     get:
@@ -1024,3 +1034,9 @@ components:
         result: {}
         error:
           $ref: "#/components/schemas/ErrorResponse"
+  securitySchemes:
+    bearer-jwt:
+      type: http
+      description: Enter the JWT access token returned by POST /api/v1/auth/login
+      scheme: bearer
+      bearerFormat: JWT
