@@ -1,22 +1,23 @@
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
-import Jobs from "./page";
+import { describe, it, expect } from "vitest";
+import RecruiterJobsPage from "./page";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
-vi.mock("next/navigation", () => ({
-  useRouter: () => ({
-    push: vi.fn(),
-    replace: vi.fn(),
-    back: vi.fn(),
-    forward: vi.fn(),
-    refresh: vi.fn(),
-    prefetch: vi.fn(),
-  }),
-  usePathname: () => "/recruiter/jobs",
-}));
+function renderWithQuery(ui: React.ReactNode) {
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  });
+  return render(
+    <QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>,
+  );
+}
 
 describe("Recruiter Jobs Page", () => {
-  it("should renders the recruiter jobs placeholder", () => {
-    render(<Jobs />);
-    expect(screen.getByText(/vagas de recrutamento/i)).toBeInTheDocument();
+  it("renders the recruiter jobs dashboard page after loading", async () => {
+    renderWithQuery(<RecruiterJobsPage />);
+
+    expect(
+      await screen.findByText("Gestão de Vagas & Oportunidades"),
+    ).toBeInTheDocument();
   });
 });
