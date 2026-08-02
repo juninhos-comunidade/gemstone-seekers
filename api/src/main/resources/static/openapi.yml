@@ -406,6 +406,18 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/BaseResponseRecruiterResponse"
+  /api/v1/market-radar/technology-demand:
+    get:
+      tags:
+      - market-radar-controller
+      operationId: getTechnologyDemand
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/BaseResponseListTechnologyDemandResponse"
   /api/v1/languages:
     get:
       tags:
@@ -877,6 +889,35 @@ components:
         stateId:
           type: integer
           format: int32
+    BaseResponseListTechnologyDemandResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        result:
+          type: array
+          items:
+            $ref: "#/components/schemas/TechnologyDemandResponse"
+        error:
+          $ref: "#/components/schemas/ErrorResponse"
+    TechnologyDemandResponse:
+      type: object
+      properties:
+        technologyId:
+          type: integer
+          format: int32
+        technologyName:
+          type: string
+        technologyCategory:
+          type: string
+        jobCount:
+          type: integer
+          format: int64
+        mandatoryCount:
+          type: integer
+          format: int64
     BaseResponseListLanguageResponse:
       type: object
       properties:

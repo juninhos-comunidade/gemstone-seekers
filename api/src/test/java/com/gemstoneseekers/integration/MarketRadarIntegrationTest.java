@@ -33,13 +33,11 @@ class MarketRadarIntegrationTest {
     @BeforeAll
     static void setup() {
         context = new SpringApplicationBuilder(GemstoneSeekersApplication.class).run(
-            "--spring.datasource.url=" + postgres.getJdbcUrl(),
-            "--spring.datasource.username=" + postgres.getUsername(),
-            "--spring.datasource.password=" + postgres.getPassword(),
-            "--server.port=0",
-            "--jwt.secret=e93afb5d9ffc2f656b9039f768011829be9a88b539671e8aab8d347949a4da67",
-            "--jwt.access-token.expiration=86400000",
-            "--jwt.refresh-token.expiration=604800000");
+                "--spring.datasource.url=" + postgres.getJdbcUrl(),
+                "--spring.datasource.username=" + postgres.getUsername(),
+                "--spring.datasource.password=" + postgres.getPassword(), "--server.port=0",
+                "--jwt.secret=e93afb5d9ffc2f656b9039f768011829be9a88b539671e8aab8d347949a4da67",
+                "--jwt.access-token.expiration=86400000", "--jwt.refresh-token.expiration=604800000");
         Integer resolvedPort = context.getEnvironment().getProperty("local.server.port", Integer.class);
         if (resolvedPort == null) {
             throw new IllegalStateException("Could not resolve local server port");
@@ -61,7 +59,7 @@ class MarketRadarIntegrationTest {
         DataSource ds = context.getBean(DataSource.class);
         try (Connection conn = ds.getConnection(); Statement stmt = conn.createStatement()) {
             stmt.execute("TRUNCATE TABLE job_technologies, jobs, recruiters, candidates, "
-                + "companies, users, technologies CASCADE");
+                    + "companies, users, technologies CASCADE");
         }
     }
 
@@ -72,16 +70,15 @@ class MarketRadarIntegrationTest {
                     "email": "radar@example.com",
                     "password": "plainPassword123"
                 }""";
-        given().contentType(ContentType.JSON).body(registerBody).when()
-            .post("/api/v1/auth/register").then().statusCode(201);
+        given().contentType(ContentType.JSON).body(registerBody).when().post("/api/v1/auth/register").then()
+                .statusCode(201);
         String loginBody = """
                 {
                     "email": "radar@example.com",
                     "password": "plainPassword123"
                 }""";
-        return given().contentType(ContentType.JSON).body(loginBody).when()
-            .post("/api/v1/auth/login").then().statusCode(200)
-            .extract().path("result.accessToken");
+        return given().contentType(ContentType.JSON).body(loginBody).when().post("/api/v1/auth/login").then()
+                .statusCode(200).extract().path("result.accessToken");
     }
 
     private void seedMarketRadarData() throws SQLException {
@@ -91,49 +88,45 @@ class MarketRadarIntegrationTest {
             stmt.execute("INSERT INTO technologies (id, name, category) VALUES (1002, 'Python', 'Backend')");
             stmt.execute("INSERT INTO technologies (id, name, category) VALUES (1003, 'Go', 'Backend')");
             stmt.execute("INSERT INTO companies (id, name, cnpj) "
-                + "VALUES ('aaaaaaaa-0000-7000-8000-000000000001', 'Tech Corp', '12345678000190')");
+                    + "VALUES ('aaaaaaaa-0000-7000-8000-000000000001', 'Tech Corp', '12345678000190')");
             stmt.execute("INSERT INTO users (id, name, email, password, role) "
-                + "VALUES ('aaaaaaaa-0000-7000-8000-000000000002', 'Recruiter', "
-                + "'recruiter@test.com', 'hashed', 'RECRUITER')");
+                    + "VALUES ('aaaaaaaa-0000-7000-8000-000000000002', 'Recruiter', "
+                    + "'recruiter@test.com', 'hashed', 'RECRUITER')");
             stmt.execute("INSERT INTO recruiters (id, user_id, company_id) "
-                + "VALUES ('aaaaaaaa-0000-7000-8000-000000000003', "
-                + "'aaaaaaaa-0000-7000-8000-000000000002', "
-                + "'aaaaaaaa-0000-7000-8000-000000000001')");
+                    + "VALUES ('aaaaaaaa-0000-7000-8000-000000000003', " + "'aaaaaaaa-0000-7000-8000-000000000002', "
+                    + "'aaaaaaaa-0000-7000-8000-000000000001')");
             stmt.execute("INSERT INTO jobs (id, recruiter_id, company_id, title, description, status) "
-                + "VALUES ('aaaaaaaa-0000-7000-8000-000000000010', "
-                + "'aaaaaaaa-0000-7000-8000-000000000003', "
-                + "'aaaaaaaa-0000-7000-8000-000000000001', 'Java Dev', 'Backend role', 'OPEN')");
+                    + "VALUES ('aaaaaaaa-0000-7000-8000-000000000010', " + "'aaaaaaaa-0000-7000-8000-000000000003', "
+                    + "'aaaaaaaa-0000-7000-8000-000000000001', 'Java Dev', 'Backend role', 'OPEN')");
             stmt.execute("INSERT INTO jobs (id, recruiter_id, company_id, title, description, status) "
-                + "VALUES ('aaaaaaaa-0000-7000-8000-000000000011', "
-                + "'aaaaaaaa-0000-7000-8000-000000000003', "
-                + "'aaaaaaaa-0000-7000-8000-000000000001', 'Full Stack Dev', 'Full stack role', 'OPEN')");
+                    + "VALUES ('aaaaaaaa-0000-7000-8000-000000000011', " + "'aaaaaaaa-0000-7000-8000-000000000003', "
+                    + "'aaaaaaaa-0000-7000-8000-000000000001', 'Full Stack Dev', 'Full stack role', 'OPEN')");
             stmt.execute("INSERT INTO jobs (id, recruiter_id, company_id, title, description, status) "
-                + "VALUES ('aaaaaaaa-0000-7000-8000-000000000012', "
-                + "'aaaaaaaa-0000-7000-8000-000000000003', "
-                + "'aaaaaaaa-0000-7000-8000-000000000001', 'Go Dev', 'Go role', 'CLOSED')");
+                    + "VALUES ('aaaaaaaa-0000-7000-8000-000000000012', " + "'aaaaaaaa-0000-7000-8000-000000000003', "
+                    + "'aaaaaaaa-0000-7000-8000-000000000001', 'Go Dev', 'Go role', 'CLOSED')");
             stmt.execute("INSERT INTO job_technologies (job_id, technology_id, is_mandatory) "
-                + "VALUES ('aaaaaaaa-0000-7000-8000-000000000010', 1001, true)");
+                    + "VALUES ('aaaaaaaa-0000-7000-8000-000000000010', 1001, true)");
             stmt.execute("INSERT INTO job_technologies (job_id, technology_id, is_mandatory) "
-                + "VALUES ('aaaaaaaa-0000-7000-8000-000000000011', 1001, false)");
+                    + "VALUES ('aaaaaaaa-0000-7000-8000-000000000011', 1001, false)");
             stmt.execute("INSERT INTO job_technologies (job_id, technology_id, is_mandatory) "
-                + "VALUES ('aaaaaaaa-0000-7000-8000-000000000010', 1002, true)");
+                    + "VALUES ('aaaaaaaa-0000-7000-8000-000000000010', 1002, true)");
             stmt.execute("INSERT INTO job_technologies (job_id, technology_id, is_mandatory) "
-                + "VALUES ('aaaaaaaa-0000-7000-8000-000000000012', 1003, true)");
+                    + "VALUES ('aaaaaaaa-0000-7000-8000-000000000012', 1003, true)");
         }
     }
 
     @Test
     void shouldRejectWithoutJwt() {
-        given().contentType(ContentType.JSON).when()
-            .get("/api/v1/market-radar/technology-demand").then().statusCode(403);
+        given().contentType(ContentType.JSON).when().get("/api/v1/market-radar/technology-demand").then()
+                .statusCode(403);
     }
 
     @Test
     void shouldReturnEmptyListWhenNoJobsExist() {
         String token = getAccessToken();
         given().contentType(ContentType.JSON).header("Authorization", "Bearer " + token).when()
-            .get("/api/v1/market-radar/technology-demand").then().statusCode(200)
-            .body("success", equalTo(true)).body("result", hasSize(0));
+                .get("/api/v1/market-radar/technology-demand").then().statusCode(200).body("success", equalTo(true))
+                .body("result", hasSize(0));
     }
 
     @Test
@@ -141,14 +134,10 @@ class MarketRadarIntegrationTest {
         String token = getAccessToken();
         seedMarketRadarData();
         given().contentType(ContentType.JSON).header("Authorization", "Bearer " + token).when()
-            .get("/api/v1/market-radar/technology-demand").then().statusCode(200)
-            .body("success", equalTo(true))
-            .body("result", hasSize(2))
-            .body("result[0].technologyName", equalTo("Java"))
-            .body("result[0].jobCount", equalTo(2))
-            .body("result[0].mandatoryCount", equalTo(1))
-            .body("result[1].technologyName", equalTo("Python"))
-            .body("result[1].jobCount", equalTo(1))
-            .body("result[1].mandatoryCount", equalTo(1));
+                .get("/api/v1/market-radar/technology-demand").then().statusCode(200).body("success", equalTo(true))
+                .body("result", hasSize(2)).body("result[0].technologyName", equalTo("Java"))
+                .body("result[0].jobCount", equalTo(2)).body("result[0].mandatoryCount", equalTo(1))
+                .body("result[1].technologyName", equalTo("Python")).body("result[1].jobCount", equalTo(1))
+                .body("result[1].mandatoryCount", equalTo(1));
     }
 }

@@ -20,20 +20,16 @@ class MarketRadarServiceTest {
 
     private final JobTechnologyRepository jobTechnologyRepository = mock(JobTechnologyRepository.class);
     private final MarketRadarMapper marketRadarMapper = mock(MarketRadarMapper.class);
-    private final MarketRadarService marketRadarService =
-        new MarketRadarService(jobTechnologyRepository, marketRadarMapper);
+    private final MarketRadarService marketRadarService = new MarketRadarService(jobTechnologyRepository,
+            marketRadarMapper);
 
     @Test
     void getTechnologyDemandShouldReturnMappedResponsesWhenDataExists() {
         TechnologyDemandProjection projection = mock(TechnologyDemandProjection.class);
-        TechnologyDemandResponse response = new TechnologyDemandResponse(
-            1, "Java", "Backend", 5L, 3L
-        );
+        TechnologyDemandResponse response = new TechnologyDemandResponse(1, "Java", "Backend", 5L, 3L);
 
-        when(jobTechnologyRepository.findTechnologyDemandByJobStatus(JobStatus.OPEN))
-            .thenReturn(List.of(projection));
-        when(marketRadarMapper.toResponseList(List.of(projection)))
-            .thenReturn(List.of(response));
+        when(jobTechnologyRepository.findTechnologyDemandByJobStatus(JobStatus.OPEN)).thenReturn(List.of(projection));
+        when(marketRadarMapper.toResponseList(List.of(projection))).thenReturn(List.of(response));
 
         List<TechnologyDemandResponse> result = marketRadarService.getTechnologyDemand();
 
@@ -51,10 +47,8 @@ class MarketRadarServiceTest {
 
     @Test
     void getTechnologyDemandShouldReturnEmptyListWhenNoDataExists() {
-        when(jobTechnologyRepository.findTechnologyDemandByJobStatus(JobStatus.OPEN))
-            .thenReturn(List.of());
-        when(marketRadarMapper.toResponseList(List.of()))
-            .thenReturn(List.of());
+        when(jobTechnologyRepository.findTechnologyDemandByJobStatus(JobStatus.OPEN)).thenReturn(List.of());
+        when(marketRadarMapper.toResponseList(List.of())).thenReturn(List.of());
 
         List<TechnologyDemandResponse> result = marketRadarService.getTechnologyDemand();
 

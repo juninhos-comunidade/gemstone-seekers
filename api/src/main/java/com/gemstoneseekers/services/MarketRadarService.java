@@ -15,15 +15,13 @@ public class MarketRadarService {
     private final JobTechnologyRepository jobTechnologyRepository;
     private final MarketRadarMapper marketRadarMapper;
 
-    public MarketRadarService(JobTechnologyRepository jobTechnologyRepository,
-        MarketRadarMapper marketRadarMapper) {
+    public MarketRadarService(JobTechnologyRepository jobTechnologyRepository, MarketRadarMapper marketRadarMapper) {
         this.jobTechnologyRepository = jobTechnologyRepository;
         this.marketRadarMapper = marketRadarMapper;
     }
 
     public List<TechnologyDemandResponse> getTechnologyDemand() {
-        return marketRadarMapper.toResponseList(
-            jobTechnologyRepository.findTechnologyDemandByJobStatus(JobStatus.OPEN)
-        );
+        return marketRadarMapper
+                .toResponseList(jobTechnologyRepository.findTechnologyDemandByJobStatus(JobStatus.OPEN));
     }
 }

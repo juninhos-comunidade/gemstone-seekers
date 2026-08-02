@@ -11,18 +11,11 @@ import com.gemstoneseekers.repositories.projections.TechnologyDemandProjection;
 public class MarketRadarMapper {
 
     public TechnologyDemandResponse toResponse(TechnologyDemandProjection projection) {
-        return new TechnologyDemandResponse(
-            projection.getTechnologyId(),
-            projection.getTechnologyName(),
-            projection.getTechnologyCategory(),
-            projection.getJobCount(),
-            projection.getMandatoryCount()
-        );
+        return new TechnologyDemandResponse(projection.getTechnologyId(), projection.getTechnologyName(),
+                projection.getTechnologyCategory(), projection.getJobCount(), projection.getMandatoryCount());
     }
 
     public List<TechnologyDemandResponse> toResponseList(List<TechnologyDemandProjection> projections) {
-        return projections.stream()
-            .map(this::toResponse)
-            .toList();
+        return projections.stream().map(this::toResponse).toList();
     }
 }

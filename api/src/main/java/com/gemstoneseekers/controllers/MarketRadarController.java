@@ -24,8 +24,6 @@ public class MarketRadarController {
     @GetMapping("/technology-demand")
     public ResponseEntity<BaseResponse<List<TechnologyDemandResponse>>> getTechnologyDemand() {
         List<TechnologyDemandResponse> result = marketRadarService.getTechnologyDemand();
-        return ResponseEntity.ok(
-            new BaseResponse<>(true, "Technology demand retrieved successfully", result, null)
-        );
+        return ResponseEntity.ok(new BaseResponse<>(true, "Technology demand retrieved successfully", result, null));
     }
 }

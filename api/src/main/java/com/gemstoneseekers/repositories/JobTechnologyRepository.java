@@ -22,16 +22,11 @@ public interface JobTechnologyRepository extends JpaRepository<JobTechnology, Jo
 
     void deleteByJobIdAndTechnologyId(UUID jobId, Integer technologyId);
 
-    @Query("SELECT jt.technology.id AS technologyId, "
-        + "jt.technology.name AS technologyName, "
-        + "jt.technology.category AS technologyCategory, "
-        + "COUNT(jt.job) AS jobCount, "
-        + "SUM(CASE WHEN jt.isMandatory = true THEN 1 ELSE 0 END) AS mandatoryCount "
-        + "FROM JobTechnology jt "
-        + "WHERE jt.job.status = :status "
-        + "AND jt.job.deletedAt IS NULL "
-        + "AND jt.technology.deletedAt IS NULL "
-        + "GROUP BY jt.technology.id, jt.technology.name, jt.technology.category "
-        + "ORDER BY jobCount DESC")
+    @Query("SELECT jt.technology.id AS technologyId, " + "jt.technology.name AS technologyName, "
+            + "jt.technology.category AS technologyCategory, " + "COUNT(jt.job) AS jobCount, "
+            + "SUM(CASE WHEN jt.isMandatory = true THEN 1 ELSE 0 END) AS mandatoryCount " + "FROM JobTechnology jt "
+            + "WHERE jt.job.status = :status " + "AND jt.job.deletedAt IS NULL "
+            + "AND jt.technology.deletedAt IS NULL "
+            + "GROUP BY jt.technology.id, jt.technology.name, jt.technology.category " + "ORDER BY jobCount DESC")
     List<TechnologyDemandProjection> findTechnologyDemandByJobStatus(@Param("status") JobStatus status);
 }
