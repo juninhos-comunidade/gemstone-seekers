@@ -83,7 +83,7 @@ class LanguageIntegrationTest {
 
     @Test
     void shouldRejectLanguagesWithoutJwt() {
-        given().contentType(ContentType.JSON).when().get("/api/v1/languages").then().statusCode(403);
+        given().contentType(ContentType.JSON).when().get("/api/v1/languages").then().statusCode(401);
     }
 
     @Test

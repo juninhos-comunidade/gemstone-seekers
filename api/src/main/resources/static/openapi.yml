@@ -1,10 +1,20 @@
 openapi: 3.1.0
 info:
-  title: OpenAPI definition
-  version: v0
+  title: Gemstone Seekers API
+  description: A knowledge validation and categorization system for directing selection
+    processes
+  contact:
+    name: Gemstone Seekers
+    url: https://github.com/juninhos-comunidade/gemstone-seekers
+  license:
+    name: PolyForm Noncommercial License 1.0.0
+    url: https://polyformproject.org/licenses/noncommercial/1.0.0
+  version: 1.0.0
 servers:
-- url: http://localhost:8080
-  description: Generated server url
+- url: /
+  description: Gemstone Seekers API
+security:
+- bearer-jwt: []
 paths:
   /api/v1/jobs/{id}:
     get:
@@ -406,6 +416,18 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/BaseResponseRecruiterResponse"
+  /api/v1/market-radar/technology-demand:
+    get:
+      tags:
+      - market-radar-controller
+      operationId: getTechnologyDemand
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/BaseResponseListTechnologyDemandResponse"
   /api/v1/languages:
     get:
       tags:
@@ -877,6 +899,35 @@ components:
         stateId:
           type: integer
           format: int32
+    BaseResponseListTechnologyDemandResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        result:
+          type: array
+          items:
+            $ref: "#/components/schemas/TechnologyDemandResponse"
+        error:
+          $ref: "#/components/schemas/ErrorResponse"
+    TechnologyDemandResponse:
+      type: object
+      properties:
+        technologyId:
+          type: integer
+          format: int32
+        technologyName:
+          type: string
+        technologyCategory:
+          type: string
+        jobCount:
+          type: integer
+          format: int64
+        mandatoryCount:
+          type: integer
+          format: int64
     BaseResponseListLanguageResponse:
       type: object
       properties:
@@ -983,3 +1034,9 @@ components:
         result: {}
         error:
           $ref: "#/components/schemas/ErrorResponse"
+  securitySchemes:
+    bearer-jwt:
+      type: http
+      description: Enter the JWT access token returned by POST /api/v1/auth/login
+      scheme: bearer
+      bearerFormat: JWT

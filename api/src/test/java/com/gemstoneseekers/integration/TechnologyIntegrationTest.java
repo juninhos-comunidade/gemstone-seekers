@@ -84,7 +84,7 @@ class TechnologyIntegrationTest {
 
     @Test
     void shouldRejectTechnologiesWithoutJwt() {
-        given().contentType(ContentType.JSON).when().get("/api/v1/technologies").then().statusCode(403);
+        given().contentType(ContentType.JSON).when().get("/api/v1/technologies").then().statusCode(401);
     }
 
     @Test

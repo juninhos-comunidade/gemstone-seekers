@@ -104,7 +104,7 @@ class CompanyIntegrationTest {
                     "name": "Tech Corp",
                     "cnpj": "12345678000190"
                 }""";
-        given().contentType(ContentType.JSON).body(createBody).when().post("/api/v1/companies").then().statusCode(403);
+        given().contentType(ContentType.JSON).body(createBody).when().post("/api/v1/companies").then().statusCode(401);
     }
 
     @Test

@@ -83,7 +83,7 @@ class StateIntegrationTest {
 
     @Test
     void shouldRejectStatesWithoutJwt() {
-        given().contentType(ContentType.JSON).when().get("/api/v1/states").then().statusCode(403);
+        given().contentType(ContentType.JSON).when().get("/api/v1/states").then().statusCode(401);
     }
 
     @Test
