@@ -101,7 +101,7 @@ class AuthIntegrationTest {
                 }""";
 
         given().contentType(ContentType.JSON).body(completeBody).when().patch("/api/v1/auth/complete-registration")
-                .then().statusCode(403);
+                .then().statusCode(401);
 
         given().contentType(ContentType.JSON).header("Authorization", "Bearer " + accessToken).body(completeBody).when()
                 .patch("/api/v1/auth/complete-registration").then().statusCode(200).body("success", equalTo(true))

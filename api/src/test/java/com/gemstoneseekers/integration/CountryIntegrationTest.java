@@ -83,7 +83,7 @@ class CountryIntegrationTest {
 
     @Test
     void shouldRejectCountriesWithoutJwt() {
-        given().contentType(ContentType.JSON).when().get("/api/v1/countries").then().statusCode(403);
+        given().contentType(ContentType.JSON).when().get("/api/v1/countries").then().statusCode(401);
     }
 
     @Test

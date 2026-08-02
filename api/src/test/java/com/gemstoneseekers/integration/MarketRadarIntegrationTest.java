@@ -118,7 +118,7 @@ class MarketRadarIntegrationTest {
     @Test
     void shouldRejectWithoutJwt() {
         given().contentType(ContentType.JSON).when().get("/api/v1/market-radar/technology-demand").then()
-                .statusCode(403);
+                .statusCode(401).body("success", equalTo(false)).body("error.code", equalTo("UNAUTHENTICATED"));
     }
 
     @Test

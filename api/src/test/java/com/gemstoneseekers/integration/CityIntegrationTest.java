@@ -83,7 +83,7 @@ class CityIntegrationTest {
 
     @Test
     void shouldRejectCitiesWithoutJwt() {
-        given().contentType(ContentType.JSON).when().get("/api/v1/cities").then().statusCode(403);
+        given().contentType(ContentType.JSON).when().get("/api/v1/cities").then().statusCode(401);
     }
 
     @Test
