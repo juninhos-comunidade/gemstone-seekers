@@ -1,14 +1,8 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { MOCK_JOBS } from "@/lib/mocks/jobMock";
+import { httpClient } from "@/lib/api/client";
 
-export async function deleteJob(id: string): Promise<boolean> {
-  await new Promise((resolve) => setTimeout(resolve, 200));
-
-  const index = MOCK_JOBS.findIndex((j) => j.id === id);
-  if (index !== -1) {
-    MOCK_JOBS.splice(index, 1);
-  }
-  return true;
+export async function deleteJob(id: string): Promise<void> {
+  await httpClient.delete(`/jobs/${id}`);
 }
 
 export function useDeleteJobMutation() {

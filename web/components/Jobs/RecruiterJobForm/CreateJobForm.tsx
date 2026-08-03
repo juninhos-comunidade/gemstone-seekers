@@ -1,13 +1,12 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useForm, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Job } from "@/lib/types/job";
 import { useCreateJobMutation } from "@/lib/api/jobs/createJob";
-import { useUpdateJobMutation } from "@/lib/api/jobs/updateJob";
+import { useAddJobTechnologiesMutation } from "@/lib/api/jobs/jobTechnologies/addJobTechnologies";
 import { jobFormSchema, JobFormData } from "@/lib/schemas/forms/jobFormSchema";
 import { JobBasicInfoSection } from "./sections/JobBasicInfoSection";
 import { JobCompensationSection } from "./sections/JobCompensationSection";
@@ -18,25 +17,19 @@ import { ArrowLeft, Save, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
-interface RecruiterJobFormProps {
-  initialJob?: Job | null;
-}
-
-export function RecruiterJobForm({ initialJob }: RecruiterJobFormProps) {
+export function CreateJobForm() {
   const router = useRouter();
   const createMutation = useCreateJobMutation();
-  const updateMutation = useUpdateJobMutation();
-
-  const isEditing = Boolean(initialJob);
+  const addTechnologiesMutation = useAddJobTechnologiesMutation();
 
   const methods = useForm<JobFormData>({
     resolver: zodResolver(jobFormSchema),
     defaultValues: {
       title: "",
-      companyName: "Gemstone Tech Solutions",
+      companyId: "",
+      recruiterId: "",
       department: "Engenharia de Software",
       seniorityLevel: "Pleno",
-      location: "Remoto (Brasil)",
       status: "OPEN",
       salaryMin: undefined,
       salaryMax: undefined,
@@ -45,56 +38,37 @@ export function RecruiterJobForm({ initialJob }: RecruiterJobFormProps) {
     },
   });
 
-  const { handleSubmit, reset } = methods;
+  const { handleSubmit } = methods;
 
-  useEffect(() => {
-    if (initialJob) {
-      reset({
-        title: initialJob.title || "",
-        companyName: initialJob.companyName || "Gemstone Tech Solutions",
-        department: initialJob.department || "",
-        seniorityLevel: initialJob.seniorityLevel || "Pleno",
-        location: initialJob.location || "",
-        status: initialJob.status || "OPEN",
-        salaryMin: initialJob.salaryMin,
-        salaryMax: initialJob.salaryMax,
-        description: initialJob.description || "",
-        technologies: initialJob.technologies || [],
+  const onSubmit = async (values: JobFormData) => {
+    try {
+      const createdJob = await createMutation.mutateAsync({
+        title: values.title,
+        description: values.description,
+        seniorityLevel: values.seniorityLevel,
+        department: values.department,
+        salaryMin: values.salaryMin,
+        salaryMax: values.salaryMax,
+        companyId: values.companyId,
+        recruiterId: values.recruiterId,
       });
-    }
-  }, [initialJob, reset]);
 
-  const onSubmit = (values: JobFormData) => {
-    if (isEditing && initialJob) {
-      updateMutation.mutate(
-        {
-          id: initialJob.id,
-          ...values,
-        },
-        {
-          onSuccess: () => {
-            toast.success("Vaga atualizada com sucesso!");
-            router.push("/recruiter/dashboard/jobs");
-          },
-          onError: () => {
-            toast.error("Erro ao atualizar a vaga.");
-          },
-        },
-      );
-    } else {
-      createMutation.mutate(values, {
-        onSuccess: () => {
-          toast.success("Vaga cadastrada e publicada com sucesso!");
-          router.push("/recruiter/dashboard/jobs");
-        },
-        onError: () => {
-          toast.error("Erro ao cadastrar a vaga.");
-        },
-      });
+      if (values.technologies && values.technologies.length > 0) {
+        await addTechnologiesMutation.mutateAsync({
+          jobId: createdJob.id,
+          technologies: values.technologies,
+        });
+      }
+
+      toast.success("Vaga cadastrada e publicada com sucesso!");
+      router.push("/recruiter/dashboard/jobs");
+    } catch {
+      toast.error("Erro ao cadastrar a vaga.");
     }
   };
 
-  const isPending = createMutation.isPending || updateMutation.isPending;
+  const isPending =
+    createMutation.isPending || addTechnologiesMutation.isPending;
 
   return (
     <div className="mx-auto max-w-4xl space-y-6 px-4 py-8 pt-20 pb-16">
@@ -110,19 +84,17 @@ export function RecruiterJobForm({ initialJob }: RecruiterJobFormProps) {
           Voltar para Vagas
         </Link>
         <span className="text-muted-foreground font-mono text-xs">
-          {isEditing ? "Edição de Vaga" : "Nova Vaga"}
+          Nova Vaga
         </span>
       </div>
 
       <div className="space-y-1">
         <h1 className="text-2xl font-bold tracking-tight">
-          {isEditing
-            ? "Editar Oportunidade de Trabalho"
-            : "Cadastrar Nova Oportunidade"}
+          Cadastrar Nova Oportunidade
         </h1>
         <p className="text-muted-foreground text-sm">
-          Preencha os detalhes da vaga, nível de senioridade, requisitos e
-          remuneração.
+          Preencha os detalhes da vaga, empresa, recrutador, nível de
+          senioridade e requisitos.
         </p>
       </div>
 
@@ -153,9 +125,7 @@ export function RecruiterJobForm({ initialJob }: RecruiterJobFormProps) {
               ) : (
                 <>
                   <Save className="size-4" />
-                  {isEditing
-                    ? "Salvar Alterações da Vaga"
-                    : "Cadastrar e Publicar Vaga"}
+                  Cadastrar e Publicar Vaga
                 </>
               )}
             </Button>

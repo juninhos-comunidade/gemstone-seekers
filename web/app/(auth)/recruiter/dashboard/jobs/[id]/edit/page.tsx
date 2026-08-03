@@ -2,7 +2,7 @@
 
 import React, { use } from "react";
 import Link from "next/link";
-import { RecruiterJobForm } from "@/components/Jobs/RecruiterJobForm/RecruiterJobForm";
+import { EditJobForm } from "@/components/Jobs/RecruiterJobForm/EditJobForm";
 import { useJobDetailQuery } from "@/lib/api/jobs/getJobDetail";
 import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -55,5 +55,5 @@ export default function EditJobPage({ params }: PageProps) {
     );
   }
 
-  return <RecruiterJobForm initialJob={job} />;
+  return <EditJobForm initialJob={job} />;
 }

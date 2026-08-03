@@ -3,7 +3,8 @@
 import React, { useState } from "react";
 import { useFormContext, useWatch } from "react-hook-form";
 import { JobFormData } from "@/lib/schemas/forms/jobFormSchema";
-import { useTechnologiesQuery } from "@/lib/api/jobs/getTechnologies";
+import { useTechnologiesQuery } from "@/lib/api/technologies/getTechnologies";
+import { TechnologyItem } from "@/lib/types/technology";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -27,11 +28,7 @@ export function JobTechnologiesSection() {
   const isSelected = (techId: number) =>
     selectedTechnologies.some((t) => t.technologyId === techId);
 
-  const handleSelectTech = (tech: {
-    id: number;
-    name: string;
-    category: string;
-  }) => {
+  const handleSelectTech = (tech: TechnologyItem) => {
     if (isSelected(tech.id)) return;
     const updated = [
       ...selectedTechnologies,
@@ -60,22 +57,6 @@ export function JobTechnologiesSection() {
       return t;
     });
     setValue("technologies", updated);
-  };
-
-  const handleAddCustomTech = () => {
-    if (!searchTerm.trim()) return;
-    const customId = Date.now();
-    const updated = [
-      ...selectedTechnologies,
-      {
-        technologyId: customId,
-        name: searchTerm.trim(),
-        category: "Personalizada",
-        isMandatory: true,
-      },
-    ];
-    setValue("technologies", updated);
-    setSearchTerm("");
   };
 
   const filteredCatalog = catalog.filter(
@@ -170,44 +151,34 @@ export function JobTechnologiesSection() {
           </div>
 
           <div className="bg-muted/20 flex max-h-48 flex-wrap gap-2 overflow-y-auto rounded-xl border p-2">
-            {filteredCatalog.map((item) => {
-              const active = isSelected(item.id);
-              return (
-                <Badge
-                  key={item.id}
-                  variant={active ? "default" : "outline"}
-                  className={`cursor-pointer gap-1.5 px-2.5 py-1 text-xs transition-all ${
-                    active
-                      ? "bg-muted text-muted-foreground border-transparent opacity-60"
-                      : "hover:border-primary/50 hover:bg-primary/5"
-                  }`}
-                  onClick={() => handleSelectTech(item)}
-                >
-                  {active ? (
-                    <CheckCircle2 className="size-3 text-emerald-500" />
-                  ) : (
-                    <Plus className="size-3" />
-                  )}
-                  {item.name}
-                </Badge>
-              );
-            })}
-
-            {searchTerm.trim() &&
-              !filteredCatalog.some(
-                (i) => i.name.toLowerCase() === searchTerm.toLowerCase(),
-              ) && (
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  className="text-primary border-primary/30 h-7 gap-1 text-xs"
-                  onClick={handleAddCustomTech}
-                >
-                  <Plus className="size-3" />
-                  Adicionar &quot;{searchTerm}&quot;
-                </Button>
-              )}
+            {filteredCatalog.length === 0 ? (
+              <p className="text-muted-foreground/70 p-2 text-xs italic">
+                Nenhuma tecnologia encontrada no catálogo.
+              </p>
+            ) : (
+              filteredCatalog.map((item) => {
+                const active = isSelected(item.id);
+                return (
+                  <Badge
+                    key={item.id}
+                    variant={active ? "default" : "outline"}
+                    className={`cursor-pointer gap-1.5 px-2.5 py-1 text-xs transition-all ${
+                      active
+                        ? "bg-muted text-muted-foreground border-transparent opacity-60"
+                        : "hover:border-primary/50 hover:bg-primary/5"
+                    }`}
+                    onClick={() => handleSelectTech(item)}
+                  >
+                    {active ? (
+                      <CheckCircle2 className="size-3 text-emerald-500" />
+                    ) : (
+                      <Plus className="size-3" />
+                    )}
+                    {item.name}
+                  </Badge>
+                );
+              })
+            )}
           </div>
         </div>
       </CardContent>

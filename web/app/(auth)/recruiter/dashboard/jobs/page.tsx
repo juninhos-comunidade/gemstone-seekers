@@ -8,7 +8,7 @@ import { Loader2 } from "lucide-react";
 export default function RecruiterJobsPage() {
   const { data: jobs, isLoading, error } = useJobsQuery();
 
-  if (isLoading || !jobs) {
+  if (isLoading) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center pt-20">
         <div className="text-muted-foreground flex items-center gap-3 text-sm font-medium">
@@ -19,7 +19,7 @@ export default function RecruiterJobsPage() {
     );
   }
 
-  if (error) {
+  if (error || !jobs) {
     return (
       <div className="text-destructive flex min-h-[60vh] items-center justify-center pt-20 text-sm font-medium">
         Erro ao carregar painel de vagas.

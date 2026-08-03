@@ -1,27 +1,13 @@
-export type JobStatus = "OPEN" | "PAUSED" | "CLOSED" | "CANCELLED";
+export type JobStatus = "OPEN" | "CLOSED" | "CANCELLED";
 
 export type SeniorityLevel =
-  "Junior" | "Pleno" | "Sênior" | "Especialista" | "Tech Lead";
-
-export interface JobTechnology {
-  technologyId: number;
-  name: string;
-  category?: string;
-  isMandatory: boolean;
-}
-
-export interface TechnologyItem {
-  id: number;
-  name: string;
-  category: string;
-}
+  "Junior" | "Pleno" | "Sênior" | "Mid" | "Especialista" | "Tech Lead";
 
 export interface Job {
   id: string;
   recruiterId: string;
   companyId: string;
-  companyName: string;
-  companyCnpj?: string;
+  companyName?: string;
   title: string;
   description: string;
   seniorityLevel: SeniorityLevel;
@@ -29,25 +15,48 @@ export interface Job {
   salaryMin?: number;
   salaryMax?: number;
   status: JobStatus;
-  technologies: JobTechnology[];
-  location: string;
-  createdAt: string;
-  updatedAt: string;
+  technologies?: JobTechnology[];
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface CreateJobInput {
   title: string;
-  companyName: string;
-  department: string;
-  seniorityLevel: SeniorityLevel;
-  location: string;
-  status: JobStatus;
+  description: string;
+  seniorityLevel?: SeniorityLevel;
+  department?: string;
   salaryMin?: number;
   salaryMax?: number;
-  description: string;
-  technologies: JobTechnology[];
+  recruiterId: string;
+  companyId: string;
 }
 
-export interface UpdateJobInput extends CreateJobInput {
-  id: string;
+export interface UpdateJobInput {
+  title: string;
+  description: string;
+  seniorityLevel?: SeniorityLevel;
+  department?: string;
+  salaryMin?: number;
+  salaryMax?: number;
+  recruiterId: string;
+  companyId: string;
+}
+
+export interface JobTechnology {
+  technologyId: number;
+  category: string;
+  technologyName: string;
+  isMandatory: boolean;
+}
+
+export interface JobTechnologyApiResponse {
+  technologyId: number;
+  technologyName?: string;
+  category: string;
+  isMandatory: boolean;
+}
+
+export interface AddJobTechnologyInput {
+  technologyId: number;
+  isMandatory: boolean;
 }

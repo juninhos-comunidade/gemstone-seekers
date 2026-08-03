@@ -35,7 +35,6 @@ export function JobCompensationSection() {
             <Input
               id="salaryMin"
               type="number"
-              step="500"
               {...register("salaryMin")}
               placeholder="Ex: 8000"
             />
@@ -46,7 +45,6 @@ export function JobCompensationSection() {
             <Input
               id="salaryMax"
               type="number"
-              step="500"
               {...register("salaryMax")}
               placeholder="Ex: 12000"
             />

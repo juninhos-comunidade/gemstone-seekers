@@ -2,14 +2,15 @@ import { z } from "zod";
 
 export const jobTechnologySchema = z.object({
   technologyId: z.number(),
-  name: z.string().min(1, "Nome da tecnologia é obrigatório"),
+  technologyName: z.string().optional(),
   category: z.string().optional(),
   isMandatory: z.boolean().default(true),
 });
 
 export const jobFormSchema = z.object({
   title: z.string().min(3, "O título da vaga deve ter no mínimo 3 caracteres"),
-  companyName: z.string().min(2, "Nome da empresa é obrigatório"),
+  companyId: z.string().min(1, "Selecione uma empresa"),
+  recruiterId: z.string().min(1, "Selecione um recrutador"),
   department: z.string().min(2, "Informe o departamento ou área"),
   seniorityLevel: z.enum([
     "Junior",
@@ -17,9 +18,9 @@ export const jobFormSchema = z.object({
     "Sênior",
     "Especialista",
     "Tech Lead",
+    "Mid",
   ]),
-  location: z.string().min(2, "Informe a localização ou regime de trabalho"),
-  status: z.enum(["OPEN", "PAUSED", "CLOSED", "CANCELLED"]).default("OPEN"),
+  status: z.enum(["OPEN", "CLOSED", "CANCELLED"]).default("OPEN"),
   salaryMin: z.coerce.number().optional(),
   salaryMax: z.coerce.number().optional(),
   description: z

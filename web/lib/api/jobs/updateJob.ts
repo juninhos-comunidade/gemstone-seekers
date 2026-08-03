@@ -1,44 +1,32 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Job, UpdateJobInput } from "@/lib/types/job";
-import { MOCK_JOBS } from "@/lib/mocks/jobMock";
+import { httpClient } from "@/lib/api/client";
+import { ApiResponse } from "@/lib/types/api/response";
 
-export async function updateJob(input: UpdateJobInput): Promise<Job> {
-  await new Promise((resolve) => setTimeout(resolve, 250));
+export interface UpdateJobParams {
+  id: string;
+  data: UpdateJobInput;
+}
 
-  const index = MOCK_JOBS.findIndex((j) => j.id === input.id);
-  const existing = MOCK_JOBS[index];
-
-  const updated: Job = {
-    ...existing,
-    title: input.title,
-    companyName:
-      input.companyName || existing?.companyName || "Gemstone Tech Solutions",
-    department: input.department,
-    seniorityLevel: input.seniorityLevel,
-    location: input.location,
-    status: input.status,
-    salaryMin: input.salaryMin,
-    salaryMax: input.salaryMax,
-    description: input.description,
-    technologies: input.technologies,
-    updatedAt: new Date().toISOString(),
-  };
-
-  if (index !== -1) {
-    MOCK_JOBS[index] = updated;
-  }
-
-  return updated;
+export async function updateJob(
+  id: string,
+  input: UpdateJobInput,
+): Promise<Job> {
+  const response = await httpClient.put<ApiResponse<Job>>(`/jobs/${id}`, input);
+  return response.result;
 }
 
 export function useUpdateJobMutation() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (input: UpdateJobInput) => updateJob(input),
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ["jobs"] });
-      queryClient.invalidateQueries({ queryKey: ["jobs", variables.id] });
+    mutationFn: ({ id, data }: UpdateJobParams) => updateJob(id, data),
+    onSuccess: (job) => {
+      queryClient.invalidateQueries({ queryKey: ["jobs"], exact: true });
+      queryClient.invalidateQueries({
+        queryKey: ["jobs", job.id],
+        refetchType: "inactive",
+      });
     },
   });
 }

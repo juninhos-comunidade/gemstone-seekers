@@ -23,13 +23,14 @@ export function RecruiterJobDashboard({ jobs }: RecruiterJobDashboardProps) {
   const filteredJobs = jobs.filter((job) => {
     const matchesSearch =
       job.title.toLowerCase().includes(search.toLowerCase()) ||
-      job.companyName.toLowerCase().includes(search.toLowerCase()) ||
-      job.department.toLowerCase().includes(search.toLowerCase()) ||
-      job.technologies.some((t) =>
-        t.name.toLowerCase().includes(search.toLowerCase()),
-      );
+      job.department.toLowerCase().includes(search.toLowerCase());
 
     if (statusFilter === "ALL") return matchesSearch;
+    if (statusFilter === "CLOSED") {
+      return (
+        matchesSearch && (job.status === "CLOSED" || job.status === "CANCELLED")
+      );
+    }
     return matchesSearch && job.status === statusFilter;
   });
 
@@ -67,18 +68,15 @@ export function RecruiterJobDashboard({ jobs }: RecruiterJobDashboardProps) {
           onValueChange={setStatusFilter}
           className="w-full sm:w-auto"
         >
-          <TabsList className="grid w-full grid-cols-4 sm:w-auto">
+          <TabsList className="grid w-full grid-cols-3 sm:w-auto">
             <TabsTrigger value="ALL" className="text-xs">
               Todas ({jobs.length})
             </TabsTrigger>
             <TabsTrigger value="OPEN" className="text-xs">
               Abertas ({jobs.filter((j) => j.status === "OPEN").length})
             </TabsTrigger>
-            <TabsTrigger value="PAUSED" className="text-xs">
-              Pausadas ({jobs.filter((j) => j.status === "PAUSED").length})
-            </TabsTrigger>
             <TabsTrigger value="CLOSED" className="text-xs">
-              Canceladas (
+              Encerradas / Canceladas (
               {
                 jobs.filter(
                   (j) => j.status === "CLOSED" || j.status === "CANCELLED",
@@ -92,7 +90,7 @@ export function RecruiterJobDashboard({ jobs }: RecruiterJobDashboardProps) {
         <div className="relative w-full sm:w-72">
           <Search className="text-muted-foreground absolute top-1/2 left-3 size-4 -translate-y-1/2" />
           <Input
-            placeholder="Buscar por título ou tecnologia..."
+            placeholder="Buscar por título ou área..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="pl-9 text-sm"

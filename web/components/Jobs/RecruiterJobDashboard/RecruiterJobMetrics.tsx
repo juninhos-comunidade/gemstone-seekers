@@ -3,7 +3,7 @@
 import React from "react";
 import { Job } from "@/lib/types/job";
 import { Card, CardContent } from "@/components/ui/card";
-import { Briefcase, CheckCircle2, XCircle, Users } from "lucide-react";
+import { Briefcase, CheckCircle2, XCircle } from "lucide-react";
 
 interface RecruiterJobMetricsProps {
   jobs: Job[];
@@ -17,7 +17,7 @@ export function RecruiterJobMetrics({ jobs }: RecruiterJobMetricsProps) {
   ).length;
 
   return (
-    <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+    <div className="grid grid-cols-2 gap-4 lg:grid-cols-3">
       <Card className="border-border/60 bg-card/80 shadow-sm backdrop-blur">
         <CardContent className="flex items-center justify-between p-4">
           <div className="space-y-1">
@@ -60,20 +60,6 @@ export function RecruiterJobMetrics({ jobs }: RecruiterJobMetricsProps) {
           </div>
           <div className="grid size-10 place-items-center rounded-xl bg-rose-500/10 text-rose-500">
             <XCircle className="size-5" />
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card className="border-border/60 bg-card/80 shadow-sm backdrop-blur">
-        <CardContent className="flex items-center justify-between p-4">
-          <div className="space-y-1">
-            <p className="text-muted-foreground text-xs font-medium tracking-wider uppercase">
-              Candidaturas
-            </p>
-            <p className="text-2xl font-bold">24</p>
-          </div>
-          <div className="grid size-10 place-items-center rounded-xl bg-blue-500/10 text-blue-500">
-            <Users className="size-5" />
           </div>
         </CardContent>
       </Card>

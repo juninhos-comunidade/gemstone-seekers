@@ -19,19 +19,34 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Briefcase } from "lucide-react";
+import { Briefcase, Building2, UserCheck, Loader2 } from "lucide-react";
+import { useCompaniesQuery } from "@/lib/api/companies/getCompanies";
+import { useCompanyRecruitersQuery } from "@/lib/api/companies/getCompanyRecruiters";
 
 export function JobBasicInfoSection() {
   const {
     register,
     setValue,
+    getValues,
     control,
     formState: { errors },
   } = useFormContext<JobFormData>();
 
+  const watchedCompanyId = useWatch({ control, name: "companyId" });
+  const companyId = watchedCompanyId ?? getValues("companyId") ?? "";
+
+  const watchedRecruiterId = useWatch({ control, name: "recruiterId" });
+  const recruiterId = watchedRecruiterId ?? getValues("recruiterId") ?? "";
+
+  const watchedSeniority = useWatch({ control, name: "seniorityLevel" });
   const seniorityLevel =
-    useWatch({ control, name: "seniorityLevel" }) || "Pleno";
-  const status = useWatch({ control, name: "status" }) || "OPEN";
+    watchedSeniority ?? getValues("seniorityLevel") ?? "Pleno";
+
+  const { data: companies = [], isLoading: isLoadingCompanies } =
+    useCompaniesQuery();
+
+  const { data: recruiters = [], isLoading: isLoadingRecruiters } =
+    useCompanyRecruitersQuery(companyId);
 
   return (
     <Card className="border-border/60">
@@ -41,7 +56,7 @@ export function JobBasicInfoSection() {
           Informações Básicas da Vaga
         </CardTitle>
         <CardDescription>
-          Título, empresa, nível de senioridade e localização.
+          Título, empresa contratante, recrutador responsável e senioridade.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -59,19 +74,92 @@ export function JobBasicInfoSection() {
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div className="space-y-2">
-            <Label htmlFor="companyName">Nome da Empresa *</Label>
-            <Input
-              id="companyName"
-              {...register("companyName")}
-              placeholder="Ex: Gemstone Tech Solutions"
-            />
-            {errors.companyName && (
+            <Label htmlFor="companyId" className="flex items-center gap-1.5">
+              <Building2 className="text-muted-foreground size-3.5" />
+              Empresa Contratante *
+            </Label>
+            <Select
+              value={companyId}
+              onValueChange={(val) => {
+                setValue("companyId", val ?? "");
+                setValue("recruiterId", "");
+              }}
+              disabled={isLoadingCompanies}
+            >
+              <SelectTrigger id="companyId">
+                <SelectValue placeholder="Selecione a empresa..." />
+              </SelectTrigger>
+              <SelectContent alignItemWithTrigger={false}>
+                {isLoadingCompanies ? (
+                  <div className="text-muted-foreground flex items-center gap-2 p-2 text-xs">
+                    <Loader2 className="size-3 animate-spin" /> Carregando
+                    empresas...
+                  </div>
+                ) : (
+                  companies.map((c) => (
+                    <SelectItem key={c.id} value={c.id}>
+                      {c.name}
+                    </SelectItem>
+                  ))
+                )}
+              </SelectContent>
+            </Select>
+            {errors.companyId && (
               <p className="text-destructive text-xs">
-                {errors.companyName.message}
+                {errors.companyId.message}
               </p>
             )}
           </div>
 
+          <div className="space-y-2">
+            <Label htmlFor="recruiterId" className="flex items-center gap-1.5">
+              <UserCheck className="text-muted-foreground size-3.5" />
+              Recrutador Responsável *
+            </Label>
+            <Select
+              value={recruiterId}
+              onValueChange={(val) => setValue("recruiterId", val ?? "")}
+              disabled={!companyId || isLoadingRecruiters}
+            >
+              <SelectTrigger id="recruiterId">
+                <SelectValue
+                  placeholder={
+                    !companyId
+                      ? "Selecione uma empresa primeiro..."
+                      : "Selecione o recrutador..."
+                  }
+                />
+              </SelectTrigger>
+              <SelectContent alignItemWithTrigger={false}>
+                {isLoadingRecruiters ? (
+                  <div className="text-muted-foreground flex items-center gap-2 p-2 text-xs">
+                    <Loader2 className="size-3 animate-spin" /> Carregando
+                    recrutadores...
+                  </div>
+                ) : recruiters.length === 0 ? (
+                  <div className="text-muted-foreground p-2 text-xs">
+                    Nenhum recrutador encontrado para esta empresa.
+                  </div>
+                ) : (
+                  recruiters.map((r) => (
+                    <SelectItem key={r.id} value={r.id}>
+                      {r.name ||
+                        r.email ||
+                        `Recrutador ${r.id.substring(0, 8)}`}
+                    </SelectItem>
+                  ))
+                )}
+              </SelectContent>
+            </Select>
+            {errors.recruiterId && (
+              <p className="text-destructive text-xs">
+                {errors.recruiterId.message}
+              </p>
+            )}
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div className="space-y-2">
             <Label htmlFor="department">Departamento / Área *</Label>
             <Input
@@ -85,59 +173,29 @@ export function JobBasicInfoSection() {
               </p>
             )}
           </div>
-        </div>
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-          <div className="space-y-2 sm:col-span-1">
+          <div className="space-y-2">
             <Label htmlFor="seniorityLevel">Nível de Senioridade *</Label>
             <Select
               value={seniorityLevel}
-              onValueChange={(val) =>
-                setValue("seniorityLevel", val as JobFormData["seniorityLevel"])
-              }
+              onValueChange={(val) => {
+                if (val) {
+                  setValue(
+                    "seniorityLevel",
+                    val as JobFormData["seniorityLevel"],
+                  );
+                }
+              }}
             >
               <SelectTrigger id="seniorityLevel">
                 <SelectValue placeholder="Selecione..." />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent alignItemWithTrigger={false}>
                 <SelectItem value="Junior">Junior</SelectItem>
                 <SelectItem value="Pleno">Pleno</SelectItem>
                 <SelectItem value="Sênior">Sênior</SelectItem>
                 <SelectItem value="Especialista">Especialista</SelectItem>
                 <SelectItem value="Tech Lead">Tech Lead</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2 sm:col-span-1">
-            <Label htmlFor="location">Localização / Regime *</Label>
-            <Input
-              id="location"
-              {...register("location")}
-              placeholder="Ex: Remoto (Brasil), São Paulo (Híbrido)"
-            />
-            {errors.location && (
-              <p className="text-destructive text-xs">
-                {errors.location.message}
-              </p>
-            )}
-          </div>
-
-          <div className="space-y-2 sm:col-span-1">
-            <Label htmlFor="status">Status da Vaga</Label>
-            <Select
-              value={status}
-              onValueChange={(val) =>
-                setValue("status", val as JobFormData["status"])
-              }
-            >
-              <SelectTrigger id="status">
-                <SelectValue placeholder="Selecione..." />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="OPEN">Aberta (Publicada)</SelectItem>
-                <SelectItem value="PAUSED">Pausada</SelectItem>
-                <SelectItem value="CLOSED">Encerrada / Cancelada</SelectItem>
               </SelectContent>
             </Select>
           </div>
