@@ -1,38 +1,24 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import CandidateSignup from "./page";
 
-const mockPush = vi.fn();
+const mockUpdateCandidate = vi.fn();
 
-vi.mock("next/navigation", () => ({
-  useRouter: () => ({
-    push: mockPush,
-    replace: vi.fn(),
-    back: vi.fn(),
-    forward: vi.fn(),
-    refresh: vi.fn(),
-    prefetch: vi.fn(),
+vi.mock("@/lib/api/auth/UpdateCandidate", () => ({
+  useUpdateCandidate: () => ({
+    mutateAsync: mockUpdateCandidate,
+    isPending: false,
   }),
-  usePathname: () => "/signup/role/candidate",
 }));
 
 describe("Candidate Signup Page", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.stubGlobal(
-      "fetch",
-      vi.fn().mockResolvedValue({
-        ok: true,
-        json: async () => ({}),
-      }),
-    );
-  });
-
-  afterEach(() => {
-    vi.unstubAllGlobals();
   });
 
   it("renders profile form fields, submit button and skip link, and handles submit navigation", async () => {
+    mockUpdateCandidate.mockResolvedValue(undefined);
+
     render(<CandidateSignup />);
     expect(
       screen.getByRole("heading", {
@@ -69,25 +55,21 @@ describe("Candidate Signup Page", () => {
       target: { value: "https://linkedin.com/in/teste" },
     });
 
-    const submitBtn = screen.getByRole("button", {
-      name: /concluir cadastro/i,
-    });
-    fireEvent.click(submitBtn);
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: /concluir cadastro/i,
+      }),
+    );
 
     await waitFor(() => {
-      expect(fetch).toHaveBeenCalledWith("/api/candidate/profile", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          phone: "(11) 99999-9999",
-          area: "Tecnologia",
-          role: "Desenvolvedor Front-end",
-          experience: "Júnior",
-          location: "São Paulo, SP",
-          resume: "https://linkedin.com/in/teste",
-        }),
+      expect(mockUpdateCandidate).toHaveBeenCalledWith({
+        phone: "(11) 99999-9999",
+        area: "Tecnologia",
+        role: "Desenvolvedor Front-end",
+        experience: "Júnior",
+        location: "São Paulo, SP",
+        resume: "https://linkedin.com/in/teste",
       });
-      expect(mockPush).toHaveBeenCalledWith("/candidate/dashboard");
     });
   });
 });

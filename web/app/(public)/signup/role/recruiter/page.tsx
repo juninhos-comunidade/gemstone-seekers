@@ -1,29 +1,27 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
-import { toast } from "sonner";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-
-type RecruiterRoleFormData = {
-  companyName: string;
-  jobTitle: string;
-  phone: string;
-  companyWebsite: string;
-  companySize: string;
-};
+import { Spinner } from "@/components/ui/spinner";
+import { useUpdateRecruiter } from "@/lib/api/auth/UpdateRecruiter";
+import {
+  recruiterRoleSchema,
+  type RecruiterRoleFormData,
+} from "@/lib/schemas/recruiterRoleSchema";
 
 export default function Page() {
-  const router = useRouter();
+  const { mutateAsync: updateRecruiter, isPending } = useUpdateRecruiter();
 
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm<RecruiterRoleFormData>({
+    resolver: zodResolver(recruiterRoleSchema),
     defaultValues: {
       companyName: "",
       jobTitle: "",
@@ -33,13 +31,10 @@ export default function Page() {
     },
   });
 
+  const isLoading = isSubmitting || isPending;
+
   const onSubmit = async (data: RecruiterRoleFormData) => {
-    try {
-      localStorage.setItem("recruiter-signup-data", JSON.stringify(data));
-      router.push("/recruiter/dashboard");
-    } catch {
-      toast.error("Erro ao concluir cadastro");
-    }
+    await updateRecruiter(data);
   };
 
   return (
@@ -59,10 +54,9 @@ export default function Page() {
               id="company-name"
               type="text"
               placeholder="Nome da empresa"
+              disabled={isLoading}
               aria-invalid={!!errors.companyName}
-              {...register("companyName", {
-                required: "Informe o nome da empresa",
-              })}
+              {...register("companyName")}
             />
             <span className="text-sm text-red-500">
               {errors.companyName?.message}
@@ -75,10 +69,9 @@ export default function Page() {
               id="job-title"
               type="text"
               placeholder="Ex: Analista de RH"
+              disabled={isLoading}
               aria-invalid={!!errors.jobTitle}
-              {...register("jobTitle", {
-                required: "Informe o cargo",
-              })}
+              {...register("jobTitle")}
             />
             <span className="text-sm text-red-500">
               {errors.jobTitle?.message}
@@ -91,10 +84,9 @@ export default function Page() {
               id="phone"
               type="tel"
               placeholder="(00) 00000-0000"
+              disabled={isLoading}
               aria-invalid={!!errors.phone}
-              {...register("phone", {
-                required: "Informe o telefone",
-              })}
+              {...register("phone")}
             />
             <span className="text-sm text-red-500">
               {errors.phone?.message}
@@ -107,10 +99,9 @@ export default function Page() {
               id="company-website"
               type="url"
               placeholder="https://suaempresa.com"
+              disabled={isLoading}
               aria-invalid={!!errors.companyWebsite}
-              {...register("companyWebsite", {
-                required: "Informe o site da empresa",
-              })}
+              {...register("companyWebsite")}
             />
             <span className="text-sm text-red-500">
               {errors.companyWebsite?.message}
@@ -123,18 +114,28 @@ export default function Page() {
               id="company-size"
               type="text"
               placeholder="Ex: 1-10, 11-50, 51-200..."
+              disabled={isLoading}
               aria-invalid={!!errors.companySize}
-              {...register("companySize", {
-                required: "Informe o tamanho da empresa",
-              })}
+              {...register("companySize")}
             />
             <span className="text-sm text-red-500">
               {errors.companySize?.message}
             </span>
           </div>
 
-          <Button type="submit" disabled={isSubmitting} className="w-full">
-            {isSubmitting ? "Concluindo..." : "Concluir cadastro"}
+          <Button
+            type="submit"
+            disabled={isLoading}
+            className="flex w-full items-center justify-center gap-2"
+          >
+            {isLoading ? (
+              <>
+                <Spinner className="h-4 w-4" />
+                <span>Concluindo...</span>
+              </>
+            ) : (
+              "Concluir cadastro"
+            )}
           </Button>
         </form>
 

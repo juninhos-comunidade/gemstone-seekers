@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
 import { toast } from "sonner";
 
 type RoleFormData = {
@@ -22,19 +23,11 @@ export default function Page() {
     },
   });
 
+  const isLoading = isSubmitting;
+
   const handleChooseRole = async ({ role }: RoleFormData) => {
     try {
-      const res = await fetch("/api/user/role", {
-        // <- rota real da API
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ role }),
-      });
-
-      if (!res.ok) {
-        const err = await res.json().catch(() => null);
-        throw new Error(err?.message ?? "Erro ao selecionar perfil");
-      }
+      localStorage.setItem("signup-role", role);
 
       router.push(
         role === "candidate"
@@ -56,10 +49,18 @@ export default function Page() {
         <p className="text-muted-foreground mb-4">Você é um recrutador?</p>
         <Button
           type="submit"
-          disabled={isSubmitting}
+          disabled={isLoading}
+          className="flex items-center justify-center gap-2"
           onClick={() => setValue("role", "recruiter")}
         >
-          {isSubmitting ? "Selecionando..." : "Selecionar"}
+          {isLoading ? (
+            <>
+              <Spinner className="h-4 w-4" />
+              <span>Selecionando...</span>
+            </>
+          ) : (
+            "Selecionar"
+          )}
         </Button>
       </div>
 
@@ -70,10 +71,18 @@ export default function Page() {
         <p className="text-muted-foreground mb-4">Você é um candidato?</p>
         <Button
           type="submit"
-          disabled={isSubmitting}
+          disabled={isLoading}
+          className="flex items-center justify-center gap-2"
           onClick={() => setValue("role", "candidate")}
         >
-          {isSubmitting ? "Selecionando..." : "Selecionar"}
+          {isLoading ? (
+            <>
+              <Spinner className="h-4 w-4" />
+              <span>Selecionando...</span>
+            </>
+          ) : (
+            "Selecionar"
+          )}
         </Button>
       </div>
     </form>

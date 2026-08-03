@@ -1,30 +1,27 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
-import { toast } from "sonner";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-
-type CandidateRoleFormData = {
-  phone: string;
-  area: string;
-  role: string;
-  experience: string;
-  location: string;
-  resume: string;
-};
+import { Spinner } from "@/components/ui/spinner";
+import { useUpdateCandidate } from "@/lib/api/auth/UpdateCandidate";
+import {
+  candidateRoleSchema,
+  type CandidateRoleFormData,
+} from "@/lib/schemas/candidateRoleSchema";
 
 export default function Page() {
-  const router = useRouter();
+  const { mutateAsync: updateCandidate, isPending } = useUpdateCandidate();
 
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm<CandidateRoleFormData>({
+    resolver: zodResolver(candidateRoleSchema),
     defaultValues: {
       phone: "",
       area: "",
@@ -35,24 +32,10 @@ export default function Page() {
     },
   });
 
+  const isLoading = isSubmitting || isPending;
+
   const onSubmit = async (data: CandidateRoleFormData) => {
-    try {
-      const res = await fetch("/api/candidate/profile", {
-        // <- rota real da API
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
-
-      if (!res.ok) {
-        const err = await res.json().catch(() => null);
-        throw new Error(err?.message ?? "Erro ao concluir cadastro");
-      }
-
-      router.push("/candidate/dashboard");
-    } catch {
-      toast.error("Erro ao concluir cadastro");
-    }
+    await updateCandidate(data);
   };
 
   return (
@@ -72,10 +55,9 @@ export default function Page() {
               id="phone"
               type="tel"
               placeholder="(00) 00000-0000"
+              disabled={isLoading}
               aria-invalid={!!errors.phone}
-              {...register("phone", {
-                required: "Informe o telefone",
-              })}
+              {...register("phone")}
             />
             <span className="text-sm text-red-500">
               {errors.phone?.message}
@@ -88,10 +70,9 @@ export default function Page() {
               id="area"
               type="text"
               placeholder="Ex: Tecnologia, Marketing, Vendas..."
+              disabled={isLoading}
               aria-invalid={!!errors.area}
-              {...register("area", {
-                required: "Informe a área de interesse",
-              })}
+              {...register("area")}
             />
             <span className="text-sm text-red-500">{errors.area?.message}</span>
           </div>
@@ -102,10 +83,9 @@ export default function Page() {
               id="role"
               type="text"
               placeholder="Ex: Desenvolvedor Front-end"
+              disabled={isLoading}
               aria-invalid={!!errors.role}
-              {...register("role", {
-                required: "Informe o cargo desejado",
-              })}
+              {...register("role")}
             />
             <span className="text-sm text-red-500">{errors.role?.message}</span>
           </div>
@@ -116,10 +96,9 @@ export default function Page() {
               id="experience"
               type="text"
               placeholder="Ex: Estágio, Júnior, Pleno, Sênior"
+              disabled={isLoading}
               aria-invalid={!!errors.experience}
-              {...register("experience", {
-                required: "Informe o nível de experiência",
-              })}
+              {...register("experience")}
             />
             <span className="text-sm text-red-500">
               {errors.experience?.message}
@@ -132,10 +111,9 @@ export default function Page() {
               id="location"
               type="text"
               placeholder="Cidade, Estado"
+              disabled={isLoading}
               aria-invalid={!!errors.location}
-              {...register("location", {
-                required: "Informe a localização",
-              })}
+              {...register("location")}
             />
             <span className="text-sm text-red-500">
               {errors.location?.message}
@@ -148,18 +126,28 @@ export default function Page() {
               id="resume"
               type="url"
               placeholder="Link do LinkedIn ou currículo"
+              disabled={isLoading}
               aria-invalid={!!errors.resume}
-              {...register("resume", {
-                required: "Informe o link do currículo",
-              })}
+              {...register("resume")}
             />
             <span className="text-sm text-red-500">
               {errors.resume?.message}
             </span>
           </div>
 
-          <Button type="submit" disabled={isSubmitting} className="w-full">
-            {isSubmitting ? "Concluindo..." : "Concluir cadastro"}
+          <Button
+            type="submit"
+            disabled={isLoading}
+            className="flex w-full items-center justify-center gap-2"
+          >
+            {isLoading ? (
+              <>
+                <Spinner className="h-4 w-4" />
+                <span>Concluindo...</span>
+              </>
+            ) : (
+              "Concluir cadastro"
+            )}
           </Button>
         </form>
 

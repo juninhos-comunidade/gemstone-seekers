@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,11 +9,11 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { PasswordInput } from "@/components/PasswordInput/PasswordInput";
 import { schema } from "@/lib/schemas/loginSchema";
-import { toast } from "sonner";
-import { setAuthToken } from "@/lib/api/auth";
+import { useLogin } from "@/lib/api/auth/login";
+import { Spinner } from "@/components/ui/spinner";
 
 export default function Page() {
-  const router = useRouter();
+  const { mutateAsync: login, isPending } = useLogin();
 
   type FormValues = z.infer<typeof schema>;
 
@@ -26,38 +25,11 @@ export default function Page() {
     resolver: zodResolver(schema),
   });
 
+  // Estado unificado de carregamento
+  const isLoading = isSubmitting || isPending;
+
   const handleLogin = handleSubmit(async (data) => {
-    try {
-      const response = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      });
-
-      const result = await response.json().catch(() => null);
-
-      if (!response.ok || !result?.success) {
-        toast.error(result?.message ?? "Erro ao fazer login");
-        return;
-      }
-
-      const token =
-        result?.result?.token ??
-        result?.token ??
-        result?.accessToken ??
-        result?.result?.accessToken;
-
-      if (token) {
-        setAuthToken(token);
-      }
-
-      toast.success("Login realizado com sucesso!");
-      router.push("/candidate/dashboard");
-    } catch {
-      toast.error("Erro ao fazer login");
-    }
+    await login(data);
   });
 
   return (
@@ -72,6 +44,7 @@ export default function Page() {
               id="email"
               type="email"
               placeholder="E-mail"
+              disabled={isLoading}
               {...register("email")}
             />
             {errors.email && (
@@ -83,10 +56,10 @@ export default function Page() {
 
           <div className="space-y-2">
             <Label htmlFor="password">Senha</Label>
-
             <PasswordInput
               id="password"
               placeholder="Senha"
+              disabled={isLoading}
               {...register("password")}
             />
             {errors.password && (
@@ -96,8 +69,19 @@ export default function Page() {
             )}
           </div>
 
-          <Button disabled={isSubmitting} className="w-full" type="submit">
-            Entrar
+          <Button
+            disabled={isLoading}
+            className="flex w-full items-center justify-center gap-2"
+            type="submit"
+          >
+            {isLoading ? (
+              <>
+                <Spinner className="h-4 w-4" />
+                <span>Entrando...</span>
+              </>
+            ) : (
+              "Entrar"
+            )}
           </Button>
         </form>
 

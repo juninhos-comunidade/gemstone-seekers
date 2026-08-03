@@ -1,38 +1,19 @@
-// {
-//     "success": true,
-//     "message": "User registered successfully",
-//     "result": {
-//         "id": "019fb938-b6a6-760b-a255-c76cd38d2605",
-//         "name": "test2",
-//         "email": "test2@example.com"
-//     },
-//     "error": null
-// }
-// {
-//     "success": false,
-//     "message": "Email already in use",
-//     "result": null,
-//     "error": {
-//         "code": "CONFLICT",
-//         "message": "Email already in use",
-//         "validations": null
-//     }
-// }
 "use client";
+
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/navigation";
-import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Spinner } from "@/components/ui/spinner";
 import { PasswordInput } from "@/components/PasswordInput/PasswordInput";
 import { schema, SignupFormData } from "@/lib/schemas/signupSchema";
+import { useSignup } from "@/lib/api/auth/signup";
 
 export default function Page() {
-  const router = useRouter();
+  const { mutateAsync: signup, isPending } = useSignup();
 
   const {
     register,
@@ -42,33 +23,10 @@ export default function Page() {
     resolver: zodResolver(schema),
   });
 
+  const isLoading = isSubmitting || isPending;
+
   const handleSignUp = async (data: z.infer<typeof schema>) => {
-    try {
-      const payload = {
-        name: data.fullName,
-        email: data.email,
-        password: data.password,
-      };
-
-      const res = await fetch("/api/signup", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      });
-
-      if (!res.ok) {
-        const err = await res.json().catch(() => null);
-        throw new Error(err?.message ?? "Falha ao cadastrar");
-      }
-
-      toast.success("Conta criada com sucesso!");
-      router.push("/signup/role");
-    } catch (err) {
-      const message = err instanceof Error ? err.message : "Erro inesperado";
-      toast.error(message);
-    }
+    await signup(data);
   };
 
   return (
@@ -83,6 +41,7 @@ export default function Page() {
               id="fullName"
               type="text"
               autoComplete="name"
+              disabled={isLoading}
               aria-invalid={!!errors.fullName}
               {...register("fullName")}
             />
@@ -97,6 +56,7 @@ export default function Page() {
               id="email"
               type="email"
               autoComplete="email"
+              disabled={isLoading}
               aria-invalid={!!errors.email}
               {...register("email")}
             />
@@ -110,6 +70,7 @@ export default function Page() {
             <PasswordInput
               id="password"
               autoComplete="new-password"
+              disabled={isLoading}
               aria-invalid={!!errors.password}
               {...register("password")}
             />
@@ -123,6 +84,7 @@ export default function Page() {
             <PasswordInput
               id="confirmPassword"
               autoComplete="new-password"
+              disabled={isLoading}
               aria-invalid={!!errors.confirmPassword}
               {...register("confirmPassword")}
             />
@@ -131,8 +93,19 @@ export default function Page() {
             </span>
           </div>
 
-          <Button type="submit" disabled={isSubmitting} className="w-full">
-            {isSubmitting ? "Cadastrando..." : "Cadastrar"}
+          <Button
+            type="submit"
+            disabled={isLoading}
+            className="flex w-full items-center justify-center gap-2"
+          >
+            {isLoading ? (
+              <>
+                <Spinner className="h-4 w-4" />
+                <span>Cadastrando...</span>
+              </>
+            ) : (
+              "Cadastrar"
+            )}
           </Button>
         </form>
 

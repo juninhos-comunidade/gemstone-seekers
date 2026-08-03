@@ -1,24 +1,24 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import RecruiterSignup from "./page";
 
-const mockPush = vi.fn();
+const mockUpdateRecruiter = vi.fn();
 
-vi.mock("next/navigation", () => ({
-  useRouter: () => ({
-    push: mockPush,
-    replace: vi.fn(),
-    back: vi.fn(),
-    forward: vi.fn(),
-    refresh: vi.fn(),
-    prefetch: vi.fn(),
+vi.mock("@/lib/api/auth/UpdateRecruiter", () => ({
+  useUpdateRecruiter: () => ({
+    mutateAsync: mockUpdateRecruiter,
+    isPending: false,
   }),
-  usePathname: () => "/signup/role/recruiter",
 }));
 
 describe("Recruiter Signup Page", () => {
-  it("renders recruiter profile form fields, submit button and skip link, and handles submit navigation", async () => {
+  beforeEach(() => {
     vi.clearAllMocks();
+  });
+
+  it("renders recruiter profile form fields, submit button and skip link, and handles submit navigation", async () => {
+    mockUpdateRecruiter.mockResolvedValue(undefined);
+
     render(<RecruiterSignup />);
     expect(
       screen.getByRole("heading", {
@@ -51,13 +51,20 @@ describe("Recruiter Signup Page", () => {
       target: { value: "11-50" },
     });
 
-    const submitBtn = screen.getByRole("button", {
-      name: /concluir cadastro/i,
-    });
-    fireEvent.click(submitBtn);
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: /concluir cadastro/i,
+      }),
+    );
 
     await waitFor(() => {
-      expect(mockPush).toHaveBeenCalledWith("/recruiter/dashboard");
+      expect(mockUpdateRecruiter).toHaveBeenCalledWith({
+        companyName: "Gemstone Seekers",
+        jobTitle: "Analista de RH",
+        phone: "(11) 99999-9999",
+        companyWebsite: "https://gemstoneseekers.com",
+        companySize: "11-50",
+      });
     });
   });
 });
