@@ -41,7 +41,7 @@ type PhoneInputProps = Omit<
     BasePhoneInput.Props<typeof BasePhoneInput.default>,
     "onChange" | "variant" | "popupClassName" | "scrollAreaClassName"
   > & {
-    onChange?: (value: BasePhoneInput.Value) => void;
+    onChange?: (_value: BasePhoneInput.Value) => void;
     variant?: PhoneInputSize;
     popupClassName?: string;
     scrollAreaClassName?: string;
@@ -108,7 +108,7 @@ type CountrySelectProps = {
   disabled?: boolean;
   value: BasePhoneInput.Country;
   options: CountryEntry[];
-  onChange: (country: BasePhoneInput.Country) => void;
+  onChange: (_country: BasePhoneInput.Country) => void;
 };
 
 function CountrySelect({

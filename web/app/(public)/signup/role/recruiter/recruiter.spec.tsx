@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import type { InputHTMLAttributes, ReactNode } from "react";
 import RecruiterSignup from "./page";
 
 const mockUpdateRecruiter = vi.fn();
@@ -11,8 +12,33 @@ vi.mock("@/lib/api/auth/UpdateRecruiter", () => ({
   }),
 }));
 
+type MockPhoneInputProps = InputHTMLAttributes<HTMLInputElement> & {
+  value?: string;
+  onChange?: (_value: string) => void;
+};
+
+type MockSelectProps = {
+  value?: string;
+  onValueChange?: (_value: string) => void;
+  children?: ReactNode;
+};
+
+type MockSelectChildrenProps = {
+  children?: ReactNode;
+};
+
+type MockSelectItemProps = {
+  children?: ReactNode;
+  value: string;
+};
+
 vi.mock("@/components/reui/phone-input", () => ({
-  PhoneInput: ({ value, onChange, id = "phone", ...props }: any) => (
+  PhoneInput: ({
+    value,
+    onChange,
+    id = "phone",
+    ...props
+  }: MockPhoneInputProps) => (
     <input
       id={id}
       type="tel"
@@ -24,7 +50,7 @@ vi.mock("@/components/reui/phone-input", () => ({
 }));
 
 vi.mock("@/components/ui/select", () => ({
-  Select: ({ value, onValueChange, children }: any) => (
+  Select: ({ value, onValueChange, children }: MockSelectProps) => (
     <select
       aria-label="Tamanho da empresa"
       value={value ?? ""}
@@ -34,11 +60,11 @@ vi.mock("@/components/ui/select", () => ({
       {children}
     </select>
   ),
-  SelectContent: ({ children }: any) => <>{children}</>,
-  SelectItem: ({ children, value }: any) => (
+  SelectContent: ({ children }: MockSelectChildrenProps) => <>{children}</>,
+  SelectItem: ({ children, value }: MockSelectItemProps) => (
     <option value={value}>{children}</option>
   ),
-  SelectTrigger: ({ children }: any) => <>{children}</>,
+  SelectTrigger: ({ children }: MockSelectChildrenProps) => <>{children}</>,
   SelectValue: () => null,
 }));
 

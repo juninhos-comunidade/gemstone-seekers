@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import type { InputHTMLAttributes, SelectHTMLAttributes } from "react";
 import CandidateSignup from "./page";
 
 const mockUpdateCandidate = vi.fn();
@@ -11,8 +12,23 @@ vi.mock("@/lib/api/auth/UpdateCandidate", () => ({
   }),
 }));
 
+type MockPhoneInputProps = InputHTMLAttributes<HTMLInputElement> & {
+  value?: string;
+  onChange?: (_value: string) => void;
+};
+
+type MockSelectLevelProps = SelectHTMLAttributes<HTMLSelectElement> & {
+  value?: string;
+  onValueChange?: (_value: string) => void;
+};
+
 vi.mock("@/components/reui/phone-input", () => ({
-  PhoneInput: ({ value, onChange, id = "phone", ...props }: any) => (
+  PhoneInput: ({
+    value,
+    onChange,
+    id = "phone",
+    ...props
+  }: MockPhoneInputProps) => (
     <input
       id={id}
       type="tel"
@@ -24,7 +40,7 @@ vi.mock("@/components/reui/phone-input", () => ({
 }));
 
 vi.mock("@/components/SelectLevel/SelectLevel", () => ({
-  SelectLevel: ({ value, onValueChange }: any) => (
+  SelectLevel: ({ value, onValueChange }: MockSelectLevelProps) => (
     <select
       aria-label="Nível de experiência"
       value={value ?? ""}
