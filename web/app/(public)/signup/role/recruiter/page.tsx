@@ -1,17 +1,33 @@
 "use client";
 
 import Link from "next/link";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Spinner } from "@/components/ui/spinner";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { PhoneInput } from "@/components/reui/phone-input";
 import { useUpdateRecruiter } from "@/lib/api/auth/UpdateRecruiter";
 import {
   recruiterRoleSchema,
   type RecruiterRoleFormData,
 } from "@/lib/schemas/recruiterRoleSchema";
+
+const companySizeOptions = [
+  { value: "1-10", label: "1-10" },
+  { value: "11-50", label: "11-50" },
+  { value: "51-200", label: "51-200" },
+  { value: "201-500", label: "201-500" },
+  { value: "500+", label: "500+" },
+];
 
 export default function Page() {
   const { mutateAsync: updateRecruiter, isPending } = useUpdateRecruiter();
@@ -19,6 +35,7 @@ export default function Page() {
   const {
     register,
     handleSubmit,
+    control,
     formState: { errors, isSubmitting },
   } = useForm<RecruiterRoleFormData>({
     resolver: zodResolver(recruiterRoleSchema),
@@ -80,13 +97,16 @@ export default function Page() {
 
           <div className="space-y-2">
             <Label htmlFor="phone">Telefone</Label>
-            <Input
-              id="phone"
-              type="tel"
-              placeholder="(00) 00000-0000"
-              disabled={isLoading}
-              aria-invalid={!!errors.phone}
-              {...register("phone")}
+            <Controller
+              name="phone"
+              control={control}
+              render={({ field }) => (
+                <PhoneInput
+                  {...field}
+                  disabled={isLoading}
+                  aria-invalid={!!errors.phone}
+                />
+              )}
             />
             <span className="text-sm text-red-500">
               {errors.phone?.message}
@@ -110,13 +130,32 @@ export default function Page() {
 
           <div className="space-y-2">
             <Label htmlFor="company-size">Tamanho da empresa</Label>
-            <Input
-              id="company-size"
-              type="text"
-              placeholder="Ex: 1-10, 11-50, 51-200..."
-              disabled={isLoading}
-              aria-invalid={!!errors.companySize}
-              {...register("companySize")}
+            <Controller
+              name="companySize"
+              control={control}
+              render={({ field }) => (
+                <Select
+                  items={companySizeOptions}
+                  value={field.value}
+                  onValueChange={field.onChange}
+                >
+                  <SelectTrigger
+                    id="company-size"
+                    disabled={isLoading}
+                    aria-invalid={!!errors.companySize}
+                    className="w-full"
+                  >
+                    <SelectValue placeholder="Selecione o tamanho da empresa" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {companySizeOptions.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
             />
             <span className="text-sm text-red-500">
               {errors.companySize?.message}

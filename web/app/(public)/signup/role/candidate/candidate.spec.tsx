@@ -11,6 +11,32 @@ vi.mock("@/lib/api/auth/UpdateCandidate", () => ({
   }),
 }));
 
+vi.mock("@/components/reui/phone-input", () => ({
+  PhoneInput: ({ value, onChange, id = "phone", ...props }: any) => (
+    <input
+      id={id}
+      type="tel"
+      value={value ?? ""}
+      onChange={(event) => onChange?.(event.target.value)}
+      {...props}
+    />
+  ),
+}));
+
+vi.mock("@/components/SelectLevel/SelectLevel", () => ({
+  SelectLevel: ({ value, onValueChange }: any) => (
+    <select
+      aria-label="Nível de experiência"
+      value={value ?? ""}
+      onChange={(event) => onValueChange?.(event.target.value)}
+    >
+      <option value="">Selecione</option>
+      <option value="junior">Júnior</option>
+      <option value="pleno">Pleno</option>
+    </select>
+  ),
+}));
+
 describe("Candidate Signup Page", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -26,7 +52,7 @@ describe("Candidate Signup Page", () => {
         name: /Informações do Candidato/i,
       }),
     ).toBeInTheDocument();
-    expect(screen.getByLabelText(/telefone/i)).toBeInTheDocument();
+    expect(screen.getByText(/telefone/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/área de interesse/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/cargo desejado/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/nível de experiência/i)).toBeInTheDocument();
@@ -36,9 +62,12 @@ describe("Candidate Signup Page", () => {
       screen.getByRole("link", { name: /pular por enquanto/i }),
     ).toHaveAttribute("href", "/dashboard");
 
-    fireEvent.change(screen.getByLabelText(/telefone/i), {
-      target: { value: "(11) 99999-9999" },
-    });
+    fireEvent.change(
+      document.querySelector("input[type='tel']") as HTMLInputElement,
+      {
+        target: { value: "+55 11 99999-9999" },
+      },
+    );
     fireEvent.change(screen.getByLabelText(/área de interesse/i), {
       target: { value: "Tecnologia" },
     });
@@ -46,7 +75,7 @@ describe("Candidate Signup Page", () => {
       target: { value: "Desenvolvedor Front-end" },
     });
     fireEvent.change(screen.getByLabelText(/nível de experiência/i), {
-      target: { value: "Júnior" },
+      target: { value: "junior" },
     });
     fireEvent.change(screen.getByLabelText(/localização/i), {
       target: { value: "São Paulo, SP" },
@@ -63,10 +92,10 @@ describe("Candidate Signup Page", () => {
 
     await waitFor(() => {
       expect(mockUpdateCandidate).toHaveBeenCalledWith({
-        phone: "(11) 99999-9999",
+        phone: "+55 11 99999-9999",
         area: "Tecnologia",
         role: "Desenvolvedor Front-end",
-        experience: "Júnior",
+        experience: "junior",
         location: "São Paulo, SP",
         resume: "https://linkedin.com/in/teste",
       });

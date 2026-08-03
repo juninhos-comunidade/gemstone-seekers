@@ -23,8 +23,8 @@ describe("Signup Page", () => {
     ).toBeInTheDocument();
     expect(screen.getByLabelText(/nome completo/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/^e-mail$/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/^senha$/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/confirmar senha/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/show password/i)).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: /cadastrar/i }),
     ).toBeInTheDocument();
@@ -45,10 +45,12 @@ describe("Signup Page", () => {
     fireEvent.change(screen.getByLabelText(/^e-mail$/i), {
       target: { value: "joao@example.com" },
     });
-    fireEvent.change(screen.getByLabelText(/^senha$/i), {
+
+    const passwordInputs = document.querySelectorAll("input[type='password']");
+    fireEvent.change(passwordInputs[0], {
       target: { value: "abc123" },
     });
-    fireEvent.change(screen.getByLabelText(/confirmar senha/i), {
+    fireEvent.change(passwordInputs[1], {
       target: { value: "abc123" },
     });
 
@@ -73,10 +75,12 @@ describe("Signup Page", () => {
     fireEvent.change(screen.getByLabelText(/^e-mail$/i), {
       target: { value: "invalid-email" },
     });
-    fireEvent.change(screen.getByLabelText(/^senha$/i), {
+
+    const passwordInputs = document.querySelectorAll("input[type='password']");
+    fireEvent.change(passwordInputs[0], {
       target: { value: "123" },
     });
-    fireEvent.change(screen.getByLabelText(/confirmar senha/i), {
+    fireEvent.change(passwordInputs[1], {
       target: { value: "456" },
     });
 

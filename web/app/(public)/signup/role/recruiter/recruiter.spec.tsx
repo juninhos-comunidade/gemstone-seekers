@@ -11,6 +11,37 @@ vi.mock("@/lib/api/auth/UpdateRecruiter", () => ({
   }),
 }));
 
+vi.mock("@/components/reui/phone-input", () => ({
+  PhoneInput: ({ value, onChange, id = "phone", ...props }: any) => (
+    <input
+      id={id}
+      type="tel"
+      value={value ?? ""}
+      onChange={(event) => onChange?.(event.target.value)}
+      {...props}
+    />
+  ),
+}));
+
+vi.mock("@/components/ui/select", () => ({
+  Select: ({ value, onValueChange, children }: any) => (
+    <select
+      aria-label="Tamanho da empresa"
+      value={value ?? ""}
+      onChange={(event) => onValueChange?.(event.target.value)}
+    >
+      <option value="">Selecione</option>
+      {children}
+    </select>
+  ),
+  SelectContent: ({ children }: any) => <>{children}</>,
+  SelectItem: ({ children, value }: any) => (
+    <option value={value}>{children}</option>
+  ),
+  SelectTrigger: ({ children }: any) => <>{children}</>,
+  SelectValue: () => null,
+}));
+
 describe("Recruiter Signup Page", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -28,7 +59,7 @@ describe("Recruiter Signup Page", () => {
     ).toBeInTheDocument();
     expect(screen.getByLabelText(/nome da empresa/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/^cargo$/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/telefone/i)).toBeInTheDocument();
+    expect(screen.getByText(/telefone/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/site da empresa/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/tamanho da empresa/i)).toBeInTheDocument();
     expect(
@@ -41,9 +72,12 @@ describe("Recruiter Signup Page", () => {
     fireEvent.change(screen.getByLabelText(/^cargo$/i), {
       target: { value: "Analista de RH" },
     });
-    fireEvent.change(screen.getByLabelText(/telefone/i), {
-      target: { value: "(11) 99999-9999" },
-    });
+    fireEvent.change(
+      document.querySelector("input[type='tel']") as HTMLInputElement,
+      {
+        target: { value: "+55 11 99999-9999" },
+      },
+    );
     fireEvent.change(screen.getByLabelText(/site da empresa/i), {
       target: { value: "https://gemstoneseekers.com" },
     });
@@ -61,7 +95,7 @@ describe("Recruiter Signup Page", () => {
       expect(mockUpdateRecruiter).toHaveBeenCalledWith({
         companyName: "Gemstone Seekers",
         jobTitle: "Analista de RH",
-        phone: "(11) 99999-9999",
+        phone: "+55 11 99999-9999",
         companyWebsite: "https://gemstoneseekers.com",
         companySize: "11-50",
       });

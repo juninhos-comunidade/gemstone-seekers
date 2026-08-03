@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useForm } from "react-hook-form";
+// 1. Import Controller from react-hook-form
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,6 +13,8 @@ import {
   candidateRoleSchema,
   type CandidateRoleFormData,
 } from "@/lib/schemas/candidateRoleSchema";
+import { SelectLevel } from "@/components/SelectLevel/SelectLevel";
+import { PhoneInput } from "@/components/reui/phone-input";
 
 export default function Page() {
   const { mutateAsync: updateCandidate, isPending } = useUpdateCandidate();
@@ -19,6 +22,7 @@ export default function Page() {
   const {
     register,
     handleSubmit,
+    control, // 2. Extract control from useForm
     formState: { errors, isSubmitting },
   } = useForm<CandidateRoleFormData>({
     resolver: zodResolver(candidateRoleSchema),
@@ -51,13 +55,17 @@ export default function Page() {
         <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
           <div className="space-y-2">
             <Label htmlFor="phone">Telefone</Label>
-            <Input
-              id="phone"
-              type="tel"
-              placeholder="(00) 00000-0000"
-              disabled={isLoading}
-              aria-invalid={!!errors.phone}
-              {...register("phone")}
+            {/* 3. Wrap PhoneInput with Controller */}
+            <Controller
+              name="phone"
+              control={control}
+              render={({ field }) => (
+                <PhoneInput
+                  {...field}
+                  disabled={isLoading}
+                  aria-invalid={!!errors.phone}
+                />
+              )}
             />
             <span className="text-sm text-red-500">
               {errors.phone?.message}
@@ -92,13 +100,16 @@ export default function Page() {
 
           <div className="space-y-2">
             <Label htmlFor="experience">Nível de experiência</Label>
-            <Input
-              id="experience"
-              type="text"
-              placeholder="Ex: Estágio, Júnior, Pleno, Sênior"
-              disabled={isLoading}
-              aria-invalid={!!errors.experience}
-              {...register("experience")}
+            <Controller
+              name="experience"
+              control={control}
+              render={({ field }) => (
+                <SelectLevel
+                  value={field.value}
+                  onValueChange={field.onChange}
+                  disabled={isLoading}
+                />
+              )}
             />
             <span className="text-sm text-red-500">
               {errors.experience?.message}
