@@ -53,6 +53,7 @@ export default function RootLayout({
             <Toaster />
           </QueryProvider>
         </ThemeProvider>
+        <Toaster />
       </body>
     </html>
   );
