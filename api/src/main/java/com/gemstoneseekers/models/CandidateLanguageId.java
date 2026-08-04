@@ -1,7 +1,6 @@
 package com.gemstoneseekers.models;
 
 import java.io.Serializable;
-import java.util.Objects;
 import java.util.UUID;
 
 import jakarta.persistence.Column;
@@ -11,11 +10,14 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.EqualsAndHashCode;
+
 
 @Embeddable
 @Getter
 @Setter
 @NoArgsConstructor
+@EqualsAndHashCode
 @AllArgsConstructor
 public class CandidateLanguageId implements Serializable {
 
