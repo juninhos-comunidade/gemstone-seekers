@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,9 +9,11 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { PasswordInput } from "@/components/PasswordInput/PasswordInput";
 import { schema } from "@/lib/schemas/loginSchema";
+import { useLogin } from "@/lib/api/auth/login";
+import { Spinner } from "@/components/ui/spinner";
 
 export default function Page() {
-  const router = useRouter();
+  const { mutateAsync: login, isPending } = useLogin();
 
   type FormValues = z.infer<typeof schema>;
 
@@ -24,9 +25,11 @@ export default function Page() {
     resolver: zodResolver(schema),
   });
 
+  // Estado unificado de carregamento
+  const isLoading = isSubmitting || isPending;
+
   const handleLogin = handleSubmit(async (data) => {
-    console.log(data);
-    router.push("/candidate/dashboard");
+    await login(data);
   });
 
   return (
@@ -41,6 +44,7 @@ export default function Page() {
               id="email"
               type="email"
               placeholder="E-mail"
+              disabled={isLoading}
               {...register("email")}
             />
             {errors.email && (
@@ -52,10 +56,10 @@ export default function Page() {
 
           <div className="space-y-2">
             <Label htmlFor="password">Senha</Label>
-
             <PasswordInput
               id="password"
               placeholder="Senha"
+              disabled={isLoading}
               {...register("password")}
             />
             {errors.password && (
@@ -66,12 +70,18 @@ export default function Page() {
           </div>
 
           <Button
-            disabled={isSubmitting}
-            className="w-full"
+            disabled={isLoading}
+            className="flex w-full items-center justify-center gap-2"
             type="submit"
-            onClick={isSubmitting ? undefined : handleLogin}
           >
-            Entrar
+            {isLoading ? (
+              <>
+                <Spinner className="h-4 w-4" />
+                <span>Entrando...</span>
+              </>
+            ) : (
+              "Entrar"
+            )}
           </Button>
         </form>
 

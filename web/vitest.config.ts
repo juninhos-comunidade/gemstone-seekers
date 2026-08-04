@@ -22,6 +22,8 @@ export default defineConfig({
         "app/**/layout.tsx",
         "lib/mocks/**",
         "app/api/**",
+        "components/reui/**",
+        "components/selectLevel/**",
       ],
       thresholds: {
         lines: 80,

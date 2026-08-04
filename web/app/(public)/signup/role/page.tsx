@@ -1,25 +1,67 @@
 "use client";
 
-import React from "react";
 import { useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
+import { toast } from "sonner";
+
+type RoleFormData = {
+  role: "candidate" | "recruiter";
+};
 
 export default function Page() {
-  const route = useRouter();
+  const router = useRouter();
 
-  const handleChoseCandidate = () => {
-    route.push("/signup/role/candidate");
+  const {
+    handleSubmit,
+    setValue,
+    formState: { isSubmitting },
+  } = useForm<RoleFormData>({
+    defaultValues: {
+      role: "candidate",
+    },
+  });
+
+  const isLoading = isSubmitting;
+
+  const handleChooseRole = async ({ role }: RoleFormData) => {
+    try {
+      localStorage.setItem("signup-role", role);
+
+      router.push(
+        role === "candidate"
+          ? "/signup/role/candidate"
+          : "/signup/role/recruiter",
+      );
+    } catch {
+      toast.error("Erro ao selecionar perfil");
+    }
   };
 
-  const handleChoseRecruiter = () => {
-    route.push("/signup/role/recruiter");
-  };
   return (
-    <div className="flex min-h-screen items-center justify-center gap-10 p-8">
+    <form
+      className="flex min-h-screen items-center justify-center gap-10 p-8"
+      onSubmit={handleSubmit(handleChooseRole)}
+    >
       <div className="text-center">
         <h2 className="mb-2 text-xl font-semibold">Recrutador</h2>
         <p className="text-muted-foreground mb-4">Você é um recrutador?</p>
-        <Button onClick={handleChoseRecruiter}>Selecionar</Button>
+        <Button
+          type="submit"
+          disabled={isLoading}
+          className="flex items-center justify-center gap-2"
+          onClick={() => setValue("role", "recruiter")}
+        >
+          {isLoading ? (
+            <>
+              <Spinner className="h-4 w-4" />
+              <span>Selecionando...</span>
+            </>
+          ) : (
+            "Selecionar"
+          )}
+        </Button>
       </div>
 
       <div className="bg-border h-48 w-px" />
@@ -27,8 +69,22 @@ export default function Page() {
       <div className="text-center">
         <h2 className="mb-2 text-xl font-semibold">Candidato(a)</h2>
         <p className="text-muted-foreground mb-4">Você é um candidato?</p>
-        <Button onClick={handleChoseCandidate}>Selecionar</Button>
+        <Button
+          type="submit"
+          disabled={isLoading}
+          className="flex items-center justify-center gap-2"
+          onClick={() => setValue("role", "candidate")}
+        >
+          {isLoading ? (
+            <>
+              <Spinner className="h-4 w-4" />
+              <span>Selecionando...</span>
+            </>
+          ) : (
+            "Selecionar"
+          )}
+        </Button>
       </div>
-    </div>
+    </form>
   );
 }

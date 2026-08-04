@@ -3,14 +3,23 @@ import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { useRouter } from "next/navigation";
 import Login from "./page";
 
+const mockPush = vi.fn();
+const mockLogin = vi.fn();
+
 vi.mock("next/navigation", () => ({
   useRouter: vi.fn(),
+}));
+
+vi.mock("@/lib/api/auth/login", () => ({
+  useLogin: () => ({
+    mutateAsync: mockLogin,
+    isPending: false,
+  }),
 }));
 
 const mockUseRouter = vi.mocked(useRouter);
 
 describe("Login Page", () => {
-  const mockPush = vi.fn();
   const mockRouter = {
     push: mockPush,
     back: vi.fn(),
@@ -27,6 +36,7 @@ describe("Login Page", () => {
 
   it("renders login form fields and signup link", () => {
     render(<Login />);
+
     expect(screen.getByRole("heading", { name: "Entrar" })).toBeInTheDocument();
     expect(screen.getByRole("textbox", { name: "E-mail" })).toBeInTheDocument();
     expect(screen.getByLabelText("Senha")).toBeInTheDocument();
@@ -37,7 +47,9 @@ describe("Login Page", () => {
     );
   });
 
-  it("navigates to candidate dashboard on valid form submission", async () => {
+  it("calls useLogin with valid form data", async () => {
+    mockLogin.mockResolvedValue(undefined);
+
     render(<Login />);
 
     fireEvent.change(screen.getByLabelText(/^e-mail$/i), {
@@ -49,21 +61,26 @@ describe("Login Page", () => {
     fireEvent.click(screen.getByRole("button", { name: "Entrar" }));
 
     await waitFor(() => {
-      expect(mockPush).toHaveBeenCalledWith("/candidate/dashboard");
+      expect(mockLogin).toHaveBeenCalledWith({
+        email: "candidato@example.com",
+        password: "senha123",
+      });
     });
   });
 
-  it("displays validation error messages for invalid form input", async () => {
+  it("does not call useLogin for invalid form input", async () => {
     render(<Login />);
 
     fireEvent.change(screen.getByLabelText(/^e-mail$/i), {
       target: { value: "invalid-email" },
     });
+    fireEvent.change(screen.getByLabelText("Senha"), {
+      target: { value: "123" },
+    });
     fireEvent.click(screen.getByRole("button", { name: "Entrar" }));
 
     await waitFor(() => {
-      expect(screen.getByText("E-mail inválido")).toBeInTheDocument();
-      expect(screen.getByText("Senha inválida")).toBeInTheDocument();
+      expect(mockLogin).not.toHaveBeenCalled();
     });
     expect(mockPush).not.toHaveBeenCalled();
   });

@@ -1,24 +1,66 @@
-import { describe, it, expect, vi } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import type { InputHTMLAttributes, SelectHTMLAttributes } from "react";
 import CandidateSignup from "./page";
 
-const mockPush = vi.fn();
+const mockUpdateCandidate = vi.fn();
 
-vi.mock("next/navigation", () => ({
-  useRouter: () => ({
-    push: mockPush,
-    replace: vi.fn(),
-    back: vi.fn(),
-    forward: vi.fn(),
-    refresh: vi.fn(),
-    prefetch: vi.fn(),
+vi.mock("@/lib/api/auth/UpdateCandidate", () => ({
+  useUpdateCandidate: () => ({
+    mutateAsync: mockUpdateCandidate,
+    isPending: false,
   }),
-  usePathname: () => "/signup/role/candidate",
+}));
+
+type MockPhoneInputProps = InputHTMLAttributes<HTMLInputElement> & {
+  value?: string;
+  onChange?: (_value: string) => void;
+};
+
+type MockSelectLevelProps = SelectHTMLAttributes<HTMLSelectElement> & {
+  value?: string;
+  onValueChange?: (_value: string) => void;
+};
+
+vi.mock("@/components/reui/phone-input", () => ({
+  PhoneInput: ({
+    value,
+    onChange,
+    id = "phone",
+    ...props
+  }: MockPhoneInputProps) => (
+    <input
+      id={id}
+      type="tel"
+      value={value ?? ""}
+      onChange={(event) => onChange?.(event.target.value)}
+      {...props}
+    />
+  ),
+}));
+
+vi.mock("@/components/SelectLevel/SelectLevel", () => ({
+  SelectLevel: ({ value, onValueChange }: MockSelectLevelProps) => (
+    <select
+      aria-label="Nível de experiência"
+      value={value ?? ""}
+      onChange={(event) => onValueChange?.(event.target.value)}
+    >
+      <option value="">Selecione</option>
+      <option value="junior">Júnior</option>
+      <option value="pleno">Pleno</option>
+    </select>
+  ),
 }));
 
 describe("Candidate Signup Page", () => {
-  it("renders profile form fields, submit button and skip link, and handles submit navigation", () => {
+  beforeEach(() => {
     vi.clearAllMocks();
+  });
+
+  it("renders profile form fields, submit button and skip link, and handles submit navigation", async () => {
+    mockUpdateCandidate.mockResolvedValue(undefined);
+
     render(<CandidateSignup />);
     expect(
       screen.getByRole("heading", {
@@ -26,7 +68,7 @@ describe("Candidate Signup Page", () => {
         name: /Informações do Candidato/i,
       }),
     ).toBeInTheDocument();
-    expect(screen.getByLabelText(/telefone/i)).toBeInTheDocument();
+    expect(screen.getByText(/telefone/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/área de interesse/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/cargo desejado/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/nível de experiência/i)).toBeInTheDocument();
@@ -36,11 +78,43 @@ describe("Candidate Signup Page", () => {
       screen.getByRole("link", { name: /pular por enquanto/i }),
     ).toHaveAttribute("href", "/dashboard");
 
-    const submitBtn = screen.getByRole("button", {
-      name: /concluir cadastro/i,
+    fireEvent.change(
+      document.querySelector("input[type='tel']") as HTMLInputElement,
+      {
+        target: { value: "+55 11 99999-9999" },
+      },
+    );
+    fireEvent.change(screen.getByLabelText(/área de interesse/i), {
+      target: { value: "Tecnologia" },
     });
-    fireEvent.click(submitBtn);
+    fireEvent.change(screen.getByLabelText(/cargo desejado/i), {
+      target: { value: "Desenvolvedor Front-end" },
+    });
+    fireEvent.change(screen.getByLabelText(/nível de experiência/i), {
+      target: { value: "junior" },
+    });
+    fireEvent.change(screen.getByLabelText(/localização/i), {
+      target: { value: "São Paulo, SP" },
+    });
+    fireEvent.change(screen.getByLabelText(/currículo \(link\)/i), {
+      target: { value: "https://linkedin.com/in/teste" },
+    });
 
-    expect(mockPush).toHaveBeenCalledWith("/candidate/dashboard");
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: /concluir cadastro/i,
+      }),
+    );
+
+    await waitFor(() => {
+      expect(mockUpdateCandidate).toHaveBeenCalledWith({
+        phone: "+55 11 99999-9999",
+        area: "Tecnologia",
+        role: "Desenvolvedor Front-end",
+        experience: "junior",
+        location: "São Paulo, SP",
+        resume: "https://linkedin.com/in/teste",
+      });
+    });
   });
 });

@@ -1,24 +1,81 @@
-import { describe, it, expect, vi } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import type { InputHTMLAttributes, ReactNode } from "react";
 import RecruiterSignup from "./page";
 
-const mockPush = vi.fn();
+const mockUpdateRecruiter = vi.fn();
 
-vi.mock("next/navigation", () => ({
-  useRouter: () => ({
-    push: mockPush,
-    replace: vi.fn(),
-    back: vi.fn(),
-    forward: vi.fn(),
-    refresh: vi.fn(),
-    prefetch: vi.fn(),
+vi.mock("@/lib/api/auth/UpdateRecruiter", () => ({
+  useUpdateRecruiter: () => ({
+    mutateAsync: mockUpdateRecruiter,
+    isPending: false,
   }),
-  usePathname: () => "/signup/role/recruiter",
+}));
+
+type MockPhoneInputProps = InputHTMLAttributes<HTMLInputElement> & {
+  value?: string;
+  onChange?: (_value: string) => void;
+};
+
+type MockSelectProps = {
+  value?: string;
+  onValueChange?: (_value: string) => void;
+  children?: ReactNode;
+};
+
+type MockSelectChildrenProps = {
+  children?: ReactNode;
+};
+
+type MockSelectItemProps = {
+  children?: ReactNode;
+  value: string;
+};
+
+vi.mock("@/components/reui/phone-input", () => ({
+  PhoneInput: ({
+    value,
+    onChange,
+    id = "phone",
+    ...props
+  }: MockPhoneInputProps) => (
+    <input
+      id={id}
+      type="tel"
+      value={value ?? ""}
+      onChange={(event) => onChange?.(event.target.value)}
+      {...props}
+    />
+  ),
+}));
+
+vi.mock("@/components/ui/select", () => ({
+  Select: ({ value, onValueChange, children }: MockSelectProps) => (
+    <select
+      aria-label="Tamanho da empresa"
+      value={value ?? ""}
+      onChange={(event) => onValueChange?.(event.target.value)}
+    >
+      <option value="">Selecione</option>
+      {children}
+    </select>
+  ),
+  SelectContent: ({ children }: MockSelectChildrenProps) => <>{children}</>,
+  SelectItem: ({ children, value }: MockSelectItemProps) => (
+    <option value={value}>{children}</option>
+  ),
+  SelectTrigger: ({ children }: MockSelectChildrenProps) => <>{children}</>,
+  SelectValue: () => null,
 }));
 
 describe("Recruiter Signup Page", () => {
-  it("renders recruiter profile form fields, submit button and skip link, and handles submit navigation", () => {
+  beforeEach(() => {
     vi.clearAllMocks();
+  });
+
+  it("renders recruiter profile form fields, submit button and skip link, and handles submit navigation", async () => {
+    mockUpdateRecruiter.mockResolvedValue(undefined);
+
     render(<RecruiterSignup />);
     expect(
       screen.getByRole("heading", {
@@ -28,18 +85,46 @@ describe("Recruiter Signup Page", () => {
     ).toBeInTheDocument();
     expect(screen.getByLabelText(/nome da empresa/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/^cargo$/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/telefone/i)).toBeInTheDocument();
+    expect(screen.getByText(/telefone/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/site da empresa/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/tamanho da empresa/i)).toBeInTheDocument();
     expect(
       screen.getByRole("link", { name: /pular por enquanto/i }),
     ).toHaveAttribute("href", "/dashboard");
 
-    const submitBtn = screen.getByRole("button", {
-      name: /concluir cadastro/i,
+    fireEvent.change(screen.getByLabelText(/nome da empresa/i), {
+      target: { value: "Gemstone Seekers" },
     });
-    fireEvent.click(submitBtn);
+    fireEvent.change(screen.getByLabelText(/^cargo$/i), {
+      target: { value: "Analista de RH" },
+    });
+    fireEvent.change(
+      document.querySelector("input[type='tel']") as HTMLInputElement,
+      {
+        target: { value: "+55 11 99999-9999" },
+      },
+    );
+    fireEvent.change(screen.getByLabelText(/site da empresa/i), {
+      target: { value: "https://gemstoneseekers.com" },
+    });
+    fireEvent.change(screen.getByLabelText(/tamanho da empresa/i), {
+      target: { value: "11-50" },
+    });
 
-    expect(mockPush).toHaveBeenCalledWith("/recruiter/dashboard");
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: /concluir cadastro/i,
+      }),
+    );
+
+    await waitFor(() => {
+      expect(mockUpdateRecruiter).toHaveBeenCalledWith({
+        companyName: "Gemstone Seekers",
+        jobTitle: "Analista de RH",
+        phone: "+55 11 99999-9999",
+        companyWebsite: "https://gemstoneseekers.com",
+        companySize: "11-50",
+      });
+    });
   });
 });

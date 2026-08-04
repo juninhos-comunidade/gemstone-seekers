@@ -1,15 +1,57 @@
 "use client";
+
 import Link from "next/link";
+import { Controller, useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Spinner } from "@/components/ui/spinner";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { PhoneInput } from "@/components/reui/phone-input";
+import { useUpdateRecruiter } from "@/lib/api/auth/UpdateRecruiter";
+import {
+  recruiterRoleSchema,
+  type RecruiterRoleFormData,
+} from "@/lib/schemas/recruiterRoleSchema";
 
-import { useRouter } from "next/navigation";
+const companySizeOptions = [
+  { value: "1-10", label: "1-10" },
+  { value: "11-50", label: "11-50" },
+  { value: "51-200", label: "51-200" },
+  { value: "201-500", label: "201-500" },
+  { value: "500+", label: "500+" },
+];
+
 export default function Page() {
-  const route = useRouter();
+  const { mutateAsync: updateRecruiter, isPending } = useUpdateRecruiter();
 
-  const handleNext = () => {
-    route.push("/recruiter/dashboard");
+  const {
+    register,
+    handleSubmit,
+    control,
+    formState: { errors, isSubmitting },
+  } = useForm<RecruiterRoleFormData>({
+    resolver: zodResolver(recruiterRoleSchema),
+    defaultValues: {
+      companyName: "",
+      jobTitle: "",
+      phone: "",
+      companyWebsite: "",
+      companySize: "",
+    },
+  });
+
+  const isLoading = isSubmitting || isPending;
+
+  const onSubmit = async (data: RecruiterRoleFormData) => {
+    await updateRecruiter(data);
   };
 
   return (
@@ -22,14 +64,20 @@ export default function Page() {
           Complete seu perfil para finalizar o cadastro
         </p>
 
-        <div className="space-y-4">
+        <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
           <div className="space-y-2">
             <Label htmlFor="company-name">Nome da empresa</Label>
             <Input
               id="company-name"
               type="text"
               placeholder="Nome da empresa"
+              disabled={isLoading}
+              aria-invalid={!!errors.companyName}
+              {...register("companyName")}
             />
+            <span className="text-sm text-red-500">
+              {errors.companyName?.message}
+            </span>
           </div>
 
           <div className="space-y-2">
@@ -38,12 +86,31 @@ export default function Page() {
               id="job-title"
               type="text"
               placeholder="Ex: Analista de RH"
+              disabled={isLoading}
+              aria-invalid={!!errors.jobTitle}
+              {...register("jobTitle")}
             />
+            <span className="text-sm text-red-500">
+              {errors.jobTitle?.message}
+            </span>
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="phone">Telefone</Label>
-            <Input id="phone" type="tel" placeholder="(00) 00000-0000" />
+            <Controller
+              name="phone"
+              control={control}
+              render={({ field }) => (
+                <PhoneInput
+                  {...field}
+                  disabled={isLoading}
+                  aria-invalid={!!errors.phone}
+                />
+              )}
+            />
+            <span className="text-sm text-red-500">
+              {errors.phone?.message}
+            </span>
           </div>
 
           <div className="space-y-2">
@@ -52,22 +119,64 @@ export default function Page() {
               id="company-website"
               type="url"
               placeholder="https://suaempresa.com"
+              disabled={isLoading}
+              aria-invalid={!!errors.companyWebsite}
+              {...register("companyWebsite")}
             />
+            <span className="text-sm text-red-500">
+              {errors.companyWebsite?.message}
+            </span>
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="company-size">Tamanho da empresa</Label>
-            <Input
-              id="company-size"
-              type="text"
-              placeholder="Ex: 1-10, 11-50, 51-200..."
+            <Controller
+              name="companySize"
+              control={control}
+              render={({ field }) => (
+                <Select
+                  items={companySizeOptions}
+                  value={field.value}
+                  onValueChange={field.onChange}
+                >
+                  <SelectTrigger
+                    id="company-size"
+                    disabled={isLoading}
+                    aria-invalid={!!errors.companySize}
+                    className="w-full"
+                  >
+                    <SelectValue placeholder="Selecione o tamanho da empresa" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {companySizeOptions.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
             />
+            <span className="text-sm text-red-500">
+              {errors.companySize?.message}
+            </span>
           </div>
 
-          <Button className="w-full" onClick={handleNext}>
-            Concluir cadastro
+          <Button
+            type="submit"
+            disabled={isLoading}
+            className="flex w-full items-center justify-center gap-2"
+          >
+            {isLoading ? (
+              <>
+                <Spinner className="h-4 w-4" />
+                <span>Concluindo...</span>
+              </>
+            ) : (
+              "Concluir cadastro"
+            )}
           </Button>
-        </div>
+        </form>
 
         <p className="text-muted-foreground mt-6 text-center text-sm">
           Prefere fazer isso depois?{" "}
