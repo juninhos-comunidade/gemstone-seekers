@@ -34,7 +34,7 @@ export function JobTechnologiesSection() {
       ...selectedTechnologies,
       {
         technologyId: tech.id,
-        name: tech.name,
+        technologyName: tech.name,
         category: tech.category,
         isMandatory: true,
       },
@@ -97,7 +97,7 @@ export function JobTechnologiesSection() {
                 >
                   <div className="flex items-center gap-2">
                     <span className="text-foreground text-sm font-medium">
-                      {tech.name}
+                      {tech.technologyName}
                     </span>
                     {tech.category && (
                       <Badge variant="outline" className="text-[10px]">
