@@ -1,0 +1,49 @@
+import React from "react";
+import { FaCog } from "react-icons/fa";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { ThemeDropdown } from "@/components/ThemeDropdown/ThemeDropdown";
+
+export function SettingsModal() {
+  return (
+    <Dialog>
+      <DialogTrigger
+        render={
+          <Button variant="ghost" size="icon" aria-label="Configurações" />
+        }
+      >
+        <FaCog className="size-4" />
+      </DialogTrigger>
+
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader className="border-b pb-4">
+          <DialogTitle className="text-lg font-semibold tracking-tight">
+            Configurações
+          </DialogTitle>
+        </DialogHeader>
+
+        <div className="space-y-4 py-2">
+          <div className="bg-muted/30 flex items-center justify-between gap-4 rounded-xl border p-4">
+            <div className="space-y-1">
+              <Label className="text-sm leading-none font-medium">
+                Aparência
+              </Label>
+              <p className="text-muted-foreground text-xs">
+                Personalize o tema da interface
+              </p>
+            </div>
+
+            <ThemeDropdown />
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}

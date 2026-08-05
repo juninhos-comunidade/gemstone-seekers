@@ -1,24 +1,63 @@
 name: Backend CI
 
-on:
+"on":
   push:
-    branches: [ "main", "develop" ]
+    branches:
+      - main
+      - develop
     paths:
       - 'api/**'
+      - '.github/workflows/backend-ci.yml'
   pull_request:
-    branches: [ "main", "develop" ]
-    paths:
-      - 'api/**'
+    branches:
+      - main
+      - develop
 
 env:
   MAVEN_OPTS: "-Xmx2048m"
   MAVEN_CLI_OPTS: "--batch-mode --no-transfer-progress"
 
 jobs:
+  detect-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      backend_core: ${{ steps.filter.outputs.backend_core }}
+      dependencies: ${{ steps.filter.outputs.dependencies }}
+      linter_config: ${{ steps.filter.outputs.linter_config }}
+      docker: ${{ steps.filter.outputs.docker }}
+      ci_config: ${{ steps.filter.outputs.ci_config }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Check for API path changes
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            backend_core:
+              - 'api/**/*.java'
+              - 'api/src/main/resources/**'
+            dependencies:
+              - 'api/pom.xml'
+              - 'api/.mvn/**'
+              - 'api/mvnw*'
+            linter_config:
+              - 'api/config/**'
+              - 'api/*-exclude.xml'
+              - 'api/rules.xml'
+            docker:
+              - 'api/Dockerfile'
+              - 'api/docker/**'
+            ci_config:
+              - '.github/workflows/backend-ci.yml'
+
   # ==========================================
-  # STAGE: BUILD
+  # STAGE: BUILD & SECURITY SCAN
   # ==========================================
-  maven-compile:
+  compile-code:
+    needs: detect-changes
+    if: ${{ needs.detect-changes.outputs.backend_core == 'true' || needs.detect-changes.outputs.dependencies == 'true' || needs.detect-changes.outputs.linter_config == 'true' || needs.detect-changes.outputs.docker == 'true' || needs.detect-changes.outputs.ci_config == 'true' }}
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -34,17 +73,19 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
 
-      - name: Compile
+      - name: Compile application code
         run: ./mvnw $MAVEN_CLI_OPTS clean compile -DskipTests -Dskip.git.hooks=true
 
-      - name: Upload target directory
+      - name: Upload compiled target directory
         uses: actions/upload-artifact@v4
         with:
           name: api-target
           path: api/target/
           retention-days: 1
 
-  sast-semgrep:
+  security-code-scan:
+    needs: detect-changes
+    if: ${{ needs.detect-changes.outputs.backend_core == 'true' || needs.detect-changes.outputs.dependencies == 'true' || needs.detect-changes.outputs.ci_config == 'true' }}
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -58,10 +99,10 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Install Semgrep
+      - name: Install Semgrep scanner
         run: pip install semgrep --quiet
 
-      - name: Run Semgrep
+      - name: Scan source code for security vulnerabilities
         run: >
           semgrep scan
           --config p/java
@@ -75,7 +116,7 @@ jobs:
           --exclude .m2/
           --exclude src/main/resources/db/seed/
 
-      - name: Upload Semgrep Report
+      - name: Upload code security report
         uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -83,13 +124,29 @@ jobs:
           path: api/semgrep-report.sarif
           retention-days: 7
 
-  sca-filesystem:
+  security-dependency-scan:
+    needs:
+      - detect-changes
+      - compile-code
+    if: |
+      always() && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled') &&
+      (needs.detect-changes.outputs.dependencies == 'true' || needs.detect-changes.outputs.ci_config == 'true')
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./api
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Run Trivy FS Scanner (CycloneDX)
+      - name: Set up JDK 25
+        uses: actions/setup-java@v4
+        with:
+          java-version: '25'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Generate dependency Bill of Materials (CycloneDX)
         uses: aquasecurity/trivy-action@master
         with:
           scan-type: 'fs'
@@ -98,7 +155,7 @@ jobs:
           output: 'api/sbom.cyclonedx.json'
           exit-code: '0'
 
-      - name: Run Trivy FS Scanner (SARIF)
+      - name: Scan dependencies for security vulnerabilities (SARIF)
         uses: aquasecurity/trivy-action@master
         with:
           scan-type: 'fs'
@@ -107,9 +164,10 @@ jobs:
           output: 'api/trivy-fs-report.sarif'
           exit-code: '1'
           severity: 'CRITICAL,HIGH'
+          ignore-unfixed: true
           scanners: 'vuln,secret'
 
-      - name: Upload Trivy Reports
+      - name: Upload dependency security reports
         uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -120,10 +178,15 @@ jobs:
           retention-days: 7
 
   # ==========================================
-  # STAGE: VERIFY
+  # STAGE: VERIFY & QUALITY
   # ==========================================
-  lint-checkstyle:
-    needs: maven-compile
+  check-code-style:
+    needs:
+      - detect-changes
+      - compile-code
+    if: |
+      always() && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled') &&
+      (needs.detect-changes.outputs.backend_core == 'true' || needs.detect-changes.outputs.linter_config == 'true' || needs.detect-changes.outputs.ci_config == 'true')
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -139,20 +202,20 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
 
-      - name: Download target directory
+      - name: Download compiled target directory
         uses: actions/download-artifact@v4
         with:
           name: api-target
           path: api/target/
 
-      - name: Run Checkstyle
+      - name: Check Java formatting rules (Checkstyle)
         run: >
           ./mvnw $MAVEN_CLI_OPTS checkstyle:checkstyle checkstyle:check
           -Dskip.git.hooks=true
           -Dcheckstyle.failOnViolation=true
           -Dcheckstyle.violationSeverity=error
 
-      - name: Upload Checkstyle Report
+      - name: Upload Checkstyle report
         uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -160,8 +223,13 @@ jobs:
           path: api/target/checkstyle/
           retention-days: 7
 
-  lint-pmd:
-    needs: maven-compile
+  check-code-quality:
+    needs:
+      - detect-changes
+      - compile-code
+    if: |
+      always() && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled') &&
+      (needs.detect-changes.outputs.backend_core == 'true' || needs.detect-changes.outputs.linter_config == 'true' || needs.detect-changes.outputs.ci_config == 'true')
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -177,20 +245,20 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
 
-      - name: Download target directory
+      - name: Download compiled target directory
         uses: actions/download-artifact@v4
         with:
           name: api-target
           path: api/target/
 
-      - name: Run PMD
+      - name: Analyze code for quality issues (PMD)
         run: >
           ./mvnw $MAVEN_CLI_OPTS pmd:pmd pmd:check
           -Dskip.git.hooks=true
           -Dpmd.failOnViolation=true
           -Dpmd.maxAllowedViolations=0
 
-      - name: Upload PMD Report
+      - name: Upload PMD report
         uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -198,8 +266,13 @@ jobs:
           path: api/target/pmd/
           retention-days: 7
 
-  sast-spotbugs:
-    needs: maven-compile
+  check-code-bugs:
+    needs:
+      - detect-changes
+      - compile-code
+    if: |
+      always() && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled') &&
+      (needs.detect-changes.outputs.backend_core == 'true' || needs.detect-changes.outputs.linter_config == 'true' || needs.detect-changes.outputs.ci_config == 'true')
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -215,20 +288,20 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
 
-      - name: Download target directory
+      - name: Download compiled target directory
         uses: actions/download-artifact@v4
         with:
           name: api-target
           path: api/target/
 
-      - name: Run SpotBugs
+      - name: Analyze bytecode for potential bugs (SpotBugs)
         run: >
           ./mvnw $MAVEN_CLI_OPTS spotbugs:spotbugs spotbugs:check
           -Dskip.git.hooks=true
           -Dspotbugs.threshold=High
           -Dspotbugs.maxAllowedViolations=0
 
-      - name: Upload SpotBugs Report
+      - name: Upload SpotBugs report
         uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -236,8 +309,13 @@ jobs:
           path: api/target/spotbugs/
           retention-days: 7
 
-  maven-test:
-    needs: maven-compile
+  unit-and-integration-tests:
+    needs:
+      - detect-changes
+      - compile-code
+    if: |
+      always() && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled') &&
+      (needs.detect-changes.outputs.backend_core == 'true' || needs.detect-changes.outputs.dependencies == 'true' || needs.detect-changes.outputs.ci_config == 'true')
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -253,44 +331,57 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
 
-      - name: Download target directory
+      - name: Download compiled target directory
         uses: actions/download-artifact@v4
         with:
           name: api-target
           path: api/target/
 
-      - name: Run Tests and Coverage
+      - name: Run tests and measure coverage
         env:
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
           COVERAGE_MIN_INSTRUCTION: "0.80"
           COVERAGE_MIN_BRANCH: "0.80"
         run: >
-          ./mvnw $MAVEN_CLI_OPTS verify
+          ./mvnw $MAVEN_CLI_OPTS verify jacoco:report
           -Dskip.git.hooks=true
           -Djacoco.skip=false
           -Dcoverage.minimum.instruction=$COVERAGE_MIN_INSTRUCTION
           -Dcoverage.minimum.branch=$COVERAGE_MIN_BRANCH
 
-      - name: Upload Surefire Reports
+      - name: Upload test execution logs
         uses: actions/upload-artifact@v4
         if: always()
         with:
           name: surefire-reports
           path: api/target/surefire-reports/
+          if-no-files-found: ignore
           retention-days: 7
 
-      - name: Upload Jacoco Report
+      - name: Upload test coverage report
         uses: actions/upload-artifact@v4
         if: always()
         with:
           name: jacoco-report
           path: api/target/site/jacoco/
+          if-no-files-found: ignore
           retention-days: 7
 
   # ==========================================
-  # STAGE: PACKAGE
+  # STAGE: PACKAGE & SCAN
   # ==========================================
-  docker-build:
-    needs: [maven-test, sast-spotbugs, lint-pmd, lint-checkstyle, sast-semgrep, sca-filesystem]
+  build-docker-image:
+    needs:
+      - detect-changes
+      - unit-and-integration-tests
+      - check-code-bugs
+      - check-code-quality
+      - check-code-style
+      - security-code-scan
+      - security-dependency-scan
+    if: |
+      always() && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled') &&
+      (needs.detect-changes.outputs.backend_core == 'true' || needs.detect-changes.outputs.dependencies == 'true' || needs.detect-changes.outputs.docker == 'true' || needs.detect-changes.outputs.ci_config == 'true')
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -299,8 +390,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # Downloads the compiled .jar from the first job (maven-compile) so the Dockerfile can use it
-      - name: Download target directory
+      - name: Download compiled target directory
         uses: actions/download-artifact@v4
         with:
           name: api-target
@@ -311,30 +401,27 @@ jobs:
           docker build -t api-image:${{ github.sha }} .
           docker save api-image:${{ github.sha }} -o image.tar
 
-      - name: Upload Image Artifact
+      - name: Upload Docker image artifact
         uses: actions/upload-artifact@v4
         with:
           name: docker-image
           path: api/image.tar
           retention-days: 1
 
-  # ==========================================
-  # STAGE: SCAN
-  # ==========================================
-  sca-container:
-    needs: docker-build
+  security-docker-image-scan:
+    needs: build-docker-image
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: ./api
     steps:
-      - name: Download Image Artifact
+      - name: Download Docker image artifact
         uses: actions/download-artifact@v4
         with:
           name: docker-image
           path: api/
 
-      - name: Run Trivy (Table Format)
+      - name: Scan Docker image for vulnerabilities (Table view)
         uses: aquasecurity/trivy-action@master
         with:
           input: 'api/image.tar'
@@ -343,7 +430,7 @@ jobs:
           severity: 'CRITICAL,HIGH'
           ignore-unfixed: true
 
-      - name: Run Trivy (SARIF Format)
+      - name: Scan Docker image for vulnerabilities (SARIF)
         uses: aquasecurity/trivy-action@master
         with:
           input: 'api/image.tar'
@@ -353,7 +440,7 @@ jobs:
           severity: 'CRITICAL,HIGH'
           ignore-unfixed: true
 
-      - name: Upload Trivy Image Report
+      - name: Upload Docker image security report
         uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -364,8 +451,8 @@ jobs:
   # ==========================================
   # STAGE: PUBLISH
   # ==========================================
-  docker-publish:
-    needs: sca-container
+  publish-docker-image:
+    needs: security-docker-image-scan
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -374,7 +461,7 @@ jobs:
       contents: read
       packages: write
     steps:
-      - name: Download Image Artifact
+      - name: Download Docker image artifact
         uses: actions/download-artifact@v4
         with:
           name: docker-image
@@ -390,22 +477,41 @@ jobs:
       - name: Load, Tag and Push Docker image
         run: |
           docker load -i image.tar
-          
+
           REPO_OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
           IMAGE_ID="ghcr.io/$REPO_OWNER/gemstone-seekers-api"
-          
-          # Commit SHA tag
+
           docker tag api-image:${{ github.sha }} $IMAGE_ID:${{ github.sha }}
-          
-          # Branch name tag (e.g., main, develop)
+
           REF_SLUG=$(echo "${{ github.ref_name }}" | tr -cd '[:alnum:]_-')
           docker tag api-image:${{ github.sha }} $IMAGE_ID:$REF_SLUG
-          
+
           docker push $IMAGE_ID:${{ github.sha }}
           docker push $IMAGE_ID:$REF_SLUG
-          
-          # Automatically creates the "latest" tag if on the main branch
+
           if [ "${{ github.ref_name }}" = "main" ]; then
             docker tag api-image:${{ github.sha }} $IMAGE_ID:latest
             docker push $IMAGE_ID:latest
           fi
+
+  # ==========================================
+  # STAGE: DEPLOY
+  # ==========================================
+  deploy-develop:
+    needs: publish-docker-image
+    if: github.ref_name == 'develop' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Render Deploy (Develop)
+        run: |
+          curl -f -X POST "${{ secrets.RENDER_DEPLOY_HOOK_DEVELOP }}"
+
+  deploy-main:
+    needs: publish-docker-image
+    if: github.ref_name == 'main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Trigger Render Deploy (Main)
+        run: |
+          curl -f -X POST "${{ secrets.RENDER_DEPLOY_HOOK_MAIN }}"

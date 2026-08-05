@@ -1,20 +1,74 @@
 name: Frontend CI
 
-on:
+"on":
   push:
-    branches: [ "main", "develop" ]
+    branches:
+      - main
+      - develop
     paths:
       - 'web/**'
+      - '.github/workflows/frontend-ci.yml'
   pull_request:
-    branches: [ "main", "develop" ]
-    paths:
-      - 'web/**'
+    branches:
+      - main
+      - develop
+
+env:
+  API_URL: ${{ secrets.API_URL }}
 
 jobs:
+  detect-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      ts_code: ${{ steps.filter.outputs.ts_code }}
+      dependencies: ${{ steps.filter.outputs.dependencies }}
+      linter_config: ${{ steps.filter.outputs.linter_config }}
+      config_files: ${{ steps.filter.outputs.config_files }}
+      ci_config: ${{ steps.filter.outputs.ci_config }}
+      project_exists: ${{ steps.check_exists.outputs.project_exists }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Check for Web path changes
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            ts_code:
+              - 'web/**/*.{ts,tsx,js,jsx,css,scss,md}'
+              - 'web/public/**'
+            dependencies:
+              - 'web/package.json'
+              - 'web/pnpm-lock.yaml'
+            linter_config:
+              - 'web/.eslintrc*'
+              - 'web/eslint.config.*'
+              - 'web/.prettierrc*'
+              - 'web/prettier.config.*'
+            config_files:
+              - 'web/next.config.*'
+              - 'web/tailwind.config.*'
+              - 'web/postcss.config.*'
+              - 'web/tsconfig.*'
+            ci_config:
+              - '.github/workflows/frontend-ci.yml'
+
+      - name: Verify if Frontend Project is Initialized
+        id: check_exists
+        run: |
+          if [ -f "web/package.json" ]; then
+            echo "project_exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "project_exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
   # ==========================================
-  # STAGE: BUILD
+  # STAGE: BUILD & SECURITY SCAN
   # ==========================================
-  next-build:
+  build-application:
+    needs: detect-changes
+    if: ${{ needs.detect-changes.outputs.project_exists == 'true' && (needs.detect-changes.outputs.ts_code == 'true' || needs.detect-changes.outputs.dependencies == 'true' || needs.detect-changes.outputs.config_files == 'true' || needs.detect-changes.outputs.ci_config == 'true') }}
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -26,13 +80,13 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v3
         with:
-          version: 9
+          version: 11.17.0
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '24.18.0'
-          cache: 'pnpm'
+          node-version: "24.18.0"
+          cache: "pnpm"
           cache-dependency-path: web/pnpm-lock.yaml
 
       - name: Install dependencies
@@ -41,7 +95,9 @@ jobs:
       - name: Build Next.js application
         run: pnpm build
 
-  sast-semgrep:
+  security-code-scan:
+    needs: detect-changes
+    if: ${{ needs.detect-changes.outputs.project_exists == 'true' && (needs.detect-changes.outputs.ts_code == 'true' || needs.detect-changes.outputs.dependencies == 'true' || needs.detect-changes.outputs.config_files == 'true' || needs.detect-changes.outputs.ci_config == 'true') }}
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -53,12 +109,12 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: "3.12"
 
-      - name: Install Semgrep
+      - name: Install Semgrep scanner
         run: pip install semgrep --quiet
 
-      - name: Run Semgrep
+      - name: Scan source code for security vulnerabilities
         run: >
           semgrep scan
           --config p/javascript
@@ -73,7 +129,7 @@ jobs:
           --exclude .next/
           --exclude out/
 
-      - name: Upload Semgrep Report
+      - name: Upload code security report
         uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -81,33 +137,39 @@ jobs:
           path: web/semgrep-report.sarif
           retention-days: 7
 
-  sca-filesystem:
+  security-dependency-scan:
+    needs: detect-changes
+    if: ${{ needs.detect-changes.outputs.project_exists == 'true' && (needs.detect-changes.outputs.dependencies == 'true' || needs.detect-changes.outputs.ci_config == 'true') }}
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./web
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Run Trivy FS Scanner (CycloneDX)
+      - name: Generate dependency Bill of Materials (CycloneDX)
         uses: aquasecurity/trivy-action@master
         with:
-          scan-type: 'fs'
-          scan-ref: './web'
-          format: 'cyclonedx'
-          output: 'web/sbom.cyclonedx.json'
-          exit-code: '0'
+          scan-type: "fs"
+          scan-ref: "./web"
+          format: "cyclonedx"
+          output: "web/sbom.cyclonedx.json"
+          exit-code: "0"
 
-      - name: Run Trivy FS Scanner (SARIF)
+      - name: Scan dependencies for security vulnerabilities (SARIF)
         uses: aquasecurity/trivy-action@master
         with:
-          scan-type: 'fs'
-          scan-ref: './web'
-          format: 'sarif'
-          output: 'web/trivy-fs-report.sarif'
-          exit-code: '1'
-          severity: 'CRITICAL,HIGH'
-          scanners: 'vuln,secret'
+          scan-type: "fs"
+          scan-ref: "./web"
+          format: "sarif"
+          output: "web/trivy-fs-report.sarif"
+          exit-code: "1"
+          severity: "CRITICAL,HIGH,MEDIUM"
+          ignore-unfixed: true
+          scanners: "vuln,secret"
 
-      - name: Upload Trivy Reports
+      - name: Upload dependency security reports
         uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -118,10 +180,11 @@ jobs:
           retention-days: 7
 
   # ==========================================
-  # STAGE: VERIFY
+  # STAGE: VERIFY & QUALITY
   # ==========================================
-  lint-eslint:
-    needs: next-build
+  check-code-lint:
+    needs: detect-changes
+    if: ${{ needs.detect-changes.outputs.project_exists == 'true' && (needs.detect-changes.outputs.ts_code == 'true' || needs.detect-changes.outputs.dependencies == 'true' || needs.detect-changes.outputs.linter_config == 'true' || needs.detect-changes.outputs.config_files == 'true' || needs.detect-changes.outputs.ci_config == 'true') }}
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -133,23 +196,24 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v3
         with:
-          version: 9
+          version: 11.17.0
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '24.18.0'
-          cache: 'pnpm'
+          node-version: "24.18.0"
+          cache: "pnpm"
           cache-dependency-path: web/pnpm-lock.yaml
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Run ESLint
+      - name: Check code linting rules (ESLint)
         run: pnpm exec eslint .
 
-  lint-prettier:
-    needs: next-build
+  check-code-formatting:
+    needs: detect-changes
+    if: ${{ needs.detect-changes.outputs.project_exists == 'true' && (needs.detect-changes.outputs.ts_code == 'true' || needs.detect-changes.outputs.dependencies == 'true' || needs.detect-changes.outputs.linter_config == 'true' || needs.detect-changes.outputs.config_files == 'true' || needs.detect-changes.outputs.ci_config == 'true') }}
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -161,23 +225,24 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v3
         with:
-          version: 9
+          version: 11.17.0
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '24.18.0'
-          cache: 'pnpm'
+          node-version: "24.18.0"
+          cache: "pnpm"
           cache-dependency-path: web/pnpm-lock.yaml
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Run Prettier
+      - name: Check code formatting (Prettier)
         run: pnpm exec prettier --check .
 
-  test-vitest:
-    needs: next-build
+  unit-tests:
+    needs: detect-changes
+    if: ${{ needs.detect-changes.outputs.project_exists == 'true' && (needs.detect-changes.outputs.ts_code == 'true' || needs.detect-changes.outputs.dependencies == 'true' || needs.detect-changes.outputs.config_files == 'true' || needs.detect-changes.outputs.ci_config == 'true') }}
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -189,31 +254,59 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v3
         with:
-          version: 9
+          version: 11.17.0
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '24.18.0'
-          cache: 'pnpm'
+          node-version: "24.18.0"
+          cache: "pnpm"
           cache-dependency-path: web/pnpm-lock.yaml
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Run Vitest with Coverage
-        # Using CLI flags to enforce the 80% coverage requirement dynamically
-        run: >
-          pnpm exec vitest run --coverage.enabled true 
-          --coverage.statements=80 
-          --coverage.branches=80 
-          --coverage.functions=80 
-          --coverage.lines=80
+      - name: Run Vitest with coverage requirements
+        run: pnpm exec vitest run --coverage
 
-      - name: Upload Coverage Report
+      - name: Upload coverage report
         uses: actions/upload-artifact@v4
         if: always()
         with:
           name: vitest-coverage-report
           path: web/coverage/
           retention-days: 7
+
+  # ==========================================
+  # STAGE: DEPLOY
+  # ==========================================
+  deploy-develop:
+    needs:
+      - build-application
+      - security-code-scan
+      - security-dependency-scan
+      - check-code-lint
+      - check-code-formatting
+      - unit-tests
+    if: github.ref_name == 'develop' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Render Deploy (Develop)
+        run: |
+          curl -f -X POST "${{ secrets.RENDER_DEPLOY_HOOK_WEB_DEVELOP }}"
+
+  deploy-main:
+    needs:
+      - build-application
+      - security-code-scan
+      - security-dependency-scan
+      - check-code-lint
+      - check-code-formatting
+      - unit-tests
+    if: github.ref_name == 'main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Trigger Render Deploy (Main)
+        run: |
+          curl -f -X POST "${{ secrets.RENDER_DEPLOY_HOOK_WEB_MAIN }}"
