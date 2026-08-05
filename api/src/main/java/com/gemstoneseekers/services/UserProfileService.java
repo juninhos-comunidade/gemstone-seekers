@@ -29,10 +29,10 @@ public class UserProfileService {
     }
 
 
-    public CandidateProfileResponse getCandidateProfileByUserId(UUID userId) {
+    public CandidateProfileResponse getCandidateProfileByUserEmail(String email) {
 
-        Candidate candidateEntity = candidateRepository.findByUserId(userId)
-            .orElseThrow(() -> new EntityNotFoundException("Candidate for User", userId));
+        Candidate candidateEntity = candidateRepository.findByUserEmail(email)
+            .orElseThrow(() -> new EntityNotFoundException("Candidate for User", email));
 
         AddressResponse address = null;
         if (candidateEntity.getAddress() != null) {

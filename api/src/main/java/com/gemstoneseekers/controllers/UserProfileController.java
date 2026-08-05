@@ -26,10 +26,12 @@ public class UserProfileController {
         this.userService = userService;
     }
 
-    @GetMapping("/{userId}")
-    public ResponseEntity<BaseResponse<CandidateProfileResponse>> getCandidateProfile(@PathVariable UUID userId) {
-
-        CandidateProfileResponse candidateProfile = userProfileService.getCandidateProfileByUserId(userId);
+    @GetMapping("")
+    @PreAuthorize("hasRole('CANDIDATE')")
+    public ResponseEntity<BaseResponse<CandidateProfileResponse>> getCandidateProfile(
+        @AuthenticationPrincipal UserDetails userDetails) {
+        String email = userDetails.getUsername();
+        CandidateProfileResponse candidateProfile = userProfileService.getCandidateProfileByUserEmail(email);
 
         return ResponseEntity.status(HttpStatus.OK)
             .body( new BaseResponse<>(true,"Candidate profile retrieved successfully", candidateProfile,null ));
