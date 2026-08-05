@@ -46,13 +46,16 @@ public class UserMapper {
         }
 
         if (request.name() != null && !request.name().isBlank()) user.setName(request.name());
+
         if(request.documentType() != null && !request.documentType().isBlank()){
+            user.setDocumentType(request.documentType());
             if(request.documentNumber() == null || request.documentNumber().isBlank()){
                 throw new IllegalArgumentException(
                     "Inconsistência: Ao alterar o tipo de documento, você deve fornecer o novo número correspondente."
                 );
             }
-            user.setDocumentType(request.documentType());
+            user.setDocumentNumber(request.documentNumber());
+        }else if(request.documentNumber() != null && !request.documentNumber().isBlank()){
             user.setDocumentNumber(request.documentNumber());
         }
         if (request.password() != null && !request.password().isBlank()) {
