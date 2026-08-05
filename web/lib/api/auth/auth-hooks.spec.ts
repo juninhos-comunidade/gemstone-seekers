@@ -78,7 +78,7 @@ describe("auth api hooks", () => {
       confirmPassword: "abc123",
     });
 
-    expect(mockHttpPost).toHaveBeenCalledWith("/signup", {
+    expect(mockHttpPost).toHaveBeenCalledWith("auth/register", {
       name: "João Pedro",
       email: "joao@example.com",
       password: "abc123",

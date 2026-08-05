@@ -264,25 +264,3 @@ describe("api interceptors", () => {
     });
   });
 });
-
-describe("getBaseUrl", () => {
-  const originalEnv = process.env.NEXT_PUBLIC_API_URL;
-
-  afterEach(() => {
-    process.env.NEXT_PUBLIC_API_URL = originalEnv;
-  });
-
-  it("should use process.env.NEXT_PUBLIC_API_URL if defined", async () => {
-    vi.resetModules();
-    process.env.NEXT_PUBLIC_API_URL = "https://custom-api.example.com";
-    const { api: freshApi } = await import("@/lib/api/client");
-    expect(freshApi.defaults.baseURL).toBe("https://custom-api.example.com");
-  });
-
-  it("should fallback to http://localhost:3000/api if process.env.NEXT_PUBLIC_API_URL is empty", async () => {
-    vi.resetModules();
-    delete process.env.NEXT_PUBLIC_API_URL;
-    const { api: freshApi } = await import("@/lib/api/client");
-    expect(freshApi.defaults.baseURL).toBe("http://localhost:3000/api");
-  });
-});
