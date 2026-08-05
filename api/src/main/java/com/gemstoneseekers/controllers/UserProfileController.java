@@ -39,12 +39,12 @@ public class UserProfileController {
 
     @PatchMapping("/user")
     @PreAuthorize("hasRole('CANDIDATE')")
-    public ResponseEntity<BaseResponse<UserResponse>> updateCandidateProfile(
+    public ResponseEntity<BaseResponse<CandidateProfileResponse>> updateCandidateProfile(
         @AuthenticationPrincipal UserDetails userDetails,
         @RequestBody UserRequest request)
     {
         String email = userDetails.getUsername();
-        UserResponse updatedUser = userService.updateUserByEmail(email,request);
+        CandidateProfileResponse updatedUser = userProfileService.updatePersonalInfoByEmail(email,request);
 
         return ResponseEntity.status(HttpStatus.OK)
             .body( new BaseResponse<>(true,"User info updated successfully", updatedUser,null));

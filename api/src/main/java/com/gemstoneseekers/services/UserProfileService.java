@@ -1,18 +1,20 @@
 package com.gemstoneseekers.services;
 
+import com.gemstoneseekers.dtos.request.UserRequest;
 import com.gemstoneseekers.dtos.response.AddressResponse;
 import com.gemstoneseekers.dtos.response.CandidateProfileResponse;
 import com.gemstoneseekers.dtos.response.CandidateResponse;
-import com.gemstoneseekers.dtos.response.UserResponse;
 import com.gemstoneseekers.exceptions.EntityNotFoundException;
 import com.gemstoneseekers.mappers.CandidateMapper;
 import com.gemstoneseekers.mappers.CandidateProfileMapper;
+import com.gemstoneseekers.mappers.UserMapper;
 import com.gemstoneseekers.models.Candidate;
 import com.gemstoneseekers.models.User;
 import com.gemstoneseekers.repositories.CandidateRepository;
+import com.gemstoneseekers.repositories.UserRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
-import java.util.UUID;
 
 @Service
 public class UserProfileService {
@@ -20,12 +22,18 @@ public class UserProfileService {
     private final CandidateMapper candidateMapper;
     private final CandidateProfileMapper candidateProfileMapper;
     private final CandidateRepository candidateRepository;
+    private final UserRepository userRepository;
+    private final UserMapper userMapper;
 
-    public UserProfileService(AddressService addressService, CandidateMapper candidateMapper, CandidateProfileMapper candidateProfileMapper, CandidateRepository candidateRepository) {
+
+    public UserProfileService(AddressService addressService, CandidateMapper candidateMapper, CandidateProfileMapper candidateProfileMapper, CandidateRepository candidateRepository, UserRepository userRepository, UserMapper userMapper) {
         this.addressService = addressService;
         this.candidateMapper = candidateMapper;
         this.candidateProfileMapper = candidateProfileMapper;
         this.candidateRepository = candidateRepository;
+        this.userRepository = userRepository;
+        this.userMapper = userMapper;
+
     }
 
 
@@ -43,6 +51,23 @@ public class UserProfileService {
 
         return candidateProfileMapper.toProfileResponse(candidate, address);
     }
+
+    @Transactional
+    public CandidateProfileResponse updatePersonalInfoByEmail(String email, UserRequest userRequest){
+
+        User user = userRepository.findByEmail(email)
+            .orElseThrow(() -> new EntityNotFoundException("User", email));
+        Candidate candidate = candidateRepository.findByUserId(user.getId())
+            .orElseThrow(() -> new EntityNotFoundException("Candidate for User ID", user.getId()));
+
+        userMapper.updateEntityFromRequest(userRequest, user);
+        candidateMapper.updateEntityFromRequest(userRequest, candidate);
+
+        userRepository.save(user);
+        candidateRepository.save(candidate);
+        return getCandidateProfileByUserEmail(email);
+    }
+
 
 
 }

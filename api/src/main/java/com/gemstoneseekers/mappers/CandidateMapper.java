@@ -1,5 +1,6 @@
 package com.gemstoneseekers.mappers;
 
+import com.gemstoneseekers.dtos.request.UserRequest;
 import com.gemstoneseekers.dtos.response.CandidateResponse;
 import com.gemstoneseekers.dtos.response.UserResponse;
 import com.gemstoneseekers.models.Candidate;
@@ -42,5 +43,17 @@ public class CandidateMapper {
             projectMapper.toResponseList(candidate.getProjects()),
             candidateLanguageMapper.toResponseList(candidate.getLanguages())
         );
+    }
+
+    public void updateEntityFromRequest(UserRequest request, Candidate candidate) {
+
+        if (request == null || candidate == null) return;
+
+        if (request.phone() != null && !request.phone().isBlank()) {
+            candidate.setPhone(request.phone());
+        }
+        if (request.summary() != null && !request.summary().isBlank()) {
+            candidate.setSummary(request.summary());
+        }
     }
 }
