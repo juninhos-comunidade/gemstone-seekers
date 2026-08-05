@@ -9,7 +9,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class CandidateMapper {
 
-    // 1. Injete todos os mappers necessários via construtor (Gerenciados pelo Spring)
     private final UserMapper userMapper;
     private final CandidateLinkMapper candidateLinkMapper;
     private final ExperienceMapper experienceMapper;
