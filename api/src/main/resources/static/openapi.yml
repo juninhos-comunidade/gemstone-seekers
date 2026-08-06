@@ -138,6 +138,24 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/BaseResponseVoid"
+  /api/v1/profile/links:
+    post:
+      tags:
+      - user-profile-controller
+      operationId: addCandidateLink
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LinkItemRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/BaseResponseCandidateProfileResponse"
   /api/v1/jobs:
     get:
       tags:
@@ -531,6 +549,25 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/BaseResponseListCityResponse"
+  /api/v1/profile/links/{linkId}:
+    delete:
+      tags:
+      - user-profile-controller
+      operationId: deleteCandidateLink
+      parameters:
+      - name: linkId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/BaseResponseCandidateProfileResponse"
   /api/v1/jobs/{jobId}/technologies/{technologyId}:
     delete:
       tags:
@@ -676,167 +713,12 @@ components:
           type: string
         cnpj:
           type: string
-    JobTechnologyRequest:
-      type: object
-      properties:
-        technologyId:
-          type: integer
-          format: int32
-        isMandatory:
-          type: boolean
-      required:
-      - technologyId
-    BaseResponseJobTechnologyResponse:
-      type: object
-      properties:
-        success:
-          type: boolean
-        message:
-          type: string
-        result:
-          $ref: "#/components/schemas/JobTechnologyResponse"
-        error:
-          $ref: "#/components/schemas/ErrorResponse"
-    JobTechnologyResponse:
-      type: object
-      properties:
-        technologyId:
-          type: integer
-          format: int32
-        technologyName:
-          type: string
-        category:
-          type: string
-        isMandatory:
-          type: boolean
-    RecruiterRequest:
-      type: object
-      properties:
-        userId:
-          type: string
-          format: uuid
-        department:
-          type: string
-      required:
-      - userId
-    BaseResponseRecruiterResponse:
-      type: object
-      properties:
-        success:
-          type: boolean
-        message:
-          type: string
-        result:
-          $ref: "#/components/schemas/RecruiterResponse"
-        error:
-          $ref: "#/components/schemas/ErrorResponse"
-    RecruiterResponse:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-        userId:
-          type: string
-          format: uuid
-        companyId:
-          type: string
-          format: uuid
-        department:
-          type: string
-    RegisterRequest:
+    LinkItemRequest:
       type: object
       properties:
         name:
           type: string
-          minLength: 1
-        email:
-          type: string
-          format: email
-          minLength: 1
-        password:
-          type: string
-          minLength: 1
-      required:
-      - email
-      - name
-      - password
-    BaseResponseRegisterResponse:
-      type: object
-      properties:
-        success:
-          type: boolean
-        message:
-          type: string
-        result:
-          $ref: "#/components/schemas/RegisterResponse"
-        error:
-          $ref: "#/components/schemas/ErrorResponse"
-    RegisterResponse:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-        name:
-          type: string
-        email:
-          type: string
-    RefreshTokenRequest:
-      type: object
-      properties:
-        refreshToken:
-          type: string
-          minLength: 1
-      required:
-      - refreshToken
-    BaseResponseLoginResponse:
-      type: object
-      properties:
-        success:
-          type: boolean
-        message:
-          type: string
-        result:
-          $ref: "#/components/schemas/LoginResponse"
-        error:
-          $ref: "#/components/schemas/ErrorResponse"
-    LoginResponse:
-      type: object
-      properties:
-        accessToken:
-          type: string
-        refreshToken:
-          type: string
-        registrationCompleted:
-          type: boolean
-    LoginRequest:
-      type: object
-      properties:
-        email:
-          type: string
-          format: email
-          minLength: 1
-        password:
-          type: string
-          minLength: 1
-      required:
-      - email
-      - password
-    UserRequest:
-      type: object
-      properties:
-        name:
-          type: string
-        password:
-          type: string
-        documentType:
-          type: string
-        documentNumber:
-          type: string
-        phone:
-          type: string
-        summary:
+        url:
           type: string
     AddressResponse:
       type: object
@@ -1059,6 +941,168 @@ components:
         documentType:
           type: string
         documentNumber:
+          type: string
+    JobTechnologyRequest:
+      type: object
+      properties:
+        technologyId:
+          type: integer
+          format: int32
+        isMandatory:
+          type: boolean
+      required:
+      - technologyId
+    BaseResponseJobTechnologyResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        result:
+          $ref: "#/components/schemas/JobTechnologyResponse"
+        error:
+          $ref: "#/components/schemas/ErrorResponse"
+    JobTechnologyResponse:
+      type: object
+      properties:
+        technologyId:
+          type: integer
+          format: int32
+        technologyName:
+          type: string
+        category:
+          type: string
+        isMandatory:
+          type: boolean
+    RecruiterRequest:
+      type: object
+      properties:
+        userId:
+          type: string
+          format: uuid
+        department:
+          type: string
+      required:
+      - userId
+    BaseResponseRecruiterResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        result:
+          $ref: "#/components/schemas/RecruiterResponse"
+        error:
+          $ref: "#/components/schemas/ErrorResponse"
+    RecruiterResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        companyId:
+          type: string
+          format: uuid
+        department:
+          type: string
+    RegisterRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+        email:
+          type: string
+          format: email
+          minLength: 1
+        password:
+          type: string
+          minLength: 1
+      required:
+      - email
+      - name
+      - password
+    BaseResponseRegisterResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        result:
+          $ref: "#/components/schemas/RegisterResponse"
+        error:
+          $ref: "#/components/schemas/ErrorResponse"
+    RegisterResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        email:
+          type: string
+    RefreshTokenRequest:
+      type: object
+      properties:
+        refreshToken:
+          type: string
+          minLength: 1
+      required:
+      - refreshToken
+    BaseResponseLoginResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        result:
+          $ref: "#/components/schemas/LoginResponse"
+        error:
+          $ref: "#/components/schemas/ErrorResponse"
+    LoginResponse:
+      type: object
+      properties:
+        accessToken:
+          type: string
+        refreshToken:
+          type: string
+        registrationCompleted:
+          type: boolean
+    LoginRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          minLength: 1
+        password:
+          type: string
+          minLength: 1
+      required:
+      - email
+      - password
+    UserRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        password:
+          type: string
+        documentType:
+          type: string
+        documentNumber:
+          type: string
+        phone:
+          type: string
+        summary:
           type: string
     AddressRequest:
       type: object

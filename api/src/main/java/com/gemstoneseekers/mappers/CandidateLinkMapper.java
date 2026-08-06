@@ -1,6 +1,8 @@
 package com.gemstoneseekers.mappers;
 
+import com.gemstoneseekers.dtos.request.LinkItemRequest;
 import com.gemstoneseekers.dtos.response.CandidateLinkResponse;
+import com.gemstoneseekers.models.Candidate;
 import com.gemstoneseekers.models.CandidateLink;
 import org.springframework.stereotype.Component;
 
@@ -26,4 +28,17 @@ public class CandidateLinkMapper {
             .map(this::toResponse)
             .collect(Collectors.toList());
     }
+
+    public CandidateLink toCandidateLink(LinkItemRequest request, Candidate candidate) {
+        CandidateLink newLink = new CandidateLink();
+        if (request == null || candidate == null) {
+            return null;
+        }
+
+        newLink.setCandidate(candidate);
+        newLink.setName(request.name());
+        newLink.setUrl(request.url());
+
+        return  newLink;
+   }
 }
