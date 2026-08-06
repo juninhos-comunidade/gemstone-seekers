@@ -353,7 +353,25 @@ paths:
           content:
             '*/*':
               schema:
-                $ref: "#/components/schemas/BaseResponseUserResponse"
+                $ref: "#/components/schemas/BaseResponseCandidateProfileResponse"
+  /api/v1/profile/address:
+    patch:
+      tags:
+      - user-profile-controller
+      operationId: updateCandidateProfile_1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AddressRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/BaseResponseCandidateProfileResponse"
   /api/v1/auth/complete-registration:
     patch:
       tags:
@@ -816,160 +834,10 @@ components:
           type: string
         documentNumber:
           type: string
-    BaseResponseUserResponse:
-      type: object
-      properties:
-        success:
-          type: boolean
-        message:
-          type: string
-        result:
-          $ref: "#/components/schemas/UserResponse"
-        error:
-          $ref: "#/components/schemas/ErrorResponse"
-    UserResponse:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-        name:
-          type: string
-        email:
-          type: string
-        role:
-          type: string
-          enum:
-          - CANDIDATE
-          - RECRUITER
-        documentType:
-          type: string
-        documentNumber:
-          type: string
-    CompleteRegistrationRequest:
-      type: object
-      properties:
-        role:
-          type: string
-          enum:
-          - CANDIDATE
-          - RECRUITER
-        documentType:
-          type: string
-        documentNumber:
-          type: string
         phone:
           type: string
         summary:
           type: string
-        companyId:
-          type: string
-          format: uuid
-        department:
-          type: string
-      required:
-      - role
-    BaseResponseCompleteRegistrationResponse:
-      type: object
-      properties:
-        success:
-          type: boolean
-        message:
-          type: string
-        result:
-          $ref: "#/components/schemas/CompleteRegistrationResponse"
-        error:
-          $ref: "#/components/schemas/ErrorResponse"
-    CompleteRegistrationResponse:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-        name:
-          type: string
-        email:
-          type: string
-        role:
-          type: string
-          enum:
-          - CANDIDATE
-          - RECRUITER
-        documentType:
-          type: string
-        documentNumber:
-          type: string
-    BaseResponseListTechnologyResponse:
-      type: object
-      properties:
-        success:
-          type: boolean
-        message:
-          type: string
-        result:
-          type: array
-          items:
-            $ref: "#/components/schemas/TechnologyResponse"
-        error:
-          $ref: "#/components/schemas/ErrorResponse"
-    TechnologyResponse:
-      type: object
-      properties:
-        id:
-          type: integer
-          format: int32
-        name:
-          type: string
-        category:
-          type: string
-    BaseResponseListStateResponse:
-      type: object
-      properties:
-        success:
-          type: boolean
-        message:
-          type: string
-        result:
-          type: array
-          items:
-            $ref: "#/components/schemas/StateResponse"
-        error:
-          $ref: "#/components/schemas/ErrorResponse"
-    StateResponse:
-      type: object
-      properties:
-        id:
-          type: integer
-          format: int32
-        name:
-          type: string
-        countryId:
-          type: integer
-          format: int32
-    BaseResponseListCityResponse:
-      type: object
-      properties:
-        success:
-          type: boolean
-        message:
-          type: string
-        result:
-          type: array
-          items:
-            $ref: "#/components/schemas/CityResponse"
-        error:
-          $ref: "#/components/schemas/ErrorResponse"
-    CityResponse:
-      type: object
-      properties:
-        id:
-          type: integer
-          format: int32
-        name:
-          type: string
-        stateId:
-          type: integer
-          format: int32
     AddressResponse:
       type: object
       properties:
@@ -1086,6 +954,17 @@ components:
           format: date
         credentialUrl:
           type: string
+    CityResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+        name:
+          type: string
+        stateId:
+          type: integer
+          format: int32
     EducationResponse:
       type: object
       properties:
@@ -1152,6 +1031,162 @@ components:
           items:
             $ref: "#/components/schemas/TechnologyResponse"
           uniqueItems: true
+    TechnologyResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+        name:
+          type: string
+        category:
+          type: string
+    UserResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        email:
+          type: string
+        role:
+          type: string
+          enum:
+          - CANDIDATE
+          - RECRUITER
+        documentType:
+          type: string
+        documentNumber:
+          type: string
+    AddressRequest:
+      type: object
+      properties:
+        zipCode:
+          type: string
+        street:
+          type: string
+        number:
+          type: string
+        neighborhood:
+          type: string
+        complement:
+          type: string
+        location:
+          $ref: "#/components/schemas/LocationRequest"
+    LocationRequest:
+      type: object
+      properties:
+        city:
+          type: string
+        state:
+          type: string
+        country:
+          type: string
+    CompleteRegistrationRequest:
+      type: object
+      properties:
+        role:
+          type: string
+          enum:
+          - CANDIDATE
+          - RECRUITER
+        documentType:
+          type: string
+        documentNumber:
+          type: string
+        phone:
+          type: string
+        summary:
+          type: string
+        companyId:
+          type: string
+          format: uuid
+        department:
+          type: string
+      required:
+      - role
+    BaseResponseCompleteRegistrationResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        result:
+          $ref: "#/components/schemas/CompleteRegistrationResponse"
+        error:
+          $ref: "#/components/schemas/ErrorResponse"
+    CompleteRegistrationResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        email:
+          type: string
+        role:
+          type: string
+          enum:
+          - CANDIDATE
+          - RECRUITER
+        documentType:
+          type: string
+        documentNumber:
+          type: string
+    BaseResponseListTechnologyResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        result:
+          type: array
+          items:
+            $ref: "#/components/schemas/TechnologyResponse"
+        error:
+          $ref: "#/components/schemas/ErrorResponse"
+    BaseResponseListStateResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        result:
+          type: array
+          items:
+            $ref: "#/components/schemas/StateResponse"
+        error:
+          $ref: "#/components/schemas/ErrorResponse"
+    StateResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+        name:
+          type: string
+        countryId:
+          type: integer
+          format: int32
+    BaseResponseListCityResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        result:
+          type: array
+          items:
+            $ref: "#/components/schemas/CityResponse"
+        error:
+          $ref: "#/components/schemas/ErrorResponse"
     BaseResponseListTechnologyDemandResponse:
       type: object
       properties:

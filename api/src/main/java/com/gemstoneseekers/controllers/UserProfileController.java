@@ -1,5 +1,6 @@
 package com.gemstoneseekers.controllers;
 
+import com.gemstoneseekers.dtos.request.AddressRequest;
 import com.gemstoneseekers.dtos.request.UserRequest;
 import com.gemstoneseekers.dtos.response.BaseResponse;
 import com.gemstoneseekers.dtos.response.CandidateProfileResponse;
@@ -49,7 +50,17 @@ public class UserProfileController {
         return ResponseEntity.status(HttpStatus.OK)
             .body( new BaseResponse<>(true,"User info updated successfully", updatedUser,null));
     }
+    @PatchMapping("/address")
+    @PreAuthorize("hasRole('CANDIDATE')")
+    public ResponseEntity<BaseResponse<CandidateProfileResponse>> updateCandidateProfile(
+        @AuthenticationPrincipal UserDetails userDetails,
+        @RequestBody AddressRequest request)
+    {
+        String email = userDetails.getUsername();
+        CandidateProfileResponse updatedUser = userProfileService.updateAddresInfoByEmail(email,request);
 
-
+        return ResponseEntity.status(HttpStatus.OK)
+            .body( new BaseResponse<>(true,"User info updated successfully", updatedUser,null));
+    }
 
 }
