@@ -9,6 +9,7 @@ const mockBar = vi.fn();
 const mockChartTooltip = vi.fn();
 
 let mediaQueryListener: ((_event: { matches: boolean }) => void) | null = null;
+let mediaQueryMatches = false;
 
 vi.mock("@/components/ui/chart", () => ({
   ChartContainer: ({ children }: { children: React.ReactNode }) => (
@@ -47,11 +48,14 @@ describe("TechnologyRequirementRateChart", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mediaQueryListener = null;
+    mediaQueryMatches = false;
 
     Object.defineProperty(window, "matchMedia", {
       writable: true,
       value: vi.fn().mockImplementation(() => ({
-        matches: false,
+        get matches() {
+          return mediaQueryMatches;
+        },
         media: "(max-width: 640px)",
         onchange: null,
         addEventListener: vi.fn(
@@ -122,6 +126,7 @@ describe("TechnologyRequirementRateChart", () => {
     );
 
     act(() => {
+      mediaQueryMatches = true;
       mediaQueryListener?.({ matches: true });
     });
 
