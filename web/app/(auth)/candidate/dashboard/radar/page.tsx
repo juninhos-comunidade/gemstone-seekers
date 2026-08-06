@@ -10,11 +10,11 @@ import {
 } from "lucide-react";
 import { Spinner } from "@/components/ui/spinner";
 import { useJobs, useTechnologyDemand } from "@/lib/api/radar";
-import { RADAR_COLORS } from "./components/chart-config";
-import { EmptyState } from "./components/EmptyState";
-import { MetricCard } from "./components/MetricCard";
-import { TopTechnologiesChart } from "./components/TopTechnologiesChart";
-import { TechnologyRequirementRateChart } from "./components/TechnologyRequirementChart";
+import { RADAR_COLORS } from "@/components/dashboard/radar/chart-config";
+import { EmptyState } from "@/components/dashboard/radar/EmptyState";
+import { MetricCard } from "@/components/dashboard/radar/MetricCard";
+import { TopTechnologiesChart } from "@/components/dashboard/radar/TopTechnologiesChart";
+import { TechnologyRequirementRateChart } from "@/components/dashboard/radar/TechnologyRequirementChart";
 
 export default function RadarPage() {
   const {
