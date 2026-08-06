@@ -1,61 +1,61 @@
-#!/bin/sh
+    #!/bin/sh
 
-# Identifies changed files by directory
-API_CHANGED=$(git diff --cached --name-only --diff-filter=ACM | grep "^api/" || true)
-WEB_CHANGED=$(git diff --cached --name-only --diff-filter=ACM | grep "^web/" || true)
+    # Identifies changed files by directory
+    API_CHANGED=$(git diff --cached --name-only --diff-filter=ACM | grep "^api/" || true)
+    WEB_CHANGED=$(git diff --cached --name-only --diff-filter=ACM | grep "^web/" || true)
 
-# ==========================================
-# BACK-END CHECKS (api/)
-# ==========================================
-if [ -n "$API_CHANGED" ]; then
-    echo "Running back-end pre-commit checks..."
+    # ==========================================
+    # BACK-END CHECKS (api/)
+    # ==========================================
+    if [ -n "$API_CHANGED" ]; then
+        echo "Running back-end pre-commit checks..."
 
-    API_FILES=$(echo "$API_CHANGED" | sed 's|^api/||' | tr '\n' ',' | sed 's/,$//')
+        API_FILES=$(echo "$API_CHANGED" | sed 's|^api/||' | tr '\n' ',' | sed 's/,$//')
 
-    cd api || exit 1
+        cd api || exit 1
 
-    # Checks if any Controller was modified to generate OpenAPI
-    CONTROLLER_FILES=$(echo "$API_CHANGED" | grep -E "Controller\.java$" || true)
+        # Checks if any Controller was modified to generate OpenAPI
+        CONTROLLER_FILES=$(echo "$API_CHANGED" | grep -E "Controller\.java$" || true)
 
-    if [ -n "$CONTROLLER_FILES" ]; then
-        echo "Generating OpenAPI documentation..."
-        ./mvnw pre-integration-test springdoc-openapi:generate post-integration-test -Popenapi
-        git add "src/main/resources/static/openapi.yml"
-    fi
+        if [ -n "$CONTROLLER_FILES" ]; then
+            echo "Generating OpenAPI documentation..."
+            ./mvnw pre-integration-test springdoc-openapi:generate post-integration-test -Popenapi
+            git add "src/main/resources/static/openapi.yml"
+        fi
 
-    # Runs Spotless formatting check ONLY on staged files
-    if ! ./mvnw spotless:check -q -Dskip.git.hooks=true -DspotlessFiles="$API_FILES"; then
-        echo "ERROR: API Spotless check failed."
-        exit 1
-    fi
-
-    cd ..
-fi
-
-# ==========================================
-# FRONT-END CHECKS (web/)
-# ==========================================
-if [ -n "$WEB_CHANGED" ]; then
-    echo "Running front-end pre-commit checks..."
-
-    WEB_FILES=$(echo "$WEB_CHANGED" | sed 's|^web/||' | tr '\n' ' ')
-    ESLINT_FILES=$(echo "$WEB_CHANGED" | sed 's|^web/||' | grep -E '\.(js|jsx|ts|tsx)$' | tr '\n' ' ' || true)
-
-    cd web || exit 1
-
-    if ! pnpm exec prettier --check --ignore-unknown $WEB_FILES; then
-        echo "ERROR: Web Prettier check failed."
-        exit 1
-    fi
-
-    if [ -n "$ESLINT_FILES" ]; then
-        if ! pnpm exec eslint $ESLINT_FILES --max-warnings 0; then
-            echo "ERROR: Web ESLint check failed."
+        # Runs Spotless formatting check ONLY on staged files
+        if ! ./mvnw spotless:check -q -Dskip.git.hooks=true -DspotlessFiles="$API_FILES"; then
+            echo "ERROR: API Spotless check failed."
             exit 1
         fi
+
+        cd ..
     fi
 
-    cd ..
-fi
+    # ==========================================
+    # FRONT-END CHECKS (web/)
+    # ==========================================
+    if [ -n "$WEB_CHANGED" ]; then
+        echo "Running front-end pre-commit checks..."
 
-exit 0
+        WEB_FILES=$(echo "$WEB_CHANGED" | sed 's|^web/||' | tr '\n' ' ')
+        ESLINT_FILES=$(echo "$WEB_CHANGED" | sed 's|^web/||' | grep -E '\.(js|jsx|ts|tsx)$' | tr '\n' ' ' || true)
+
+        cd web || exit 1
+
+        if ! pnpm exec prettier --check --ignore-unknown $WEB_FILES; then
+            echo "ERROR: Web Prettier check failed."
+            exit 1
+        fi
+
+        if [ -n "$ESLINT_FILES" ]; then
+            if ! pnpm exec eslint $ESLINT_FILES --max-warnings 0; then
+                echo "ERROR: Web ESLint check failed."
+                exit 1
+            fi
+        fi
+
+        cd ..
+    fi
+
+    exit 0
