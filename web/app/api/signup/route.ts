@@ -2,7 +2,7 @@ export async function POST(req: Request) {
   const body = await req.json();
 
   const upstreamResponse = await fetch(
-    "https://gemstone-seekers-1.onrender.com/api/v1/auth/register",
+    "https://gemstone-seekers-72pb.onrender.com/api/v1/auth/register",
     {
       method: "POST",
       headers: {

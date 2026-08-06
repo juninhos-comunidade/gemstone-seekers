@@ -1,8 +1,8 @@
 "use client";
 
+import { useEffect } from "react";
 import Link from "next/link";
-// 1. Import Controller from react-hook-form
-import { useForm, Controller } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,14 +15,16 @@ import {
 } from "@/lib/schemas/candidateRoleSchema";
 import { SelectLevel } from "@/components/SelectLevel/SelectLevel";
 import { PhoneInput } from "@/components/reui/phone-input";
+import { useRouter } from "next/navigation";
 
-export default function Page() {
+export default function CandidateRegistrationPage() {
+  const router = useRouter();
   const { mutateAsync: updateCandidate, isPending } = useUpdateCandidate();
 
   const {
     register,
     handleSubmit,
-    control, // 2. Extract control from useForm
+    control,
     formState: { errors, isSubmitting },
   } = useForm<CandidateRoleFormData>({
     resolver: zodResolver(candidateRoleSchema),
@@ -36,6 +38,14 @@ export default function Page() {
     },
   });
 
+  useEffect(() => {
+    const selectedRole = localStorage.getItem("signup-role");
+
+    if (selectedRole === "recruiter") {
+      router.replace("/signup/role/recruiter");
+    }
+  }, [router]);
+
   const isLoading = isSubmitting || isPending;
 
   const onSubmit = async (data: CandidateRoleFormData) => {
@@ -43,62 +53,95 @@ export default function Page() {
   };
 
   return (
-    <main className="bg-muted/30 flex min-h-screen items-center justify-center">
-      <div className="bg-background w-full max-w-md rounded-xl border p-8 shadow-sm">
-        <h1 className="mb-2 text-center text-2xl font-bold">
-          Informações do Candidato
-        </h1>
-        <p className="text-muted-foreground mb-6 text-center text-sm">
-          Complete seu perfil para finalizar o cadastro
-        </p>
+    <main className="from-muted/40 via-background to-muted/20 flex min-h-screen items-center justify-center bg-gradient-to-br px-4 py-12">
+      <div className="bg-background/95 w-full max-w-2xl rounded-2xl border p-8 shadow-lg shadow-black/5 backdrop-blur-sm sm:p-10">
+        <div className="mb-8 text-center">
+          <h1 className="mb-2 text-3xl font-bold tracking-tight">
+            Complete seu cadastro de candidato
+          </h1>
+          <p className="text-muted-foreground text-sm">
+            Preencha seus dados profissionais para concluir o acesso à
+            plataforma.
+          </p>
+        </div>
 
-        <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
-          <div className="space-y-2">
-            <Label htmlFor="phone">Telefone</Label>
-            {/* 3. Wrap PhoneInput with Controller */}
-            <Controller
-              name="phone"
-              control={control}
-              render={({ field }) => (
-                <PhoneInput
-                  {...field}
-                  disabled={isLoading}
-                  aria-invalid={!!errors.phone}
-                />
+        <form className="grid gap-5" onSubmit={handleSubmit(onSubmit)}>
+          <div className="grid gap-5 md:grid-cols-2">
+            <div className="space-y-1.5">
+              <Label htmlFor="phone">Telefone</Label>
+              <Controller
+                name="phone"
+                control={control}
+                render={({ field }) => (
+                  <PhoneInput
+                    {...field}
+                    disabled={isLoading}
+                    aria-invalid={!!errors.phone}
+                  />
+                )}
+              />
+              {errors.phone?.message && (
+                <span className="block text-xs font-medium text-red-500">
+                  {errors.phone.message}
+                </span>
               )}
-            />
-            <span className="text-sm text-red-500">
-              {errors.phone?.message}
-            </span>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="location">Localização</Label>
+              <Input
+                id="location"
+                type="text"
+                placeholder="Cidade, Estado"
+                disabled={isLoading}
+                aria-invalid={!!errors.location}
+                {...register("location")}
+              />
+              {errors.location?.message && (
+                <span className="block text-xs font-medium text-red-500">
+                  {errors.location.message}
+                </span>
+              )}
+            </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="area">Área de interesse</Label>
-            <Input
-              id="area"
-              type="text"
-              placeholder="Ex: Tecnologia, Marketing, Vendas..."
-              disabled={isLoading}
-              aria-invalid={!!errors.area}
-              {...register("area")}
-            />
-            <span className="text-sm text-red-500">{errors.area?.message}</span>
+          <div className="grid gap-5 md:grid-cols-2">
+            <div className="space-y-1.5">
+              <Label htmlFor="area">Área de interesse</Label>
+              <Input
+                id="area"
+                type="text"
+                placeholder="Ex: Tecnologia, Marketing, Dados"
+                disabled={isLoading}
+                aria-invalid={!!errors.area}
+                {...register("area")}
+              />
+              {errors.area?.message && (
+                <span className="block text-xs font-medium text-red-500">
+                  {errors.area.message}
+                </span>
+              )}
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="role">Cargo desejado</Label>
+              <Input
+                id="role"
+                type="text"
+                placeholder="Ex: Desenvolvedor Front-end"
+                disabled={isLoading}
+                aria-invalid={!!errors.role}
+                {...register("role")}
+              />
+              {errors.role?.message && (
+                <span className="block text-xs font-medium text-red-500">
+                  {errors.role.message}
+                </span>
+              )}
+            </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="role">Cargo desejado</Label>
-            <Input
-              id="role"
-              type="text"
-              placeholder="Ex: Desenvolvedor Front-end"
-              disabled={isLoading}
-              aria-invalid={!!errors.role}
-              {...register("role")}
-            />
-            <span className="text-sm text-red-500">{errors.role?.message}</span>
-          </div>
-
-          <div className="space-y-2">
+          <div className="space-y-1.5">
             <Label htmlFor="experience">Nível de experiência</Label>
             <Controller
               name="experience"
@@ -111,50 +154,39 @@ export default function Page() {
                 />
               )}
             />
-            <span className="text-sm text-red-500">
-              {errors.experience?.message}
-            </span>
+            {errors.experience?.message && (
+              <span className="block text-xs font-medium text-red-500">
+                {errors.experience.message}
+              </span>
+            )}
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="location">Localização</Label>
-            <Input
-              id="location"
-              type="text"
-              placeholder="Cidade, Estado"
-              disabled={isLoading}
-              aria-invalid={!!errors.location}
-              {...register("location")}
-            />
-            <span className="text-sm text-red-500">
-              {errors.location?.message}
-            </span>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="resume">Currículo (link)</Label>
+          <div className="space-y-1.5">
+            <Label htmlFor="resume">Currículo ou LinkedIn</Label>
             <Input
               id="resume"
               type="url"
-              placeholder="Link do LinkedIn ou currículo"
+              placeholder="https://linkedin.com/in/seu-perfil"
               disabled={isLoading}
               aria-invalid={!!errors.resume}
               {...register("resume")}
             />
-            <span className="text-sm text-red-500">
-              {errors.resume?.message}
-            </span>
+            {errors.resume?.message && (
+              <span className="block text-xs font-medium text-red-500">
+                {errors.resume.message}
+              </span>
+            )}
           </div>
 
           <Button
             type="submit"
             disabled={isLoading}
-            className="flex w-full items-center justify-center gap-2"
+            className="mt-2 flex w-full items-center justify-center gap-2 py-5 text-sm font-semibold shadow-sm transition-all hover:shadow-md active:scale-[0.98]"
           >
             {isLoading ? (
               <>
                 <Spinner className="h-4 w-4" />
-                <span>Concluindo...</span>
+                <span>Salvando...</span>
               </>
             ) : (
               "Concluir cadastro"
@@ -162,10 +194,13 @@ export default function Page() {
           </Button>
         </form>
 
-        <p className="text-muted-foreground mt-6 text-center text-sm">
-          Prefere fazer isso depois?{" "}
-          <Link href="/dashboard" className="text-primary hover:underline">
-            Pular por enquanto
+        <p className="text-muted-foreground mt-8 text-center text-sm">
+          Escolheu o perfil errado?{" "}
+          <Link
+            href="/signup/role"
+            className="text-primary font-medium underline-offset-4 hover:underline"
+          >
+            Voltar e alterar perfil
           </Link>
         </p>
       </div>

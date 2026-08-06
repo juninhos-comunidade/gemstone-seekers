@@ -3,16 +3,24 @@ import { ApiError, type ApiErrorResponse } from "./errors";
 import { getAuthToken, removeAuthToken } from "./auth";
 
 const getBaseUrl = (): string => {
-  if (process.env.NEXT_PUBLIC_API_URL) {
-    return process.env.NEXT_PUBLIC_API_URL;
+  if (typeof window !== "undefined") {
+    return "/api";
   }
+
+  if (process.env.API_INTERNAL_URL) {
+    return process.env.API_INTERNAL_URL;
+  }
+
+  if (process.env.NEXT_PUBLIC_APP_URL) {
+    return `${process.env.NEXT_PUBLIC_APP_URL}/api`;
+  }
+
   return "http://localhost:3000/api";
 };
 
 export const api = axios.create({
   baseURL: getBaseUrl(),
   withCredentials: true,
-  adapter: "fetch",
   timeout: 10000,
 });
 

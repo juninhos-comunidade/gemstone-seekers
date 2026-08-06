@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import { ApiError } from "@/lib/api/errors";
 
 const mockUseRouter = vi.fn();
 const mockUseMutation = vi.fn();
@@ -6,6 +7,7 @@ const mockToastSuccess = vi.fn();
 const mockToastError = vi.fn();
 const mockSetAuthToken = vi.fn();
 const mockHttpPost = vi.fn();
+const mockHttpPatch = vi.fn();
 
 vi.mock("next/navigation", () => ({
   useRouter: () => mockUseRouter(),
@@ -29,6 +31,7 @@ vi.mock("@/lib/api/auth", () => ({
 vi.mock("@/lib/api/client", () => ({
   httpClient: {
     post: (...args: unknown[]) => mockHttpPost(...args),
+    patch: (...args: unknown[]) => mockHttpPatch(...args),
   },
 }));
 
@@ -57,7 +60,11 @@ describe("auth api hooks", () => {
 
     mutation.onSuccess({
       success: true,
-      result: { token: "jwt-token" },
+      result: {
+        token: "jwt-token",
+        role: "CANDIDATE",
+        registrationCompleted: true,
+      },
     });
 
     expect(mockSetAuthToken).toHaveBeenCalledWith("jwt-token");
@@ -65,6 +72,22 @@ describe("auth api hooks", () => {
       "Login realizado com sucesso!",
     );
     expect(mockPush).toHaveBeenCalledWith("/candidate/dashboard");
+  });
+
+  it("useLogin redirects incomplete recruiter registrations to the completion page", async () => {
+    const { useLogin } = await import("./login");
+    const mutation = useLogin();
+
+    mutation.onSuccess({
+      success: true,
+      result: {
+        token: "jwt-token",
+        role: "RECRUITER",
+        registrationCompleted: false,
+      },
+    });
+
+    expect(mockPush).toHaveBeenCalledWith("/signup/role/recruiter");
   });
 
   it("useSignup maps payload, stores token and redirects on success", async () => {
@@ -78,7 +101,7 @@ describe("auth api hooks", () => {
       confirmPassword: "abc123",
     });
 
-    expect(mockHttpPost).toHaveBeenCalledWith("/signup", {
+    expect(mockHttpPost).toHaveBeenCalledWith("/auth/register", {
       name: "João Pedro",
       email: "joao@example.com",
       password: "abc123",
@@ -107,13 +130,10 @@ describe("auth api hooks", () => {
       resume: "https://linkedin.com/in/teste",
     });
 
-    expect(mockHttpPost).toHaveBeenCalledWith("/candidate/profile", {
+    expect(mockHttpPatch).toHaveBeenCalledWith("/auth/complete-registration", {
+      role: "CANDIDATE",
       phone: "(11) 99999-9999",
-      area: "Tecnologia",
-      role: "Frontend",
-      experience: "Júnior",
-      location: "São Paulo",
-      resume: "https://linkedin.com/in/teste",
+      summary: "Frontend • Tecnologia • Júnior • São Paulo",
     });
 
     mutation.onSuccess();
@@ -122,6 +142,48 @@ describe("auth api hooks", () => {
       "Perfil do candidato atualizado com sucesso!",
     );
     expect(mockPush).toHaveBeenCalledWith("/candidate/dashboard");
+  });
+
+  it("useUpdateCandidate redirects when registration is already completed", async () => {
+    const { useUpdateCandidate } = await import("./UpdateCandidate");
+    const mutation = useUpdateCandidate();
+
+    mutation.onError(
+      new ApiError(409, "Registration already completed", {
+        message: "Registration already completed",
+      }),
+    );
+
+    expect(mockToastSuccess).toHaveBeenCalledWith(
+      "Cadastro do candidato já estava concluído.",
+    );
+    expect(mockPush).toHaveBeenCalledWith("/candidate/dashboard");
+  });
+
+  it("useUpdateRecruiter posts profile data and redirects on success", async () => {
+    const { useUpdateRecruiter } = await import("./UpdateRecruiter");
+    const mutation = useUpdateRecruiter();
+
+    await mutation.mutationFn({
+      companyName: "Gemstone Seekers",
+      jobTitle: "Analista de RH",
+      phone: "(11) 99999-9999",
+      companyWebsite: "https://gemstoneseekers.com",
+      companySize: "11-50",
+    });
+
+    expect(mockHttpPatch).toHaveBeenCalledWith("/auth/complete-registration", {
+      role: "RECRUITER",
+      phone: "(11) 99999-9999",
+      department: "Analista de RH",
+    });
+
+    mutation.onSuccess();
+
+    expect(mockToastSuccess).toHaveBeenCalledWith(
+      "Perfil do recrutador atualizado com sucesso!",
+    );
+    expect(mockPush).toHaveBeenCalledWith("/recruiter/dashboard");
   });
 
   it("useUpdateRecruiter posts profile data and shows error fallback", async () => {
@@ -136,16 +198,30 @@ describe("auth api hooks", () => {
       companySize: "11-50",
     });
 
-    expect(mockHttpPost).toHaveBeenCalledWith("/recruiter/profile", {
-      companyName: "Gemstone Seekers",
-      jobTitle: "Analista de RH",
+    expect(mockHttpPatch).toHaveBeenCalledWith("/auth/complete-registration", {
+      role: "RECRUITER",
       phone: "(11) 99999-9999",
-      companyWebsite: "https://gemstoneseekers.com",
-      companySize: "11-50",
+      department: "Analista de RH",
     });
 
     mutation.onError(new Error("falhou"));
 
     expect(mockToastError).toHaveBeenCalledWith("falhou");
+  });
+
+  it("useUpdateRecruiter redirects when registration is already completed", async () => {
+    const { useUpdateRecruiter } = await import("./UpdateRecruiter");
+    const mutation = useUpdateRecruiter();
+
+    mutation.onError(
+      new ApiError(409, "Registration already completed", {
+        message: "Registration already completed",
+      }),
+    );
+
+    expect(mockToastSuccess).toHaveBeenCalledWith(
+      "Cadastro do recrutador já estava concluído.",
+    );
+    expect(mockPush).toHaveBeenCalledWith("/recruiter/dashboard");
   });
 });

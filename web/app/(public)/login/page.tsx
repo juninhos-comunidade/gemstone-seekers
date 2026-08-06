@@ -87,7 +87,7 @@ export default function Page() {
 
         <p className="text-muted-foreground mt-6 text-center text-sm">
           Não possui uma conta?{" "}
-          <Link href="/signup/role" className="text-primary hover:underline">
+          <Link href="/signup" className="text-primary hover:underline">
             Cadastre-se
           </Link>
         </p>
