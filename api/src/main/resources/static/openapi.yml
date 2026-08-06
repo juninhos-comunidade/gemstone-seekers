@@ -156,6 +156,24 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/BaseResponseCandidateProfileResponse"
+  /api/v1/profile/experiences:
+    post:
+      tags:
+      - user-profile-controller
+      operationId: addCandidateExperience
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ExperienceRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/BaseResponseCandidateProfileResponse"
   /api/v1/jobs:
     get:
       tags:
@@ -568,6 +586,25 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/BaseResponseCandidateProfileResponse"
+  /api/v1/profile/experiences/{experienceId}:
+    delete:
+      tags:
+      - user-profile-controller
+      operationId: deleteCandidateExperience
+      parameters:
+      - name: experienceId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/BaseResponseCandidateProfileResponse"
   /api/v1/jobs/{jobId}/technologies/{technologyId}:
     delete:
       tags:
@@ -941,6 +978,23 @@ components:
         documentType:
           type: string
         documentNumber:
+          type: string
+    ExperienceRequest:
+      type: object
+      properties:
+        title:
+          type: string
+        companyName:
+          type: string
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+        isCurrent:
+          type: boolean
+        description:
           type: string
     JobTechnologyRequest:
       type: object

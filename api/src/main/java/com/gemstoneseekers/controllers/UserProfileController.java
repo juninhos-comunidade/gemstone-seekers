@@ -37,7 +37,7 @@ public class UserProfileController {
         this.candidateLinkService = candidateLinkService;
         this.experienceService = experienceService;
     }
-
+//=================GET======================================================
     @GetMapping("")
     @PreAuthorize("hasRole('CANDIDATE')")
     public ResponseEntity<BaseResponse<CandidateProfileResponse>> getCandidateProfile(
@@ -49,6 +49,7 @@ public class UserProfileController {
             .body( new BaseResponse<>(true,"Candidate profile retrieved successfully", candidateProfile,null ));
     }
 
+//=================PATCH======================================================
     @PatchMapping("/user")
     @PreAuthorize("hasRole('CANDIDATE')")
     public ResponseEntity<BaseResponse<CandidateProfileResponse>> updateCandidateProfile(
@@ -61,6 +62,7 @@ public class UserProfileController {
         return ResponseEntity.status(HttpStatus.OK)
             .body( new BaseResponse<>(true,"User info updated successfully", updatedUser,null));
     }
+
     @PatchMapping("/address")
     @PreAuthorize("hasRole('CANDIDATE')")
     public ResponseEntity<BaseResponse<CandidateProfileResponse>> updateCandidateAddres(
@@ -76,7 +78,7 @@ public class UserProfileController {
             .body( new BaseResponse<>(true,"Candidate address updated successfully", candidateProfile,null));
     }
 
-
+//=================POST======================================================
     @PostMapping("/links")
     @PreAuthorize("hasRole('CANDIDATE')")
     public ResponseEntity<BaseResponse<CandidateProfileResponse>> addCandidateLink(
@@ -93,6 +95,22 @@ public class UserProfileController {
 
       }
 
+    @PostMapping("/experiences")
+    @PreAuthorize("hasRole('CANDIDATE')")
+    public ResponseEntity<BaseResponse<CandidateProfileResponse>> addCandidateExperience(
+        @AuthenticationPrincipal UserDetails userDetails,
+        @RequestBody ExperienceRequest request) {
+
+        String email = userDetails.getUsername();
+        experienceService.addExperience(email, request);
+        CandidateProfileResponse updatedUser = userProfileService.getCandidateProfileByUserEmail(email);
+
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(new BaseResponse<>(true, "Experience added successfully", updatedUser, null));
+
+    }
+// ===================DELETE===================================================================
+
     @DeleteMapping("/links/{linkId}")
     @PreAuthorize("hasRole('CANDIDATE')")
     public ResponseEntity<BaseResponse<CandidateProfileResponse>> deleteCandidateLink(
@@ -107,4 +125,18 @@ public class UserProfileController {
                 .body(new BaseResponse<>(true, "Link deleted successfully", updatedUser, null));
 
       }
+
+    @DeleteMapping("/experiences/{experienceId}")
+    @PreAuthorize("hasRole('CANDIDATE')")
+    public ResponseEntity<BaseResponse<CandidateProfileResponse>> deleteCandidateExperience(
+        @AuthenticationPrincipal UserDetails userDetails,
+        @PathVariable UUID experienceId) {
+
+        String email = userDetails.getUsername();
+        experienceService.deleteExperience(email, experienceId);
+        CandidateProfileResponse updatedUser = userProfileService.getCandidateProfileByUserEmail(email);
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(new BaseResponse<>(true, "Link deleted successfully", updatedUser, null));
+
+    }
 }
