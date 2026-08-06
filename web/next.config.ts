@@ -14,7 +14,7 @@ const nextConfig: NextConfig = {
     return [
       {
         source: "/api/:path*",
-        destination: "https://gemstone-seekers-1.onrender.com/api/v1/:path*",
+        destination: "https://gemstone-seekers-72pb.onrender.com/api/v1/:path*",
       },
     ];
   },
