@@ -1,11 +1,5 @@
 package com.gemstoneseekers.services;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-
-import org.junit.jupiter.api.Test;
-
 import com.gemstoneseekers.dtos.request.JobTechnologyRequest;
 import com.gemstoneseekers.exceptions.ConflictException;
 import com.gemstoneseekers.exceptions.EntityNotFoundException;
@@ -15,6 +9,11 @@ import com.gemstoneseekers.models.Technology;
 import com.gemstoneseekers.repositories.JobRepository;
 import com.gemstoneseekers.repositories.JobTechnologyRepository;
 import com.gemstoneseekers.repositories.TechnologyRepository;
+import org.junit.jupiter.api.Test;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -148,22 +147,31 @@ class JobTechnologyServiceTest {
     void shouldRemoveTechnologyFromJobSuccessfully() {
         UUID jobId = UUID.randomUUID();
         Integer technologyId = 1;
-        when(jobTechnologyRepository.existsByJobIdAndTechnologyId(jobId, technologyId)).thenReturn(true);
+        Job job = new Job();
+        job.setId(jobId);
+        Technology technology = new Technology();
+        technology.setId(technologyId);
+        JobTechnology jobTechnology = new JobTechnology(job, technology, true);
+
+        when(jobTechnologyRepository.findByJobIdAndTechnologyId(jobId, technologyId))
+                .thenReturn(Optional.of(jobTechnology));
 
         jobTechnologyService.removeTechnology(jobId, technologyId);
 
-        verify(jobTechnologyRepository).deleteByJobIdAndTechnologyId(jobId, technologyId);
+        verify(jobTechnologyRepository).delete(jobTechnology);
     }
 
     @Test
     void shouldThrowEntityNotFoundExceptionWhenRemovingNonexistentLink() {
         UUID jobId = UUID.randomUUID();
         Integer technologyId = 1;
-        when(jobTechnologyRepository.existsByJobIdAndTechnologyId(jobId, technologyId)).thenReturn(false);
+
+        when(jobTechnologyRepository.findByJobIdAndTechnologyId(jobId, technologyId)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> jobTechnologyService.removeTechnology(jobId, technologyId))
                 .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("JobTechnology");
-        verify(jobTechnologyRepository, never()).deleteByJobIdAndTechnologyId(any(), any());
+
+        verify(jobTechnologyRepository, never()).delete(any());
     }
 
     @Test

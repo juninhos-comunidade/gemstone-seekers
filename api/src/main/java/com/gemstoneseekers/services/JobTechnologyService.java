@@ -1,10 +1,5 @@
 package com.gemstoneseekers.services;
 
-import java.util.List;
-import java.util.UUID;
-
-import org.springframework.stereotype.Service;
-
 import com.gemstoneseekers.dtos.request.JobTechnologyRequest;
 import com.gemstoneseekers.exceptions.ConflictException;
 import com.gemstoneseekers.exceptions.EntityNotFoundException;
@@ -14,6 +9,11 @@ import com.gemstoneseekers.models.Technology;
 import com.gemstoneseekers.repositories.JobRepository;
 import com.gemstoneseekers.repositories.JobTechnologyRepository;
 import com.gemstoneseekers.repositories.TechnologyRepository;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.UUID;
 
 @Service
 public class JobTechnologyService {
@@ -41,15 +41,18 @@ public class JobTechnologyService {
         }
 
         boolean isMandatory = request.isMandatory() == null || request.isMandatory();
+
         JobTechnology jobTechnology = new JobTechnology(job, technology, isMandatory);
+
         return jobTechnologyRepository.save(jobTechnology);
     }
 
+    @Transactional
     public void removeTechnology(UUID jobId, Integer technologyId) {
-        if (!jobTechnologyRepository.existsByJobIdAndTechnologyId(jobId, technologyId)) {
-            throw new EntityNotFoundException("JobTechnology", jobId + "/" + technologyId);
-        }
-        jobTechnologyRepository.deleteByJobIdAndTechnologyId(jobId, technologyId);
+        JobTechnology jobTechnology = jobTechnologyRepository.findByJobIdAndTechnologyId(jobId, technologyId)
+                .orElseThrow(() -> new EntityNotFoundException("JobTechnology", jobId + "/" + technologyId));
+
+        jobTechnologyRepository.delete(jobTechnology);
     }
 
     public List<JobTechnology> findByJobId(UUID jobId) {
