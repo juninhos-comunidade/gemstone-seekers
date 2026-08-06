@@ -22,7 +22,7 @@ vi.mock("@/lib/api/radar", () => ({
   useTechnologyDemand: () => mockUseTechnologyDemand(),
 }));
 
-vi.mock("./components/TopTechnologiesChart", () => ({
+vi.mock("@/components/dashboard/radar/TopTechnologiesChart", () => ({
   TopTechnologiesChart: ({ data }: { data: Array<{ tecnologia: string }> }) => (
     <div data-testid="top-technologies-chart">
       {data.map((item) => item.tecnologia).join(", ")}
@@ -30,7 +30,7 @@ vi.mock("./components/TopTechnologiesChart", () => ({
   ),
 }));
 
-vi.mock("./components/TechnologyRequirementChart", () => ({
+vi.mock("@/components/dashboard/radar/TechnologyRequirementChart", () => ({
   TechnologyRequirementRateChart: ({
     data,
   }: {
