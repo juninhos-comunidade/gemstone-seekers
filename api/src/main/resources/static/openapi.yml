@@ -358,7 +358,7 @@ paths:
     patch:
       tags:
       - user-profile-controller
-      operationId: updateCandidateProfile_1
+      operationId: updateCandidateAddres
       requestBody:
         content:
           application/json:
