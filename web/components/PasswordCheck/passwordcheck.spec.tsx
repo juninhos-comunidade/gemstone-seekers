@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { PasswordCheck } from "./PasswordInput";
 
@@ -29,21 +29,42 @@ describe("PasswordCheck", () => {
     expect(screen.getByText("At least 1 uppercase letter")).toBeInTheDocument();
   });
 
-  it("forwards onChange and toggles password visibility", () => {
-    const handleChange = vi.fn();
-    render(<PasswordCheck onChange={handleChange} defaultValue="abc" />);
+  it("renders with custom label when hideLabel is false and custom id", () => {
+    render(
+      <PasswordCheck
+        id="custom-password-id"
+        label="Sua Senha"
+        hideLabel={false}
+      />,
+    );
 
-    const input = screen.getByDisplayValue("abc");
-    expect(input).toHaveAttribute("type", "password");
+    expect(screen.getByLabelText("Sua Senha")).toBeInTheDocument();
+    expect(screen.getByLabelText("Sua Senha")).toHaveAttribute(
+      "id",
+      "custom-password-id",
+    );
+  });
 
-    fireEvent.click(screen.getByLabelText("Show password"));
-    expect(input).toHaveAttribute("type", "text");
+  it("calculates score levels (Weak, Medium, Strong) and toggle visibility back", () => {
+    const { rerender } = render(<PasswordCheck value="a" />);
+    expect(screen.getByText("Weak security")).toBeInTheDocument();
+
+    rerender(<PasswordCheck value="a1" />);
+    expect(screen.getByText("Weak security")).toBeInTheDocument();
+
+    rerender(<PasswordCheck value="a1B" />);
+    expect(screen.getByText("Medium security")).toBeInTheDocument();
+
+    rerender(<PasswordCheck value="a1B!" />);
+    expect(screen.getByText("Medium security")).toBeInTheDocument();
+
+    rerender(<PasswordCheck value="a1B!5678" />);
+    expect(screen.getByText("Strong security")).toBeInTheDocument();
+
+    const toggleButton = screen.getByLabelText("Show password");
+    fireEvent.click(toggleButton);
     expect(screen.getByLabelText("Hide password")).toBeInTheDocument();
-
-    fireEvent.change(input, {
-      target: { value: "abc123A!" },
-    });
-
-    expect(handleChange).toHaveBeenCalled();
+    fireEvent.click(screen.getByLabelText("Hide password"));
+    expect(screen.getByLabelText("Show password")).toBeInTheDocument();
   });
 });

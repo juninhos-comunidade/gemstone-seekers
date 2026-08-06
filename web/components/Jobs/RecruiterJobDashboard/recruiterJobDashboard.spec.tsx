@@ -105,7 +105,17 @@ describe("RecruiterJobDashboard Component", () => {
     expect(openTab).toBeInTheDocument();
   });
 
-  it("opens delete confirmation dialog and deletes job when confirmed", async () => {
+  it("opens delete confirmation dialog and handles delete success and error callbacks", async () => {
+    mockMutateDelete.mockImplementation(
+      (
+        id: string,
+        options?: { onSuccess?: () => void; onError?: () => void },
+      ) => {
+        options?.onSuccess?.();
+        options?.onError?.();
+      },
+    );
+
     renderWithQuery(<RecruiterJobDashboard jobs={[MOCK_JOBS[0]]} />);
 
     const deleteButton = screen.getByRole("button", { name: /Excluir Vaga/i });
@@ -113,6 +123,10 @@ describe("RecruiterJobDashboard Component", () => {
 
     expect(await screen.findByText("Excluir Oportunidade")).toBeInTheDocument();
 
+    const cancelButton = screen.getByRole("button", { name: /Cancelar/i });
+    fireEvent.click(cancelButton);
+
+    fireEvent.click(deleteButton);
     const confirmButton = screen.getByRole("button", {
       name: /Confirmar Exclusão/i,
     });
@@ -124,5 +138,38 @@ describe("RecruiterJobDashboard Component", () => {
         expect.anything(),
       );
     });
+  });
+
+  it("renders status badges and salary formats for various job statuses", () => {
+    const cancelledJob = {
+      ...MOCK_JOBS[0],
+      id: "job-cancelled",
+      status: "CANCELLED" as const,
+      salaryMin: 5000,
+      salaryMax: undefined,
+    };
+    const closedJob = {
+      ...MOCK_JOBS[0],
+      id: "job-closed",
+      status: "CLOSED" as const,
+      salaryMin: undefined,
+      salaryMax: 10000,
+    };
+    const unknownStatusJob = {
+      ...MOCK_JOBS[0],
+      id: "job-unknown",
+      status: "CANCELLED" as const,
+      salaryMin: undefined,
+      salaryMax: undefined,
+    };
+
+    renderWithQuery(
+      <RecruiterJobDashboard
+        jobs={[cancelledJob, closedJob, unknownStatusJob]}
+      />,
+    );
+
+    expect(screen.getAllByText("Cancelada").length).toBeGreaterThan(1);
+    expect(screen.getByText("Encerrada")).toBeInTheDocument();
   });
 });

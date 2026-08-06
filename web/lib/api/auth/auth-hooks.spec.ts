@@ -124,6 +124,41 @@ describe("auth api hooks", () => {
     expect(mockPush).toHaveBeenCalledWith("/candidate/dashboard");
   });
 
+  it("useLogin handles onError with error message and fallback", async () => {
+    const { useLogin } = await import("./login");
+    const mutation = useLogin();
+
+    mutation.onError(new Error("Erro de autenticação"));
+    expect(mockToastError).toHaveBeenCalledWith("Erro de autenticação");
+
+    mutation.onError({ message: undefined } as unknown as Error);
+    expect(mockToastError).toHaveBeenCalledWith("Erro ao fazer login");
+  });
+
+  it("useSignup handles onError with error message and fallback", async () => {
+    const { useSignup } = await import("./signup");
+    const mutation = useSignup();
+
+    mutation.onError(new Error("Email em uso"));
+    expect(mockToastError).toHaveBeenCalledWith("Email em uso");
+
+    mutation.onError({ message: undefined } as unknown as Error);
+    expect(mockToastError).toHaveBeenCalledWith("Falha ao cadastrar");
+  });
+
+  it("useUpdateCandidate handles onError with error message and fallback", async () => {
+    const { useUpdateCandidate } = await import("./UpdateCandidate");
+    const mutation = useUpdateCandidate();
+
+    mutation.onError(new Error("Erro candidato"));
+    expect(mockToastError).toHaveBeenCalledWith("Erro candidato");
+
+    mutation.onError({ message: undefined } as unknown as Error);
+    expect(mockToastError).toHaveBeenCalledWith(
+      "Erro ao atualizar perfil do candidato",
+    );
+  });
+
   it("useUpdateRecruiter posts profile data and shows error fallback", async () => {
     const { useUpdateRecruiter } = await import("./UpdateRecruiter");
     const mutation = useUpdateRecruiter();
@@ -144,8 +179,18 @@ describe("auth api hooks", () => {
       companySize: "11-50",
     });
 
-    mutation.onError(new Error("falhou"));
+    mutation.onSuccess();
+    expect(mockToastSuccess).toHaveBeenCalledWith(
+      "Perfil do recrutador atualizado com sucesso!",
+    );
+    expect(mockPush).toHaveBeenCalledWith("/recruiter/dashboard");
 
+    mutation.onError(new Error("falhou"));
     expect(mockToastError).toHaveBeenCalledWith("falhou");
+
+    mutation.onError({ message: undefined } as unknown as Error);
+    expect(mockToastError).toHaveBeenCalledWith(
+      "Erro ao atualizar perfil do recrutador",
+    );
   });
 });
