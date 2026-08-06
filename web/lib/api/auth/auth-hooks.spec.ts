@@ -90,6 +90,39 @@ describe("auth api hooks", () => {
     expect(mockPush).toHaveBeenCalledWith("/signup/role/recruiter");
   });
 
+  it("useLogin redirects incomplete candidate registrations to the completion page", async () => {
+    const { useLogin } = await import("./login");
+    const mutation = useLogin();
+
+    mutation.onSuccess({
+      success: true,
+      result: {
+        role: "CANDIDATE",
+        registrationCompleted: false,
+      },
+    });
+
+    expect(mockSetAuthToken).not.toHaveBeenCalled();
+    expect(mockPush).toHaveBeenCalledWith("/signup/role/candidate");
+  });
+
+  it("useLogin uses accessToken fallback and redirects recruiters to dashboard", async () => {
+    const { useLogin } = await import("./login");
+    const mutation = useLogin();
+
+    mutation.onSuccess({
+      success: true,
+      accessToken: "access-token",
+      result: {
+        role: "RECRUITER",
+        registrationCompleted: true,
+      },
+    });
+
+    expect(mockSetAuthToken).toHaveBeenCalledWith("access-token");
+    expect(mockPush).toHaveBeenCalledWith("/recruiter/dashboard");
+  });
+
   it("useSignup maps payload, stores token and redirects on success", async () => {
     const { useSignup } = await import("./signup");
     const mutation = useSignup();
@@ -114,6 +147,21 @@ describe("auth api hooks", () => {
 
     expect(mockSetAuthToken).toHaveBeenCalledWith("signup-token");
     expect(mockToastSuccess).toHaveBeenCalledWith("Conta criada com sucesso!");
+    expect(mockPush).toHaveBeenCalledWith("/signup/role");
+  });
+
+  it("useSignup uses nested accessToken fallback when token fields are absent", async () => {
+    const { useSignup } = await import("./signup");
+    const mutation = useSignup();
+
+    mutation.onSuccess({
+      success: true,
+      result: {
+        accessToken: "nested-access-token",
+      },
+    });
+
+    expect(mockSetAuthToken).toHaveBeenCalledWith("nested-access-token");
     expect(mockPush).toHaveBeenCalledWith("/signup/role");
   });
 
@@ -207,6 +255,28 @@ describe("auth api hooks", () => {
     mutation.onError(new Error("falhou"));
 
     expect(mockToastError).toHaveBeenCalledWith("falhou");
+  });
+
+  it("useUpdateCandidate shows generic error fallback when message is unavailable", async () => {
+    const { useUpdateCandidate } = await import("./UpdateCandidate");
+    const mutation = useUpdateCandidate();
+
+    mutation.onError({} as Error);
+
+    expect(mockToastError).toHaveBeenCalledWith(
+      "Erro ao atualizar perfil do candidato",
+    );
+  });
+
+  it("useUpdateRecruiter shows generic error fallback when message is unavailable", async () => {
+    const { useUpdateRecruiter } = await import("./UpdateRecruiter");
+    const mutation = useUpdateRecruiter();
+
+    mutation.onError({} as Error);
+
+    expect(mockToastError).toHaveBeenCalledWith(
+      "Erro ao atualizar perfil do recrutador",
+    );
   });
 
   it("useUpdateRecruiter redirects when registration is already completed", async () => {
