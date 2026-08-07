@@ -26,13 +26,15 @@ public class UserProfileController {
     private final CandidateLinkService candidateLinkService;
     private final ExperienceService experienceService;
     private final EducationService educationService;
+    private final CertificationService certificationService;
 
-    public UserProfileController(UserProfileService userProfileService, AddressService addressService, CandidateLinkService candidateLinkService, ExperienceService experienceService, EducationService educationService) {
+    public UserProfileController(UserProfileService userProfileService, AddressService addressService, CandidateLinkService candidateLinkService, ExperienceService experienceService, EducationService educationService, CertificationService certificationService) {
         this.userProfileService = userProfileService;
         this.addressService = addressService;
         this.candidateLinkService = candidateLinkService;
         this.experienceService = experienceService;
         this.educationService = educationService;
+        this.certificationService = certificationService;
     }
 //=================GET======================================================
     @GetMapping("")
@@ -118,7 +120,20 @@ public class UserProfileController {
         CandidateProfileResponse updatedUser = userProfileService.getCandidateProfileByUserEmail(email);
 
         return ResponseEntity.status(HttpStatus.OK)
-            .body(new BaseResponse<>(true, "Experience added successfully", updatedUser, null));
+            .body(new BaseResponse<>(true, "Education added successfully", updatedUser, null));
+
+    }    @PostMapping("/certifications")
+    @PreAuthorize("hasRole('CANDIDATE')")
+    public ResponseEntity<BaseResponse<CandidateProfileResponse>> addCertification(
+        @AuthenticationPrincipal UserDetails userDetails,
+        @RequestBody CertificationRequest request) {
+
+        String email = userDetails.getUsername();
+        certificationService.addCertification(email, request);
+        CandidateProfileResponse updatedUser = userProfileService.getCandidateProfileByUserEmail(email);
+
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(new BaseResponse<>(true, "Certification added successfully", updatedUser, null));
 
     }
 // ===================DELETE===================================================================
@@ -163,6 +178,19 @@ public class UserProfileController {
         CandidateProfileResponse updatedUser = userProfileService.getCandidateProfileByUserEmail(email);
         return ResponseEntity.status(HttpStatus.OK)
             .body(new BaseResponse<>(true, "Education deleted successfully", updatedUser, null));
+
+    }
+    @DeleteMapping("/certifications/{certificationId}")
+    @PreAuthorize("hasRole('CANDIDATE')")
+    public ResponseEntity<BaseResponse<CandidateProfileResponse>> deleteCandidateCertification(
+        @AuthenticationPrincipal UserDetails userDetails,
+        @PathVariable UUID certificationId) {
+
+        String email = userDetails.getUsername();
+        certificationService.deleteCertification(email, certificationId);
+        CandidateProfileResponse updatedUser = userProfileService.getCandidateProfileByUserEmail(email);
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(new BaseResponse<>(true, "Certification deleted successfully", updatedUser, null));
 
     }
 }

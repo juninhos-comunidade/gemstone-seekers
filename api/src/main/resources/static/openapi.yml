@@ -192,6 +192,24 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/BaseResponseCandidateProfileResponse"
+  /api/v1/profile/certifications:
+    post:
+      tags:
+      - user-profile-controller
+      operationId: addCertification
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CertificationRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/BaseResponseCandidateProfileResponse"
   /api/v1/jobs:
     get:
       tags:
@@ -642,6 +660,25 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/BaseResponseCandidateProfileResponse"
+  /api/v1/profile/certifications/{certificationId}:
+    delete:
+      tags:
+      - user-profile-controller
+      operationId: deleteCandidateCertification
+      parameters:
+      - name: certificationId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/BaseResponseCandidateProfileResponse"
   /api/v1/jobs/{jobId}/technologies/{technologyId}:
     delete:
       tags:
@@ -1043,6 +1080,21 @@ components:
         completionDate:
           type: string
           format: date
+    CertificationRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        issuingOrganization:
+          type: string
+        issueDate:
+          type: string
+          format: date
+        expirationDate:
+          type: string
+          format: date
+        credentialUrl:
+          type: string
     JobTechnologyRequest:
       type: object
       properties:

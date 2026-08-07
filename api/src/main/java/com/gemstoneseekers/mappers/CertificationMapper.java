@@ -1,6 +1,8 @@
 package com.gemstoneseekers.mappers;
 
+import com.gemstoneseekers.dtos.request.CertificationRequest;
 import com.gemstoneseekers.dtos.response.CertificationResponse;
+import com.gemstoneseekers.models.Candidate;
 import com.gemstoneseekers.models.Certification;
 import org.springframework.stereotype.Component;
 
@@ -32,5 +34,20 @@ public class CertificationMapper {
     }
 
 
+    public Certification toCertification(CertificationRequest request, Candidate candidate) {
+        Certification newCertification = new Certification();
+        if (request == null || candidate == null) {
+            return null;
+        }
 
+        newCertification.setCandidate(candidate);
+        newCertification.setName(request.name());
+        newCertification.setCredentialUrl(request.credentialUrl());
+        newCertification.setIssueDate(request.issueDate());
+        newCertification.setExpirationDate(request.expirationDate());
+        newCertification.setIssuingOrganization(request.issuingOrganization());
+
+        return newCertification;
+
+    }
 }
