@@ -43,7 +43,7 @@ describe("Login Page", () => {
     expect(screen.getByRole("button", { name: "Entrar" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Cadastre-se" })).toHaveAttribute(
       "href",
-      "/signup/role",
+      "/signup",
     );
   });
 

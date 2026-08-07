@@ -3,6 +3,13 @@ import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import type { InputHTMLAttributes, ReactNode } from "react";
 import RecruiterSignup from "./page";
 
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({
+    replace: vi.fn(),
+    push: vi.fn(),
+  }),
+}));
+
 const mockUpdateRecruiter = vi.fn();
 
 vi.mock("@/lib/api/auth/UpdateRecruiter", () => ({
@@ -73,14 +80,14 @@ describe("Recruiter Signup Page", () => {
     vi.clearAllMocks();
   });
 
-  it("renders recruiter profile form fields, submit button and skip link, and handles submit navigation", async () => {
+  it("renders recruiter completion form fields and submits recruiter data", async () => {
     mockUpdateRecruiter.mockResolvedValue(undefined);
 
     render(<RecruiterSignup />);
     expect(
       screen.getByRole("heading", {
         level: 1,
-        name: /informações do recrutador/i,
+        name: /complete seu cadastro de recrutador/i,
       }),
     ).toBeInTheDocument();
     expect(screen.getByLabelText(/nome da empresa/i)).toBeInTheDocument();
@@ -89,8 +96,8 @@ describe("Recruiter Signup Page", () => {
     expect(screen.getByLabelText(/site da empresa/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/tamanho da empresa/i)).toBeInTheDocument();
     expect(
-      screen.getByRole("link", { name: /pular por enquanto/i }),
-    ).toHaveAttribute("href", "/dashboard");
+      screen.getByRole("link", { name: /voltar e alterar perfil/i }),
+    ).toHaveAttribute("href", "/signup/role");
 
     fireEvent.change(screen.getByLabelText(/nome da empresa/i), {
       target: { value: "Gemstone Seekers" },

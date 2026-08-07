@@ -7,7 +7,7 @@ export default function Page() {
           Bem-vindo! Em breve você poderá acompanhar suas vagas, testes e
           candidaturas por aqui.
         </p>
-        <p>Nome do usuário {}</p>
+        <p>Nome do usuário teste</p>
       </div>
     </main>
   );

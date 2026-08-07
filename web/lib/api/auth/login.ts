@@ -17,6 +17,8 @@ interface LoginResponse {
   result?: {
     token?: string;
     accessToken?: string;
+    role?: "CANDIDATE" | "RECRUITER";
+    registrationCompleted?: boolean;
   };
 }
 
@@ -40,8 +42,23 @@ export function useLogin() {
         setAuthToken(token);
       }
 
+      const role = result?.result?.role;
+      const registrationCompleted = result?.result?.registrationCompleted;
+
       toast.success("Login realizado com sucesso!");
-      router.push("/candidate/dashboard");
+
+      if (!registrationCompleted) {
+        router.push(
+          role === "RECRUITER"
+            ? "/signup/role/recruiter"
+            : "/signup/role/candidate",
+        );
+        return;
+      }
+
+      router.push(
+        role === "RECRUITER" ? "/recruiter/dashboard" : "/candidate/dashboard",
+      );
     },
     onError: (error: Error) => {
       toast.error(error.message ?? "Erro ao fazer login");
