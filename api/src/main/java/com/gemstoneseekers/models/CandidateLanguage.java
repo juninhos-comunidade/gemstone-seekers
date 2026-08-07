@@ -15,6 +15,8 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 @Entity
 @Table(name = "candidate_languages")
@@ -37,6 +39,8 @@ public class CandidateLanguage {
     private Language language;
 
     @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
+
     @Column(name = "proficiency", nullable = false, columnDefinition = "proficiency_level")
     private ProficiencyLevel proficiency;
 

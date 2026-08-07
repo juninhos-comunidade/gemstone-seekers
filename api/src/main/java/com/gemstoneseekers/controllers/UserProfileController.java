@@ -3,8 +3,6 @@ package com.gemstoneseekers.controllers;
 import com.gemstoneseekers.dtos.request.*;
 import com.gemstoneseekers.dtos.response.BaseResponse;
 import com.gemstoneseekers.dtos.response.CandidateProfileResponse;
-import com.gemstoneseekers.models.Education;
-import com.gemstoneseekers.models.Experience;
 import com.gemstoneseekers.services.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,14 +25,16 @@ public class UserProfileController {
     private final ExperienceService experienceService;
     private final EducationService educationService;
     private final CertificationService certificationService;
+    private final CandidateLanguageService candidateLanguageService;
 
-    public UserProfileController(UserProfileService userProfileService, AddressService addressService, CandidateLinkService candidateLinkService, ExperienceService experienceService, EducationService educationService, CertificationService certificationService) {
+    public UserProfileController(UserProfileService userProfileService, AddressService addressService, CandidateLinkService candidateLinkService, ExperienceService experienceService, EducationService educationService, CertificationService certificationService, CandidateLanguageService candidateLanguageService) {
         this.userProfileService = userProfileService;
         this.addressService = addressService;
         this.candidateLinkService = candidateLinkService;
         this.experienceService = experienceService;
         this.educationService = educationService;
         this.certificationService = certificationService;
+        this.candidateLanguageService = candidateLanguageService;
     }
 //=================GET======================================================
     @GetMapping("")
@@ -134,8 +134,23 @@ public class UserProfileController {
 
         return ResponseEntity.status(HttpStatus.OK)
             .body(new BaseResponse<>(true, "Certification added successfully", updatedUser, null));
-
     }
+
+    @PostMapping("/languages")
+    @PreAuthorize("hasRole('CANDIDATE')")
+    public ResponseEntity<BaseResponse<CandidateProfileResponse>> addLanguage(
+        @AuthenticationPrincipal UserDetails userDetails,
+        @RequestBody CandidateLanguageRequest request) {
+
+        String email = userDetails.getUsername();
+
+        candidateLanguageService.addCandidateLanguage(email,request);
+        CandidateProfileResponse updatedUser = userProfileService.getCandidateProfileByUserEmail(email);
+
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(new BaseResponse<>(true, "Language added successfully", updatedUser, null));
+    }
+
 // ===================DELETE===================================================================
 
     @DeleteMapping("/links/{linkId}")
@@ -188,6 +203,19 @@ public class UserProfileController {
 
         String email = userDetails.getUsername();
         certificationService.deleteCertification(email, certificationId);
+        CandidateProfileResponse updatedUser = userProfileService.getCandidateProfileByUserEmail(email);
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(new BaseResponse<>(true, "Certification deleted successfully", updatedUser, null));
+
+    }
+    @DeleteMapping("/languages/{languageId}")
+    @PreAuthorize("hasRole('CANDIDATE')")
+    public ResponseEntity<BaseResponse<CandidateProfileResponse>> deleteLanguage(
+        @AuthenticationPrincipal UserDetails userDetails,
+        @PathVariable Integer languageId) {
+
+        String email = userDetails.getUsername();
+        candidateLanguageService.deleteCandidateLanguage(email, languageId);
         CandidateProfileResponse updatedUser = userProfileService.getCandidateProfileByUserEmail(email);
         return ResponseEntity.status(HttpStatus.OK)
             .body(new BaseResponse<>(true, "Certification deleted successfully", updatedUser, null));

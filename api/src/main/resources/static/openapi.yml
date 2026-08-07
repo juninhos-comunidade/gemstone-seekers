@@ -156,6 +156,24 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/BaseResponseCandidateProfileResponse"
+  /api/v1/profile/languages:
+    post:
+      tags:
+      - user-profile-controller
+      operationId: addLanguage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CandidateLanguageRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/BaseResponseCandidateProfileResponse"
   /api/v1/profile/experiences:
     post:
       tags:
@@ -622,6 +640,25 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/BaseResponseCandidateProfileResponse"
+  /api/v1/profile/languages/{languageId}:
+    delete:
+      tags:
+      - user-profile-controller
+      operationId: deleteLanguage
+      parameters:
+      - name: languageId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int32
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/BaseResponseCandidateProfileResponse"
   /api/v1/profile/experiences/{experienceId}:
     delete:
       tags:
@@ -1047,6 +1084,13 @@ components:
         documentType:
           type: string
         documentNumber:
+          type: string
+    CandidateLanguageRequest:
+      type: object
+      properties:
+        languageName:
+          type: string
+        proficiency:
           type: string
     ExperienceRequest:
       type: object
