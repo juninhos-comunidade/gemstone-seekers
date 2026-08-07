@@ -29,7 +29,6 @@ interface SideMenuProps {
 export function SideMenu({ items, mobile = false }: SideMenuProps) {
   const pathname = usePathname();
 
-  /** Finds the item with the most specific (longest) matching href for the current route */
   const activeHref = items
     .filter((item) => {
       if (!item.href) return false;

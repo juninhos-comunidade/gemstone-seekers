@@ -252,9 +252,19 @@ describe("auth api hooks", () => {
       department: "Analista de RH",
     });
 
-    mutation.onError(new Error("falhou"));
+    mutation.onSuccess();
+    expect(mockToastSuccess).toHaveBeenCalledWith(
+      "Perfil do recrutador atualizado com sucesso!",
+    );
+    expect(mockPush).toHaveBeenCalledWith("/recruiter/dashboard");
 
+    mutation.onError(new Error("falhou"));
     expect(mockToastError).toHaveBeenCalledWith("falhou");
+
+    mutation.onError({ message: undefined } as unknown as Error);
+    expect(mockToastError).toHaveBeenCalledWith(
+      "Erro ao atualizar perfil do recrutador",
+    );
   });
 
   it("useUpdateCandidate shows generic error fallback when message is unavailable", async () => {
