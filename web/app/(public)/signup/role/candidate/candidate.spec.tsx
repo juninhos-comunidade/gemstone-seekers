@@ -3,6 +3,13 @@ import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import type { InputHTMLAttributes, SelectHTMLAttributes } from "react";
 import CandidateSignup from "./page";
 
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({
+    replace: vi.fn(),
+    push: vi.fn(),
+  }),
+}));
+
 const mockUpdateCandidate = vi.fn();
 
 vi.mock("@/lib/api/auth/UpdateCandidate", () => ({
@@ -58,25 +65,25 @@ describe("Candidate Signup Page", () => {
     vi.clearAllMocks();
   });
 
-  it("renders profile form fields, submit button and skip link, and handles submit navigation", async () => {
+  it("renders completion form fields and submits candidate registration data", async () => {
     mockUpdateCandidate.mockResolvedValue(undefined);
 
     render(<CandidateSignup />);
     expect(
       screen.getByRole("heading", {
         level: 1,
-        name: /Informações do Candidato/i,
+        name: /Complete seu cadastro de candidato/i,
       }),
     ).toBeInTheDocument();
     expect(screen.getByText(/telefone/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/localização/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/área de interesse/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/cargo desejado/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/nível de experiência/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/localização/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/currículo \(link\)/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/currículo ou linkedin/i)).toBeInTheDocument();
     expect(
-      screen.getByRole("link", { name: /pular por enquanto/i }),
-    ).toHaveAttribute("href", "/dashboard");
+      screen.getByRole("link", { name: /voltar e alterar perfil/i }),
+    ).toHaveAttribute("href", "/signup/role");
 
     fireEvent.change(
       document.querySelector("input[type='tel']") as HTMLInputElement,
@@ -84,6 +91,9 @@ describe("Candidate Signup Page", () => {
         target: { value: "+55 11 99999-9999" },
       },
     );
+    fireEvent.change(screen.getByLabelText(/localização/i), {
+      target: { value: "São Paulo, SP" },
+    });
     fireEvent.change(screen.getByLabelText(/área de interesse/i), {
       target: { value: "Tecnologia" },
     });
@@ -93,10 +103,7 @@ describe("Candidate Signup Page", () => {
     fireEvent.change(screen.getByLabelText(/nível de experiência/i), {
       target: { value: "junior" },
     });
-    fireEvent.change(screen.getByLabelText(/localização/i), {
-      target: { value: "São Paulo, SP" },
-    });
-    fireEvent.change(screen.getByLabelText(/currículo \(link\)/i), {
+    fireEvent.change(screen.getByLabelText(/currículo ou linkedin/i), {
       target: { value: "https://linkedin.com/in/teste" },
     });
 
