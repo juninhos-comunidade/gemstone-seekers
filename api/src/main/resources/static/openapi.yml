@@ -174,6 +174,24 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/BaseResponseCandidateProfileResponse"
+  /api/v1/profile/educations:
+    post:
+      tags:
+      - user-profile-controller
+      operationId: addEducation
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EducationRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/BaseResponseCandidateProfileResponse"
   /api/v1/jobs:
     get:
       tags:
@@ -605,6 +623,25 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/BaseResponseCandidateProfileResponse"
+  /api/v1/profile/educations/{educationId}:
+    delete:
+      tags:
+      - user-profile-controller
+      operationId: deleteCandidateEducation
+      parameters:
+      - name: educationId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/BaseResponseCandidateProfileResponse"
   /api/v1/jobs/{jobId}/technologies/{technologyId}:
     delete:
       tags:
@@ -902,11 +939,6 @@ components:
         completionDate:
           type: string
           format: date
-        technologies:
-          type: array
-          items:
-            $ref: "#/components/schemas/TechnologyResponse"
-          uniqueItems: true
     ExperienceResponse:
       type: object
       properties:
@@ -996,6 +1028,21 @@ components:
           type: boolean
         description:
           type: string
+    EducationRequest:
+      type: object
+      properties:
+        institution:
+          type: string
+        fieldOfStudy:
+          type: string
+        degree:
+          type: string
+        startDate:
+          type: string
+          format: date
+        completionDate:
+          type: string
+          format: date
     JobTechnologyRequest:
       type: object
       properties:

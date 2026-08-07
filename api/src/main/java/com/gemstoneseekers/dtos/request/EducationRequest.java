@@ -1,14 +1,12 @@
-package com.gemstoneseekers.dtos.response;
+package com.gemstoneseekers.dtos.request;
 
 import java.time.LocalDate;
-import java.util.Set;
-import java.util.UUID;
 
-public record EducationResponse(
-    UUID id,
+public record EducationRequest(
     String institution,
     String fieldOfStudy,
     String degree,
     LocalDate startDate,
     LocalDate completionDate
-) {}
+) {
+}

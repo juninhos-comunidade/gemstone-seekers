@@ -1,16 +1,11 @@
 package com.gemstoneseekers.controllers;
 
-import com.gemstoneseekers.dtos.request.AddressRequest;
-import com.gemstoneseekers.dtos.request.ExperienceRequest;
-import com.gemstoneseekers.dtos.request.LinkItemRequest;
-import com.gemstoneseekers.dtos.request.UserRequest;
+import com.gemstoneseekers.dtos.request.*;
 import com.gemstoneseekers.dtos.response.BaseResponse;
 import com.gemstoneseekers.dtos.response.CandidateProfileResponse;
+import com.gemstoneseekers.models.Education;
 import com.gemstoneseekers.models.Experience;
-import com.gemstoneseekers.services.AddressService;
-import com.gemstoneseekers.services.CandidateLinkService;
-import com.gemstoneseekers.services.ExperienceService;
-import com.gemstoneseekers.services.UserProfileService;
+import com.gemstoneseekers.services.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -30,12 +25,14 @@ public class UserProfileController {
     private final UserProfileService userProfileService;
     private final CandidateLinkService candidateLinkService;
     private final ExperienceService experienceService;
+    private final EducationService educationService;
 
-    public UserProfileController(UserProfileService userProfileService, AddressService addressService, CandidateLinkService candidateLinkService, ExperienceService experienceService) {
+    public UserProfileController(UserProfileService userProfileService, AddressService addressService, CandidateLinkService candidateLinkService, ExperienceService experienceService, EducationService educationService) {
         this.userProfileService = userProfileService;
         this.addressService = addressService;
         this.candidateLinkService = candidateLinkService;
         this.experienceService = experienceService;
+        this.educationService = educationService;
     }
 //=================GET======================================================
     @GetMapping("")
@@ -109,6 +106,21 @@ public class UserProfileController {
             .body(new BaseResponse<>(true, "Experience added successfully", updatedUser, null));
 
     }
+
+    @PostMapping("/educations")
+    @PreAuthorize("hasRole('CANDIDATE')")
+    public ResponseEntity<BaseResponse<CandidateProfileResponse>> addEducation(
+        @AuthenticationPrincipal UserDetails userDetails,
+        @RequestBody EducationRequest request) {
+
+        String email = userDetails.getUsername();
+        educationService.addEducation(email, request);
+        CandidateProfileResponse updatedUser = userProfileService.getCandidateProfileByUserEmail(email);
+
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(new BaseResponse<>(true, "Experience added successfully", updatedUser, null));
+
+    }
 // ===================DELETE===================================================================
 
     @DeleteMapping("/links/{linkId}")
@@ -136,7 +148,21 @@ public class UserProfileController {
         experienceService.deleteExperience(email, experienceId);
         CandidateProfileResponse updatedUser = userProfileService.getCandidateProfileByUserEmail(email);
         return ResponseEntity.status(HttpStatus.OK)
-            .body(new BaseResponse<>(true, "Link deleted successfully", updatedUser, null));
+            .body(new BaseResponse<>(true, "Experience deleted successfully", updatedUser, null));
+
+    }
+
+    @DeleteMapping("/educations/{educationId}")
+    @PreAuthorize("hasRole('CANDIDATE')")
+    public ResponseEntity<BaseResponse<CandidateProfileResponse>> deleteCandidateEducation(
+        @AuthenticationPrincipal UserDetails userDetails,
+        @PathVariable UUID educationId) {
+
+        String email = userDetails.getUsername();
+        educationService.deleteEducation(email, educationId);
+        CandidateProfileResponse updatedUser = userProfileService.getCandidateProfileByUserEmail(email);
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(new BaseResponse<>(true, "Education deleted successfully", updatedUser, null));
 
     }
 }
