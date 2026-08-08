@@ -60,7 +60,6 @@ public class UserProfileController {
         this.candidateLanguageService = candidateLanguageService;
         this.projectService = projectService;
     }
-    // =================GET======================================================
     @GetMapping("")
     @PreAuthorize(CANDIDATE_ROLE)
     public ResponseEntity<BaseResponse<CandidateProfileResponse>> getCandidateProfile(
@@ -72,7 +71,6 @@ public class UserProfileController {
                 .body(new BaseResponse<>(true, "Candidate profile retrieved successfully", candidateProfile, null));
     }
 
-    // =================PATCH======================================================
     @PatchMapping("/user")
     @PreAuthorize(CANDIDATE_ROLE)
     public ResponseEntity<BaseResponse<CandidateProfileResponse>> updateCandidateProfile(
@@ -97,7 +95,6 @@ public class UserProfileController {
                 .body(new BaseResponse<>(true, "Candidate address updated successfully", candidateProfile, null));
     }
 
-    // =================POST======================================================
     @PostMapping("/links")
     @PreAuthorize(CANDIDATE_ROLE)
     public ResponseEntity<BaseResponse<CandidateProfileResponse>> addCandidateLink(
@@ -180,7 +177,6 @@ public class UserProfileController {
                 .body(new BaseResponse<>(true, "Project added successfully", updatedUser, null));
     }
 
-    // ===================DELETE===================================================================
 
     @DeleteMapping("/links/{linkId}")
     @PreAuthorize(CANDIDATE_ROLE)

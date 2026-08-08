@@ -58,7 +58,7 @@ public class AddressService {
         }
 
         addressMapper.updateEntityFromRequest(request, address);
-        candidate.setAddress(address); // Dirty checking do JPA cuidará da persistência de ambas as entidades ao fim da
-                                       // transação.
+        candidate.setAddress(address);
+
     }
 }

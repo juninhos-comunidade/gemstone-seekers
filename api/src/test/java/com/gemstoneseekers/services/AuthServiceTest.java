@@ -54,7 +54,6 @@ class AuthServiceTest {
     @Test
     @DisplayName("register() should create user when email is unique")
     void register_shouldCreateUser_whenEmailIsUnique() {
-        // Arrange
         var request = new RegisterRequest("John Doe", "john.doe@example.com", "password123");
         var hashedPassword = "hashedPassword";
         var savedUser = new User();
@@ -67,10 +66,8 @@ class AuthServiceTest {
         when(passwordEncoder.encode(request.password())).thenReturn(hashedPassword);
         when(userRepository.save(any(User.class))).thenReturn(savedUser);
 
-        // Act
         User result = authService.register(request);
 
-        // Assert
         assertThat(result).isNotNull();
         assertThat(result.getId()).isEqualTo(savedUser.getId());
         assertThat(result.getEmail()).isEqualTo(request.email());
@@ -88,11 +85,9 @@ class AuthServiceTest {
     @Test
     @DisplayName("register() should throw ConflictException when email is already in use")
     void register_shouldThrowConflictException_whenEmailIsInUse() {
-        // Arrange
         var request = new RegisterRequest("Jane Doe", "jane.doe@example.com", "password123");
         when(userRepository.existsByEmail(request.email())).thenReturn(true);
 
-        // Act & Assert
         assertThatThrownBy(() -> authService.register(request)).isInstanceOf(ConflictException.class)
                 .hasMessage("Email already in use");
 
