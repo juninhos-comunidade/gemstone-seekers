@@ -18,6 +18,8 @@ import lombok.Setter;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
+import java.io.Serial;
+
 @Entity
 @Table(name = "candidate_languages")
 @Getter
@@ -26,7 +28,7 @@ import org.hibernate.type.SqlTypes;
 public class CandidateLanguage {
 
     @EmbeddedId
-    private CandidateLanguageId id = new CandidateLanguageId();
+    private CandidateLanguageId id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("candidateId")

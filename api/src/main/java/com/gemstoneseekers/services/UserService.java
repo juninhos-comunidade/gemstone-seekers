@@ -22,7 +22,7 @@ public class UserService {
 
     public UserResponse getUserById(UUID userId) {
         User user = userRepository.findById(userId)
-            .orElseThrow(() -> new RuntimeException("Usuário não encontrado com o ID fornecido: " + userId));
+            .orElseThrow(() -> new EntityNotFoundException("User", userId));
 
         return new UserResponse(
             user.getId(),
@@ -34,6 +34,12 @@ public class UserService {
         );
     }
     public UserResponse updateUserByEmail(String email, UserRequest userRequest){
+        if (email == null || email.isBlank()) {
+            throw new IllegalArgumentException("Email não pode ser nulo ou vazio");
+        }
+        if (userRequest == null) {
+            throw new IllegalArgumentException("Requisição do usuário não pode ser nula");
+        }
         User user = userRepository.findByEmail(email)
             .orElseThrow(() -> new EntityNotFoundException("User", email));
         userMapper.updateEntityFromRequest(userRequest, user);

@@ -27,7 +27,7 @@ public class UserProfileController {
     private final CertificationService certificationService;
     private final CandidateLanguageService candidateLanguageService;
     private final ProjectService projectService;
-
+    public static final String CANDIDATE_ROLE = "hasRole('CANDIDATE')";
     public UserProfileController(UserProfileService userProfileService, AddressService addressService, CandidateLinkService candidateLinkService, ExperienceService experienceService, EducationService educationService, CertificationService certificationService, CandidateLanguageService candidateLanguageService, ProjectService projectService) {
         this.userProfileService = userProfileService;
         this.addressService = addressService;
@@ -40,7 +40,7 @@ public class UserProfileController {
     }
 //=================GET======================================================
     @GetMapping("")
-    @PreAuthorize("hasRole('CANDIDATE')")
+    @PreAuthorize(CANDIDATE_ROLE)
     public ResponseEntity<BaseResponse<CandidateProfileResponse>> getCandidateProfile(
         @AuthenticationPrincipal UserDetails userDetails) {
         String email = userDetails.getUsername();
@@ -52,7 +52,7 @@ public class UserProfileController {
 
 //=================PATCH======================================================
     @PatchMapping("/user")
-    @PreAuthorize("hasRole('CANDIDATE')")
+    @PreAuthorize(CANDIDATE_ROLE)
     public ResponseEntity<BaseResponse<CandidateProfileResponse>> updateCandidateProfile(
         @AuthenticationPrincipal UserDetails userDetails,
         @RequestBody UserRequest request)
@@ -65,14 +65,14 @@ public class UserProfileController {
     }
 
     @PatchMapping("/address")
-    @PreAuthorize("hasRole('CANDIDATE')")
+    @PreAuthorize(CANDIDATE_ROLE)
     public ResponseEntity<BaseResponse<CandidateProfileResponse>> updateCandidateAddres(
         @AuthenticationPrincipal UserDetails userDetails,
         @RequestBody AddressRequest request)
     {
         String email = userDetails.getUsername();
 
-        addressService.updateAddresInfoByEmail(email,request);
+        addressService.updateAddressInfoByEmail(email,request);
         CandidateProfileResponse candidateProfile = userProfileService.getCandidateProfileByUserEmail(email);
 
         return ResponseEntity.status(HttpStatus.OK)
@@ -81,7 +81,7 @@ public class UserProfileController {
 
 //=================POST======================================================
     @PostMapping("/links")
-    @PreAuthorize("hasRole('CANDIDATE')")
+    @PreAuthorize(CANDIDATE_ROLE)
     public ResponseEntity<BaseResponse<CandidateProfileResponse>> addCandidateLink(
         @AuthenticationPrincipal UserDetails userDetails,
         @RequestBody LinkItemRequest request) {
@@ -97,7 +97,7 @@ public class UserProfileController {
       }
 
     @PostMapping("/experiences")
-    @PreAuthorize("hasRole('CANDIDATE')")
+    @PreAuthorize(CANDIDATE_ROLE)
     public ResponseEntity<BaseResponse<CandidateProfileResponse>> addCandidateExperience(
         @AuthenticationPrincipal UserDetails userDetails,
         @RequestBody ExperienceRequest request) {
@@ -112,7 +112,7 @@ public class UserProfileController {
     }
 
     @PostMapping("/educations")
-    @PreAuthorize("hasRole('CANDIDATE')")
+    @PreAuthorize(CANDIDATE_ROLE)
     public ResponseEntity<BaseResponse<CandidateProfileResponse>> addEducation(
         @AuthenticationPrincipal UserDetails userDetails,
         @RequestBody EducationRequest request) {
@@ -125,7 +125,7 @@ public class UserProfileController {
             .body(new BaseResponse<>(true, "Education added successfully", updatedUser, null));
 
     }    @PostMapping("/certifications")
-    @PreAuthorize("hasRole('CANDIDATE')")
+    @PreAuthorize(CANDIDATE_ROLE)
     public ResponseEntity<BaseResponse<CandidateProfileResponse>> addCertification(
         @AuthenticationPrincipal UserDetails userDetails,
         @RequestBody CertificationRequest request) {
@@ -139,7 +139,7 @@ public class UserProfileController {
     }
 
     @PostMapping("/languages")
-    @PreAuthorize("hasRole('CANDIDATE')")
+    @PreAuthorize(CANDIDATE_ROLE)
     public ResponseEntity<BaseResponse<CandidateProfileResponse>> addLanguage(
         @AuthenticationPrincipal UserDetails userDetails,
         @RequestBody CandidateLanguageRequest request) {
@@ -153,7 +153,7 @@ public class UserProfileController {
             .body(new BaseResponse<>(true, "Language added successfully", updatedUser, null));
     }
     @PostMapping("/projects")
-    @PreAuthorize("hasRole('CANDIDATE')")
+    @PreAuthorize(CANDIDATE_ROLE)
     public ResponseEntity<BaseResponse<CandidateProfileResponse>> addProjects(
         @AuthenticationPrincipal UserDetails userDetails,
         @RequestBody ProjectRequest request) {
@@ -170,7 +170,7 @@ public class UserProfileController {
 // ===================DELETE===================================================================
 
     @DeleteMapping("/links/{linkId}")
-    @PreAuthorize("hasRole('CANDIDATE')")
+    @PreAuthorize(CANDIDATE_ROLE)
     public ResponseEntity<BaseResponse<CandidateProfileResponse>> deleteCandidateLink(
         @AuthenticationPrincipal UserDetails userDetails,
         @PathVariable UUID linkId) {
@@ -185,7 +185,7 @@ public class UserProfileController {
       }
 
     @DeleteMapping("/experiences/{experienceId}")
-    @PreAuthorize("hasRole('CANDIDATE')")
+    @PreAuthorize(CANDIDATE_ROLE)
     public ResponseEntity<BaseResponse<CandidateProfileResponse>> deleteCandidateExperience(
         @AuthenticationPrincipal UserDetails userDetails,
         @PathVariable UUID experienceId) {
@@ -199,7 +199,7 @@ public class UserProfileController {
     }
 
     @DeleteMapping("/educations/{educationId}")
-    @PreAuthorize("hasRole('CANDIDATE')")
+    @PreAuthorize(CANDIDATE_ROLE)
     public ResponseEntity<BaseResponse<CandidateProfileResponse>> deleteCandidateEducation(
         @AuthenticationPrincipal UserDetails userDetails,
         @PathVariable UUID educationId) {
@@ -212,7 +212,7 @@ public class UserProfileController {
 
     }
     @DeleteMapping("/certifications/{certificationId}")
-    @PreAuthorize("hasRole('CANDIDATE')")
+    @PreAuthorize(CANDIDATE_ROLE)
     public ResponseEntity<BaseResponse<CandidateProfileResponse>> deleteCandidateCertification(
         @AuthenticationPrincipal UserDetails userDetails,
         @PathVariable UUID certificationId) {
@@ -225,7 +225,7 @@ public class UserProfileController {
 
     }
     @DeleteMapping("/languages/{languageId}")
-    @PreAuthorize("hasRole('CANDIDATE')")
+    @PreAuthorize(CANDIDATE_ROLE)
     public ResponseEntity<BaseResponse<CandidateProfileResponse>> deleteLanguage(
         @AuthenticationPrincipal UserDetails userDetails,
         @PathVariable Integer languageId) {
@@ -238,7 +238,7 @@ public class UserProfileController {
 
     }
     @DeleteMapping("/projects/{projectId}")
-    @PreAuthorize("hasRole('CANDIDATE')")
+    @PreAuthorize(CANDIDATE_ROLE)
     public ResponseEntity<BaseResponse<CandidateProfileResponse>> deleteProject(
         @AuthenticationPrincipal UserDetails userDetails,
         @PathVariable UUID projectId) {

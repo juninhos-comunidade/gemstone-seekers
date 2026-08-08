@@ -117,10 +117,8 @@ class AddressServiceTest {
             target.setComplement(value.complement());
             return null;
         }).when(addressMapper).updateEntityFromRequest(request, address);
-        when(addressRepository.save(address)).thenReturn(address);
-        when(candidateRepository.save(candidate)).thenReturn(candidate);
 
-        addressService.updateAddresInfoByEmail(email, request);
+        addressService.updateAddressInfoByEmail(email, request);
 
         assertThat(address.getCity()).isEqualTo(city);
         assertThat(address.getZipCode()).isEqualTo("01000-000");
@@ -129,8 +127,7 @@ class AddressServiceTest {
         verify(countryService).getCountry("Brazil");
         verify(stateService).getCanonicalState("SP", country);
         verify(cityService).getOrCreateCity("São Paulo", state);
-        verify(addressRepository).save(address);
-        verify(candidateRepository).save(candidate);
+        verify(addressMapper).updateEntityFromRequest(request, address);
     }
 
     @Test
@@ -151,20 +148,17 @@ class AddressServiceTest {
             target.setComplement(value.complement());
             return null;
         }).when(addressMapper).updateEntityFromRequest(eq(request), any(Address.class));
-        when(addressRepository.save(any(Address.class))).thenAnswer(invocation -> invocation.getArgument(0));
-        when(candidateRepository.save(candidate)).thenReturn(candidate);
 
-        addressService.updateAddresInfoByEmail(email, request);
+        addressService.updateAddressInfoByEmail(email, request);
 
         ArgumentCaptor<Address> addressCaptor = ArgumentCaptor.forClass(Address.class);
-        verify(addressRepository).save(addressCaptor.capture());
-        Address savedAddress = addressCaptor.getValue();
+        verify(addressMapper).updateEntityFromRequest(eq(request), addressCaptor.capture());
+        Address capturedAddress = addressCaptor.getValue();
 
-        assertThat(savedAddress.getCity()).isNull();
-        assertThat(savedAddress.getZipCode()).isEqualTo("01000-000");
-        assertThat(candidate.getAddress()).isSameAs(savedAddress);
+        assertThat(capturedAddress.getCity()).isNull();
+        assertThat(capturedAddress.getZipCode()).isEqualTo("01000-000");
+        assertThat(candidate.getAddress()).isSameAs(capturedAddress);
         verifyNoInteractions(countryService, stateService, cityService);
-        verify(candidateRepository).save(candidate);
     }
 
     @Test
@@ -173,7 +167,7 @@ class AddressServiceTest {
         AddressRequest request = new AddressRequest("01000-000", "Main Street", "100", "Center", "Apt 12", null);
         when(candidateRepository.findByUserEmail(email)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> addressService.updateAddresInfoByEmail(email, request))
+        assertThatThrownBy(() -> addressService.updateAddressInfoByEmail(email, request))
             .isInstanceOf(EntityNotFoundException.class)
             .hasMessage("Candidate with id " + email + " not found");
         verifyNoInteractions(addressMapper, addressRepository, countryService, stateService, cityService);

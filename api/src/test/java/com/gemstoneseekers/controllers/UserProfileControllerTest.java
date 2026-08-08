@@ -104,7 +104,7 @@ class UserProfileControllerTest {
         assertThat(response.getBody().success()).isTrue();
         assertThat(response.getBody().message()).isEqualTo("Candidate address updated successfully");
         assertThat(response.getBody().result()).isEqualTo(profile);
-        verify(addressService).updateAddresInfoByEmail(email, request);
+        verify(addressService).updateAddressInfoByEmail(email, request);
         verify(userProfileService).getCandidateProfileByUserEmail(email);
     }
 

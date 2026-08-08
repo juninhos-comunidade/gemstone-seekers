@@ -10,6 +10,7 @@ import com.gemstoneseekers.repositories.CandidateRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -36,18 +37,15 @@ public class AddressService {
     }
 
     @Transactional
-    public void updateAddresInfoByEmail(String email, AddressRequest request){
+    public void updateAddressInfoByEmail(String email, AddressRequest request) {
 
         Candidate candidate = candidateRepository.findByUserEmail(email)
             .orElseThrow(() -> new EntityNotFoundException("Candidate", email));
 
-        Address address = candidate.getAddress();
-        if (address == null) {
-            address = new Address();
-        }
+        Address address = Optional.ofNullable(candidate.getAddress())
+            .orElseGet(Address::new);
 
-
-        if (request.location() != null && request.location().city() != null && request.location().state() != null && request.location().country() != null) {
+        if (request.location() != null) {
             Country country = countryService.getCountry(request.location().country());
             State state = stateService.getCanonicalState(request.location().state(), country);
             City city = cityService.getOrCreateCity(request.location().city(), state);
@@ -56,10 +54,6 @@ public class AddressService {
         }
 
         addressMapper.updateEntityFromRequest(request, address);
-
-        addressRepository.save(address);
-        candidate.setAddress(address);
-        candidateRepository.save(candidate);
-
+        candidate.setAddress(address); // Dirty checking do JPA cuidará da persistência de ambas as entidades ao fim da transação.
     }
 }

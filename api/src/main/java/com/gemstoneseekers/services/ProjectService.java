@@ -35,18 +35,14 @@ public class ProjectService {
 
     public void addCandidateProject(String email, ProjectRequest request) {
 
-        try {
+
         Candidate candidate = candidateRepository.findByUserEmail(email)
             .orElseThrow(() -> new EntityNotFoundException("Candidate", email));
 
         Project newProject = projectMapper.toProject(request, candidate);
         candidate.getProjects().add(newProject);
         candidateRepository.save(candidate);
-    } catch (Exception e) { // ➔ 🎯 PEGOU EM FLAGRANTE
-        System.err.println("=== 🚨 ERRO DETECTADO NO FLUXO DE PROJETOS ===");
-        e.printStackTrace(); // Cospe a pilha de erro vermelha inteira no console do Spring
-        throw e; // Repassa o erro para o Spring Boot manter o Rollback ativo
-    }
+
     }
     public void deleteCandidateProject(String email, UUID educationId) {
 

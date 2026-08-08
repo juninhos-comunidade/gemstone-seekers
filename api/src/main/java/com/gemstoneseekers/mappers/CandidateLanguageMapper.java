@@ -9,6 +9,7 @@ import com.gemstoneseekers.models.Language;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 @Component
@@ -37,7 +38,7 @@ public class CandidateLanguageMapper {
         }
         candidateLanguage.setCandidate(candidate);
         candidateLanguage.setLanguage(language);
-        candidateLanguage.setProficiency(ProficiencyLevel.valueOf(request.proficiency().toUpperCase()));
+        candidateLanguage.setProficiency(ProficiencyLevel.valueOf(request.proficiency().toUpperCase(Locale.ROOT)));
 
 
         return candidateLanguage;

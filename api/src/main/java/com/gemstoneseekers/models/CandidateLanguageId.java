@@ -1,5 +1,6 @@
 package com.gemstoneseekers.models;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.UUID;
 
@@ -20,6 +21,9 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode
 @AllArgsConstructor
 public class CandidateLanguageId implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     @Column(name = "candidate_id")
     private UUID candidateId;
