@@ -1,6 +1,5 @@
 package com.gemstoneseekers.services;
 
-
 import com.gemstoneseekers.dtos.request.UserRequest;
 import com.gemstoneseekers.dtos.response.AddressResponse;
 import com.gemstoneseekers.dtos.response.CandidateProfileResponse;
@@ -9,13 +8,12 @@ import com.gemstoneseekers.exceptions.EntityNotFoundException;
 import com.gemstoneseekers.mappers.CandidateMapper;
 import com.gemstoneseekers.mappers.CandidateProfileMapper;
 import com.gemstoneseekers.mappers.UserMapper;
-import com.gemstoneseekers.models.*;
+import com.gemstoneseekers.models.Candidate;
+import com.gemstoneseekers.models.User;
 import com.gemstoneseekers.repositories.CandidateRepository;
 import com.gemstoneseekers.repositories.UserRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
-
-
 
 @Service
 public class UserProfileService {
@@ -27,8 +25,9 @@ public class UserProfileService {
     private final UserMapper userMapper;
     private final CandidateService candidateService;
 
-
-    public UserProfileService(AddressService addressService, CandidateMapper candidateMapper, CandidateProfileMapper candidateProfileMapper, CandidateRepository candidateRepository, UserRepository userRepository, UserMapper userMapper, CandidateService candidateService) {
+    public UserProfileService(AddressService addressService, CandidateMapper candidateMapper,
+            CandidateProfileMapper candidateProfileMapper, CandidateRepository candidateRepository,
+            UserRepository userRepository, UserMapper userMapper, CandidateService candidateService) {
         this.addressService = addressService;
         this.candidateMapper = candidateMapper;
         this.candidateProfileMapper = candidateProfileMapper;
@@ -42,7 +41,7 @@ public class UserProfileService {
     public CandidateProfileResponse getCandidateProfileByUserEmail(String email) {
 
         Candidate candidateEntity = candidateRepository.findByUserEmail(email)
-            .orElseThrow(() -> new EntityNotFoundException("Candidate for User", email));
+                .orElseThrow(() -> new EntityNotFoundException("Candidate for User", email));
 
         AddressResponse address = null;
         if (candidateEntity.getAddress() != null) {
@@ -55,10 +54,9 @@ public class UserProfileService {
     }
 
     @Transactional
-    public CandidateProfileResponse updatePersonalInfoByEmail(String email, UserRequest userRequest){
+    public CandidateProfileResponse updatePersonalInfoByEmail(String email, UserRequest userRequest) {
 
-        User user = userRepository.findByEmail(email)
-            .orElseThrow(() -> new EntityNotFoundException("User", email));
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new EntityNotFoundException("User", email));
         Candidate candidate = candidateService.getCandidateByUserId(user.getId());
 
         userMapper.updateEntityFromRequest(userRequest, user);
@@ -68,8 +66,5 @@ public class UserProfileService {
         candidateRepository.save(candidate);
         return getCandidateProfileByUserEmail(email);
     }
-
-
-
 
 }

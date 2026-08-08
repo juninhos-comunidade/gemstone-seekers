@@ -23,7 +23,7 @@ public class CountryService {
 
     public Country getCountry(String name) {
         return countryRepository.findByNameIgnoreCase(name)
-            .orElseThrow(() -> new EntityNotFoundException("Country", name));
+                .orElseThrow(() -> new EntityNotFoundException("Country", name));
     }
 
 }

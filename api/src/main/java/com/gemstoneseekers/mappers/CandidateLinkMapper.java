@@ -13,20 +13,14 @@ import java.util.stream.Collectors;
 public class CandidateLinkMapper {
 
     public CandidateLinkResponse toResponse(CandidateLink link) {
-         return new CandidateLinkResponse(
-            link.getId(),
-            link.getName(),
-            link.getUrl()
-        );
+        return new CandidateLinkResponse(link.getId(), link.getName(), link.getUrl());
     }
 
     public List<CandidateLinkResponse> toResponseList(List<CandidateLink> links) {
         if (links == null) {
             return List.of();
         }
-        return links.stream()
-            .map(this::toResponse)
-            .collect(Collectors.toList());
+        return links.stream().map(this::toResponse).collect(Collectors.toList());
     }
 
     public CandidateLink toCandidateLink(LinkItemRequest request, Candidate candidate) {
@@ -39,6 +33,6 @@ public class CandidateLinkMapper {
         newLink.setName(request.name());
         newLink.setUrl(request.url());
 
-        return  newLink;
-   }
+        return newLink;
+    }
 }

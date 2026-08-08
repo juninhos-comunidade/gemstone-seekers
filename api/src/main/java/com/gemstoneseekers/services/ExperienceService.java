@@ -1,12 +1,10 @@
 package com.gemstoneseekers.services;
 
 import com.gemstoneseekers.dtos.request.ExperienceRequest;
-import com.gemstoneseekers.dtos.response.CandidateProfileResponse;
 import com.gemstoneseekers.exceptions.AccessDeniedException;
 import com.gemstoneseekers.exceptions.EntityNotFoundException;
 import com.gemstoneseekers.mappers.ExperienceMapper;
 import com.gemstoneseekers.models.Candidate;
-import com.gemstoneseekers.models.CandidateLink;
 import com.gemstoneseekers.models.Experience;
 import com.gemstoneseekers.repositories.CandidateRepository;
 import com.gemstoneseekers.repositories.ExperienceRepository;
@@ -22,7 +20,8 @@ public class ExperienceService {
     private final ExperienceMapper experienceMapper;
     private final CandidateRepository candidateRepository;
 
-    public ExperienceService(UserProfileService userProfileService, ExperienceRepository experienceRepository, ExperienceMapper experienceMapper, CandidateRepository candidateRepository) {
+    public ExperienceService(UserProfileService userProfileService, ExperienceRepository experienceRepository,
+            ExperienceMapper experienceMapper, CandidateRepository candidateRepository) {
         this.userProfileService = userProfileService;
         this.experienceRepository = experienceRepository;
         this.experienceMapper = experienceMapper;
@@ -31,7 +30,7 @@ public class ExperienceService {
 
     public void addExperience(String email, ExperienceRequest request) {
         Candidate candidate = candidateRepository.findByUserEmail(email)
-            .orElseThrow(() -> new EntityNotFoundException("Candidate", email));
+                .orElseThrow(() -> new EntityNotFoundException("Candidate", email));
 
         Experience newExperience = experienceMapper.toExperience(request, candidate);
         candidate.getExperiences().add(newExperience);
@@ -41,13 +40,11 @@ public class ExperienceService {
     public void deleteExperience(String email, UUID linkId) {
 
         Experience experience = experienceRepository.findById(linkId)
-            .orElseThrow(() -> new EntityNotFoundException("Link", linkId));
+                .orElseThrow(() -> new EntityNotFoundException("Link", linkId));
         Candidate candidate = experience.getCandidate();
 
         if (!candidate.getUser().getEmail().equalsIgnoreCase(email)) {
-            throw new AccessDeniedException(
-                "Operação inválida. Você não é o proprietário deste registro."
-            );
+            throw new AccessDeniedException("Operação inválida. Você não é o proprietário deste registro.");
         }
 
         candidate.getExperiences().remove(experience);

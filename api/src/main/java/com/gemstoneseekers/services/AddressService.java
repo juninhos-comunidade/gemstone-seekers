@@ -4,7 +4,11 @@ import com.gemstoneseekers.dtos.request.AddressRequest;
 import com.gemstoneseekers.dtos.response.AddressResponse;
 import com.gemstoneseekers.exceptions.EntityNotFoundException;
 import com.gemstoneseekers.mappers.AddressMapper;
-import com.gemstoneseekers.models.*;
+import com.gemstoneseekers.models.Address;
+import com.gemstoneseekers.models.Candidate;
+import com.gemstoneseekers.models.City;
+import com.gemstoneseekers.models.Country;
+import com.gemstoneseekers.models.State;
 import com.gemstoneseekers.repositories.AddressRepository;
 import com.gemstoneseekers.repositories.CandidateRepository;
 import jakarta.transaction.Transactional;
@@ -22,7 +26,9 @@ public class AddressService {
     private final StateService stateService;
     private final CityService cityService;
 
-    public AddressService(AddressMapper addressMapper, AddressRepository addressRepository, CandidateRepository candidateRepository, CountryService countryService, StateService stateService, CityService cityService) {
+    public AddressService(AddressMapper addressMapper, AddressRepository addressRepository,
+            CandidateRepository candidateRepository, CountryService countryService, StateService stateService,
+            CityService cityService) {
         this.addressMapper = addressMapper;
         this.addressRepository = addressRepository;
         this.candidateRepository = candidateRepository;
@@ -31,8 +37,7 @@ public class AddressService {
         this.cityService = cityService;
     }
     public AddressResponse getAddressById(UUID id) {
-        Address address = addressRepository.findById(id)
-            .orElseThrow(() -> new EntityNotFoundException("Address", id));
+        Address address = addressRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Address", id));
         return addressMapper.toAddressResponse(address);
     }
 
@@ -40,10 +45,9 @@ public class AddressService {
     public void updateAddressInfoByEmail(String email, AddressRequest request) {
 
         Candidate candidate = candidateRepository.findByUserEmail(email)
-            .orElseThrow(() -> new EntityNotFoundException("Candidate", email));
+                .orElseThrow(() -> new EntityNotFoundException("Candidate", email));
 
-        Address address = Optional.ofNullable(candidate.getAddress())
-            .orElseGet(Address::new);
+        Address address = Optional.ofNullable(candidate.getAddress()).orElseGet(Address::new);
 
         if (request.location() != null) {
             Country country = countryService.getCountry(request.location().country());
@@ -54,6 +58,7 @@ public class AddressService {
         }
 
         addressMapper.updateEntityFromRequest(request, address);
-        candidate.setAddress(address); // Dirty checking do JPA cuidará da persistência de ambas as entidades ao fim da transação.
+        candidate.setAddress(address); // Dirty checking do JPA cuidará da persistência de ambas as entidades ao fim da
+                                       // transação.
     }
 }

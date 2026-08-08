@@ -19,7 +19,8 @@ public class CandidateLinkService {
     private final CandidateRepository candidateRepository;
     private final CandidateLinkRepository candidateLinkRepository;
     private final CandidateLinkMapper candidateLinkMapper;
-    public CandidateLinkService(CandidateRepository candidateRepository, CandidateLinkRepository candidateLinkRepository, CandidateLinkMapper candidateLinkMapper) {
+    public CandidateLinkService(CandidateRepository candidateRepository,
+            CandidateLinkRepository candidateLinkRepository, CandidateLinkMapper candidateLinkMapper) {
         this.candidateRepository = candidateRepository;
         this.candidateLinkRepository = candidateLinkRepository;
         this.candidateLinkMapper = candidateLinkMapper;
@@ -28,7 +29,7 @@ public class CandidateLinkService {
     @Transactional
     public void addLink(String email, LinkItemRequest request) {
         Candidate candidate = candidateRepository.findByUserEmail(email)
-            .orElseThrow(() -> new EntityNotFoundException("Candidate", email));
+                .orElseThrow(() -> new EntityNotFoundException("Candidate", email));
 
         CandidateLink newLink = candidateLinkMapper.toCandidateLink(request, candidate);
         candidate.getLinks().add(newLink);
@@ -39,13 +40,11 @@ public class CandidateLinkService {
     public void deleteLink(String email, UUID linkId) {
 
         CandidateLink link = candidateLinkRepository.findById(linkId)
-            .orElseThrow(() -> new EntityNotFoundException("Link", linkId));
+                .orElseThrow(() -> new EntityNotFoundException("Link", linkId));
         Candidate candidate = link.getCandidate();
 
         if (!candidate.getUser().getEmail().equalsIgnoreCase(email)) {
-            throw new AccessDeniedException(
-                "Operação inválida. Você não é o proprietário deste registro."
-            );
+            throw new AccessDeniedException("Operação inválida. Você não é o proprietário deste registro.");
         }
 
         candidate.getLinks().remove(link);

@@ -2,7 +2,6 @@ package com.gemstoneseekers.models;
 
 import java.util.UUID;
 
-import com.gemstoneseekers.models.BaseModel;
 import org.hibernate.annotations.UuidGenerator;
 
 import jakarta.persistence.Column;
@@ -40,6 +39,5 @@ public class CandidateLink extends BaseModel {
 
     @Column(name = "url", nullable = false, columnDefinition = "TEXT")
     private String url;
-
 
 }

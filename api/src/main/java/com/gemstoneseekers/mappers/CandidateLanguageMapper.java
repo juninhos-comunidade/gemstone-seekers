@@ -17,21 +17,16 @@ public class CandidateLanguageMapper {
 
     public CandidateLanguageResponse toResponse(CandidateLanguage candidateLanguage) {
 
-        return new CandidateLanguageResponse(
-            candidateLanguage.getId().getLanguageId(),
-            candidateLanguage.getLanguage().getName(),
-            candidateLanguage.getProficiency()
-        );
+        return new CandidateLanguageResponse(candidateLanguage.getId().getLanguageId(),
+                candidateLanguage.getLanguage().getName(), candidateLanguage.getProficiency());
     }
 
     public List<CandidateLanguageResponse> toResponseList(List<CandidateLanguage> candidateLanguages) {
-        return candidateLanguages.stream()
-            .map(this::toResponse)
-            .collect(Collectors.toList());
+        return candidateLanguages.stream().map(this::toResponse).collect(Collectors.toList());
     }
 
-
-    public CandidateLanguage toCandidateLanguage(CandidateLanguageRequest request, Candidate candidate, Language language) {
+    public CandidateLanguage toCandidateLanguage(CandidateLanguageRequest request, Candidate candidate,
+            Language language) {
         CandidateLanguage candidateLanguage = new CandidateLanguage();
         if (request == null || candidate == null || language == null) {
             return null;
@@ -39,7 +34,6 @@ public class CandidateLanguageMapper {
         candidateLanguage.setCandidate(candidate);
         candidateLanguage.setLanguage(language);
         candidateLanguage.setProficiency(ProficiencyLevel.valueOf(request.proficiency().toUpperCase(Locale.ROOT)));
-
 
         return candidateLanguage;
     }

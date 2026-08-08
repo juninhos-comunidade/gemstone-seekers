@@ -16,26 +16,18 @@ public class EducationMapper {
         this.technologyMapper = technologyMapper;
     }
 
-    public EducationResponse toResponse(Education education){
+    public EducationResponse toResponse(Education education) {
         if (education == null) {
             return null;
         }
-        return new EducationResponse(
-            education.getId(),
-            education.getInstitution(),
-            education.getFieldOfStudy(),
-            education.getDegree(),
-            education.getStartDate(),
-            education.getCompletionDate()
-        );
+        return new EducationResponse(education.getId(), education.getInstitution(), education.getFieldOfStudy(),
+                education.getDegree(), education.getStartDate(), education.getCompletionDate());
     }
     public List<EducationResponse> toResponseList(List<Education> educations) {
         if (educations == null) {
             return List.of();
         }
-        return educations.stream()
-            .map(this::toResponse)
-            .collect(Collectors.toList());
+        return educations.stream().map(this::toResponse).collect(Collectors.toList());
     }
     public Education toEducation(EducationRequest request, Candidate candidate) {
         Education newEducation = new Education();
@@ -49,7 +41,7 @@ public class EducationMapper {
         newEducation.setFieldOfStudy(request.fieldOfStudy());
         newEducation.setDegree(request.degree());
         newEducation.setCompletionDate(request.completionDate());
-        return  newEducation;
+        return newEducation;
 
     }
 }

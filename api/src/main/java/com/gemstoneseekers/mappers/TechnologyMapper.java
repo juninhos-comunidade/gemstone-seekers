@@ -17,8 +17,6 @@ public class TechnologyMapper {
         if (technologies == null) {
             return Set.of();
         }
-        return technologies.stream()
-            .map(this::toTechnologyResponse)
-            .collect(Collectors.toSet());
+        return technologies.stream().map(this::toTechnologyResponse).collect(Collectors.toSet());
     }
 }

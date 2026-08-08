@@ -13,14 +13,9 @@ import java.util.stream.Collectors;
 public class CertificationMapper {
 
     public CertificationResponse toCertificationResponse(Certification certification) {
-        return new CertificationResponse(
-            certification.getId(),
-            certification.getName(),
-            certification.getIssuingOrganization(),
-            certification.getIssueDate(),
-            certification.getExpirationDate(),
-            certification.getCredentialUrl()
-        );
+        return new CertificationResponse(certification.getId(), certification.getName(),
+                certification.getIssuingOrganization(), certification.getIssueDate(), certification.getExpirationDate(),
+                certification.getCredentialUrl());
 
     }
 
@@ -28,11 +23,8 @@ public class CertificationMapper {
         if (certifications == null) {
             return List.of();
         }
-        return certifications.stream()
-            .map(this::toCertificationResponse)
-            .collect(Collectors.toList());
+        return certifications.stream().map(this::toCertificationResponse).collect(Collectors.toList());
     }
-
 
     public Certification toCertification(CertificationRequest request, Candidate candidate) {
         Certification newCertification = new Certification();

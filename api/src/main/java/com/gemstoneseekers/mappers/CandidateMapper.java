@@ -17,7 +17,9 @@ public class CandidateMapper {
     private final ProjectMapper projectMapper;
     private final CandidateLanguageMapper candidateLanguageMapper;
 
-    public CandidateMapper(UserMapper userMapper, CandidateLinkMapper candidateLinkMapper, ExperienceMapper experienceMapper, EducationMapper educationMapper, CertificationMapper certificationMapper, ProjectMapper projectMapper, CandidateLanguageMapper candidateLanguageMapper) {
+    public CandidateMapper(UserMapper userMapper, CandidateLinkMapper candidateLinkMapper,
+            ExperienceMapper experienceMapper, EducationMapper educationMapper, CertificationMapper certificationMapper,
+            ProjectMapper projectMapper, CandidateLanguageMapper candidateLanguageMapper) {
         this.userMapper = userMapper;
         this.candidateLinkMapper = candidateLinkMapper;
         this.experienceMapper = experienceMapper;
@@ -30,23 +32,20 @@ public class CandidateMapper {
     public CandidateResponse toCandidateResponse(Candidate candidate) {
         UserResponse userResponse = userMapper.toUserResponse(candidate.getUser());
 
-        return new CandidateResponse(
-            candidate.getId(),
-            userResponse,
-            candidate.getPhone(),
-            candidate.getSummary(),
-            candidateLinkMapper.toResponseList(candidate.getLinks()),
-            experienceMapper.toResponseList(candidate.getExperiences()),
-            educationMapper.toResponseList(candidate.getEducations()),
-            certificationMapper.toResponseList(candidate.getCertifications()),
-            projectMapper.toResponseList(candidate.getProjects()),
-            candidateLanguageMapper.toResponseList(candidate.getLanguages())
-        );
+        return new CandidateResponse(candidate.getId(), userResponse, candidate.getPhone(), candidate.getSummary(),
+                candidateLinkMapper.toResponseList(candidate.getLinks()),
+                experienceMapper.toResponseList(candidate.getExperiences()),
+                educationMapper.toResponseList(candidate.getEducations()),
+                certificationMapper.toResponseList(candidate.getCertifications()),
+                projectMapper.toResponseList(candidate.getProjects()),
+                candidateLanguageMapper.toResponseList(candidate.getLanguages()));
     }
 
     public void updateEntityFromRequest(UserRequest request, Candidate candidate) {
 
-        if (request == null || candidate == null) return;
+        if (request == null || candidate == null) {
+            return;
+        }
 
         if (request.phone() != null && !request.phone().isBlank()) {
             candidate.setPhone(request.phone());

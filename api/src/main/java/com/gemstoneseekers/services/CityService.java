@@ -26,14 +26,12 @@ public class CityService {
     }
 
     public City getOrCreateCity(String cityName, State state) {
-        return cityRepository.findByNameIgnoreCaseAndStateId(cityName, state.getId())
-            .orElseGet(() -> {
-                City city = new City();
-                city.setName(cityName);
-                city.setState(state);
-                return cityRepository.save(city);
-            });
+        return cityRepository.findByNameIgnoreCaseAndStateId(cityName, state.getId()).orElseGet(() -> {
+            City city = new City();
+            city.setName(cityName);
+            city.setState(state);
+            return cityRepository.save(city);
+        });
     }
-
 
 }

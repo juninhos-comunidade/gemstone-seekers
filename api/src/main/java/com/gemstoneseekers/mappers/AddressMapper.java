@@ -13,15 +13,8 @@ public class AddressMapper {
     }
 
     public AddressResponse toAddressResponse(Address address) {
-        return new AddressResponse(
-            address.getId(),
-            cityMapper.toCityResponse(address.getCity()),
-            address.getZipCode(),
-            address.getStreet(),
-            address.getNumber(),
-            address.getNeighborhood(),
-            address.getComplement()
-        );
+        return new AddressResponse(address.getId(), cityMapper.toCityResponse(address.getCity()), address.getZipCode(),
+                address.getStreet(), address.getNumber(), address.getNeighborhood(), address.getComplement());
     }
 
     public void updateEntityFromRequest(AddressRequest request, Address address) {

@@ -1,7 +1,6 @@
 package com.gemstoneseekers.models;
 
 import java.time.LocalDate;
-import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
@@ -58,8 +57,7 @@ public class Project extends BaseModel {
     @JoinTable(
         name = "project_technologies",
         joinColumns = @JoinColumn(name = "project_id"),
-        inverseJoinColumns = @JoinColumn(name = "technology_id")
-    )
+        inverseJoinColumns = @JoinColumn(name = "technology_id"))
     private Set<Technology> technologies;
 
 }

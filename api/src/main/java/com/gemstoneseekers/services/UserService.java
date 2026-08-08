@@ -21,27 +21,19 @@ public class UserService {
     }
 
     public UserResponse getUserById(UUID userId) {
-        User user = userRepository.findById(userId)
-            .orElseThrow(() -> new EntityNotFoundException("User", userId));
+        User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("User", userId));
 
-        return new UserResponse(
-            user.getId(),
-            user.getName(),
-            user.getEmail(),
-            user.getRole(),
-            user.getDocumentType(),
-            user.getDocumentNumber()
-        );
+        return new UserResponse(user.getId(), user.getName(), user.getEmail(), user.getRole(), user.getDocumentType(),
+                user.getDocumentNumber());
     }
-    public UserResponse updateUserByEmail(String email, UserRequest userRequest){
+    public UserResponse updateUserByEmail(String email, UserRequest userRequest) {
         if (email == null || email.isBlank()) {
             throw new IllegalArgumentException("Email não pode ser nulo ou vazio");
         }
         if (userRequest == null) {
             throw new IllegalArgumentException("Requisição do usuário não pode ser nula");
         }
-        User user = userRepository.findByEmail(email)
-            .orElseThrow(() -> new EntityNotFoundException("User", email));
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new EntityNotFoundException("User", email));
         userMapper.updateEntityFromRequest(userRequest, user);
         user = userRepository.save(user);
         return userMapper.toUserResponse(user);

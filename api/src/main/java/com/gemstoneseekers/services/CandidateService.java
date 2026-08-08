@@ -16,12 +16,9 @@ public class CandidateService {
         this.candidateRepository = candidateRepository;
     }
 
-
     public Candidate getCandidateByUserId(UUID id) {
         return candidateRepository.findByUserId(id)
-            .orElseThrow(() -> new EntityNotFoundException("Candidate for User ID", id));
+                .orElseThrow(() -> new EntityNotFoundException("Candidate for User ID", id));
     }
-
-
 
 }
