@@ -164,7 +164,7 @@ public class UserProfileController {
         CandidateProfileResponse updatedUser = userProfileService.getCandidateProfileByUserEmail(email);
 
         return ResponseEntity.status(HttpStatus.OK)
-            .body(new BaseResponse<>(true, "Language added successfully", updatedUser, null));
+            .body(new BaseResponse<>(true, "Project added successfully", updatedUser, null));
     }
 
 // ===================DELETE===================================================================
@@ -234,7 +234,7 @@ public class UserProfileController {
         candidateLanguageService.deleteCandidateLanguage(email, languageId);
         CandidateProfileResponse updatedUser = userProfileService.getCandidateProfileByUserEmail(email);
         return ResponseEntity.status(HttpStatus.OK)
-            .body(new BaseResponse<>(true, "Certification deleted successfully", updatedUser, null));
+            .body(new BaseResponse<>(true, "Language deleted successfully", updatedUser, null));
 
     }
     @DeleteMapping("/projects/{projectId}")
@@ -247,7 +247,7 @@ public class UserProfileController {
         projectService.deleteCandidateProject(email, projectId);
         CandidateProfileResponse updatedUser = userProfileService.getCandidateProfileByUserEmail(email);
         return ResponseEntity.status(HttpStatus.OK)
-            .body(new BaseResponse<>(true, "Certification deleted successfully", updatedUser, null));
+            .body(new BaseResponse<>(true, "Project deleted successfully", updatedUser, null));
 
     }
 }
