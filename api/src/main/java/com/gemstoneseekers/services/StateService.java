@@ -2,6 +2,8 @@ package com.gemstoneseekers.services;
 
 import java.util.List;
 
+import com.gemstoneseekers.exceptions.EntityNotFoundException;
+import com.gemstoneseekers.models.Country;
 import org.springframework.stereotype.Service;
 
 import com.gemstoneseekers.models.State;
@@ -23,4 +25,10 @@ public class StateService {
     public List<State> getStatesByCountryId(Integer countryId) {
         return stateRepository.findByCountryId(countryId);
     }
+
+    public State getCanonicalState(String name, Country country) {
+        return stateRepository.findByNameIgnoreCaseAndCountryId(name, country.getId())
+                .orElseThrow(() -> new EntityNotFoundException("State", name));
+    }
+
 }
