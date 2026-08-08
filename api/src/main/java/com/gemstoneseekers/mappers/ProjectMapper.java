@@ -1,7 +1,9 @@
 package com.gemstoneseekers.mappers;
 
+import com.gemstoneseekers.dtos.request.ProjectRequest;
 import com.gemstoneseekers.dtos.response.ProjectResponse;
 import com.gemstoneseekers.dtos.response.TechnologyResponse;
+import com.gemstoneseekers.models.Candidate;
 import com.gemstoneseekers.models.Project;
 import org.springframework.stereotype.Component;
 
@@ -22,8 +24,7 @@ public class ProjectMapper {
             project.getDescription(),
             project.getProjectUrl(),
             project.getStartDate(),
-            project.getEndDate(),
-            technologyMapper.toTechnologyResponseSet(project.getTechnologies())
+            project.getEndDate()
         );
     }
 
@@ -35,5 +36,19 @@ public class ProjectMapper {
         return projects.stream()
             .map(this::toResponse)
             .collect(Collectors.toList());
+    }
+
+    public Project toProject(ProjectRequest request, Candidate candidate) {
+        if (request == null || candidate == null) {
+            return null;
+        }
+        Project project = new Project();
+        project.setName(request.name());
+        project.setDescription(request.description());
+        project.setProjectUrl(request.projectUrl());
+        project.setStartDate(request.startDate());
+        project.setEndDate(request.endDate());
+        project.setCandidate(candidate);
+        return project;
     }
 }

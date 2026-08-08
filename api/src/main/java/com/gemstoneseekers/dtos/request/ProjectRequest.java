@@ -1,14 +1,15 @@
-package com.gemstoneseekers.dtos.response;
+package com.gemstoneseekers.dtos.request;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.util.Set;
-import java.util.UUID;
 
-public record ProjectResponse(
-    UUID id,
+public record ProjectRequest(
     String name,
     String description,
     String projectUrl,
     LocalDate startDate,
     LocalDate endDate
+
 ) {}

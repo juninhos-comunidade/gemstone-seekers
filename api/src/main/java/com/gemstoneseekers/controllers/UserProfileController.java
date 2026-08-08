@@ -26,8 +26,9 @@ public class UserProfileController {
     private final EducationService educationService;
     private final CertificationService certificationService;
     private final CandidateLanguageService candidateLanguageService;
+    private final ProjectService projectService;
 
-    public UserProfileController(UserProfileService userProfileService, AddressService addressService, CandidateLinkService candidateLinkService, ExperienceService experienceService, EducationService educationService, CertificationService certificationService, CandidateLanguageService candidateLanguageService) {
+    public UserProfileController(UserProfileService userProfileService, AddressService addressService, CandidateLinkService candidateLinkService, ExperienceService experienceService, EducationService educationService, CertificationService certificationService, CandidateLanguageService candidateLanguageService, ProjectService projectService) {
         this.userProfileService = userProfileService;
         this.addressService = addressService;
         this.candidateLinkService = candidateLinkService;
@@ -35,6 +36,7 @@ public class UserProfileController {
         this.educationService = educationService;
         this.certificationService = certificationService;
         this.candidateLanguageService = candidateLanguageService;
+        this.projectService = projectService;
     }
 //=================GET======================================================
     @GetMapping("")
@@ -150,6 +152,20 @@ public class UserProfileController {
         return ResponseEntity.status(HttpStatus.OK)
             .body(new BaseResponse<>(true, "Language added successfully", updatedUser, null));
     }
+    @PostMapping("/projects")
+    @PreAuthorize("hasRole('CANDIDATE')")
+    public ResponseEntity<BaseResponse<CandidateProfileResponse>> addProjects(
+        @AuthenticationPrincipal UserDetails userDetails,
+        @RequestBody ProjectRequest request) {
+
+        String email = userDetails.getUsername();
+
+        projectService.addCandidateProject(email,request);
+        CandidateProfileResponse updatedUser = userProfileService.getCandidateProfileByUserEmail(email);
+
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(new BaseResponse<>(true, "Language added successfully", updatedUser, null));
+    }
 
 // ===================DELETE===================================================================
 
@@ -216,6 +232,19 @@ public class UserProfileController {
 
         String email = userDetails.getUsername();
         candidateLanguageService.deleteCandidateLanguage(email, languageId);
+        CandidateProfileResponse updatedUser = userProfileService.getCandidateProfileByUserEmail(email);
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(new BaseResponse<>(true, "Certification deleted successfully", updatedUser, null));
+
+    }
+    @DeleteMapping("/projects/{projectId}")
+    @PreAuthorize("hasRole('CANDIDATE')")
+    public ResponseEntity<BaseResponse<CandidateProfileResponse>> deleteProject(
+        @AuthenticationPrincipal UserDetails userDetails,
+        @PathVariable UUID projectId) {
+
+        String email = userDetails.getUsername();
+        projectService.deleteCandidateProject(email, projectId);
         CandidateProfileResponse updatedUser = userProfileService.getCandidateProfileByUserEmail(email);
         return ResponseEntity.status(HttpStatus.OK)
             .body(new BaseResponse<>(true, "Certification deleted successfully", updatedUser, null));
