@@ -8,14 +8,15 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
+import org.springframework.core.MethodParameter;
+import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 
-import java.util.List;
+import java.lang.reflect.Method;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -28,11 +29,10 @@ class GlobalExceptionHandlerTest {
 
     @Test
     void shouldHandleMethodArgumentNotValid() {
-        BindingResult bindingResult = mock(BindingResult.class);
+        BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(new Object(), "userRequest");
         FieldError fieldError = new FieldError("userRequest", "email", "Email must be valid");
-        when(bindingResult.getFieldErrors()).thenReturn(List.of(fieldError));
-        MethodArgumentNotValidException ex = mock(MethodArgumentNotValidException.class);
-        when(ex.getBindingResult()).thenReturn(bindingResult);
+        bindingResult.addError(fieldError);
+        MethodArgumentNotValidException ex = new MethodArgumentNotValidException(methodParameter(), bindingResult);
         WebRequest request = mock(WebRequest.class);
         HttpHeaders headers = new HttpHeaders();
 
@@ -192,5 +192,18 @@ class GlobalExceptionHandlerTest {
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().success()).isFalse();
         assertThat(response.getBody().error().code()).isEqualTo("DATA_INTEGRITY_VIOLATION");
+    }
+
+    private static MethodParameter methodParameter() {
+        try {
+            Method method = GlobalExceptionHandlerTest.class.getDeclaredMethod("invalidPayload", String.class);
+            return new MethodParameter(method, 0);
+        } catch (NoSuchMethodException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
+    @SuppressWarnings("unused")
+    private void invalidPayload(String email) {
     }
 }
