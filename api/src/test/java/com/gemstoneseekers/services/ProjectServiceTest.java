@@ -49,13 +49,8 @@ class ProjectServiceTest {
         candidate.setId(candidateId);
         candidate.setProjects(new ArrayList<>());
 
-        ProjectRequest request = new ProjectRequest(
-            "E-commerce Platform",
-            "Built scalable e-commerce system",
-            "https://github.com/user/ecommerce",
-            LocalDate.of(2021, 1, 1),
-            LocalDate.of(2021, 12, 31)
-        );
+        ProjectRequest request = new ProjectRequest("E-commerce Platform", "Built scalable e-commerce system",
+                "https://github.com/user/ecommerce", LocalDate.of(2021, 1, 1), LocalDate.of(2021, 12, 31));
 
         Project newProject = new Project();
         newProject.setId(projectId);
@@ -78,19 +73,13 @@ class ProjectServiceTest {
     @Test
     void shouldThrowEntityNotFoundExceptionWhenAddProjectWithNonExistentCandidate() {
         String email = "nonexistent@example.com";
-        ProjectRequest request = new ProjectRequest(
-            "E-commerce Platform",
-            "Built scalable e-commerce system",
-            "https://github.com/user/ecommerce",
-            LocalDate.of(2021, 1, 1),
-            LocalDate.of(2021, 12, 31)
-        );
+        ProjectRequest request = new ProjectRequest("E-commerce Platform", "Built scalable e-commerce system",
+                "https://github.com/user/ecommerce", LocalDate.of(2021, 1, 1), LocalDate.of(2021, 12, 31));
 
         when(candidateRepository.findByUserEmail(email)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> projectService.addCandidateProject(email, request))
-            .isInstanceOf(EntityNotFoundException.class)
-            .hasMessage("Candidate with id " + email + " not found");
+                .isInstanceOf(EntityNotFoundException.class).hasMessage("Candidate with id " + email + " not found");
 
         verify(candidateRepository).findByUserEmail(email);
         verify(projectMapper, never()).toProject(any(), any());
@@ -134,8 +123,7 @@ class ProjectServiceTest {
         when(projectRepository.findById(projectId)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> projectService.deleteCandidateProject(email, projectId))
-            .isInstanceOf(EntityNotFoundException.class)
-            .hasMessage("project with id " + projectId + " not found");
+                .isInstanceOf(EntityNotFoundException.class).hasMessage("project with id " + projectId + " not found");
 
         verify(projectRepository).findById(projectId);
         verify(projectRepository, never()).delete(any());
@@ -162,8 +150,8 @@ class ProjectServiceTest {
         when(projectRepository.findById(projectId)).thenReturn(Optional.of(project));
 
         assertThatThrownBy(() -> projectService.deleteCandidateProject(requesterEmail, projectId))
-            .isInstanceOf(AccessDeniedException.class)
-            .hasMessage("Operação inválida. Você não é o proprietário deste registro.");
+                .isInstanceOf(AccessDeniedException.class)
+                .hasMessage("Operação inválida. Você não é o proprietário deste registro.");
 
         verify(projectRepository).findById(projectId);
         verify(projectRepository, never()).delete(any());

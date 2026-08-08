@@ -17,7 +17,6 @@ import com.gemstoneseekers.repositories.CandidateRepository;
 import com.gemstoneseekers.repositories.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
@@ -115,8 +114,8 @@ class UserProfileServiceTest {
         when(candidateRepository.findByUserEmail(email)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> userProfileService.getCandidateProfileByUserEmail(email))
-            .isInstanceOf(EntityNotFoundException.class)
-            .hasMessage("Candidate for User with id " + email + " not found");
+                .isInstanceOf(EntityNotFoundException.class)
+                .hasMessage("Candidate for User with id " + email + " not found");
         verifyNoInteractions(addressService, candidateMapper, candidateProfileMapper);
     }
 
@@ -124,7 +123,7 @@ class UserProfileServiceTest {
     void shouldUpdatePersonalInfoAndReturnRefreshedProfile() {
         String email = "candidate@example.com";
         UserRequest request = new UserRequest("John Doe", "new-password", "CPF", "12345678900", "11999999999",
-            "Updated summary");
+                "Updated summary");
         User user = new User();
         user.setId(UUID.randomUUID());
         user.setEmail(email);
@@ -171,21 +170,20 @@ class UserProfileServiceTest {
     void shouldThrowWhenUserIsMissingForPersonalInfoUpdate() {
         String email = "candidate@example.com";
         UserRequest request = new UserRequest("John Doe", "new-password", "CPF", "12345678900", "11999999999",
-            "Updated summary");
+                "Updated summary");
         when(userRepository.findByEmail(email)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> userProfileService.updatePersonalInfoByEmail(email, request))
-            .isInstanceOf(EntityNotFoundException.class)
-            .hasMessage("User with id " + email + " not found");
+                .isInstanceOf(EntityNotFoundException.class).hasMessage("User with id " + email + " not found");
         verify(userRepository, never()).save(any());
         verifyNoInteractions(candidateService, userMapper, candidateMapper, candidateRepository);
     }
 
     private static CandidateResponse candidateResponse() {
         UserResponse userResponse = new UserResponse(UUID.randomUUID(), "John Doe", "candidate@example.com",
-            UserRole.CANDIDATE, "CPF", "12345678900");
-        return new CandidateResponse(UUID.randomUUID(), userResponse, "11999999999", "Summary", null, null, null,
-            null, null, null);
+                UserRole.CANDIDATE, "CPF", "12345678900");
+        return new CandidateResponse(UUID.randomUUID(), userResponse, "11999999999", "Summary", null, null, null, null,
+                null, null);
     }
 
     private static AddressResponse addressResponse() {

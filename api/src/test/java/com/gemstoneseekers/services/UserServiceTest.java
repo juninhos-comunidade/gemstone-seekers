@@ -44,14 +44,8 @@ class UserServiceTest {
         user.setDocumentType("CPF");
         user.setDocumentNumber("12345678900");
 
-        UserResponse expectedResponse = new UserResponse(
-            userId,
-            "John Doe",
-            "john@example.com",
-            UserRole.CANDIDATE,
-            "CPF",
-            "12345678900"
-        );
+        UserResponse expectedResponse = new UserResponse(userId, "John Doe", "john@example.com", UserRole.CANDIDATE,
+                "CPF", "12345678900");
 
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
 
@@ -66,9 +60,8 @@ class UserServiceTest {
         UUID userId = UUID.randomUUID();
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> userService.getUserById(userId))
-            .isInstanceOf(EntityNotFoundException.class)
-            .hasMessage("User with id " + userId + " not found");
+        assertThatThrownBy(() -> userService.getUserById(userId)).isInstanceOf(EntityNotFoundException.class)
+                .hasMessage("User with id " + userId + " not found");
 
         verify(userRepository).findById(userId);
     }
@@ -85,28 +78,15 @@ class UserServiceTest {
         user.setDocumentType("CPF");
         user.setDocumentNumber("12345678900");
 
-        UserRequest request = new UserRequest(
-            "Jane Doe",
-            "newPassword123",
-            "RG",
-            "12345678",
-            null,
-            null
-        );
+        UserRequest request = new UserRequest("Jane Doe", "newPassword123", "RG", "12345678", null, null);
 
         User updatedUser = new User();
         updatedUser.setId(userId);
         updatedUser.setName("Jane Doe");
         updatedUser.setEmail(email);
 
-        UserResponse expectedResponse = new UserResponse(
-            userId,
-            "Jane Doe",
-            email,
-            UserRole.CANDIDATE,
-            "RG",
-            "12345678"
-        );
+        UserResponse expectedResponse = new UserResponse(userId, "Jane Doe", email, UserRole.CANDIDATE, "RG",
+                "12345678");
 
         when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
         when(userRepository.save(user)).thenReturn(updatedUser);
@@ -124,20 +104,12 @@ class UserServiceTest {
     @Test
     void shouldThrowEntityNotFoundExceptionWhenUpdateUserByEmailWithNonExistentEmail() {
         String email = "nonexistent@example.com";
-        UserRequest request = new UserRequest(
-            "Jane Doe",
-            "newPassword123",
-            null,
-            null,
-            null,
-            null
-        );
+        UserRequest request = new UserRequest("Jane Doe", "newPassword123", null, null, null, null);
 
         when(userRepository.findByEmail(email)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> userService.updateUserByEmail(email, request))
-            .isInstanceOf(EntityNotFoundException.class)
-            .hasMessage("User with id " + email + " not found");
+                .isInstanceOf(EntityNotFoundException.class).hasMessage("User with id " + email + " not found");
 
         verify(userRepository).findByEmail(email);
         verify(userMapper, never()).updateEntityFromRequest(any(), any());
@@ -146,36 +118,20 @@ class UserServiceTest {
 
     @Test
     void shouldThrowIllegalArgumentExceptionWhenUpdateUserByEmailWithNullEmail() {
-        UserRequest request = new UserRequest(
-            "Jane Doe",
-            "newPassword123",
-            null,
-            null,
-            null,
-            null
-        );
+        UserRequest request = new UserRequest("Jane Doe", "newPassword123", null, null, null, null);
 
         assertThatThrownBy(() -> userService.updateUserByEmail(null, request))
-            .isInstanceOf(IllegalArgumentException.class)
-            .hasMessage("Email não pode ser nulo ou vazio");
+                .isInstanceOf(IllegalArgumentException.class).hasMessage("Email não pode ser nulo ou vazio");
 
         verify(userRepository, never()).findByEmail(anyString());
     }
 
     @Test
     void shouldThrowIllegalArgumentExceptionWhenUpdateUserByEmailWithBlankEmail() {
-        UserRequest request = new UserRequest(
-            "Jane Doe",
-            "newPassword123",
-            null,
-            null,
-            null,
-            null
-        );
+        UserRequest request = new UserRequest("Jane Doe", "newPassword123", null, null, null, null);
 
         assertThatThrownBy(() -> userService.updateUserByEmail("   ", request))
-            .isInstanceOf(IllegalArgumentException.class)
-            .hasMessage("Email não pode ser nulo ou vazio");
+                .isInstanceOf(IllegalArgumentException.class).hasMessage("Email não pode ser nulo ou vazio");
 
         verify(userRepository, never()).findByEmail(anyString());
     }
@@ -185,8 +141,7 @@ class UserServiceTest {
         String email = "john@example.com";
 
         assertThatThrownBy(() -> userService.updateUserByEmail(email, null))
-            .isInstanceOf(IllegalArgumentException.class)
-            .hasMessage("Requisição do usuário não pode ser nula");
+                .isInstanceOf(IllegalArgumentException.class).hasMessage("Requisição do usuário não pode ser nula");
 
         verify(userRepository, never()).findByEmail(email);
     }
@@ -199,23 +154,16 @@ class UserServiceTest {
         user.setId(userId);
         user.setEmail(email);
 
-        UserRequest request = new UserRequest(
-            null,
-            null,
-            "CPF",
-            null,
-            null,
-            null
-        );
+        UserRequest request = new UserRequest(null, null, "CPF", null, null, null);
 
         when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
         doThrow(new IllegalArgumentException(
-            "Inconsistência: Ao alterar o tipo de documento, você deve fornecer o novo número correspondente."
-        )).when(userMapper).updateEntityFromRequest(request, user);
+                "Inconsistência: Ao alterar o tipo de documento, você deve fornecer o novo número correspondente."))
+                .when(userMapper).updateEntityFromRequest(request, user);
 
         assertThatThrownBy(() -> userService.updateUserByEmail(email, request))
-            .isInstanceOf(IllegalArgumentException.class)
-            .hasMessage("Inconsistência: Ao alterar o tipo de documento, você deve fornecer o novo número correspondente.");
+                .isInstanceOf(IllegalArgumentException.class).hasMessage(
+                        "Inconsistência: Ao alterar o tipo de documento, você deve fornecer o novo número correspondente.");
 
         verify(userRepository).findByEmail(email);
         verify(userMapper).updateEntityFromRequest(request, user);

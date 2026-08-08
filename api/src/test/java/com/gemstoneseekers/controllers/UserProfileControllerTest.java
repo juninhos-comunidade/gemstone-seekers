@@ -47,8 +47,8 @@ class UserProfileControllerTest {
     private final CandidateLanguageService candidateLanguageService = mock(CandidateLanguageService.class);
     private final ProjectService projectService = mock(ProjectService.class);
     private final UserProfileController controller = new UserProfileController(userProfileService, addressService,
-        candidateLinkService, experienceService, educationService, certificationService, candidateLanguageService,
-        projectService);
+            candidateLinkService, experienceService, educationService, certificationService, candidateLanguageService,
+            projectService);
 
     @Test
     void shouldReturnCandidateProfileForAuthenticatedUser() {
@@ -72,12 +72,12 @@ class UserProfileControllerTest {
         String email = "candidate@example.com";
         UserDetails userDetails = userDetails(email);
         UserRequest request = new UserRequest("John Doe", "new-password", "CPF", "12345678900", "11999999999",
-            "Summary");
+                "Summary");
         CandidateProfileResponse profile = candidateProfile();
         when(userProfileService.updatePersonalInfoByEmail(email, request)).thenReturn(profile);
 
         ResponseEntity<BaseResponse<CandidateProfileResponse>> response = controller.updateCandidateProfile(userDetails,
-            request);
+                request);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
@@ -92,12 +92,12 @@ class UserProfileControllerTest {
         String email = "candidate@example.com";
         UserDetails userDetails = userDetails(email);
         AddressRequest request = new AddressRequest("01000-000", "Main Street", "100", "Center", "Apt 12",
-            new com.gemstoneseekers.dtos.request.LocationRequest("São Paulo", "SP", "Brazil"));
+                new com.gemstoneseekers.dtos.request.LocationRequest("São Paulo", "SP", "Brazil"));
         CandidateProfileResponse profile = candidateProfile();
         when(userProfileService.getCandidateProfileByUserEmail(email)).thenReturn(profile);
 
         ResponseEntity<BaseResponse<CandidateProfileResponse>> response = controller.updateCandidateAddres(userDetails,
-            request);
+                request);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
@@ -117,7 +117,7 @@ class UserProfileControllerTest {
         when(userProfileService.getCandidateProfileByUserEmail(email)).thenReturn(profile);
 
         ResponseEntity<BaseResponse<CandidateProfileResponse>> response = controller.addCandidateLink(userDetails,
-            request);
+                request);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
@@ -133,12 +133,12 @@ class UserProfileControllerTest {
         String email = "candidate@example.com";
         UserDetails userDetails = userDetails(email);
         ExperienceRequest request = new ExperienceRequest("Developer", "Company", LocalDate.of(2022, 1, 1),
-            LocalDate.of(2023, 1, 1), false, "Worked on backend services");
+                LocalDate.of(2023, 1, 1), false, "Worked on backend services");
         CandidateProfileResponse profile = candidateProfile();
         when(userProfileService.getCandidateProfileByUserEmail(email)).thenReturn(profile);
 
         ResponseEntity<BaseResponse<CandidateProfileResponse>> response = controller.addCandidateExperience(userDetails,
-            request);
+                request);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
@@ -154,7 +154,7 @@ class UserProfileControllerTest {
         String email = "candidate@example.com";
         UserDetails userDetails = userDetails(email);
         EducationRequest request = new EducationRequest("University", "Computer Science", "Bachelor",
-            LocalDate.of(2018, 1, 1), LocalDate.of(2022, 1, 1));
+                LocalDate.of(2018, 1, 1), LocalDate.of(2022, 1, 1));
         CandidateProfileResponse profile = candidateProfile();
         when(userProfileService.getCandidateProfileByUserEmail(email)).thenReturn(profile);
 
@@ -174,12 +174,12 @@ class UserProfileControllerTest {
         String email = "candidate@example.com";
         UserDetails userDetails = userDetails(email);
         CertificationRequest request = new CertificationRequest("AWS", "Amazon", LocalDate.of(2024, 1, 1),
-            LocalDate.of(2027, 1, 1), "https://example.com/cert");
+                LocalDate.of(2027, 1, 1), "https://example.com/cert");
         CandidateProfileResponse profile = candidateProfile();
         when(userProfileService.getCandidateProfileByUserEmail(email)).thenReturn(profile);
 
         ResponseEntity<BaseResponse<CandidateProfileResponse>> response = controller.addCertification(userDetails,
-            request);
+                request);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
@@ -214,7 +214,7 @@ class UserProfileControllerTest {
         String email = "candidate@example.com";
         UserDetails userDetails = userDetails(email);
         ProjectRequest request = new ProjectRequest("Portfolio", "Personal site", "https://example.com",
-            LocalDate.of(2024, 1, 1), LocalDate.of(2024, 12, 31));
+                LocalDate.of(2024, 1, 1), LocalDate.of(2024, 12, 31));
         CandidateProfileResponse profile = candidateProfile();
         when(userProfileService.getCandidateProfileByUserEmail(email)).thenReturn(profile);
 
@@ -238,7 +238,7 @@ class UserProfileControllerTest {
         when(userProfileService.getCandidateProfileByUserEmail(email)).thenReturn(profile);
 
         ResponseEntity<BaseResponse<CandidateProfileResponse>> response = controller.deleteCandidateLink(userDetails,
-            linkId);
+                linkId);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
@@ -257,8 +257,8 @@ class UserProfileControllerTest {
         CandidateProfileResponse profile = candidateProfile();
         when(userProfileService.getCandidateProfileByUserEmail(email)).thenReturn(profile);
 
-        ResponseEntity<BaseResponse<CandidateProfileResponse>> response = controller.deleteCandidateExperience(
-            userDetails, experienceId);
+        ResponseEntity<BaseResponse<CandidateProfileResponse>> response = controller
+                .deleteCandidateExperience(userDetails, experienceId);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
@@ -277,8 +277,8 @@ class UserProfileControllerTest {
         CandidateProfileResponse profile = candidateProfile();
         when(userProfileService.getCandidateProfileByUserEmail(email)).thenReturn(profile);
 
-        ResponseEntity<BaseResponse<CandidateProfileResponse>> response = controller.deleteCandidateEducation(
-            userDetails, educationId);
+        ResponseEntity<BaseResponse<CandidateProfileResponse>> response = controller
+                .deleteCandidateEducation(userDetails, educationId);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
@@ -297,8 +297,8 @@ class UserProfileControllerTest {
         CandidateProfileResponse profile = candidateProfile();
         when(userProfileService.getCandidateProfileByUserEmail(email)).thenReturn(profile);
 
-        ResponseEntity<BaseResponse<CandidateProfileResponse>> response = controller.deleteCandidateCertification(
-            userDetails, certificationId);
+        ResponseEntity<BaseResponse<CandidateProfileResponse>> response = controller
+                .deleteCandidateCertification(userDetails, certificationId);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
@@ -318,7 +318,7 @@ class UserProfileControllerTest {
         when(userProfileService.getCandidateProfileByUserEmail(email)).thenReturn(profile);
 
         ResponseEntity<BaseResponse<CandidateProfileResponse>> response = controller.deleteLanguage(userDetails,
-            languageId);
+                languageId);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
@@ -338,7 +338,7 @@ class UserProfileControllerTest {
         when(userProfileService.getCandidateProfileByUserEmail(email)).thenReturn(profile);
 
         ResponseEntity<BaseResponse<CandidateProfileResponse>> response = controller.deleteProject(userDetails,
-            projectId);
+                projectId);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
@@ -357,11 +357,11 @@ class UserProfileControllerTest {
 
     private static CandidateProfileResponse candidateProfile() {
         UserResponse user = new UserResponse(UUID.randomUUID(), "John Doe", "candidate@example.com", UserRole.CANDIDATE,
-            "CPF", "12345678900");
+                "CPF", "12345678900");
         CandidateResponse candidate = new CandidateResponse(UUID.randomUUID(), user, "11999999999", "Summary",
-            List.of(), List.of(), List.of(), List.of(), List.of(), List.of());
+                List.of(), List.of(), List.of(), List.of(), List.of(), List.of());
         AddressResponse address = new AddressResponse(UUID.randomUUID(), null, "01000-000", "Main Street", "100",
-            "Center", "Apt 12");
+                "Center", "Apt 12");
         return new CandidateProfileResponse(candidate, address);
     }
 }

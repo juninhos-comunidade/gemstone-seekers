@@ -61,8 +61,7 @@ class AddressServiceTest {
         UUID id = UUID.randomUUID();
         Address address = new Address();
         address.setId(id);
-        AddressResponse expected = new AddressResponse(id, null, "01000-000", "Main Street", "100", "Center",
-            "Apt 12");
+        AddressResponse expected = new AddressResponse(id, null, "01000-000", "Main Street", "100", "Center", "Apt 12");
         when(addressRepository.findById(id)).thenReturn(Optional.of(address));
         when(addressMapper.toAddressResponse(address)).thenReturn(expected);
 
@@ -78,9 +77,8 @@ class AddressServiceTest {
         UUID id = UUID.randomUUID();
         when(addressRepository.findById(id)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> addressService.getAddressById(id))
-            .isInstanceOf(EntityNotFoundException.class)
-            .hasMessage("Address with id " + id + " not found");
+        assertThatThrownBy(() -> addressService.getAddressById(id)).isInstanceOf(EntityNotFoundException.class)
+                .hasMessage("Address with id " + id + " not found");
         verify(addressMapper, never()).toAddressResponse(any());
     }
 
@@ -101,7 +99,7 @@ class AddressServiceTest {
         city.setId(30);
         city.setState(state);
         AddressRequest request = new AddressRequest("01000-000", "Main Street", "100", "Center", "Apt 12",
-            new LocationRequest("São Paulo", "SP", "Brazil"));
+                new LocationRequest("São Paulo", "SP", "Brazil"));
 
         when(candidateRepository.findByUserEmail(email)).thenReturn(Optional.of(candidate));
         when(countryService.getCountry("Brazil")).thenReturn(country);
@@ -168,8 +166,7 @@ class AddressServiceTest {
         when(candidateRepository.findByUserEmail(email)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> addressService.updateAddressInfoByEmail(email, request))
-            .isInstanceOf(EntityNotFoundException.class)
-            .hasMessage("Candidate with id " + email + " not found");
+                .isInstanceOf(EntityNotFoundException.class).hasMessage("Candidate with id " + email + " not found");
         verifyNoInteractions(addressMapper, addressRepository, countryService, stateService, cityService);
     }
 }

@@ -49,13 +49,9 @@ class CertificationServiceTest {
         candidate.setId(candidateId);
         candidate.setCertifications(new ArrayList<>());
 
-        CertificationRequest request = new CertificationRequest(
-            "AWS Certified Solutions Architect",
-            "Amazon Web Services",
-            LocalDate.of(2021, 1, 15),
-            LocalDate.of(2024, 1, 15),
-            "https://aws.amazon.com/verify"
-        );
+        CertificationRequest request = new CertificationRequest("AWS Certified Solutions Architect",
+                "Amazon Web Services", LocalDate.of(2021, 1, 15), LocalDate.of(2024, 1, 15),
+                "https://aws.amazon.com/verify");
 
         Certification newCertification = new Certification();
         newCertification.setId(certificationId);
@@ -78,19 +74,14 @@ class CertificationServiceTest {
     @Test
     void shouldThrowEntityNotFoundExceptionWhenAddCertificationWithNonExistentCandidate() {
         String email = "nonexistent@example.com";
-        CertificationRequest request = new CertificationRequest(
-            "AWS Certified Solutions Architect",
-            "Amazon Web Services",
-            LocalDate.of(2021, 1, 15),
-            LocalDate.of(2024, 1, 15),
-            "https://aws.amazon.com/verify"
-        );
+        CertificationRequest request = new CertificationRequest("AWS Certified Solutions Architect",
+                "Amazon Web Services", LocalDate.of(2021, 1, 15), LocalDate.of(2024, 1, 15),
+                "https://aws.amazon.com/verify");
 
         when(candidateRepository.findByUserEmail(email)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> certificationService.addCertification(email, request))
-            .isInstanceOf(EntityNotFoundException.class)
-            .hasMessage("Candidate with id " + email + " not found");
+                .isInstanceOf(EntityNotFoundException.class).hasMessage("Candidate with id " + email + " not found");
 
         verify(candidateRepository).findByUserEmail(email);
         verify(certificationMapper, never()).toCertification(any(), any());
@@ -134,8 +125,8 @@ class CertificationServiceTest {
         when(certificationRepository.findById(certificationId)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> certificationService.deleteCertification(email, certificationId))
-            .isInstanceOf(EntityNotFoundException.class)
-            .hasMessage("Certification with id " + certificationId + " not found");
+                .isInstanceOf(EntityNotFoundException.class)
+                .hasMessage("Certification with id " + certificationId + " not found");
 
         verify(certificationRepository).findById(certificationId);
         verify(certificationRepository, never()).delete(any());
@@ -162,8 +153,8 @@ class CertificationServiceTest {
         when(certificationRepository.findById(certificationId)).thenReturn(Optional.of(certification));
 
         assertThatThrownBy(() -> certificationService.deleteCertification(requesterEmail, certificationId))
-            .isInstanceOf(AccessDeniedException.class)
-            .hasMessage("Operação inválida. Você não é o proprietário deste registro.");
+                .isInstanceOf(AccessDeniedException.class)
+                .hasMessage("Operação inválida. Você não é o proprietário deste registro.");
 
         verify(certificationRepository).findById(certificationId);
         verify(certificationRepository, never()).delete(any());

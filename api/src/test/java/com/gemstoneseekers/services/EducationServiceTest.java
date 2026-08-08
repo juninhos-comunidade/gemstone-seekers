@@ -22,7 +22,6 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -50,13 +49,8 @@ class EducationServiceTest {
         candidate.setId(candidateId);
         candidate.setEducations(new ArrayList<>());
 
-        EducationRequest request = new EducationRequest(
-            "Stanford University",
-            "Computer Science",
-            "Bachelor",
-            LocalDate.of(2018, 9, 1),
-            LocalDate.of(2022, 6, 15)
-        );
+        EducationRequest request = new EducationRequest("Stanford University", "Computer Science", "Bachelor",
+                LocalDate.of(2018, 9, 1), LocalDate.of(2022, 6, 15));
 
         Education newEducation = new Education();
         newEducation.setId(educationId);
@@ -82,19 +76,13 @@ class EducationServiceTest {
     @Test
     void shouldThrowEntityNotFoundExceptionWhenAddEducationWithNonExistentCandidate() {
         String email = "nonexistent@example.com";
-        EducationRequest request = new EducationRequest(
-            "Stanford University",
-            "Computer Science",
-            "Bachelor",
-            LocalDate.of(2018, 9, 1),
-            LocalDate.of(2022, 6, 15)
-        );
+        EducationRequest request = new EducationRequest("Stanford University", "Computer Science", "Bachelor",
+                LocalDate.of(2018, 9, 1), LocalDate.of(2022, 6, 15));
 
         when(candidateRepository.findByUserEmail(email)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> educationService.addEducation(email, request))
-            .isInstanceOf(EntityNotFoundException.class)
-            .hasMessage("Candidate with id " + email + " not found");
+                .isInstanceOf(EntityNotFoundException.class).hasMessage("Candidate with id " + email + " not found");
 
         verify(candidateRepository).findByUserEmail(email);
         verify(educationMapper, never()).toEducation(any(), any());
@@ -138,8 +126,8 @@ class EducationServiceTest {
         when(educationRepository.findById(educationId)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> educationService.deleteEducation(email, educationId))
-            .isInstanceOf(EntityNotFoundException.class)
-            .hasMessage("Education with id " + educationId + " not found");
+                .isInstanceOf(EntityNotFoundException.class)
+                .hasMessage("Education with id " + educationId + " not found");
 
         verify(educationRepository).findById(educationId);
         verify(educationRepository, never()).delete(any());
@@ -167,8 +155,8 @@ class EducationServiceTest {
         when(educationRepository.findById(educationId)).thenReturn(Optional.of(education));
 
         assertThatThrownBy(() -> educationService.deleteEducation(requesterEmail, educationId))
-            .isInstanceOf(AccessDeniedException.class)
-            .hasMessage("Operação inválida. Você não é o proprietário deste registro.");
+                .isInstanceOf(AccessDeniedException.class)
+                .hasMessage("Operação inválida. Você não é o proprietário deste registro.");
 
         verify(educationRepository).findById(educationId);
         verify(educationRepository, never()).delete(any());

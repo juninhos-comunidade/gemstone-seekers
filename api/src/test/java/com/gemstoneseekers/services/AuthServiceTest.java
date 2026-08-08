@@ -93,8 +93,7 @@ class AuthServiceTest {
         when(userRepository.existsByEmail(request.email())).thenReturn(true);
 
         // Act & Assert
-        assertThatThrownBy(() -> authService.register(request))
-                .isInstanceOf(ConflictException.class)
+        assertThatThrownBy(() -> authService.register(request)).isInstanceOf(ConflictException.class)
                 .hasMessage("Email already in use");
 
         verify(userRepository).existsByEmail(request.email());

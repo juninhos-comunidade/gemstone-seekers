@@ -49,14 +49,8 @@ class ExperienceServiceTest {
         candidate.setId(candidateId);
         candidate.setExperiences(new ArrayList<>());
 
-        ExperienceRequest request = new ExperienceRequest(
-            "Software Engineer",
-            "Tech Corp",
-            LocalDate.of(2020, 1, 1),
-            LocalDate.of(2023, 12, 31),
-            false,
-            "Developed web applications"
-        );
+        ExperienceRequest request = new ExperienceRequest("Software Engineer", "Tech Corp", LocalDate.of(2020, 1, 1),
+                LocalDate.of(2023, 12, 31), false, "Developed web applications");
 
         Experience newExperience = new Experience();
         newExperience.setId(experienceId);
@@ -79,20 +73,13 @@ class ExperienceServiceTest {
     @Test
     void shouldThrowEntityNotFoundExceptionWhenAddExperienceWithNonExistentCandidate() {
         String email = "nonexistent@example.com";
-        ExperienceRequest request = new ExperienceRequest(
-            "Software Engineer",
-            "Tech Corp",
-            LocalDate.of(2020, 1, 1),
-            LocalDate.of(2023, 12, 31),
-            false,
-            "Developed web applications"
-        );
+        ExperienceRequest request = new ExperienceRequest("Software Engineer", "Tech Corp", LocalDate.of(2020, 1, 1),
+                LocalDate.of(2023, 12, 31), false, "Developed web applications");
 
         when(candidateRepository.findByUserEmail(email)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> experienceService.addExperience(email, request))
-            .isInstanceOf(EntityNotFoundException.class)
-            .hasMessage("Candidate with id " + email + " not found");
+                .isInstanceOf(EntityNotFoundException.class).hasMessage("Candidate with id " + email + " not found");
 
         verify(candidateRepository).findByUserEmail(email);
         verify(experienceMapper, never()).toExperience(any(), any());
@@ -136,8 +123,7 @@ class ExperienceServiceTest {
         when(experienceRepository.findById(experienceId)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> experienceService.deleteExperience(email, experienceId))
-            .isInstanceOf(EntityNotFoundException.class)
-            .hasMessage("Link with id " + experienceId + " not found");
+                .isInstanceOf(EntityNotFoundException.class).hasMessage("Link with id " + experienceId + " not found");
 
         verify(experienceRepository).findById(experienceId);
         verify(experienceRepository, never()).delete(any());
@@ -164,8 +150,8 @@ class ExperienceServiceTest {
         when(experienceRepository.findById(experienceId)).thenReturn(Optional.of(experience));
 
         assertThatThrownBy(() -> experienceService.deleteExperience(requesterEmail, experienceId))
-            .isInstanceOf(AccessDeniedException.class)
-            .hasMessage("Operação inválida. Você não é o proprietário deste registro.");
+                .isInstanceOf(AccessDeniedException.class)
+                .hasMessage("Operação inválida. Você não é o proprietário deste registro.");
 
         verify(experienceRepository).findById(experienceId);
         verify(experienceRepository, never()).delete(any());
