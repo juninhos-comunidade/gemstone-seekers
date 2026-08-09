@@ -21,4 +21,10 @@ public class CandidateService {
                 .orElseThrow(() -> new EntityNotFoundException("Candidate for User ID", id));
     }
 
+    public Candidate getCandidateByEmailSession(String Email){
+        return candidateRepository.findByUserEmail(Email)
+                .orElseThrow(() -> new EntityNotFoundException("Candidate", Email));
+
+    }
+
 }
