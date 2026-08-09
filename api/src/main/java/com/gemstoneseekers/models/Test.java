@@ -64,6 +64,7 @@ public class Test extends BaseModel {
     private OffsetDateTime completedAt;
 
     @OneToMany(mappedBy = "test", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("id ASC")
     private List<CandidateAnswer> answers = new ArrayList<>();
 
     public void addAnswer(CandidateAnswer answer) {
