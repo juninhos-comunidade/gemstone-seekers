@@ -13,15 +13,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Briefcase,
-  Building2,
-  MapPin,
-  Banknote,
-  Search,
-  ChevronRight,
-  Code2,
-} from "lucide-react";
+import { Briefcase, Banknote, Search, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface JobListProps {
@@ -35,9 +27,7 @@ export function JobList({ jobs }: JobListProps) {
     const term = search.toLowerCase();
     return (
       job.title.toLowerCase().includes(term) ||
-      job.companyName.toLowerCase().includes(term) ||
-      job.department.toLowerCase().includes(term) ||
-      job.technologies.some((t) => t.name.toLowerCase().includes(term))
+      job.department.toLowerCase().includes(term)
     );
   });
 
@@ -111,17 +101,6 @@ export function JobList({ jobs }: JobListProps) {
                     </CardTitle>
                   </div>
                 </div>
-
-                <div className="text-muted-foreground flex flex-wrap items-center gap-x-4 gap-y-1 pt-1 text-xs">
-                  <span className="text-foreground/80 flex items-center gap-1.5 font-medium">
-                    <Building2 className="text-primary/70 size-3" />
-                    {job.companyName}
-                  </span>
-                  <span className="flex items-center gap-1.5">
-                    <MapPin className="text-primary/70 size-3" />
-                    {job.location}
-                  </span>
-                </div>
               </CardHeader>
 
               <CardContent className="space-y-4 pb-4">
@@ -139,39 +118,9 @@ export function JobList({ jobs }: JobListProps) {
                     </span>
                   </div>
                 )}
-
-                <div className="space-y-1.5">
-                  <span className="text-muted-foreground flex items-center gap-1 text-[11px] font-semibold tracking-wider uppercase">
-                    <Code2 className="size-3" /> Tecnologias
-                  </span>
-                  <div className="flex flex-wrap gap-1.5">
-                    {job.technologies.slice(0, 4).map((tech) => (
-                      <Badge
-                        key={tech.technologyId}
-                        variant={tech.isMandatory ? "default" : "secondary"}
-                        className="px-2 py-0.5 text-[10px] font-normal"
-                      >
-                        {tech.name}
-                      </Badge>
-                    ))}
-                    {job.technologies.length > 4 && (
-                      <Badge
-                        variant="outline"
-                        className="px-1.5 py-0.5 text-[10px]"
-                      >
-                        +{job.technologies.length - 4}
-                      </Badge>
-                    )}
-                  </div>
-                </div>
               </CardContent>
 
               <CardFooter className="border-border/40 bg-muted/20 flex items-center justify-between border-t px-6 py-3 pt-0">
-                <span className="text-muted-foreground text-[11px]">
-                  Publicado em{" "}
-                  {new Date(job.createdAt).toLocaleDateString("pt-BR")}
-                </span>
-
                 <Link
                   href={`/candidate/dashboard/jobs/${job.id}`}
                   className={cn(

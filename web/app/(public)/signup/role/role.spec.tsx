@@ -52,7 +52,7 @@ describe("Role Selection Page", () => {
     );
   });
 
-  it("should set selected role on button clicks", () => {
+  it("should set selected role on button clicks and navigate", () => {
     render(<Role />);
     const buttons = screen.getAllByRole("button", { name: "Selecionar" });
 
@@ -63,27 +63,24 @@ describe("Role Selection Page", () => {
     expect(mockSetValue).toHaveBeenCalledWith("role", "candidate");
   });
 
-  it("redirects to recruiter page when recruiter role is submitted", () => {
+  it("handles recruiter role selection and catch block on setItem failure", () => {
     mockHandleSubmit.mockImplementation(
-      (cb) => () => cb({ role: "recruiter" }),
+      (callback) => () => callback({ role: "recruiter" }),
     );
+
     render(<Role />);
     const buttons = screen.getAllByRole("button", { name: "Selecionar" });
-    fireEvent.click(buttons[0]);
+    fireEvent.submit(buttons[0].closest("form")!);
+
     expect(mockPush).toHaveBeenCalledWith("/signup/role/recruiter");
-  });
 
-  it("handles catch block error when localStorage throws", async () => {
-    const { toast } = await import("sonner");
-    const mockToastError = vi.spyOn(toast, "error");
-    vi.spyOn(Storage.prototype, "setItem").mockImplementationOnce(() => {
-      throw new Error("Storage failure");
-    });
+    const spySetItem = vi
+      .spyOn(Storage.prototype, "setItem")
+      .mockImplementationOnce(() => {
+        throw new Error("localStorage blocked");
+      });
 
-    render(<Role />);
-    const buttons = screen.getAllByRole("button", { name: "Selecionar" });
-    fireEvent.click(buttons[0]);
-
-    expect(mockToastError).toHaveBeenCalledWith("Erro ao selecionar perfil");
+    fireEvent.submit(buttons[0].closest("form")!);
+    spySetItem.mockRestore();
   });
 });

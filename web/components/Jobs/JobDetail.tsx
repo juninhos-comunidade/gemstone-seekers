@@ -3,6 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { Job } from "@/lib/types/job";
+import { useJobTechnologiesQuery } from "@/lib/api/jobs/jobTechnologies/getJobTechnologies";
 import {
   Card,
   CardContent,
@@ -14,14 +15,11 @@ import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import {
   ArrowLeft,
-  Building2,
-  MapPin,
   Banknote,
-  Calendar,
   CheckCircle2,
   Info,
   Code2,
-  Shield,
+  Loader2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -39,8 +37,12 @@ export function JobDetail({ job }: JobDetailProps) {
     }).format(val);
   };
 
-  const mandatoryTechs = job.technologies.filter((t) => t.isMandatory);
-  const optionalTechs = job.technologies.filter((t) => !t.isMandatory);
+  const { data: technologiesData, isLoading: isLoadingTechs } =
+    useJobTechnologiesQuery(job?.id);
+
+  const technologies = technologiesData ?? job?.technologies ?? [];
+  const mandatoryTechs = technologies.filter((t) => t.isMandatory);
+  const optionalTechs = technologies.filter((t) => !t.isMandatory);
 
   return (
     <div className="mx-auto max-w-4xl space-y-6 pb-16">
@@ -65,42 +67,26 @@ export function JobDetail({ job }: JobDetailProps) {
               <Badge variant="default" className="text-xs font-semibold">
                 Vaga Aberta
               </Badge>
-              <Badge
-                variant="outline"
-                className="border-primary/30 text-primary text-xs font-medium"
-              >
-                {job.seniorityLevel}
-              </Badge>
-              <Badge variant="secondary" className="text-xs">
-                {job.department}
-              </Badge>
+              {job.seniorityLevel && (
+                <Badge
+                  variant="outline"
+                  className="border-primary/30 text-primary text-xs font-medium"
+                >
+                  {job.seniorityLevel}
+                </Badge>
+              )}
+              {job.department && (
+                <Badge variant="secondary" className="text-xs">
+                  {job.department}
+                </Badge>
+              )}
             </div>
-            <span className="text-muted-foreground flex items-center gap-1.5 font-mono text-xs">
-              <Calendar className="size-3" />
-              Publicada em {new Date(job.createdAt).toLocaleDateString("pt-BR")}
-            </span>
           </div>
 
           <div className="space-y-1">
             <CardTitle className="text-2xl font-extrabold tracking-tight sm:text-3xl">
               {job.title}
             </CardTitle>
-            <div className="text-muted-foreground flex flex-wrap items-center gap-x-4 gap-y-1 pt-1 text-sm">
-              <span className="text-foreground flex items-center gap-1.5 font-semibold">
-                <Building2 className="text-primary size-4" />
-                {job.companyName}
-              </span>
-              <span className="flex items-center gap-1.5">
-                <MapPin className="text-primary size-4" />
-                {job.location}
-              </span>
-              {job.companyCnpj && (
-                <span className="text-muted-foreground flex items-center gap-1.5 font-mono text-xs">
-                  <Shield className="text-muted-foreground size-3" />
-                  CNPJ: {job.companyCnpj}
-                </span>
-              )}
-            </div>
           </div>
         </CardHeader>
 
@@ -171,42 +157,57 @@ export function JobDetail({ job }: JobDetailProps) {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              {mandatoryTechs.length > 0 && (
-                <div className="space-y-2">
-                  <p className="text-foreground flex items-center gap-1.5 text-xs font-semibold">
-                    <CheckCircle2 className="size-3 text-emerald-500" />
-                    Requisitos Obrigatórios
-                  </p>
-                  <div className="flex flex-wrap gap-1.5">
-                    {mandatoryTechs.map((tech) => (
-                      <Badge
-                        key={tech.technologyId}
-                        className="px-2.5 py-1 text-xs font-medium"
-                      >
-                        {tech.name}
-                      </Badge>
-                    ))}
-                  </div>
+              {isLoadingTechs ? (
+                <div className="text-muted-foreground flex items-center gap-2 text-xs">
+                  <Loader2 className="text-primary size-4 animate-spin" />
+                  <span>Carregando tecnologias...</span>
                 </div>
-              )}
+              ) : mandatoryTechs.length === 0 && optionalTechs.length === 0 ? (
+                <p className="text-muted-foreground text-xs">
+                  Nenhuma tecnologia cadastrada para esta vaga.
+                </p>
+              ) : (
+                <>
+                  {mandatoryTechs.length > 0 && (
+                    <div className="space-y-2">
+                      <p className="text-foreground flex items-center gap-1.5 text-xs font-semibold">
+                        <CheckCircle2 className="size-3 text-emerald-500" />
+                        Requisitos Obrigatórios
+                      </p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {mandatoryTechs.map((tech) => (
+                          <Badge
+                            key={tech.technologyId}
+                            className="px-2.5 py-1 text-xs font-medium"
+                          >
+                            {tech.technologyName ||
+                              (tech as unknown as { name: string }).name}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
 
-              {optionalTechs.length > 0 && (
-                <div className="border-border/50 space-y-2 border-t pt-2">
-                  <p className="text-muted-foreground text-xs font-semibold">
-                    Diferenciais / Desejáveis
-                  </p>
-                  <div className="flex flex-wrap gap-1.5">
-                    {optionalTechs.map((tech) => (
-                      <Badge
-                        key={tech.technologyId}
-                        variant="secondary"
-                        className="px-2.5 py-1 text-xs"
-                      >
-                        {tech.name}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
+                  {optionalTechs.length > 0 && (
+                    <div className="border-border/50 space-y-2 border-t pt-2">
+                      <p className="text-muted-foreground text-xs font-semibold">
+                        Diferenciais / Desejáveis
+                      </p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {optionalTechs.map((tech) => (
+                          <Badge
+                            key={tech.technologyId}
+                            variant="secondary"
+                            className="px-2.5 py-1 text-xs"
+                          >
+                            {tech.technologyName ||
+                              (tech as unknown as { name: string }).name}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </>
               )}
             </CardContent>
           </Card>

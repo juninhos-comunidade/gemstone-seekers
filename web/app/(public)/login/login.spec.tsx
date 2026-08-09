@@ -43,7 +43,7 @@ describe("Login Page", () => {
     expect(screen.getByRole("button", { name: "Entrar" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Cadastre-se" })).toHaveAttribute(
       "href",
-      "/signup/role",
+      "/signup",
     );
   });
 
@@ -68,8 +68,8 @@ describe("Login Page", () => {
     });
   });
 
-  it("does not call useLogin for invalid form input", async () => {
-    render(<Login />);
+  it("does not call useLogin for invalid form input and displays error messages", async () => {
+    const { container } = render(<Login />);
 
     fireEvent.change(screen.getByLabelText(/^e-mail$/i), {
       target: { value: "invalid-email" },
@@ -77,10 +77,14 @@ describe("Login Page", () => {
     fireEvent.change(screen.getByLabelText("Senha"), {
       target: { value: "123" },
     });
-    fireEvent.click(screen.getByRole("button", { name: "Entrar" }));
+
+    const form = container.querySelector("form")!;
+    fireEvent.submit(form);
 
     await waitFor(() => {
       expect(mockLogin).not.toHaveBeenCalled();
+      expect(screen.getByText("E-mail inválido")).toBeInTheDocument();
+      expect(screen.getByText("Senha inválida")).toBeInTheDocument();
     });
     expect(mockPush).not.toHaveBeenCalled();
   });

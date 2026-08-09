@@ -1,3 +1,4 @@
+import React from "react";
 import { render, screen } from "@testing-library/react";
 import { describe, it, expect } from "vitest";
 import { JobList } from "@/components/Jobs/JobList";
@@ -38,24 +39,17 @@ describe("JobList Component", () => {
     ).toBeInTheDocument();
   });
 
-  it("renders salary range and extra technologies badge correctly", () => {
+  it("renders salary range correctly", () => {
     const mockJobsExtra = [
       {
         ...MOCK_JOBS[0],
         id: "extra-1",
         salaryMin: 5000,
         salaryMax: 8000,
-        technologies: [
-          { technologyId: "1", name: "React", isMandatory: true },
-          { technologyId: "2", name: "TypeScript", isMandatory: true },
-          { technologyId: "3", name: "Next.js", isMandatory: false },
-          { technologyId: "4", name: "Tailwind", isMandatory: false },
-          { technologyId: "5", name: "Node.js", isMandatory: false },
-        ],
       },
     ];
 
     render(<JobList jobs={mockJobsExtra} />);
-    expect(screen.getByText(/\+1/i)).toBeInTheDocument();
+    expect(screen.getByText(/\/ mês/i)).toBeInTheDocument();
   });
 });

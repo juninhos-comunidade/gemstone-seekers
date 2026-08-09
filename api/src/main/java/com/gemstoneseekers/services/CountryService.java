@@ -2,6 +2,7 @@ package com.gemstoneseekers.services;
 
 import java.util.List;
 
+import com.gemstoneseekers.exceptions.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 
 import com.gemstoneseekers.models.Country;
@@ -19,4 +20,10 @@ public class CountryService {
     public List<Country> getCountries() {
         return countryRepository.findAll();
     }
+
+    public Country getCountry(String name) {
+        return countryRepository.findByNameIgnoreCase(name)
+                .orElseThrow(() -> new EntityNotFoundException("Country", name));
+    }
+
 }

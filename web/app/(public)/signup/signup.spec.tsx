@@ -66,8 +66,8 @@ describe("Signup Page", () => {
     });
   });
 
-  it("does not call useSignup for invalid form input", async () => {
-    render(<Signup />);
+  it("does not call useSignup and displays validation error messages for invalid input", async () => {
+    const { container } = render(<Signup />);
 
     fireEvent.change(screen.getByLabelText(/nome completo/i), {
       target: { value: "Jo" },
@@ -78,16 +78,22 @@ describe("Signup Page", () => {
 
     const passwordInputs = document.querySelectorAll("input[type='password']");
     fireEvent.change(passwordInputs[0], {
-      target: { value: "123" },
+      target: { value: "123456" },
     });
     fireEvent.change(passwordInputs[1], {
-      target: { value: "456" },
+      target: { value: "654321" },
     });
 
-    fireEvent.click(screen.getByRole("button", { name: /cadastrar/i }));
+    const form = container.querySelector("form")!;
+    fireEvent.submit(form);
 
     await waitFor(() => {
       expect(mockSignup).not.toHaveBeenCalled();
+      expect(
+        screen.getByText("Nome completo é obrigatório"),
+      ).toBeInTheDocument();
+      expect(screen.getByText("E-mail inválido")).toBeInTheDocument();
+      expect(screen.getByText("Senhas não coincidem")).toBeInTheDocument();
     });
   });
 });

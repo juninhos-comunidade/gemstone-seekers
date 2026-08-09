@@ -42,6 +42,30 @@ describe("Side Menu", () => {
     expect(screen.getByText(/sem link/i)).toBeInTheDocument();
   });
 
+  it("renders mobile variant without fixed desktop container classes", () => {
+    mockUsePathname.mockReturnValue("/candidate/dashboard/radar");
+
+    render(
+      <SideMenu
+        mobile
+        items={[
+          { label: "Dashboard", href: "/candidate/dashboard", icon: "home" },
+          {
+            label: "Radar",
+            href: "/candidate/dashboard/radar",
+            icon: "LuRadar",
+          },
+        ]}
+      />,
+    );
+
+    const nav = screen.getByLabelText(/navegação do painel/i).parentElement;
+    expect(nav?.className).toContain("relative");
+    expect(screen.getByRole("link", { name: /radar/i }).className).toMatch(
+      /sidebar-primary/i,
+    );
+  });
+
   it("selects the most specific (longest) active href when nested path matches multiple items", () => {
     mockUsePathname.mockReturnValue("/candidate/jobs/detail");
 

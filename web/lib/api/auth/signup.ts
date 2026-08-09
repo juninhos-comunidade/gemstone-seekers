@@ -32,7 +32,7 @@ async function signupRequest(data: SignupData): Promise<SignupResponse> {
     password: data.password,
   };
 
-  return httpClient.post<SignupResponse>("auth/register", payload);
+  return httpClient.post<SignupResponse>("/auth/register", payload);
 }
 
 export function useSignup() {

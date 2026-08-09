@@ -1,10 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
 import { Job } from "@/lib/types/job";
-import { MOCK_JOBS } from "@/lib/mocks/jobMock";
+import { httpClient } from "@/lib/api/client";
+import { ApiResponse } from "@/lib/types/api/response";
 
 export async function getJobs(): Promise<Job[]> {
-  await new Promise((resolve) => setTimeout(resolve, 150));
-  return MOCK_JOBS;
+  const response = await httpClient.get<ApiResponse<Job[]>>("/jobs");
+  return response.result;
 }
 
 export function useJobsQuery() {

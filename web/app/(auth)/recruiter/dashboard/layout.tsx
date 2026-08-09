@@ -1,3 +1,4 @@
+import { DashboardHeader } from "@/components/DashboardHeader/DashboardHeader";
 import { SideMenu } from "@/components/SideMenu/SideMenu";
 
 export default function Layout({
@@ -5,21 +6,31 @@ export default function Layout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const menuItems = [
+    {
+      label: "Dashboard",
+      href: "/recruiter/dashboard",
+      icon: "home" as const,
+    },
+    {
+      label: "Vagas",
+      href: "/recruiter/dashboard/jobs",
+      icon: "briefcase" as const,
+    },
+    {
+      label: "Radar",
+      href: "/candidate/dashboard/radar",
+      icon: "LuRadar" as const,
+    },
+  ];
+
   return (
     <main className="bg-background min-h-screen">
-      <SideMenu
-        items={[
-          { label: "Dashboard", href: "/recruiter/dashboard", icon: "home" },
-          {
-            label: "Vagas",
-            href: "/recruiter/dashboard/jobs",
-            icon: "briefcase",
-          },
-        ]}
-      />
+      <DashboardHeader role="recruiter" menuItems={menuItems} />
+      <SideMenu items={menuItems} />
 
-      <div className="ml-72 pt-16">
-        <div className="p-6">{children}</div>
+      <div className="pt-16 md:ml-72">
+        <div className="p-4 md:p-6">{children}</div>
       </div>
     </main>
   );

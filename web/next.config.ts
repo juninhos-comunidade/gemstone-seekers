@@ -14,7 +14,9 @@ const nextConfig: NextConfig = {
     return [
       {
         source: "/api/:path*",
-        destination: `${process.env.API_URL}/:path*`,
+        destination: process.env.API_URL
+          ? `${process.env.API_URL}/:path*`
+          : "https://gemstone-seekers-72pb.onrender.com/api/v1/:path*",
       },
     ];
   },
