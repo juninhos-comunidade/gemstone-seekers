@@ -14,4 +14,48 @@ describe("JobList Component", () => {
       screen.getByText("Engenheiro Backend Java / Spring Boot"),
     ).toBeInTheDocument();
   });
+
+  it("filters jobs when typing in search input and allows clearing search", async () => {
+    const { default: userEvent } = await import("@testing-library/user-event");
+    const user = userEvent.setup();
+
+    render(<JobList jobs={MOCK_JOBS} />);
+
+    const searchInput = screen.getByPlaceholderText(
+      /Buscar por título, tech ou empresa.../i,
+    );
+    await user.type(searchInput, "InexistenteQuery123");
+
+    expect(
+      screen.getByText(/Nenhuma vaga encontrada para "InexistenteQuery123"/i),
+    ).toBeInTheDocument();
+
+    const clearButton = screen.getByRole("button", { name: /Limpar busca/i });
+    await user.click(clearButton);
+
+    expect(
+      screen.getByText("Desenvolvedor Front-end React / Next.js"),
+    ).toBeInTheDocument();
+  });
+
+  it("renders salary range and extra technologies badge correctly", () => {
+    const mockJobsExtra = [
+      {
+        ...MOCK_JOBS[0],
+        id: "extra-1",
+        salaryMin: 5000,
+        salaryMax: 8000,
+        technologies: [
+          { technologyId: "1", name: "React", isMandatory: true },
+          { technologyId: "2", name: "TypeScript", isMandatory: true },
+          { technologyId: "3", name: "Next.js", isMandatory: false },
+          { technologyId: "4", name: "Tailwind", isMandatory: false },
+          { technologyId: "5", name: "Node.js", isMandatory: false },
+        ],
+      },
+    ];
+
+    render(<JobList jobs={mockJobsExtra} />);
+    expect(screen.getByText(/\+1/i)).toBeInTheDocument();
+  });
 });

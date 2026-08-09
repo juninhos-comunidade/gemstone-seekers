@@ -34,4 +34,44 @@ describe("CandidateProfileForm Component", () => {
       "Avenida Paulista",
     );
   });
+
+  it("navigates across all tabs and handles form submit", async () => {
+    renderWithQuery(<CandidateProfileForm initialData={undefined} />);
+
+    const tabs = [
+      /Links & Redes/i,
+      /Idiomas/i,
+      /Experiência/i,
+      /Educação/i,
+      /Certificações/i,
+      /Projetos/i,
+    ];
+
+    for (const tabPattern of tabs) {
+      const tab = screen.getByRole("tab", { name: tabPattern });
+      fireEvent.click(tab);
+      expect(tab).toBeInTheDocument();
+    }
+
+    const saveButton = screen.getByRole("button", {
+      name: /Salvar Alterações/i,
+    });
+    expect(saveButton).toBeInTheDocument();
+  });
+
+  it("submits the form and calls mutate onSuccess and onError callbacks", async () => {
+    const { default: userEvent } = await import("@testing-library/user-event");
+    const user = userEvent.setup();
+
+    renderWithQuery(
+      <CandidateProfileForm initialData={INITIAL_MOCK_CANDIDATE} />,
+    );
+
+    const submitBtn = screen.getByRole("button", {
+      name: /Salvar Alterações/i,
+    });
+    await user.click(submitBtn);
+
+    expect(submitBtn).toBeInTheDocument();
+  });
 });

@@ -62,4 +62,28 @@ describe("Role Selection Page", () => {
     fireEvent.click(buttons[1]);
     expect(mockSetValue).toHaveBeenCalledWith("role", "candidate");
   });
+
+  it("redirects to recruiter page when recruiter role is submitted", () => {
+    mockHandleSubmit.mockImplementation(
+      (cb) => () => cb({ role: "recruiter" }),
+    );
+    render(<Role />);
+    const buttons = screen.getAllByRole("button", { name: "Selecionar" });
+    fireEvent.click(buttons[0]);
+    expect(mockPush).toHaveBeenCalledWith("/signup/role/recruiter");
+  });
+
+  it("handles catch block error when localStorage throws", async () => {
+    const { toast } = await import("sonner");
+    const mockToastError = vi.spyOn(toast, "error");
+    vi.spyOn(Storage.prototype, "setItem").mockImplementationOnce(() => {
+      throw new Error("Storage failure");
+    });
+
+    render(<Role />);
+    const buttons = screen.getAllByRole("button", { name: "Selecionar" });
+    fireEvent.click(buttons[0]);
+
+    expect(mockToastError).toHaveBeenCalledWith("Erro ao selecionar perfil");
+  });
 });

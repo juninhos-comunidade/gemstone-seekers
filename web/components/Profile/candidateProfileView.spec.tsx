@@ -46,4 +46,41 @@ describe("CandidateProfileView Component", () => {
       screen.getByRole("link", { name: /Preencher Dados do Perfil Agora/i }),
     ).toBeInTheDocument();
   });
+
+  it("renders certifications, projects, languages, and credential links when populated", () => {
+    const populatedMock = {
+      ...INITIAL_MOCK_CANDIDATE,
+      links: [{ id: "l1", label: "GitHub", url: "https://github.com" }],
+      certifications: [
+        {
+          id: "c1",
+          name: "AWS Certified Developer",
+          issuingOrganization: "Amazon",
+          credentialUrl: "https://aws.amazon.com",
+          issueDate: "2024-01-01",
+        },
+      ],
+      projects: [
+        {
+          id: "p1",
+          name: "Project Alpha",
+          description: "Fullstack App",
+          projectUrl: "https://alpha.com",
+        },
+      ],
+      languages: [
+        {
+          languageId: "lang1",
+          languageName: "Espanhol",
+          proficiency: "Avançado",
+        },
+      ],
+    };
+
+    renderWithQuery(<CandidateProfileView initialData={populatedMock} />);
+
+    expect(screen.getByText("AWS Certified Developer")).toBeInTheDocument();
+    expect(screen.getByText("Project Alpha")).toBeInTheDocument();
+    expect(screen.getByText(/Espanhol —/i)).toBeInTheDocument();
+  });
 });

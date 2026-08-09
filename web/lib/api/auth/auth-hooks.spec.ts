@@ -144,8 +144,84 @@ describe("auth api hooks", () => {
       companySize: "11-50",
     });
 
-    mutation.onError(new Error("falhou"));
+    mutation.onSuccess();
+    expect(mockToastSuccess).toHaveBeenCalledWith(
+      "Perfil do recrutador atualizado com sucesso!",
+    );
+    expect(mockPush).toHaveBeenCalledWith("/recruiter/dashboard");
 
+    mutation.onError(new Error("falhou"));
     expect(mockToastError).toHaveBeenCalledWith("falhou");
+
+    mockToastError.mockClear();
+    const errorWithoutMsg = {} as Error;
+    mutation.onError(errorWithoutMsg);
+    expect(mockToastError).toHaveBeenCalledWith(
+      "Erro ao atualizar perfil do recrutador",
+    );
+  });
+
+  it("useLogin handles token fallbacks and onError branch without message", async () => {
+    const { useLogin } = await import("./login");
+    const mutation = useLogin();
+
+    mutation.onSuccess({ success: true, token: "token-direct" });
+    expect(mockSetAuthToken).toHaveBeenCalledWith("token-direct");
+
+    mutation.onSuccess({ success: true, accessToken: "token-access" });
+    expect(mockSetAuthToken).toHaveBeenCalledWith("token-access");
+
+    mutation.onSuccess({
+      success: true,
+      result: { accessToken: "token-result-access" },
+    });
+    expect(mockSetAuthToken).toHaveBeenCalledWith("token-result-access");
+
+    mutation.onSuccess({ success: false });
+
+    const errNoMsg = {} as Error;
+    mutation.onError(errNoMsg);
+    expect(mockToastError).toHaveBeenCalledWith("Erro ao fazer login");
+  });
+
+  it("useSignup handles token fallbacks and onError branch without message", async () => {
+    const { useSignup } = await import("./signup");
+    const mutation = useSignup();
+
+    mutation.onSuccess({ success: true, accessToken: "token-access-signup" });
+    expect(mockSetAuthToken).toHaveBeenCalledWith("token-access-signup");
+
+    mutation.onSuccess({
+      success: true,
+      result: { token: "token-res-signup" },
+    });
+    expect(mockSetAuthToken).toHaveBeenCalledWith("token-res-signup");
+
+    mutation.onSuccess({
+      success: true,
+      result: { accessToken: "token-res-acc-signup" },
+    });
+    expect(mockSetAuthToken).toHaveBeenCalledWith("token-res-acc-signup");
+
+    mutation.onSuccess({ success: false });
+
+    mutation.onError(new Error("Erro de cadastro"));
+    expect(mockToastError).toHaveBeenCalledWith("Erro de cadastro");
+
+    mockToastError.mockClear();
+    const errNoMsg = {} as Error;
+    mutation.onError(errNoMsg);
+    expect(mockToastError).toHaveBeenCalledWith("Falha ao cadastrar");
+  });
+
+  it("useUpdateCandidate handles onError fallback without message", async () => {
+    const { useUpdateCandidate } = await import("./UpdateCandidate");
+    const mutation = useUpdateCandidate();
+
+    const errNoMsg = {} as Error;
+    mutation.onError(errNoMsg);
+    expect(mockToastError).toHaveBeenCalledWith(
+      "Erro ao atualizar perfil do candidato",
+    );
   });
 });
