@@ -7,13 +7,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/tests")
+@RequestMapping("/api/v1/tests")
 public class TestController {
 
 
@@ -33,13 +30,25 @@ public class TestController {
         TestResponse testResponse = testApplicationService.startTest(email, technology);
 
     return ResponseEntity.status(HttpStatus.CREATED)
-        .body(new BaseResponse<>(
-            true,
-            "Test initiated successfully",
-            testResponse,
-            null));
+        .body(new BaseResponse<>(true,"Test initiated successfully",testResponse,null));
     }
 
+    @GetMapping("/{technology}/active")
+    public ResponseEntity<BaseResponse<TestResponse>> getTestStatus(
+        @AuthenticationPrincipal UserDetails userDetails,
+        @PathVariable String technology
+    ){
+        String email = userDetails.getUsername();
+
+        TestResponse testResponse = testApplicationService.getActiveTestAndQuestions(email, technology);
+
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(new BaseResponse<>(
+                true,
+                "Active test retrieved successfully",
+                testResponse,
+                null));
+    }
 
 
 }

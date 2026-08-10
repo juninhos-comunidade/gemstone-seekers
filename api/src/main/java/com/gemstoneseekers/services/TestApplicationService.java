@@ -2,10 +2,13 @@ package com.gemstoneseekers.services;
 
 import com.gemstoneseekers.dtos.response.TestResponse;
 import com.gemstoneseekers.enums.TestStatus;
+import com.gemstoneseekers.exceptions.EntityNotFoundException;
 import com.gemstoneseekers.mappers.TestMapper;
 import com.gemstoneseekers.models.*;
 import com.gemstoneseekers.repositories.QuestionRepository;
 import com.gemstoneseekers.repositories.TestRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,7 +35,7 @@ public class TestApplicationService {
         this.technologyService = technologyService;
         this.testMapper = testMapper;
     }
-
+    private static final Logger log = LoggerFactory.getLogger(TestApplicationService.class);
     @Transactional
     public TestResponse startTest(String email, String technologyName) {
         int requiredAmount = 10;
@@ -64,5 +67,16 @@ public class TestApplicationService {
         Test savedTest = testRepository.save(test);
 
         return testMapper.toTestAndQuestionsResponse(savedTest);
+    }
+
+    @Transactional(readOnly = true)
+    public TestResponse getActiveTestAndQuestions(String email, String technologyName) {
+        Candidate candidate = candidateService.getCandidateByEmailSession(email);
+        Technology technology = technologyService.getTechnologyByName(technologyName);
+
+        Test test = testRepository.findByCandidateAndTechnologyAndStatus(candidate, technology, TestStatus.IN_PROGRESS)
+            .orElseThrow(() -> new EntityNotFoundException("Test", technologyName));
+
+        return testMapper.toTestAndQuestionsResponse(test);
     }
 }
