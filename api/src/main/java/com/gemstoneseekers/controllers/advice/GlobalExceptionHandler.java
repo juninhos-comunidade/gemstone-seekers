@@ -3,6 +3,7 @@ package com.gemstoneseekers.controllers.advice;
 import com.gemstoneseekers.dtos.response.BaseResponse;
 import com.gemstoneseekers.dtos.response.ErrorResponse;
 import com.gemstoneseekers.dtos.response.ValidationError;
+import com.gemstoneseekers.exceptions.BusinessRuleException;
 import org.jspecify.annotations.NonNull;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -109,5 +110,12 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 null);
         BaseResponse<Void> response = new BaseResponse<>(false, "Data integrity error", null, error);
         return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+    }
+
+    @ExceptionHandler(BusinessRuleException.class)
+    public ResponseEntity<BaseResponse<Void>> handleBusinessRuleException(BusinessRuleException ex) {
+        ErrorResponse error = new ErrorResponse("BUSINESS_RULE_VIOLATION", ex.getMessage(), null);
+        BaseResponse<Void> response = new BaseResponse<>(false, ex.getMessage(), null, error);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 }
