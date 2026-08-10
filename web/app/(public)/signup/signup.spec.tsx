@@ -24,7 +24,7 @@ describe("Signup Page", () => {
     expect(screen.getByLabelText(/nome completo/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/^e-mail$/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/confirmar senha/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/show password/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/mostrar senha/i)).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: /cadastrar/i }),
     ).toBeInTheDocument();

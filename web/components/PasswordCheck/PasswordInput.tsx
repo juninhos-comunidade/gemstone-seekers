@@ -21,7 +21,7 @@ export const PasswordCheck = forwardRef<HTMLInputElement, PasswordCheckProps>(
   (
     {
       id,
-      label = "Secure Password",
+      label = "Senha segura",
       hideLabel = true,
       className,
       onChange,
@@ -44,13 +44,25 @@ export const PasswordCheck = forwardRef<HTMLInputElement, PasswordCheckProps>(
 
     const requirements = useMemo(
       () => [
-        { regex: /.{8,}/, text: "At least 8 characters" },
-        { regex: /[0-9]/, text: "At least 1 number" },
-        { regex: /[a-z]/, text: "At least 1 lowercase letter" },
-        { regex: /[A-Z]/, text: "At least 1 uppercase letter" },
+        {
+          regex: /.{8,}/,
+          text: "Pelo menos 8 caracteres",
+        },
+        {
+          regex: /[0-9]/,
+          text: "Pelo menos 1 número",
+        },
+        {
+          regex: /[a-z]/,
+          text: "Pelo menos 1 letra minúscula",
+        },
+        {
+          regex: /[A-Z]/,
+          text: "Pelo menos 1 letra maiúscula",
+        },
         {
           regex: /[!@#$%^&*(),.?":{}|<>]/,
-          text: "At least 1 special character",
+          text: "Pelo menos 1 caractere especial",
         },
       ],
       [],
@@ -79,16 +91,17 @@ export const PasswordCheck = forwardRef<HTMLInputElement, PasswordCheckProps>(
     };
 
     const getStrengthText = (score: number) => {
-      if (score === 0) return "Enter a password";
-      if (score <= 2) return "Weak security";
-      if (score <= 4) return "Medium security";
-      return "Strong security";
+      if (score === 0) return "Digite uma senha";
+      if (score <= 2) return "Segurança fraca";
+      if (score <= 4) return "Segurança média";
+      return "Segurança forte";
     };
 
     return (
       <div className="w-full">
         <Field>
           {!hideLabel && <FieldLabel htmlFor={inputId}>{label}</FieldLabel>}
+
           <div className="relative">
             <Input
               ref={ref}
@@ -103,9 +116,10 @@ export const PasswordCheck = forwardRef<HTMLInputElement, PasswordCheckProps>(
               }}
               {...props}
             />
+
             <button
               aria-controls={inputId}
-              aria-label={isVisible ? "Hide password" : "Show password"}
+              aria-label={isVisible ? "Ocultar senha" : "Mostrar senha"}
               aria-pressed={isVisible}
               className="text-muted-foreground/80 hover:text-foreground focus-visible:border-ring focus-visible:ring-ring/50 absolute inset-y-0 end-0 flex h-full w-9 items-center justify-center rounded-e-md transition-[color,box-shadow] outline-none focus:z-10 focus-visible:ring-[3px] disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50"
               onClick={toggleVisibility}
@@ -121,7 +135,7 @@ export const PasswordCheck = forwardRef<HTMLInputElement, PasswordCheckProps>(
         </Field>
 
         <div
-          aria-label="Password strength"
+          aria-label="Força da senha"
           aria-valuemax={5}
           aria-valuemin={0}
           aria-valuenow={strengthScore}
@@ -147,12 +161,13 @@ export const PasswordCheck = forwardRef<HTMLInputElement, PasswordCheckProps>(
           >
             {getStrengthText(strengthScore)}
           </p>
+
           <span className="text-muted-foreground text-xs">
-            {strengthScore}/5 requirements met
+            {strengthScore}/5 requisitos atendidos
           </span>
         </div>
 
-        <ul aria-label="Password requirements" className="space-y-1.5">
+        <ul aria-label="Requisitos da senha" className="space-y-1.5">
           {strength.map((req) => (
             <li className="flex items-center gap-1" key={req.text}>
               {req.met ? (
@@ -166,6 +181,7 @@ export const PasswordCheck = forwardRef<HTMLInputElement, PasswordCheckProps>(
                   aria-hidden="true"
                 />
               )}
+
               <span
                 className={cn(
                   "text-xs transition-colors",
@@ -173,8 +189,11 @@ export const PasswordCheck = forwardRef<HTMLInputElement, PasswordCheckProps>(
                 )}
               >
                 {req.text}
+
                 <span className="sr-only">
-                  {req.met ? " - Requirement met" : " - Requirement not met"}
+                  {req.met
+                    ? " - Requisito atendido"
+                    : " - Requisito não atendido"}
                 </span>
               </span>
             </li>
