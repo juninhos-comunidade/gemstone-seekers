@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, Controller, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   addressSchema,
@@ -18,82 +18,215 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { MapPin, Save, Loader2 } from "lucide-react";
 import { useUpdateAddressMutation } from "@/lib/api/candidate/userProfileMutations";
+import {
+  useCountriesQuery,
+  useStatesQuery,
+  useStatesByCountryQuery,
+  useCitiesByStateQuery,
+} from "@/lib/api/location/location";
+
+const EMPTY_ARRAY: never[] = [];
 
 interface CandidateAddressProps {
   initialData?: CandidateProfileResponse | null;
 }
 
+// Resolve country/state/city ids and display names from the backend profile.
+// Pure function: no side effects, easy to unit test in isolation.
+function resolveInitialLocation(
+  address: CandidateProfileResponse["address"] | undefined | null,
+  allStates: ReturnType<typeof useStatesQuery>["data"],
+  countries: ReturnType<typeof useCountriesQuery>["data"],
+): AddressFormData | null {
+  if (!address) return null;
+
+  const initialCity = address.city;
+  const matchedStateId = initialCity?.stateId;
+  let matchedStateName = initialCity?.stateName || initialCity?.stateCode || "";
+  let matchedCountryId: number | undefined = undefined;
+  let matchedCountryName = initialCity?.countryName || "Brazil";
+
+  if (matchedStateId && allStates && allStates.length > 0) {
+    const foundState = allStates.find((s) => s.id === matchedStateId);
+    if (foundState) {
+      matchedStateName = foundState.name;
+      matchedCountryId = foundState.countryId;
+    }
+  }
+
+  if (matchedCountryId && countries && countries.length > 0) {
+    const foundCountry = countries.find((c) => c.id === matchedCountryId);
+    if (foundCountry) matchedCountryName = foundCountry.name;
+  } else if (countries && countries.length > 0) {
+    const foundCountry =
+      countries.find(
+        (c) => c.name.toLowerCase() === matchedCountryName.toLowerCase(),
+      ) || countries.find((c) => c.name.toLowerCase().includes("bra"));
+    if (foundCountry) {
+      matchedCountryId = foundCountry.id;
+      matchedCountryName = foundCountry.name;
+    }
+  }
+
+  return {
+    street: address.street || "",
+    number: address.number || "",
+    neighborhood: address.neighborhood || "",
+    complement: address.complement || "",
+    zipCode: address.zipCode || "",
+    countryId: matchedCountryId,
+    stateId: matchedStateId,
+    cityId: initialCity?.id,
+    countryName: matchedCountryName,
+    stateName: matchedStateName,
+    cityName: initialCity?.name || "",
+  };
+}
+
+function matchCity(
+  targetCityId: number | undefined,
+  targetCityName: string | undefined,
+  cities: { id: number; name: string }[],
+) {
+  if (!targetCityId || cities.length === 0) return undefined;
+  return (
+    cities.find((c) => c.id === targetCityId) ||
+    cities.find(
+      (c) => c.name.toLowerCase() === (targetCityName || "").toLowerCase(),
+    )
+  );
+}
+
 export function CandidateAddress({ initialData }: CandidateAddressProps) {
-  const address = initialData?.address;
+  const { data: countries = EMPTY_ARRAY, isLoading: isLoadingCountries } =
+    useCountriesQuery();
+  const { data: allStates = EMPTY_ARRAY } = useStatesQuery();
+
+  // Resolved once per (initialData, countries, allStates) change — feeds `values`.
+  const resolvedInitialValues = React.useMemo(
+    () => resolveInitialLocation(initialData?.address, allStates, countries),
+    [initialData, allStates, countries],
+  );
 
   const {
     register,
     handleSubmit,
-    reset,
+    setValue,
+    control,
     formState: { errors },
   } = useForm<AddressFormData>({
     resolver: zodResolver(addressSchema),
     defaultValues: {
-      street: address?.street || "",
-      number: address?.number || "",
-      neighborhood: address?.neighborhood || "",
-      complement: address?.complement || "",
-      zipCode: address?.zipCode || "",
-      cityName: address?.city?.name || "",
-      stateCode: "SP",
+      street: "",
+      number: "",
+      neighborhood: "",
+      complement: "",
+      zipCode: "",
+      countryId: undefined,
+      stateId: undefined,
+      cityId: undefined,
+      countryName: "Brazil",
+      stateName: "",
+      cityName: "",
     },
+    values: resolvedInitialValues ?? undefined,
   });
 
-  useEffect(() => {
-    if (initialData) {
-      const addr = initialData.address;
-      reset({
-        street: addr?.street || "",
-        number: addr?.number || "",
-        neighborhood: addr?.neighborhood || "",
-        complement: addr?.complement || "",
-        zipCode: addr?.zipCode || "",
-        cityName: addr?.city?.name || "",
-        stateCode: "SP",
-      });
-    }
-  }, [initialData, reset]);
+  const selectedCountryId = useWatch({ control, name: "countryId" });
+  const selectedStateId = useWatch({ control, name: "stateId" });
+
+  const { data: states = EMPTY_ARRAY, isLoading: isLoadingStates } =
+    useStatesByCountryQuery(
+      selectedCountryId ? Number(selectedCountryId) : null,
+    );
+  const { data: cities = EMPTY_ARRAY, isLoading: isLoadingCities } =
+    useCitiesByStateQuery(selectedStateId ? Number(selectedStateId) : null);
+
+  const countryItems = React.useMemo(
+    () => countries.map((c) => ({ value: String(c.id), label: c.name })),
+    [countries],
+  );
+  const stateItems = React.useMemo(
+    () => states.map((s) => ({ value: String(s.id), label: s.name })),
+    [states],
+  );
+  const cityItems = React.useMemo(
+    () => cities.map((c) => ({ value: String(c.id), label: c.name })),
+    [cities],
+  );
 
   const updateAddressMutation = useUpdateAddressMutation();
 
+  const matchedCityRef = React.useRef<number | null>(null);
+  useEffect(() => {
+    const target = resolvedInitialValues;
+    if (!target?.cityId || cities.length === 0) return;
+    if (matchedCityRef.current === target.cityId) return;
+
+    const matched = matchCity(target.cityId, target.cityName, cities);
+    if (matched) {
+      matchedCityRef.current = target.cityId;
+      setValue("cityId", matched.id);
+      setValue("cityName", matched.name);
+    }
+  }, [cities, resolvedInitialValues, setValue]);
+
+  const handleCountryChange = (val?: number) => {
+    const country = countries.find((c) => c.id === val);
+    setValue("countryId", val);
+    setValue("countryName", country?.name || "");
+    setValue("stateId", undefined);
+    setValue("stateName", "");
+    setValue("cityId", undefined);
+    setValue("cityName", "");
+  };
+
+  const handleStateChange = (val?: number) => {
+    const stateItem = states.find((s) => s.id === val);
+    setValue("stateId", val);
+    setValue("stateName", stateItem?.name || "");
+    setValue("cityId", undefined);
+    setValue("cityName", "");
+  };
+
+  const handleCityChange = (val?: number) => {
+    const cityItem = cities.find((c) => c.id === val);
+    setValue("cityId", val);
+    setValue("cityName", cityItem?.name || "");
+  };
+
   const onSave = (data: AddressFormData) => {
-    updateAddressMutation.mutate(
-      {
-        street: data.street,
-        number: data.number,
-        neighborhood: data.neighborhood,
-        complement: data.complement,
-        zipCode: data.zipCode,
-        location: {
-          city: data.cityName,
-          state: data.stateCode,
-          country: "Brasil",
-        },
-      },
-      {
-        onSuccess: (updatedProfile) => {
-          if (updatedProfile) {
-            const addr = updatedProfile.address;
-            reset({
-              street: addr?.street || data.street,
-              number: addr?.number || data.number,
-              neighborhood: addr?.neighborhood || data.neighborhood,
-              complement: addr?.complement || data.complement,
-              zipCode: addr?.zipCode || data.zipCode,
-              cityName: addr?.city?.name || data.cityName,
-              stateCode: data.stateCode || "SP",
-            });
-          }
-        },
-      },
+    const matchedCountry = countries.find(
+      (c) => c.id === Number(data.countryId),
     );
+    const matchedState = states.find((s) => s.id === Number(data.stateId));
+    const matchedCity = cities.find((c) => c.id === Number(data.cityId));
+
+    const countryStr = matchedCountry?.name || data.countryName || "Brazil";
+    const stateStr = matchedState?.name || data.stateName || "";
+    const cityStr = matchedCity?.name || data.cityName || "";
+
+    updateAddressMutation.mutate({
+      street: data.street,
+      number: data.number,
+      neighborhood: data.neighborhood,
+      complement: data.complement,
+      zipCode: data.zipCode,
+      location: {
+        city: cityStr,
+        state: stateStr,
+        country: countryStr,
+      },
+    });
   };
 
   return (
@@ -189,7 +322,7 @@ export function CandidateAddress({ initialData }: CandidateAddressProps) {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-4">
             <div className="space-y-2 sm:col-span-1">
               <Label htmlFor="zipCode">CEP</Label>
               <Input
@@ -205,30 +338,130 @@ export function CandidateAddress({ initialData }: CandidateAddressProps) {
             </div>
 
             <div className="space-y-2 sm:col-span-1">
-              <Label htmlFor="cityName">Cidade</Label>
-              <Input
-                id="cityName"
-                {...register("cityName")}
-                placeholder="Ex: São Paulo"
+              <Label htmlFor="countrySelect">País</Label>
+              <Controller
+                control={control}
+                name="countryId"
+                render={({ field }) => (
+                  <Select
+                    items={countryItems}
+                    value={field.value ? String(field.value) : ""}
+                    onValueChange={(val) =>
+                      handleCountryChange(val ? Number(val) : undefined)
+                    }
+                    disabled={isLoadingCountries}
+                  >
+                    <SelectTrigger id="countrySelect" className="w-full">
+                      <SelectValue
+                        placeholder={
+                          isLoadingCountries
+                            ? "Carregando..."
+                            : "Selecione o País"
+                        }
+                      />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {countries.map((c) => (
+                        <SelectItem key={c.id} value={String(c.id)}>
+                          {c.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
               />
-              {errors.cityName && (
-                <p className="text-destructive text-xs">
-                  {errors.cityName.message}
+            </div>
+
+            <div className="space-y-2 sm:col-span-1">
+              <Label htmlFor="stateSelect">Estado</Label>
+              <Controller
+                control={control}
+                name="stateId"
+                render={({ field }) => (
+                  <Select
+                    items={stateItems}
+                    value={field.value ? String(field.value) : ""}
+                    onValueChange={(val) =>
+                      handleStateChange(val ? Number(val) : undefined)
+                    }
+                    disabled={
+                      !selectedCountryId ||
+                      isLoadingStates ||
+                      states.length === 0
+                    }
+                  >
+                    <SelectTrigger id="stateSelect" className="w-full">
+                      <SelectValue
+                        placeholder={
+                          !selectedCountryId
+                            ? "Selecione o País primeiro"
+                            : isLoadingStates
+                              ? "Carregando estados..."
+                              : states.length === 0
+                                ? "Nenhum estado disponível"
+                                : "Selecione o Estado"
+                        }
+                      />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {states.map((s) => (
+                        <SelectItem key={s.id} value={String(s.id)}>
+                          {s.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+              {selectedCountryId && states.length === 0 && !isLoadingStates && (
+                <p className="text-muted-foreground text-xs">
+                  Nenhum estado disponível para este país.
                 </p>
               )}
             </div>
 
             <div className="space-y-2 sm:col-span-1">
-              <Label htmlFor="stateCode">UF / Estado</Label>
-              <Input
-                id="stateCode"
-                maxLength={2}
-                {...register("stateCode")}
-                placeholder="Ex: SP"
+              <Label htmlFor="citySelect">Cidade</Label>
+              <Controller
+                control={control}
+                name="cityId"
+                render={({ field }) => (
+                  <Select
+                    items={cityItems}
+                    value={field.value ? String(field.value) : ""}
+                    onValueChange={(val) =>
+                      handleCityChange(val ? Number(val) : undefined)
+                    }
+                    disabled={
+                      !selectedStateId || isLoadingCities || cities.length === 0
+                    }
+                  >
+                    <SelectTrigger id="citySelect" className="w-full">
+                      <SelectValue
+                        placeholder={
+                          !selectedStateId
+                            ? "Selecione o Estado primeiro"
+                            : isLoadingCities
+                              ? "Carregando cidades..."
+                              : cities.length === 0
+                                ? "Nenhuma cidade disponível"
+                                : "Selecione a Cidade"
+                        }
+                      />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {cities.map((c) => (
+                        <SelectItem key={c.id} value={String(c.id)}>
+                          {c.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
               />
-              {errors.stateCode && (
-                <p className="text-destructive text-xs">
-                  {errors.stateCode.message}
+              {selectedStateId && cities.length === 0 && !isLoadingCities && (
+                <p className="text-muted-foreground text-xs">
+                  Nenhuma cidade disponível para este estado.
                 </p>
               )}
             </div>

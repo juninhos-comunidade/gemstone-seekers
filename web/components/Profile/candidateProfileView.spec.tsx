@@ -14,6 +14,17 @@ vi.mock("next/navigation", () => ({
   }),
 }));
 
+vi.mock("@/lib/api/location/location", () => ({
+  useStatesQuery: () => ({
+    data: [{ id: 10, name: "São Paulo", countryId: 1 }],
+    isLoading: false,
+  }),
+  useCountriesQuery: () => ({
+    data: [{ id: 1, name: "Brasil", codeAlpha2: "BR" }],
+    isLoading: false,
+  }),
+}));
+
 function renderWithQuery(ui: React.ReactNode) {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false } },

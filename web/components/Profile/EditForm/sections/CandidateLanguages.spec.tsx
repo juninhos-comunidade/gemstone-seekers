@@ -17,6 +17,17 @@ vi.mock("@/lib/api/candidate/userProfileMutations", () => ({
   }),
 }));
 
+vi.mock("@/lib/api/languages/languages", () => ({
+  useLanguagesQuery: () => ({
+    data: [
+      { id: 1, name: "Português" },
+      { id: 2, name: "Inglês" },
+      { id: 3, name: "Alemão" },
+    ],
+    isLoading: false,
+  }),
+}));
+
 function renderWithClient(ui: React.ReactNode) {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false } },
@@ -49,10 +60,12 @@ describe("CandidateLanguagesSection Component", () => {
       <CandidateLanguages initialData={INITIAL_MOCK_CANDIDATE} />,
     );
 
-    const nameInput = screen.getByPlaceholderText(
-      /Ex: Português, Inglês, Espanhol/i,
-    );
-    fireEvent.change(nameInput, { target: { value: "Alemão" } });
+    const selectTrigger = screen.getByLabelText(/Idioma/i);
+    fireEvent.click(selectTrigger);
+
+    const option = await screen.findByRole("option", { name: "Alemão" });
+    fireEvent.pointerDown(option);
+    fireEvent.click(option);
 
     const addBtn = screen.getByRole("button", { name: /Adicionar Idioma/i });
     fireEvent.click(addBtn);

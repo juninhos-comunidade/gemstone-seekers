@@ -25,6 +25,8 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+import { useStatesQuery, useCountriesQuery } from "@/lib/api/location/location";
+
 interface CandidateProfileViewProps {
   initialData: CandidateProfileResponse | null;
 }
@@ -35,6 +37,24 @@ export function CandidateProfileView({
   const candidate = initialData?.candidate;
   const address = initialData?.address;
   const user = candidate?.user;
+
+  const { data: allStates = [] } = useStatesQuery();
+  const { data: allCountries = [] } = useCountriesQuery();
+
+  const matchedState = address?.city?.stateId
+    ? allStates.find((s) => s.id === address.city?.stateId)
+    : undefined;
+  const matchedCountry = matchedState?.countryId
+    ? allCountries.find((c) => c.id === matchedState.countryId)
+    : undefined;
+
+  const locationDisplay = [
+    address?.city?.name,
+    matchedState?.name || address?.city?.stateName || address?.city?.stateCode,
+    matchedCountry?.name || address?.city?.countryName,
+  ]
+    .filter(Boolean)
+    .join(", ");
 
   if (!candidate || !user) {
     return null;
@@ -168,7 +188,11 @@ export function CandidateProfileView({
                   <p className="text-xs">{address.complement}</p>
                 )}
                 <p>{address.neighborhood}</p>
-                <p>{address.city?.name || "Cidade não informada"}</p>
+                <p>
+                  {locationDisplay ||
+                    address.city?.name ||
+                    "Cidade não informada"}
+                </p>
                 <p className="text-muted-foreground/80 pt-1 font-mono text-xs">
                   CEP: {address.zipCode}
                 </p>

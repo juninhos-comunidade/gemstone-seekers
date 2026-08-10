@@ -14,8 +14,13 @@ export const addressSchema = z.object({
   neighborhood: z.string().optional(),
   complement: z.string().optional(),
   zipCode: z.string().optional(),
+  countryId: z.number().optional(),
+  stateId: z.number().optional(),
+  cityId: z.number().optional(),
+  countryName: z.string().optional(),
+  stateName: z.string().optional(),
   cityName: z.string().optional(),
-  stateCode: z.string().max(2, "UF deve ter no máximo 2 letras").optional(),
+  stateCode: z.string().optional(),
 });
 
 export const candidateLinkSchema = z.object({

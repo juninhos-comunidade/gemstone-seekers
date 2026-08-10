@@ -14,6 +14,9 @@ export interface CityResponse {
   id?: number;
   name: string;
   stateId?: number;
+  stateName?: string;
+  stateCode?: string;
+  countryName?: string;
 }
 
 export interface AddressResponse {

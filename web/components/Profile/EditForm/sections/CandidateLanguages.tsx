@@ -11,7 +11,6 @@ import {
   CandidateProfileResponse,
   ProficiencyLevel,
 } from "@/lib/types/candidate";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import {
@@ -33,14 +32,49 @@ import {
   useAddLanguageMutation,
   useDeleteLanguageMutation,
 } from "@/lib/api/candidate/userProfileMutations";
+import { useLanguagesQuery } from "@/lib/api/languages/languages";
 import { ConfirmDeleteDialog } from "@/components/ConfirmDeleteDialog/ConfirmDeleteDialog";
 
 interface CandidateLanguagesProps {
   initialData?: CandidateProfileResponse | null;
 }
 
+const proficiencyLevels: { value: ProficiencyLevel; label: string }[] = [
+  { value: "BASIC", label: "Básico" },
+  { value: "INTERMEDIATE", label: "Intermediário" },
+  { value: "ADVANCED", label: "Avançado" },
+  { value: "FLUENT", label: "Fluente" },
+  { value: "NATIVE", label: "Nativo" },
+];
+
+const languagesLabels = [
+  {
+    name: "Portuguese",
+    label: "Português",
+  },
+  {
+    name: "English",
+    label: "Inglês",
+  },
+  {
+    name: "Spanish",
+    label: "Espanhol",
+  },
+  {
+    name: "French",
+    label: "Francês",
+  },
+  {
+    name: "German",
+    label: "Alemão",
+  },
+];
+
 export function CandidateLanguages({ initialData }: CandidateLanguagesProps) {
   const languages = initialData?.candidate?.languages || [];
+
+  const { data: catalogLanguages = [], isLoading: isLoadingLanguages } =
+    useLanguagesQuery();
 
   const addForm = useForm<CandidateLanguageFormData>({
     resolver: zodResolver(candidateLanguageSchema),
@@ -104,11 +138,45 @@ export function CandidateLanguages({ initialData }: CandidateLanguagesProps) {
               Adicionar Idioma
             </span>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              {/* Seleção do Idioma via Shadcn UI Select */}
               <div className="space-y-1">
-                <Label className="text-xs">Nome do Idioma</Label>
-                <Input
-                  {...addForm.register("languageName")}
-                  placeholder="Ex: Português, Inglês, Espanhol"
+                <Label className="text-xs" htmlFor="languageNameSelect">
+                  Idioma
+                </Label>
+                <Controller
+                  control={addForm.control}
+                  name="languageName"
+                  render={({ field }) => (
+                    <Select
+                      value={
+                        field.value
+                          ? languagesLabels.find(
+                              (lang) => lang.name === field.value,
+                            )?.label
+                          : ""
+                      }
+                      onValueChange={(val) => field.onChange(val)}
+                      disabled={isLoadingLanguages}
+                    >
+                      <SelectTrigger id="languageNameSelect" className="w-full">
+                        <SelectValue
+                          placeholder={
+                            isLoadingLanguages
+                              ? "Carregando idiomas..."
+                              : "Selecione o Idioma"
+                          }
+                        />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {catalogLanguages.map((lang) => (
+                          <SelectItem key={lang.id} value={lang.name}>
+                            {languagesLabels.find((l) => l.name === lang.name)
+                              ?.label || lang.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
                 />
                 {addForm.formState.errors.languageName && (
                   <p className="text-destructive text-xs">
@@ -116,6 +184,8 @@ export function CandidateLanguages({ initialData }: CandidateLanguagesProps) {
                   </p>
                 )}
               </div>
+
+              {/* Nível de Proficiência via Shadcn UI Select */}
               <div className="space-y-1">
                 <Label className="text-xs">Nível de Proficiência</Label>
                 <Controller
@@ -123,22 +193,26 @@ export function CandidateLanguages({ initialData }: CandidateLanguagesProps) {
                   name="proficiency"
                   render={({ field }) => (
                     <Select
-                      value={field.value}
+                      value={
+                        field.value
+                          ? proficiencyLevels.find(
+                              (level) => level.value === field.value,
+                            )?.label
+                          : ""
+                      }
                       onValueChange={(val) =>
                         field.onChange(val as ProficiencyLevel)
                       }
                     >
-                      <SelectTrigger>
+                      <SelectTrigger className="w-full">
                         <SelectValue placeholder="Selecione..." />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="BASIC">Básico</SelectItem>
-                        <SelectItem value="INTERMEDIATE">
-                          Intermediário
-                        </SelectItem>
-                        <SelectItem value="ADVANCED">Avançado</SelectItem>
-                        <SelectItem value="FLUENT">Fluente</SelectItem>
-                        <SelectItem value="NATIVE">Nativo</SelectItem>
+                        {proficiencyLevels.map((level) => (
+                          <SelectItem key={level.value} value={level.value}>
+                            {level.label}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   )}
@@ -153,7 +227,7 @@ export function CandidateLanguages({ initialData }: CandidateLanguagesProps) {
             <Button
               type="submit"
               size="sm"
-              disabled={addLanguageMutation.isPending}
+              disabled={addLanguageMutation.isPending || isLoadingLanguages}
               className="gap-1 text-xs"
             >
               {addLanguageMutation.isPending ? (
@@ -182,10 +256,17 @@ export function CandidateLanguages({ initialData }: CandidateLanguagesProps) {
               >
                 <div className="text-xs">
                   <span className="text-foreground font-semibold">
-                    {item.languageName}:{" "}
+                    {languagesLabels.find(
+                      (lang) => lang.name === item.languageName,
+                    )?.label || item.languageName}
+                    :{" "}
                   </span>
                   <span className="text-muted-foreground">
-                    {item.proficiency}
+                    {
+                      proficiencyLevels.find(
+                        (level) => level.value === item.proficiency,
+                      )?.label
+                    }
                   </span>
                 </div>
                 <Button
