@@ -2,7 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
-import { CandidateProfile } from "@/lib/types/candidate";
+import { CandidateProfileResponse } from "@/lib/types/candidate";
 import { buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,7 +13,6 @@ import {
   Mail,
   CreditCard,
   User,
-  AlertTriangle,
   CheckCircle2,
   Globe,
   Languages,
@@ -27,52 +26,18 @@ import {
 import { cn } from "@/lib/utils";
 
 interface CandidateProfileViewProps {
-  initialData: CandidateProfile | null;
+  initialData: CandidateProfileResponse | null;
 }
 
 export function CandidateProfileView({
   initialData,
 }: CandidateProfileViewProps) {
-  const profile = initialData;
+  const candidate = initialData?.candidate;
+  const address = initialData?.address;
+  const user = candidate?.user;
 
-  const isProfileEmpty =
-    !profile ||
-    (!profile.phone &&
-      !profile.summary &&
-      (!profile.address || !profile.address.street));
-
-  if (!profile || isProfileEmpty) {
-    return (
-      <div className="mx-auto max-w-4xl space-y-6 pb-12">
-        <Card className="border-primary/30 bg-muted/20 border-dashed">
-          <CardContent className="flex flex-col items-center justify-center space-y-4 p-8 text-center sm:p-12">
-            <div className="bg-primary/10 text-primary mb-2 grid size-16 place-items-center rounded-full">
-              <AlertTriangle className="size-8" />
-            </div>
-            <div className="max-w-md space-y-2">
-              <h2 className="text-xl font-semibold tracking-tight">
-                Seu perfil ainda está incompleto
-              </h2>
-              <p className="text-muted-foreground text-sm">
-                Preencha seus dados de contato, resumo profissional, endereço,
-                histórico de experiências e formação para se candidatar às
-                vagas.
-              </p>
-            </div>
-            <Link
-              href="/candidate/user/edit"
-              className={cn(
-                buttonVariants({ variant: "default", size: "lg" }),
-                "mt-4 gap-2",
-              )}
-            >
-              <UserPen className="size-4" />
-              Preencher Dados do Perfil Agora
-            </Link>
-          </CardContent>
-        </Card>
-      </div>
-    );
+  if (!candidate || !user) {
+    return null;
   }
 
   return (
@@ -83,12 +48,12 @@ export function CandidateProfileView({
           <div className="-mt-12 mb-4 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
             <div className="flex items-end gap-4">
               <div className="bg-primary text-primary-foreground ring-background relative flex size-24 shrink-0 items-center justify-center rounded-2xl text-3xl font-bold shadow-lg ring-4">
-                {profile.user.name.charAt(0).toUpperCase()}
+                {user.name ? user.name.charAt(0).toUpperCase() : "U"}
               </div>
               <div className="pt-2">
                 <div className="flex items-center gap-2">
                   <h1 className="text-foreground text-2xl font-bold tracking-tight">
-                    {profile.user.name}
+                    {user.name}
                   </h1>
                   <Badge
                     variant="secondary"
@@ -98,9 +63,7 @@ export function CandidateProfileView({
                     Candidato
                   </Badge>
                 </div>
-                <p className="text-muted-foreground text-sm">
-                  {profile.user.email}
-                </p>
+                <p className="text-muted-foreground text-sm">{user.email}</p>
               </div>
             </div>
 
@@ -119,12 +82,12 @@ export function CandidateProfileView({
           <div className="border-border/50 grid grid-cols-1 gap-3 border-t pt-4 text-sm sm:grid-cols-3">
             <div className="text-muted-foreground flex items-center gap-2.5">
               <Mail className="text-primary/70 size-4 shrink-0" />
-              <span className="truncate">{profile.user.email}</span>
+              <span className="truncate">{user.email}</span>
             </div>
             <div className="text-muted-foreground flex items-center gap-2.5">
               <Phone className="text-primary/70 size-4 shrink-0" />
               <span>
-                {profile.phone || (
+                {candidate.phone || (
                   <span className="text-muted-foreground/60 italic">
                     Não informado
                   </span>
@@ -134,8 +97,8 @@ export function CandidateProfileView({
             <div className="text-muted-foreground flex items-center gap-2.5">
               <CreditCard className="text-primary/70 size-4 shrink-0" />
               <span>
-                {profile.user.documentType && profile.user.documentNumber ? (
-                  `${profile.user.documentType}: ${profile.user.documentNumber}`
+                {user.documentType && user.documentNumber ? (
+                  `${user.documentType}: ${user.documentNumber}`
                 ) : (
                   <span className="text-muted-foreground/60 italic">
                     Documento não informado
@@ -145,12 +108,12 @@ export function CandidateProfileView({
             </div>
           </div>
 
-          {profile.links && profile.links.length > 0 && (
+          {candidate.links && candidate.links.length > 0 && (
             <div className="border-border/40 mt-3 flex flex-wrap items-center gap-2 border-t pt-4">
               <span className="text-muted-foreground flex items-center gap-1 text-xs font-semibold">
                 <Globe className="size-3.5" /> Links:
               </span>
-              {profile.links.map((link) => (
+              {candidate.links.map((link) => (
                 <a
                   key={link.id || link.url}
                   href={link.url}
@@ -176,9 +139,9 @@ export function CandidateProfileView({
             </CardTitle>
           </CardHeader>
           <CardContent>
-            {profile.summary ? (
+            {candidate.summary ? (
               <p className="text-muted-foreground text-sm leading-relaxed whitespace-pre-line">
-                {profile.summary}
+                {candidate.summary}
               </p>
             ) : (
               <p className="text-muted-foreground/60 text-sm italic">
@@ -196,20 +159,18 @@ export function CandidateProfileView({
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-2 text-sm">
-            {profile.address && profile.address.street ? (
+            {address && address.street ? (
               <div className="text-muted-foreground space-y-1.5">
                 <p className="text-foreground font-medium">
-                  {profile.address.street}, {profile.address.number}
+                  {address.street}, {address.number}
                 </p>
-                {profile.address.complement && (
-                  <p className="text-xs">{profile.address.complement}</p>
+                {address.complement && (
+                  <p className="text-xs">{address.complement}</p>
                 )}
-                <p>{profile.address.neighborhood}</p>
-                <p>
-                  {profile.address.cityName} - {profile.address.stateCode}
-                </p>
+                <p>{address.neighborhood}</p>
+                <p>{address.city?.name || "Cidade não informada"}</p>
                 <p className="text-muted-foreground/80 pt-1 font-mono text-xs">
-                  CEP: {profile.address.zipCode}
+                  CEP: {address.zipCode}
                 </p>
               </div>
             ) : (
@@ -229,12 +190,12 @@ export function CandidateProfileView({
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          {!profile.experiences || profile.experiences.length === 0 ? (
+          {!candidate.experiences || candidate.experiences.length === 0 ? (
             <p className="text-muted-foreground/60 text-sm italic">
               Nenhuma experiência profissional cadastrada.
             </p>
           ) : (
-            profile.experiences.map((exp) => (
+            candidate.experiences.map((exp) => (
               <div
                 key={exp.id || exp.title}
                 className="border-primary space-y-1 border-l-2 py-1 pl-4"
@@ -284,12 +245,12 @@ export function CandidateProfileView({
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {!profile.educations || profile.educations.length === 0 ? (
+            {!candidate.educations || candidate.educations.length === 0 ? (
               <p className="text-muted-foreground/60 text-sm italic">
                 Nenhuma formação acadêmica cadastrada.
               </p>
             ) : (
-              profile.educations.map((edu) => (
+              candidate.educations.map((edu) => (
                 <div
                   key={edu.id || edu.institution}
                   className="border-primary/70 space-y-1 border-l-2 py-1 pl-4"
@@ -320,12 +281,13 @@ export function CandidateProfileView({
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {!profile.certifications || profile.certifications.length === 0 ? (
+            {!candidate.certifications ||
+            candidate.certifications.length === 0 ? (
               <p className="text-muted-foreground/60 text-sm italic">
                 Nenhuma certificação cadastrada.
               </p>
             ) : (
-              profile.certifications.map((cert) => (
+              candidate.certifications.map((cert) => (
                 <div
                   key={cert.id || cert.name}
                   className="border-primary/70 space-y-1 border-l-2 py-1 pl-4"
@@ -368,13 +330,13 @@ export function CandidateProfileView({
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          {!profile.projects || profile.projects.length === 0 ? (
+          {!candidate.projects || candidate.projects.length === 0 ? (
             <p className="text-muted-foreground/60 text-sm italic">
               Nenhum projeto cadastrado.
             </p>
           ) : (
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              {profile.projects.map((proj) => (
+              {candidate.projects.map((proj) => (
                 <div
                   key={proj.id || proj.name}
                   className="border-border/50 bg-muted/20 space-y-2 rounded-xl border p-4"
@@ -414,13 +376,13 @@ export function CandidateProfileView({
           </CardTitle>
         </CardHeader>
         <CardContent>
-          {!profile.languages || profile.languages.length === 0 ? (
+          {!candidate.languages || candidate.languages.length === 0 ? (
             <p className="text-muted-foreground/60 text-sm italic">
               Nenhum idioma cadastrado.
             </p>
           ) : (
             <div className="flex flex-wrap gap-2">
-              {profile.languages.map((lang) => (
+              {candidate.languages.map((lang) => (
                 <Badge
                   key={lang.languageId || lang.languageName}
                   variant="secondary"

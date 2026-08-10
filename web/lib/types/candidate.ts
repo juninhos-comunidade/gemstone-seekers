@@ -1,54 +1,55 @@
 export type ProficiencyLevel =
   "BASIC" | "INTERMEDIATE" | "ADVANCED" | "FLUENT" | "NATIVE";
 
-export interface User {
+export interface UserResponse {
   id: string;
   name: string;
   email: string;
-  role: "CANDIDATE" | "RECRUITER";
-  documentType: "CPF" | "CNPJ" | "PASSPORT" | string;
-  documentNumber: string;
-  createdAt: string;
+  role: "CANDIDATE" | "RECRUITER" | string;
+  documentType?: string;
+  documentNumber?: string;
 }
 
-export interface Address {
+export interface CityResponse {
+  id?: number;
+  name: string;
+  stateId?: number;
+}
+
+export interface AddressResponse {
   id: string;
   street: string;
   number: string;
   neighborhood: string;
   complement?: string;
   zipCode: string;
-  cityName: string;
-  stateName: string;
-  stateCode: string;
-  countryName: string;
+  city?: CityResponse;
 }
 
-export interface CandidateLink {
-  id?: string;
+export interface CandidateLinkResponse {
+  id: string;
   name: string;
   url: string;
 }
 
-export interface CandidateLanguage {
+export interface CandidateLanguageResponse {
   languageId?: number;
   languageName: string;
   proficiency: ProficiencyLevel;
 }
 
-export interface Experience {
-  id?: string;
+export interface ExperienceResponse {
+  id: string;
   title: string;
   companyName: string;
   startDate: string;
   endDate?: string;
-  isCurrent: boolean;
+  isCurrent?: boolean;
   description?: string;
-  technologyNames?: string[];
 }
 
-export interface Education {
-  id?: string;
+export interface EducationResponse {
+  id: string;
   institution: string;
   fieldOfStudy: string;
   degree?: string;
@@ -56,8 +57,8 @@ export interface Education {
   completionDate?: string;
 }
 
-export interface Certification {
-  id?: string;
+export interface CertificationResponse {
+  id: string;
   name: string;
   issuingOrganization: string;
   issueDate?: string;
@@ -65,31 +66,101 @@ export interface Certification {
   credentialUrl?: string;
 }
 
-export interface Project {
-  id?: string;
+export interface ProjectResponse {
+  id: string;
   name: string;
   description?: string;
   projectUrl?: string;
   startDate?: string;
   endDate?: string;
-  technologyNames?: string[];
 }
 
-export interface CandidateProfile {
+export interface CandidateResponse {
   id: string;
-  userId: string;
-  user: User;
+  user: UserResponse;
   phone?: string;
   summary?: string;
-  address?: Address;
-  links?: CandidateLink[];
-  languages?: CandidateLanguage[];
-  experiences?: Experience[];
-  educations?: Education[];
-  certifications?: Certification[];
-  projects?: Project[];
-  createdAt: string;
-  updatedAt: string;
+  links?: CandidateLinkResponse[];
+  experiences?: ExperienceResponse[];
+  educations?: EducationResponse[];
+  certifications?: CertificationResponse[];
+  projects?: ProjectResponse[];
+  languages?: CandidateLanguageResponse[];
+}
+
+export interface CandidateProfileResponse {
+  candidate: CandidateResponse;
+  address?: AddressResponse | null;
+}
+
+export type CandidateProfile = CandidateProfileResponse;
+
+// Request DTO Types matching Spring Boot UserProfileController
+export interface UserRequest {
+  name?: string;
+  password?: string;
+  documentType?: string;
+  documentNumber?: string;
+  phone?: string;
+  summary?: string;
+}
+
+export interface LocationRequest {
+  city?: string;
+  state?: string;
+  country?: string;
+}
+
+export interface AddressRequest {
+  zipCode?: string;
+  street?: string;
+  number?: string;
+  neighborhood?: string;
+  complement?: string;
+  location?: LocationRequest;
+}
+
+export interface LinkItemRequest {
+  name: string;
+  url: string;
+}
+
+export interface ExperienceRequest {
+  title: string;
+  companyName: string;
+  startDate: string;
+  endDate?: string;
+  isCurrent?: boolean;
+  description?: string;
+}
+
+export interface EducationRequest {
+  institution: string;
+  fieldOfStudy: string;
+  degree?: string;
+  startDate?: string;
+  completionDate?: string;
+}
+
+export interface CertificationRequest {
+  name: string;
+  issuingOrganization: string;
+  issueDate?: string;
+  expirationDate?: string;
+  credentialUrl?: string;
+}
+
+export interface CandidateLanguageRequest {
+  languageName: string;
+  proficiency: ProficiencyLevel;
+}
+
+export interface ProjectRequest {
+  name: string;
+  description?: string;
+  projectUrl?: string;
+  startDate?: string;
+  endDate?: string;
 }
 
 export interface UpdateCandidateInput {
@@ -107,10 +178,10 @@ export interface UpdateCandidateInput {
     cityName: string;
     stateCode: string;
   };
-  links?: CandidateLink[];
-  languages?: CandidateLanguage[];
-  experiences?: Experience[];
-  educations?: Education[];
-  certifications?: Certification[];
-  projects?: Project[];
+  links?: CandidateLinkResponse[];
+  languages?: CandidateLanguageResponse[];
+  experiences?: ExperienceResponse[];
+  educations?: EducationResponse[];
+  certifications?: CertificationResponse[];
+  projects?: ProjectResponse[];
 }

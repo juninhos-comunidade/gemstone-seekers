@@ -32,11 +32,13 @@ describe("Candidate User Profile Page", () => {
   it("should render candidate profile name and info", async () => {
     mockUseCandidateQuery.mockReturnValue({
       data: {
-        id: "1",
-        userId: "u1",
-        phone: "11999999999",
-        summary: "Resumo Profissional",
-        user: { name: "Thiago Silva", email: "thiago@example.com" },
+        candidate: {
+          id: "1",
+          phone: "11999999999",
+          summary: "Resumo Profissional",
+          user: { name: "Thiago Silva", email: "thiago@example.com" },
+        },
+        address: null,
       },
       isLoading: false,
       error: null,

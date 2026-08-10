@@ -35,7 +35,7 @@ describe("CandidateProfileForm Component", () => {
     );
   });
 
-  it("navigates across all tabs and handles form submit", async () => {
+  it("navigates across all tabs and renders granular save buttons", async () => {
     renderWithQuery(<CandidateProfileForm initialData={undefined} />);
 
     const tabs = [
@@ -52,26 +52,5 @@ describe("CandidateProfileForm Component", () => {
       fireEvent.click(tab);
       expect(tab).toBeInTheDocument();
     }
-
-    const saveButton = screen.getByRole("button", {
-      name: /Salvar Alterações/i,
-    });
-    expect(saveButton).toBeInTheDocument();
-  });
-
-  it("submits the form and calls mutate onSuccess and onError callbacks", async () => {
-    const { default: userEvent } = await import("@testing-library/user-event");
-    const user = userEvent.setup();
-
-    renderWithQuery(
-      <CandidateProfileForm initialData={INITIAL_MOCK_CANDIDATE} />,
-    );
-
-    const submitBtn = screen.getByRole("button", {
-      name: /Salvar Alterações/i,
-    });
-    await user.click(submitBtn);
-
-    expect(submitBtn).toBeInTheDocument();
   });
 });

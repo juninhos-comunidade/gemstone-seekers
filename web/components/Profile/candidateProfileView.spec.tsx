@@ -6,6 +6,7 @@ import {
   EMPTY_CANDIDATE_MOCK,
 } from "@/lib/mocks/candidateMock";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { CandidateProfileResponse } from "@/lib/types/candidate";
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({
@@ -34,47 +35,49 @@ describe("CandidateProfileView Component", () => {
     ).toBeInTheDocument();
   });
 
-  it("renders empty state message when candidate data is empty", () => {
+  it("renders profile header and section placeholders when optional candidate fields are empty", () => {
     renderWithQuery(
       <CandidateProfileView initialData={EMPTY_CANDIDATE_MOCK} />,
     );
 
+    expect(screen.getByText("Novo Candidato")).toBeInTheDocument();
     expect(
-      screen.getByText("Seu perfil ainda está incompleto"),
+      screen.getByText("Nenhum resumo informado ainda."),
     ).toBeInTheDocument();
-    expect(
-      screen.getByRole("link", { name: /Preencher Dados do Perfil Agora/i }),
-    ).toBeInTheDocument();
+    expect(screen.getByText("Endereço não cadastrado.")).toBeInTheDocument();
   });
 
   it("renders certifications, projects, languages, and credential links when populated", () => {
-    const populatedMock = {
+    const populatedMock: CandidateProfileResponse = {
       ...INITIAL_MOCK_CANDIDATE,
-      links: [{ id: "l1", label: "GitHub", url: "https://github.com" }],
-      certifications: [
-        {
-          id: "c1",
-          name: "AWS Certified Developer",
-          issuingOrganization: "Amazon",
-          credentialUrl: "https://aws.amazon.com",
-          issueDate: "2024-01-01",
-        },
-      ],
-      projects: [
-        {
-          id: "p1",
-          name: "Project Alpha",
-          description: "Fullstack App",
-          projectUrl: "https://alpha.com",
-        },
-      ],
-      languages: [
-        {
-          languageId: "lang1",
-          languageName: "Espanhol",
-          proficiency: "Avançado",
-        },
-      ],
+      candidate: {
+        ...INITIAL_MOCK_CANDIDATE.candidate,
+        links: [{ id: "l1", name: "GitHub", url: "https://github.com" }],
+        certifications: [
+          {
+            id: "c1",
+            name: "AWS Certified Developer",
+            issuingOrganization: "Amazon",
+            credentialUrl: "https://aws.amazon.com",
+            issueDate: "2024-01-01",
+          },
+        ],
+        projects: [
+          {
+            id: "p1",
+            name: "Project Alpha",
+            description: "Fullstack App",
+            projectUrl: "https://alpha.com",
+          },
+        ],
+        languages: [
+          {
+            languageId: 1,
+            languageName: "Espanhol",
+            proficiency: "ADVANCED",
+          },
+        ],
+      },
     };
 
     renderWithQuery(<CandidateProfileView initialData={populatedMock} />);

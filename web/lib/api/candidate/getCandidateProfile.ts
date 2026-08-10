@@ -1,10 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
-import { CandidateProfile } from "@/lib/types/candidate";
-import { INITIAL_MOCK_CANDIDATE } from "@/lib/mocks/candidateMock";
+import { httpClient } from "@/lib/api/client";
+import { CandidateProfileResponse } from "@/lib/types/candidate";
+import { ApiResponse } from "@/lib/types/api/response";
 
-export async function getCandidateProfile(): Promise<CandidateProfile | null> {
-  await new Promise((resolve) => setTimeout(resolve, 150));
-  return INITIAL_MOCK_CANDIDATE;
+export async function getCandidateProfile(): Promise<CandidateProfileResponse | null> {
+  const response =
+    await httpClient.get<ApiResponse<CandidateProfileResponse>>("/profile");
+  return response?.result ?? null;
 }
 
 export function useCandidateQuery() {
