@@ -4,7 +4,11 @@ import com.gemstoneseekers.dtos.response.TestResponse;
 import com.gemstoneseekers.enums.TestStatus;
 import com.gemstoneseekers.exceptions.EntityNotFoundException;
 import com.gemstoneseekers.mappers.TestMapper;
-import com.gemstoneseekers.models.*;
+import com.gemstoneseekers.models.Candidate;
+import com.gemstoneseekers.models.CandidateAnswer;
+import com.gemstoneseekers.models.Question;
+import com.gemstoneseekers.models.Technology;
+import com.gemstoneseekers.models.Test;
 import com.gemstoneseekers.repositories.QuestionRepository;
 import com.gemstoneseekers.repositories.TestRepository;
 
