@@ -6,7 +6,9 @@ import com.gemstoneseekers.models.CandidateAnswer;
 import com.gemstoneseekers.models.Test;
 import org.springframework.stereotype.Component;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 @Component
 public class TestMapper {
@@ -20,7 +22,9 @@ public class TestMapper {
     }
 
     public TestResponse toTestAndQuestionsResponse(Test test){
-        List<QuestionResponse> questions = test.getAnswers().stream()
+        List<QuestionResponse> questions = Optional.ofNullable(test.getAnswers())
+            .orElseGet(Collections::emptySet)
+            .stream()
             .map(CandidateAnswer::getQuestion)
             .map(questionMapper::toResponse)
             .toList();
