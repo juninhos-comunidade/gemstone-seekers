@@ -5,6 +5,7 @@ import java.time.OffsetDateTime;
 import java.util.*;
 
 import com.gemstoneseekers.enums.TestStatus;
+import com.gemstoneseekers.exceptions.BusinessRuleException;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -71,5 +72,15 @@ public class Test extends BaseModel {
     public void addAnswer(CandidateAnswer answer) {
         answers.add(answer);
         answer.setTest(this);
+    }
+
+    public void answerQuestion(Long questionId, QuestionOption option) {
+        CandidateAnswer answer = this.answers.stream()
+            .filter(a -> a.getQuestion().getId().equals(questionId))
+            .findFirst()
+            .orElseThrow(() -> new BusinessRuleException(
+                String.format("Question ID %d does not belong to Test ID %s", questionId, getId())            ));
+
+        answer.setSelectedOption(option);
     }
 }

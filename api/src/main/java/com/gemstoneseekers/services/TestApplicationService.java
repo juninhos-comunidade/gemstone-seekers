@@ -1,22 +1,24 @@
 package com.gemstoneseekers.services;
 
+import com.gemstoneseekers.dtos.request.SaveAnswerRequest;
 import com.gemstoneseekers.dtos.response.TestResponse;
 import com.gemstoneseekers.enums.TestStatus;
+import com.gemstoneseekers.exceptions.AccessDeniedException;
+import com.gemstoneseekers.exceptions.BusinessRuleException;
 import com.gemstoneseekers.exceptions.EntityNotFoundException;
 import com.gemstoneseekers.mappers.TestMapper;
-import com.gemstoneseekers.models.Candidate;
-import com.gemstoneseekers.models.CandidateAnswer;
-import com.gemstoneseekers.models.Question;
-import com.gemstoneseekers.models.Technology;
-import com.gemstoneseekers.models.Test;
+import com.gemstoneseekers.models.*;
+import com.gemstoneseekers.repositories.QuestionOptionRepository;
 import com.gemstoneseekers.repositories.QuestionRepository;
 import com.gemstoneseekers.repositories.TestRepository;
 
+import jakarta.validation.constraints.NotNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class TestApplicationService {
@@ -26,17 +28,19 @@ public class TestApplicationService {
     private final CandidateService candidateService;
     private final TechnologyService technologyService;
     private final TestMapper testMapper;
+    private final QuestionOptionRepository questionOptionRepository;
 
     public TestApplicationService(QuestionRepository questionRepository,
                                   TestRepository testRepository,
                                   CandidateService candidateService,
                                   TechnologyService technologyService,
-                                  TestMapper testMapper) {
+                                  TestMapper testMapper, QuestionOptionRepository questionOptionRepository) {
         this.questionRepository = questionRepository;
         this.testRepository = testRepository;
         this.candidateService = candidateService;
         this.technologyService = technologyService;
         this.testMapper = testMapper;
+        this.questionOptionRepository = questionOptionRepository;
     }
     @Transactional
     public TestResponse startTest(String email, String technologyName) {
@@ -79,5 +83,40 @@ public class TestApplicationService {
             .orElseThrow(() -> new EntityNotFoundException("Test", technologyName));
 
         return testMapper.toTestAndQuestionsResponse(test);
+    }
+
+    public void saveCandidateAnswer(
+        UUID testId,
+        Long questionId,
+        @NotNull(message = "Selected option ID is required") SaveAnswerRequest request,
+        String email) {
+        Candidate candidate = candidateService.getCandidateByEmailSession(email);
+
+        Test test = testRepository.findById(testId)
+            .orElseThrow(() -> new EntityNotFoundException("Test", testId));
+        if (!test.getCandidate().getId().equals(candidate.getId())) {
+            throw new AccessDeniedException("You do not have permission to modify this test");
+        }
+
+        if (test.getStatus() != TestStatus.IN_PROGRESS) {
+            throw new BusinessRuleException("Cannot save answers for a test that is not IN_PROGRESS");
+        }
+
+        QuestionOption selectedOption = questionOptionRepository.findById(request.selectedOptionId())
+            .orElseThrow(() -> new EntityNotFoundException("QuestionOption", request.selectedOptionId()));
+
+
+        Question question = questionRepository.findById(questionId)
+            .orElseThrow(() -> new EntityNotFoundException("Question", questionId));
+
+        if (!selectedOption.getQuestion().getId().equals(questionId)) {
+            throw new BusinessRuleException(
+                String.format("Option ID %d does not belong to Question ID %d", request.selectedOptionId(), questionId)
+            );
+        }
+
+        test.answerQuestion(questionId, selectedOption);
+
+
     }
 }

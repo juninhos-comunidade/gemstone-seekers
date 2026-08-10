@@ -1,13 +1,17 @@
 package com.gemstoneseekers.controllers;
 
+import com.gemstoneseekers.dtos.request.SaveAnswerRequest;
 import com.gemstoneseekers.dtos.response.BaseResponse;
 import com.gemstoneseekers.dtos.response.TestResponse;
 import com.gemstoneseekers.services.TestApplicationService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/tests")
@@ -20,7 +24,7 @@ public class TestController {
         this.testApplicationService = testApplicationService;
     }
 
-    @PostMapping("/{technology}")
+    @PostMapping("/start/{technology}")
     public ResponseEntity<BaseResponse<TestResponse>> startTest(
         @AuthenticationPrincipal UserDetails userDetails,
         @PathVariable String technology
@@ -48,6 +52,19 @@ public class TestController {
                 "Active test retrieved successfully",
                 testResponse,
                 null));
+    }
+
+    @PutMapping("/tests/{testId}/answers/{questionId}")
+    public ResponseEntity<BaseResponse<Void>> saveAnswer(
+        @PathVariable UUID testId,
+        @PathVariable Long questionId,
+        @Valid @RequestBody SaveAnswerRequest request,
+        @AuthenticationPrincipal UserDetails userDetails
+    ) {
+        String email = userDetails.getUsername();
+
+        testApplicationService.saveCandidateAnswer(testId, questionId, request, email);
+        return ResponseEntity.ok(new BaseResponse<>(true, "Answer saved successfully", null, null));
     }
 
 
