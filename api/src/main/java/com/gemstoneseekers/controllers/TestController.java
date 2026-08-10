@@ -3,6 +3,7 @@ package com.gemstoneseekers.controllers;
 import com.gemstoneseekers.dtos.request.SaveAnswerRequest;
 import com.gemstoneseekers.dtos.response.BaseResponse;
 import com.gemstoneseekers.dtos.response.TestResponse;
+import com.gemstoneseekers.dtos.response.TestResultResponse;
 import com.gemstoneseekers.services.TestApplicationService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -54,7 +55,7 @@ public class TestController {
                 null));
     }
 
-    @PutMapping("/tests/{testId}/answers/{questionId}")
+    @PutMapping("/{testId}/answers/{questionId}")
     public ResponseEntity<BaseResponse<Void>> saveAnswer(
         @PathVariable UUID testId,
         @PathVariable Long questionId,
@@ -66,6 +67,16 @@ public class TestController {
         testApplicationService.saveCandidateAnswer(testId, questionId, request, email);
         return ResponseEntity.ok(new BaseResponse<>(true, "Answer saved successfully", null, null));
     }
+    @PostMapping("/{testId}/submit")
+    public ResponseEntity<BaseResponse<TestResultResponse>> submitTest(
+        @PathVariable UUID testId,
+        @AuthenticationPrincipal UserDetails userDetails
+    ) {
+        String email = userDetails.getUsername();
 
+        TestResultResponse response = testApplicationService.submitTest(testId, email);
+
+        return ResponseEntity.ok(new BaseResponse<>(true, "Test submitted successfully", response, null));
+    }
 
 }

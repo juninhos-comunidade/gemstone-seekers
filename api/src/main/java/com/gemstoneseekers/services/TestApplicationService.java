@@ -2,6 +2,7 @@ package com.gemstoneseekers.services;
 
 import com.gemstoneseekers.dtos.request.SaveAnswerRequest;
 import com.gemstoneseekers.dtos.response.TestResponse;
+import com.gemstoneseekers.dtos.response.TestResultResponse;
 import com.gemstoneseekers.enums.TestStatus;
 import com.gemstoneseekers.exceptions.AccessDeniedException;
 import com.gemstoneseekers.exceptions.BusinessRuleException;
@@ -84,16 +85,13 @@ public class TestApplicationService {
 
         return testMapper.toTestAndQuestionsResponse(test);
     }
-
-    public void saveCandidateAnswer(
-        UUID testId,
-        Long questionId,
-        @NotNull(message = "Selected option ID is required") SaveAnswerRequest request,
-        String email) {
+    @Transactional
+    public void saveCandidateAnswer(UUID testId, Long questionId, SaveAnswerRequest request, String email) {
         Candidate candidate = candidateService.getCandidateByEmailSession(email);
 
         Test test = testRepository.findById(testId)
             .orElseThrow(() -> new EntityNotFoundException("Test", testId));
+
         if (!test.getCandidate().getId().equals(candidate.getId())) {
             throw new AccessDeniedException("You do not have permission to modify this test");
         }
@@ -105,10 +103,6 @@ public class TestApplicationService {
         QuestionOption selectedOption = questionOptionRepository.findById(request.selectedOptionId())
             .orElseThrow(() -> new EntityNotFoundException("QuestionOption", request.selectedOptionId()));
 
-
-        Question question = questionRepository.findById(questionId)
-            .orElseThrow(() -> new EntityNotFoundException("Question", questionId));
-
         if (!selectedOption.getQuestion().getId().equals(questionId)) {
             throw new BusinessRuleException(
                 String.format("Option ID %d does not belong to Question ID %d", request.selectedOptionId(), questionId)
@@ -116,7 +110,22 @@ public class TestApplicationService {
         }
 
         test.answerQuestion(questionId, selectedOption);
+    }
+    @Transactional
+    public TestResultResponse submitTest(UUID testId, String email) {
+        Candidate candidate = candidateService.getCandidateByEmailSession(email);
 
+        Test test = testRepository.findById(testId)
+            .orElseThrow(() -> new EntityNotFoundException("Test", testId));
 
+        if (!test.getCandidate().getId().equals(candidate.getId())) {
+            throw new AccessDeniedException("You do not have permission to submit this test");
+        }
+
+        test.submit();
+
+        Test savedTest = testRepository.save(test);
+
+        return testMapper.toTestResultResponse(savedTest);
     }
 }
