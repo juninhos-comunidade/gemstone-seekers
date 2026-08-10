@@ -21,8 +21,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "questions")
@@ -49,8 +48,7 @@ public class Question extends BaseModel {
     private QuestionDifficulty difficultyLevel;
 
     @OneToMany(mappedBy = "question", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<QuestionOption> options = new ArrayList<>();
-
+    private Set<QuestionOption> options;
     @Enumerated(EnumType.STRING)
     @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     @Column(name = "source", nullable = false, columnDefinition = "question_source")

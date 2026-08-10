@@ -2,9 +2,7 @@ package com.gemstoneseekers.models;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 import com.gemstoneseekers.enums.TestStatus;
 import jakarta.persistence.CascadeType;
@@ -67,7 +65,8 @@ public class Test extends BaseModel {
 
     @OneToMany(mappedBy = "test", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("id ASC")
-    private List<CandidateAnswer> answers = new ArrayList<>();
+    private Set<CandidateAnswer> answers = new LinkedHashSet<>();;
+
 
     public void addAnswer(CandidateAnswer answer) {
         answers.add(answer);
