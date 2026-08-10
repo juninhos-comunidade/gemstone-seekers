@@ -53,5 +53,5 @@ public class CandidateAnswer extends BaseModel {
     private QuestionOption selectedOption;
 
     @Column(name = "is_correct")
-    private Boolean correct;
+    private Boolean isCorrect;
 }

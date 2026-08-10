@@ -1,6 +1,8 @@
 package com.gemstoneseekers.models;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.*;
 
@@ -58,11 +60,12 @@ public class Test extends BaseModel {
     @Column(name = "score", precision = 5, scale = 2)
     private BigDecimal score;
 
+
     @Column(name = "started_at", nullable = false)
-    private OffsetDateTime startedAt = OffsetDateTime.now();
+    private Instant startedAt = Instant.now();
 
     @Column(name = "completed_at")
-    private OffsetDateTime completedAt;
+    private Instant completedAt;
 
     @OneToMany(mappedBy = "test", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("id ASC")
@@ -82,5 +85,35 @@ public class Test extends BaseModel {
                 String.format("Question ID %d does not belong to Test ID %s", questionId, getId())            ));
 
         answer.setSelectedOption(option);
+    }
+    public void submit() {
+
+        if (this.status != TestStatus.IN_PROGRESS) {
+            throw new BusinessRuleException("Only tests in progress can be submitted");
+        }
+
+        this.score = calculateScore();
+        this.status = TestStatus.COMPLETED;
+        this.completedAt = Instant.now();
+    }
+
+    private BigDecimal calculateScore() {
+
+        int totalQuestions = (this.answers != null) ? this.answers.size() : 0;
+
+        if (totalQuestions == 0) {
+            return BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP);
+        }
+
+        long correctAnswersCount = this.answers.stream()
+            .map(CandidateAnswer::getSelectedOption)
+            .filter(Objects::nonNull)
+            .filter(QuestionOption::isCorrect)
+            .count();
+
+
+        return BigDecimal.valueOf(correctAnswersCount)
+            .multiply(BigDecimal.valueOf(10))
+            .divide(BigDecimal.valueOf(totalQuestions), 2, RoundingMode.HALF_UP);
     }
 }
