@@ -1,6 +1,63 @@
-import { render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
-import Tests from "./page";
+import { fireEvent, render, screen } from "@testing-library/react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import TestsPage from "./page";
+
+const mockSelectFilter = vi.fn();
+
+vi.mock("@/components/SelectFilter/SelectFilter", () => ({
+  SelectFilter: ({
+    items,
+    value,
+    onValueChange,
+    placeholder,
+  }: {
+    items: Array<{ value: string; label: string }>;
+    value?: string;
+    onValueChange?: (_value: string) => void;
+    placeholder?: string;
+  }) => {
+    mockSelectFilter({ items, value, onValueChange, placeholder });
+
+    return (
+      <label>
+        <span>{placeholder}</span>
+        <select
+          aria-label={placeholder}
+          value={value}
+          onChange={(event) => onValueChange?.(event.target.value)}
+        >
+          {items.map((item) => (
+            <option key={item.value || item.label} value={item.value}>
+              {item.label}
+            </option>
+          ))}
+        </select>
+      </label>
+    );
+  },
+}));
+
+vi.mock("@/components/tests/TestCard/TestCard", () => ({
+  TestCard: ({
+    Tech,
+    Titulo,
+    Nivel,
+  }: {
+    Tech: string;
+    Titulo: string;
+    Nivel: string;
+  }) => (
+    <article data-testid="test-card">
+      <h2>{Titulo}</h2>
+      <p>{Tech}</p>
+      <p>{Nivel}</p>
+    </article>
+  ),
+}));
+
+vi.mock("@/components/SkeletonCard/SkeletonCard", () => ({
+  SkeletonCard: () => <div data-testid="skeleton-card" />,
+}));
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({
@@ -11,12 +68,87 @@ vi.mock("next/navigation", () => ({
     refresh: vi.fn(),
     prefetch: vi.fn(),
   }),
-  usePathname: () => "/candidate/tests",
+  usePathname: () => "/candidate/dashboard/tests",
 }));
 
 describe("Candidate Tests Page", () => {
-  it("should render the texts placeholder", () => {
-    render(<Tests />);
-    expect(screen.getByText(/page testes candidato/i)).toBeInTheDocument();
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("renders page heading, helper text and all test cards by default", () => {
+    render(<TestsPage />);
+
+    expect(
+      screen.getByRole("heading", { name: /testes/i }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/explore os questionários disponíveis por tecnologia/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("combobox", { name: /filtrar por tecnologia/i }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("combobox", { name: /filtrar por nível/i }),
+    ).toBeInTheDocument();
+    expect(screen.getAllByTestId("test-card")).toHaveLength(24);
+  });
+
+  it("filters cards by selected technology", () => {
+    render(<TestsPage />);
+
+    fireEvent.change(
+      screen.getByRole("combobox", { name: /filtrar por tecnologia/i }),
+      {
+        target: { value: "React" },
+      },
+    );
+
+    const cards = screen.getAllByTestId("test-card");
+    expect(cards).toHaveLength(3);
+    expect(screen.getByText(/react para iniciantes/i)).toBeInTheDocument();
+    expect(screen.queryByText(/python para iniciantes/i)).not.toBeInTheDocument();
+  });
+
+  it("filters cards by technology and level together", () => {
+    render(<TestsPage />);
+
+    fireEvent.change(
+      screen.getByRole("combobox", { name: /filtrar por tecnologia/i }),
+      {
+        target: { value: "React" },
+      },
+    );
+
+    fireEvent.change(
+      screen.getByRole("combobox", { name: /filtrar por nível/i }),
+      {
+        target: { value: "avancado" },
+      },
+    );
+
+    expect(screen.getAllByTestId("test-card")).toHaveLength(1);
+    expect(screen.getByText(/react avançado/i)).toBeInTheDocument();
+    expect(
+      screen.queryByText(/react intermediário/i),
+    ).not.toBeInTheDocument();
+  });
+
+  it("restores all cards when technology filter is cleared", () => {
+    render(<TestsPage />);
+
+    const technologySelect = screen.getByRole("combobox", {
+      name: /filtrar por tecnologia/i,
+    });
+
+    fireEvent.change(technologySelect, {
+      target: { value: "Java" },
+    });
+    expect(screen.getAllByTestId("test-card")).toHaveLength(3);
+
+    fireEvent.change(technologySelect, {
+      target: { value: "" },
+    });
+    expect(screen.getAllByTestId("test-card")).toHaveLength(24);
   });
 });
