@@ -7,8 +7,7 @@ import com.gemstoneseekers.mappers.TestMapper;
 import com.gemstoneseekers.models.*;
 import com.gemstoneseekers.repositories.QuestionRepository;
 import com.gemstoneseekers.repositories.TestRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,7 +34,6 @@ public class TestApplicationService {
         this.technologyService = technologyService;
         this.testMapper = testMapper;
     }
-    private static final Logger log = LoggerFactory.getLogger(TestApplicationService.class);
     @Transactional
     public TestResponse startTest(String email, String technologyName) {
         int requiredAmount = 10;
@@ -49,9 +47,8 @@ public class TestApplicationService {
         if (activeTest.isPresent()) {
             return testMapper.toTestAndQuestionsResponse(activeTest.get());
         }
-
         List<Question> selectedQuestions = questionRepository
-            .findRandomByTechnologyId(technology.getId(), requiredAmount);
+            .findUnansweredRandomByTechnologyAndCandidate(technology.getId(), candidate.getId(), requiredAmount);
 
         Test test = new Test();
         test.setCandidate(candidate);
