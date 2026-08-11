@@ -59,7 +59,7 @@ describe("Candidate Signup Page", () => {
     vi.mocked(useUpdateCandidate).mockReturnValue({
       mutateAsync: mockMutate,
       isPending: false,
-    } as UseUpdateCandidateReturn);
+    } as unknown as UseUpdateCandidateReturn);
 
     render(<CandidateSignup />);
 
@@ -97,7 +97,7 @@ describe("Candidate Signup Page", () => {
     vi.mocked(useUpdateCandidate).mockReturnValue({
       mutateAsync: vi.fn(),
       isPending: true,
-    } as UseUpdateCandidateReturn);
+    } as unknown as UseUpdateCandidateReturn);
 
     render(<CandidateSignup />);
 

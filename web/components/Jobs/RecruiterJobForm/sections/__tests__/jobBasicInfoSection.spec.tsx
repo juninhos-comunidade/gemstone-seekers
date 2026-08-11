@@ -79,7 +79,7 @@ describe("JobBasicInfoSection Component", () => {
     vi.mocked(useCompanyRecruitersQuery).mockReturnValue({
       data: [],
       isLoading: false,
-    } as ReturnType<typeof useCompanyRecruitersQuery>);
+    } as unknown as ReturnType<typeof useCompanyRecruitersQuery>);
 
     render(<TestWrapper initialValues={{ companyId: "" }} />);
 
