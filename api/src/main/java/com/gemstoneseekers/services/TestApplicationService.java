@@ -91,16 +91,6 @@ public class TestApplicationService {
         return testMapper.toTestAndQuestionsResponse(savedTest);
     }
 
-    @Transactional(readOnly = true)
-    public TestResponse getActiveTestAndQuestions(String email, String technologyName) {
-        Candidate candidate = candidateService.getCandidateByEmailSession(email);
-        Technology technology = technologyService.getTechnologyByName(technologyName);
-
-        Test test = testRepository.findByCandidateAndTechnologyAndStatus(candidate, technology, TestStatus.IN_PROGRESS)
-            .orElseThrow(() -> new EntityNotFoundException("Test", technologyName));
-
-        return testMapper.toTestAndQuestionsResponse(test);
-    }
     @Transactional
     public void saveCandidateAnswer(UUID testId, Long questionId, SaveAnswerRequest request, String email) {
         Candidate candidate = candidateService.getCandidateByEmailSession(email);

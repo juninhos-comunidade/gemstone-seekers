@@ -576,24 +576,6 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/BaseResponseCompleteRegistrationResponse"
-  /api/v1/tests/{technology}/active:
-    get:
-      tags:
-      - test-controller
-      operationId: getTestStatus
-      parameters:
-      - name: technology
-        in: path
-        required: true
-        schema:
-          type: string
-      responses:
-        "200":
-          description: OK
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/BaseResponseTestResponse"
   /api/v1/technologies:
     get:
       tags:

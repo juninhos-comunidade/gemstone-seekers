@@ -39,23 +39,6 @@ public class TestController {
             .body(new BaseResponse<>(true, "Test initiated successfully", testResponse, null));
     }
 
-    @GetMapping("/{technology}/active")
-    public ResponseEntity<BaseResponse<TestResponse>> getTestStatus(
-        @AuthenticationPrincipal UserDetails userDetails,
-        @PathVariable String technology
-    ){
-        String email = userDetails.getUsername();
-
-        TestResponse testResponse = testApplicationService.getActiveTestAndQuestions(email, technology);
-
-        return ResponseEntity.status(HttpStatus.OK)
-            .body(new BaseResponse<>(
-                true,
-                "Active test retrieved successfully",
-                testResponse,
-                null));
-    }
-
     @PutMapping("/{testId}/answers/{questionId}")
     public ResponseEntity<BaseResponse<Void>> saveAnswer(
         @PathVariable UUID testId,

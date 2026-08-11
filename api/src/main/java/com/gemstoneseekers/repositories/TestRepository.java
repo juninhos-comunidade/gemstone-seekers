@@ -14,7 +14,6 @@ import java.util.UUID;
 @Repository
 public interface TestRepository extends JpaRepository<Test, UUID> {
     @EntityGraph(attributePaths = {"technology", "answers", "answers.question", "answers.question.options"})
-    Optional<Test> findByCandidateAndTechnologyAndStatus(Candidate candidate, Technology technology, TestStatus testStatus);
 
     Optional<Test> findByCandidateIdAndTechnologyNameAndStatus(UUID id, String technologyName, TestStatus testStatus);
 }
