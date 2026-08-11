@@ -36,6 +36,12 @@ describe("getJobDetail API", () => {
     expect(job).toBeNull();
   });
 
+  it("retorna null quando a requisição falha", async () => {
+    vi.spyOn(httpClient, "get").mockRejectedValue(new Error("network error"));
+    const result = await getJobDetail("123");
+    expect(result).toBeNull();
+  });
+
   it("useJobDetailQuery configura queryKey e queryFn corretamente", () => {
     useJobDetailQuery("job-123");
     expect(mockUseQuery).toHaveBeenCalledWith(

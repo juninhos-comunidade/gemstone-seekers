@@ -1,6 +1,6 @@
 "use client";
 
-import { FaBriefcase, FaCode, FaHome, FaUsers } from "react-icons/fa";
+import { FaAward, FaBriefcase, FaCode, FaHome, FaUsers } from "react-icons/fa";
 import { LuRadar } from "react-icons/lu";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -8,6 +8,7 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 
 const menuIcons = {
+  award: FaAward,
   briefcase: FaBriefcase,
   code: FaCode,
   home: FaHome,

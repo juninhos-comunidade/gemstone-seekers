@@ -27,6 +27,11 @@ export default function Layout({
       href: "/candidate/dashboard/radar",
       icon: "LuRadar" as const,
     },
+    {
+      label: "Badges",
+      href: "/candidate/dashboard/badges",
+      icon: "award" as const,
+    },
   ];
 
   return (
