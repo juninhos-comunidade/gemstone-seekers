@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
-import { DashboardHeader } from "./DashboardHeader";
+import { UserHeader } from "./UserHeader";
 
 vi.mock("@/components/NotificationsModal/NotificationsModal", () => ({
   NotificationsModal: () => <div>Notifications</div>,
@@ -48,10 +48,10 @@ vi.mock("next/navigation", () => ({
   usePathname: () => "/candidate/dashboard",
 }));
 
-describe("DashboardHeader", () => {
+describe("UserHeader", () => {
   it("renders candidate layout, initials, logo link and handles profile redirect", () => {
     vi.clearAllMocks();
-    render(<DashboardHeader role="candidate" />);
+    render(<UserHeader role="candidate" />);
     expect(screen.getByRole("banner")).toHaveClass("sticky");
     expect(screen.getByText(/painel do candidato/i)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /perfil/i })).toHaveTextContent(
@@ -67,7 +67,7 @@ describe("DashboardHeader", () => {
 
   it("renders recruiter layout, initials, and handles profile redirect", () => {
     vi.clearAllMocks();
-    render(<DashboardHeader role="recruiter" />);
+    render(<UserHeader role="recruiter" />);
     expect(screen.getByText(/painel do recrutador/i)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /perfil/i })).toHaveTextContent(
       /RE/,
@@ -79,7 +79,7 @@ describe("DashboardHeader", () => {
 
   it("renders mobile menu trigger content when menu items are provided", () => {
     render(
-      <DashboardHeader
+      <UserHeader
         role="candidate"
         menuItems={[
           { label: "Dashboard", href: "/candidate/dashboard", icon: "home" },

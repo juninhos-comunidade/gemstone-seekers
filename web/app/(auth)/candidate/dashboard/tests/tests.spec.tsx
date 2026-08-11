@@ -91,7 +91,7 @@ describe("Candidate Tests Page", () => {
     expect(
       screen.getByRole("combobox", { name: /filtrar por nível/i }),
     ).toBeInTheDocument();
-    expect(screen.getAllByTestId("test-card")).toHaveLength(24);
+    expect(screen.getAllByTestId("test-card")).toHaveLength(4);
   });
 
   it("filters cards by selected technology", () => {
@@ -100,13 +100,12 @@ describe("Candidate Tests Page", () => {
     fireEvent.change(
       screen.getByRole("combobox", { name: /filtrar por tecnologia/i }),
       {
-        target: { value: "React" },
+        target: { value: "JavaScript" },
       },
     );
 
-    const cards = screen.getAllByTestId("test-card");
-    expect(cards).toHaveLength(3);
-    expect(screen.getByText(/react para iniciantes/i)).toBeInTheDocument();
+    expect(screen.getAllByTestId("test-card")).toHaveLength(1);
+    expect(screen.getByText(/javascript para iniciantes/i)).toBeInTheDocument();
     expect(
       screen.queryByText(/python para iniciantes/i),
     ).not.toBeInTheDocument();
@@ -118,20 +117,22 @@ describe("Candidate Tests Page", () => {
     fireEvent.change(
       screen.getByRole("combobox", { name: /filtrar por tecnologia/i }),
       {
-        target: { value: "React" },
+        target: { value: "JavaScript" },
       },
     );
 
     fireEvent.change(
       screen.getByRole("combobox", { name: /filtrar por nível/i }),
       {
-        target: { value: "avancado" },
+        target: { value: "iniciante" },
       },
     );
 
     expect(screen.getAllByTestId("test-card")).toHaveLength(1);
-    expect(screen.getByText(/react avançado/i)).toBeInTheDocument();
-    expect(screen.queryByText(/react intermediário/i)).not.toBeInTheDocument();
+    expect(screen.getByText(/javascript para iniciantes/i)).toBeInTheDocument();
+    expect(
+      screen.queryByText(/python para iniciantes/i),
+    ).not.toBeInTheDocument();
   });
 
   it("restores all cards when technology filter is cleared", () => {
@@ -144,11 +145,11 @@ describe("Candidate Tests Page", () => {
     fireEvent.change(technologySelect, {
       target: { value: "Java" },
     });
-    expect(screen.getAllByTestId("test-card")).toHaveLength(3);
+    expect(screen.getAllByTestId("test-card")).toHaveLength(1);
 
     fireEvent.change(technologySelect, {
       target: { value: "" },
     });
-    expect(screen.getAllByTestId("test-card")).toHaveLength(24);
+    expect(screen.getAllByTestId("test-card")).toHaveLength(4);
   });
 });

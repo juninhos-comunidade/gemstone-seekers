@@ -3,14 +3,21 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { techIcons, defaultIcon } from "@/lib/icons/techIcons";
 import type { Questionario } from "@/lib/mocks/testsMock";
+import Link from "next/link";
+
+type TestCardProps = Pick<
+  Questionario,
+  "id" | "Tech" | "Titulo" | "Descricao" | "NumQuestoes" | "Nivel"
+>;
 
 export function TestCard({
+  id,
   Tech,
   Titulo,
   Descricao,
   NumQuestoes,
   Nivel,
-}: Questionario) {
+}: TestCardProps) {
   const icon = techIcons[Tech] || defaultIcon;
 
   return (
@@ -29,8 +36,9 @@ export function TestCard({
           <span>•</span>
           <span>{Nivel}</span>
         </div>
-
-        <Button className="w-full">Começar</Button>
+        <Link href={`/candidate/test/${id}`}>
+          <Button className="w-full">Começar</Button>
+        </Link>
       </CardContent>
     </Card>
   );

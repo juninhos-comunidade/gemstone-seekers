@@ -16,15 +16,12 @@ import {
 } from "@/components/ui/sheet";
 import { SideMenu, type MenuItem } from "@/components/SideMenu/SideMenu";
 import { useRouter } from "next/navigation";
-type DashboardHeaderProps = {
+type userHeaderProps = {
   role: "candidate" | "recruiter";
   menuItems?: MenuItem[];
 };
 
-export function DashboardHeader({
-  role,
-  menuItems = [],
-}: DashboardHeaderProps) {
+export function UserHeader({ role, menuItems = [] }: userHeaderProps) {
   const roleLabel = role === "candidate" ? "Candidato" : "Recrutador";
   const initials = role === "candidate" ? "CA" : "RE";
 

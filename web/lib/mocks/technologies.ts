@@ -1,10 +1,1 @@
-export const technologies = [
-  "React",
-  "Node.js",
-  "Python",
-  "Java",
-  "JavaScript",
-  "TypeScript",
-  "SQL",
-  "Git",
-];
+export const technologies = ["JavaScript", "TypeScript", "Python", "Java"];

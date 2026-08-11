@@ -12,6 +12,7 @@ describe("TestCard", () => {
   it("renders test title, description, metadata and action", () => {
     render(
       <TestCard
+        id="react-iniciantes"
         Tech="React"
         Titulo="React para Iniciantes"
         Descricao="Teste sobre componentes e props."
@@ -26,14 +27,18 @@ describe("TestCard", () => {
     ).toBeInTheDocument();
     expect(screen.getByText(/10 questões/i)).toBeInTheDocument();
     expect(screen.getByText(/^iniciante$/i)).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: /começar/i }),
-    ).toBeInTheDocument();
+    const startLink = screen.getByRole("link", { name: /começar/i });
+    expect(startLink).toBeInTheDocument();
+    expect(startLink).toHaveAttribute(
+      "href",
+      "/candidate/test/react-iniciantes",
+    );
   });
 
   it("uses mapped technology icon when available", () => {
     render(
       <TestCard
+        id="react-intermediario"
         Tech="React"
         Titulo="React Intermediário"
         Descricao="Teste de hooks."
@@ -51,6 +56,7 @@ describe("TestCard", () => {
   it("falls back to default icon when technology is unknown", () => {
     render(
       <TestCard
+        id="teste-desconhecido"
         Tech="Tecnologia X"
         Titulo="Teste Desconhecido"
         Descricao="Teste sem ícone mapeado."

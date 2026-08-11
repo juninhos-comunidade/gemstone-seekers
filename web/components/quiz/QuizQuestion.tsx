@@ -29,11 +29,11 @@ export function QuizQuestion({
   return (
     <div className="mx-auto w-full max-w-2xl p-6">
       <div className="bg-card rounded-xl border p-6 shadow-sm">
-        <QuizProgress progressPercent={progressPercent} />
-        <span className="text-muted-foreground text-sm font-medium">
-          Questão {currentIndex + 1} de {totalQuestions}
-        </span>
-
+        <QuizProgress
+          progressPercent={progressPercent}
+          currentIndex={currentIndex}
+          totalQuestions={totalQuestions}
+        />
         <h2 className="mt-2 text-xl font-semibold">
           {currentQuestion.statement}
         </h2>
