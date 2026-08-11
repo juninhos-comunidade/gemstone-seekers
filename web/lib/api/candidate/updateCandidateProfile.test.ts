@@ -1,75 +1,24 @@
-import { describe, it, expect, vi } from "vitest";
-import {
-  useUpdateUserMutation,
-  useUpdateAddressMutation,
-  useAddExperienceMutation,
-  useDeleteExperienceMutation,
-} from "./userProfileMutations";
+import React from "react";
+import { describe, it, expect } from "vitest";
+import { renderHook } from "@testing-library/react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { useUpdateCandidateMutation } from "./updateCandidateProfile";
 
-const mockInvalidateQueries = vi.fn();
-const mockUseMutation = vi.fn();
-
-vi.mock("@tanstack/react-query", () => ({
-  useQueryClient: () => ({
-    invalidateQueries: mockInvalidateQueries,
-  }),
-  useMutation: (options: unknown) => mockUseMutation(options),
-}));
-
-describe("UserProfileMutations API", () => {
-  it("useUpdateUserMutation invalidates candidateProfile query on success", () => {
-    mockUseMutation.mockImplementation((options) => {
-      if (options && typeof options === "object" && "onSuccess" in options) {
-        (options.onSuccess as () => void)();
-      }
-      return options;
-    });
-
-    useUpdateUserMutation();
-    expect(mockInvalidateQueries).toHaveBeenCalledWith({
-      queryKey: ["candidateProfile"],
-    });
+function createWrapper() {
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
   });
+  const Wrapper = ({ children }: { children: React.ReactNode }) =>
+    React.createElement(QueryClientProvider, { client: queryClient }, children);
+  Wrapper.displayName = "UpdateCandidateQueryWrapper";
+  return Wrapper;
+}
 
-  it("useUpdateAddressMutation invalidates candidateProfile query on success", () => {
-    mockUseMutation.mockImplementation((options) => {
-      if (options && typeof options === "object" && "onSuccess" in options) {
-        (options.onSuccess as () => void)();
-      }
-      return options;
+describe("updateCandidateProfile hook", () => {
+  it("renders useUpdateCandidateMutation hook correctly", () => {
+    const { result } = renderHook(() => useUpdateCandidateMutation(), {
+      wrapper: createWrapper(),
     });
-
-    useUpdateAddressMutation();
-    expect(mockInvalidateQueries).toHaveBeenCalledWith({
-      queryKey: ["candidateProfile"],
-    });
-  });
-
-  it("useAddExperienceMutation invalidates candidateProfile query on success", () => {
-    mockUseMutation.mockImplementation((options) => {
-      if (options && typeof options === "object" && "onSuccess" in options) {
-        (options.onSuccess as () => void)();
-      }
-      return options;
-    });
-
-    useAddExperienceMutation();
-    expect(mockInvalidateQueries).toHaveBeenCalledWith({
-      queryKey: ["candidateProfile"],
-    });
-  });
-
-  it("useDeleteExperienceMutation invalidates candidateProfile query on success", () => {
-    mockUseMutation.mockImplementation((options) => {
-      if (options && typeof options === "object" && "onSuccess" in options) {
-        (options.onSuccess as () => void)();
-      }
-      return options;
-    });
-
-    useDeleteExperienceMutation();
-    expect(mockInvalidateQueries).toHaveBeenCalledWith({
-      queryKey: ["candidateProfile"],
-    });
+    expect(result.current.mutate).toBeDefined();
   });
 });

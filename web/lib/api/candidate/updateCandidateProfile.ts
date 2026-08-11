@@ -1,3 +1,5 @@
 import { useUpdateUserMutation } from "./userProfileMutations";
 
-export { useUpdateUserMutation as useUpdateCandidateMutation };
+export function useUpdateCandidateMutation() {
+  return useUpdateUserMutation();
+}
