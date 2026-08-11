@@ -24,12 +24,10 @@ export const getTechnologies = async (): Promise<Technology[]> => {
   const response = await httpClient.get<TechnologiesResponse>(
     "/api/v1/technologies",
   );
-  if (!response.data.success) {
-    throw new Error(
-      response.data.error?.message ?? "Erro ao buscar tecnologias",
-    );
+  if (!response.success) {
+    throw new Error(response.error?.message ?? "Erro ao buscar tecnologias");
   }
-  return response.data.result;
+  return response.result;
 };
 
 export const techIcons: Record<string, string> = {
