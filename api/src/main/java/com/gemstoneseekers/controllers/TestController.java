@@ -4,6 +4,7 @@ import com.gemstoneseekers.dtos.request.SaveAnswerRequest;
 import com.gemstoneseekers.dtos.response.BaseResponse;
 import com.gemstoneseekers.dtos.response.TestResponse;
 import com.gemstoneseekers.dtos.response.TestResultResponse;
+import com.gemstoneseekers.enums.QuestionDifficulty;
 import com.gemstoneseekers.services.TestApplicationService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -24,18 +25,18 @@ public class TestController {
     public TestController(TestApplicationService testApplicationService) {
         this.testApplicationService = testApplicationService;
     }
-
     @PostMapping("/start/{technology}")
     public ResponseEntity<BaseResponse<TestResponse>> startTest(
         @AuthenticationPrincipal UserDetails userDetails,
-        @PathVariable String technology
-    ){
+        @PathVariable String technology,
+        @RequestParam(defaultValue = "BEGINNER") QuestionDifficulty difficulty
+    ) {
         String email = userDetails.getUsername();
 
-        TestResponse testResponse = testApplicationService.startTest(email, technology);
+        TestResponse testResponse = testApplicationService.startTest(email, technology, difficulty);
 
-    return ResponseEntity.status(HttpStatus.CREATED)
-        .body(new BaseResponse<>(true,"Test initiated successfully",testResponse,null));
+        return ResponseEntity.status(HttpStatus.CREATED)
+            .body(new BaseResponse<>(true, "Test initiated successfully", testResponse, null));
     }
 
     @GetMapping("/{technology}/active")

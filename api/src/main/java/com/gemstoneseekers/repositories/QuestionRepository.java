@@ -1,5 +1,6 @@
 package com.gemstoneseekers.repositories;
 
+import com.gemstoneseekers.enums.QuestionDifficulty;
 import com.gemstoneseekers.models.Question;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -11,24 +12,25 @@ import java.util.UUID;
 
 @Repository
 public interface QuestionRepository extends JpaRepository<Question, Long> {
+
     @Query(value = """
-        SELECT q.*
-        FROM questions q
-        WHERE q.technology_id = :technologyId
-          AND NOT EXISTS (
-              SELECT 1
+        SELECT q.* FROM questions q
+        JOIN technologies t ON q.technology_id = t.id
+        WHERE LOWER(t.name) = LOWER(:technologyName)
+          AND q.difficulty = :#{#difficulty.name()}
+          AND q.id NOT IN (
+              SELECT ca.question_id
               FROM candidate_answers ca
-              JOIN tests t ON ca.test_id = t.id
-              WHERE ca.question_id = q.id
-                AND t.candidate_id = :candidateId
+              JOIN tests tst ON ca.test_id = tst.id
+              WHERE tst.candidate_id = :candidateId
           )
         ORDER BY RANDOM()
-        LIMIT :limit
+        LIMIT :amount
         """, nativeQuery = true)
-    List<Question> findUnansweredRandomByTechnologyAndCandidate(
-        @Param("technologyId") Integer technologyId,
+    List<Question> findUnansweredRandomByTechnologyAndDifficulty(
+        @Param("technologyName") String technologyName,
+        @Param("difficulty") QuestionDifficulty difficulty,
         @Param("candidateId") UUID candidateId,
-        @Param("limit") int limit
+        @Param("amount") int amount
     );
-
 }

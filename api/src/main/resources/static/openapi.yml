@@ -199,6 +199,16 @@ paths:
         required: true
         schema:
           type: string
+      - name: difficulty
+        in: query
+        required: false
+        schema:
+          type: string
+          default: BEGINNER
+          enum:
+          - BEGINNER
+          - INTERMEDIATE
+          - ADVANCED
       responses:
         "200":
           description: OK

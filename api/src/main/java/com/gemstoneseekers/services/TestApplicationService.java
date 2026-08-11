@@ -3,6 +3,7 @@ package com.gemstoneseekers.services;
 import com.gemstoneseekers.dtos.request.SaveAnswerRequest;
 import com.gemstoneseekers.dtos.response.TestResponse;
 import com.gemstoneseekers.dtos.response.TestResultResponse;
+import com.gemstoneseekers.enums.QuestionDifficulty;
 import com.gemstoneseekers.enums.TestStatus;
 import com.gemstoneseekers.exceptions.AccessDeniedException;
 import com.gemstoneseekers.exceptions.BusinessRuleException;
@@ -19,7 +20,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class TestApplicationService {
@@ -30,6 +33,8 @@ public class TestApplicationService {
     private final TechnologyService technologyService;
     private final TestMapper testMapper;
     private final QuestionOptionRepository questionOptionRepository;
+
+    private static final int REQUIRED_AMOUNT = 10;
 
     public TestApplicationService(QuestionRepository questionRepository,
                                   TestRepository testRepository,
@@ -44,34 +49,45 @@ public class TestApplicationService {
         this.questionOptionRepository = questionOptionRepository;
     }
     @Transactional
-    public TestResponse startTest(String email, String technologyName) {
-        int requiredAmount = 10;
+    public TestResponse startTest(String email, String technologyName, QuestionDifficulty difficulty) {
+
         Candidate candidate = candidateService.getCandidateByEmailSession(email);
         Technology technology = technologyService.getTechnologyByName(technologyName);
 
-        Optional<Test> activeTest = testRepository.findByCandidateAndTechnologyAndStatus(
-            candidate, technology, TestStatus.IN_PROGRESS
+        Optional<Test> activeTest = testRepository.findByCandidateIdAndTechnologyNameAndStatus(
+            candidate.getId(), technologyName, TestStatus.IN_PROGRESS
         );
 
         if (activeTest.isPresent()) {
             return testMapper.toTestAndQuestionsResponse(activeTest.get());
         }
-        List<Question> selectedQuestions = questionRepository
-            .findUnansweredRandomByTechnologyAndCandidate(technology.getId(), candidate.getId(), requiredAmount);
 
-        Test test = new Test();
-        test.setCandidate(candidate);
-        test.setTechnology(technology);
-        test.setStatus(TestStatus.IN_PROGRESS);
+        List<Question> questions = questionRepository.findUnansweredRandomByTechnologyAndDifficulty(
+            technologyName, difficulty,candidate.getId(), REQUIRED_AMOUNT
+        );
 
-        for (Question question : selectedQuestions) {
-            CandidateAnswer answer = new CandidateAnswer();
-            answer.setQuestion(question);
-            test.addAnswer(answer);
+        if (questions.isEmpty()) {
+            throw new BusinessRuleException(
+                String.format("No questions found for technology '%s' with difficulty '%s'", technologyName, difficulty)
+            );
         }
+        Test newTest = new Test();
+        newTest.setCandidate(candidate);
+        newTest.setTechnology(technology);
+        newTest.setStatus(TestStatus.IN_PROGRESS);
 
-        Test savedTest = testRepository.save(test);
+        Set<CandidateAnswer> candidateAnswers = questions.stream()
+            .map(question -> {
+                CandidateAnswer answer = new CandidateAnswer();
+                answer.setTest(newTest);
+                answer.setQuestion(question);
+                return answer;
+            })
+            .collect(Collectors.toSet());
 
+        newTest.setAnswers(candidateAnswers);
+
+        Test savedTest = testRepository.save(newTest);
         return testMapper.toTestAndQuestionsResponse(savedTest);
     }
 
