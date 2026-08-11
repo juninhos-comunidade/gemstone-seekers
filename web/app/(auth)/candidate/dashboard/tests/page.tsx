@@ -7,12 +7,10 @@ import { technologies } from "@/lib/mocks/technologies";
 import { useState, useMemo } from "react";
 import { SkeletonCard } from "@/components/SkeletonCard/SkeletonCard";
 
-
 export default function Page() {
   const [selectedTechnology, setSelectedTechnology] = useState("");
   const [selectedLevel, setSelectedLevel] = useState("");
   const [loading] = useState(false);
-
 
   const questionariosFiltrados = useMemo(() => {
     return questionarios.filter((q) => {
@@ -28,7 +26,6 @@ export default function Page() {
   function handleFilterLevel(value: string) {
     setSelectedLevel(value);
   }
-
 
   return (
     <section className="space-y-6">
@@ -66,7 +63,6 @@ export default function Page() {
             value={selectedLevel}
             onValueChange={handleFilterLevel}
             placeholder="Filtrar por nível"
-
           />
         </div>
       </div>

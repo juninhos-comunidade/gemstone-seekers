@@ -24,7 +24,7 @@ export default defineConfig({
         "app/api/**",
         "components/reui/**",
         "components/selectLevel/**",
-        "components/SkeletonCard/**"
+        "components/SkeletonCard/**",
       ],
       thresholds: {
         lines: 80,

@@ -6,9 +6,9 @@ export default function Layout({
   children: React.ReactNode;
 }>) {
   return (
-    <main>
+    <main className="flex min-h-screen flex-col">
       <DashboardHeader role="recruiter" />
-      <div>{children}</div>
+      <div className="flex-1">{children}</div>
     </main>
   );
 }

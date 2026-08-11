@@ -6,5 +6,5 @@ export const technologies = [
   "JavaScript",
   "TypeScript",
   "SQL",
-  "Git"
+  "Git",
 ];

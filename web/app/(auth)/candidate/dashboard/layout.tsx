@@ -36,9 +36,7 @@ export default function Layout({
         <SideMenu items={menuItems} />
 
         <section className="mt-16 w-full md:ml-72">
-          <div className="mx-auto w-full max-w-7xl p-4 md:p-6">
-            {children}
-          </div>
+          <div className="mx-auto w-full max-w-7xl p-4 md:p-6">{children}</div>
         </section>
       </div>
     </main>

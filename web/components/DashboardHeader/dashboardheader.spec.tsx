@@ -52,6 +52,7 @@ describe("DashboardHeader", () => {
   it("renders candidate layout, initials, logo link and handles profile redirect", () => {
     vi.clearAllMocks();
     render(<DashboardHeader role="candidate" />);
+    expect(screen.getByRole("banner")).toHaveClass("sticky");
     expect(screen.getByText(/painel do candidato/i)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /perfil/i })).toHaveTextContent(
       /CA/,

@@ -21,9 +21,13 @@ type TechnologiesResponse = {
 };
 
 export const getTechnologies = async (): Promise<Technology[]> => {
-  const response = await httpClient.get<TechnologiesResponse>("/api/v1/technologies");
+  const response = await httpClient.get<TechnologiesResponse>(
+    "/api/v1/technologies",
+  );
   if (!response.data.success) {
-    throw new Error(response.data.error?.message ?? "Erro ao buscar tecnologias");
+    throw new Error(
+      response.data.error?.message ?? "Erro ao buscar tecnologias",
+    );
   }
   return response.data.result;
 };

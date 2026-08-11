@@ -22,11 +22,9 @@ export function TestCard({
           <h2 className="text-2xl font-semibold">{Titulo}</h2>
         </div>
 
-        <p className="text-sm text-muted-foreground">
-          {Descricao}
-        </p>
+        <p className="text-muted-foreground text-sm">{Descricao}</p>
 
-        <div className="flex items-center gap-4 text-sm text-muted-foreground">
+        <div className="text-muted-foreground flex items-center gap-4 text-sm">
           <span>{NumQuestoes} questões</span>
           <span>•</span>
           <span>{Nivel}</span>

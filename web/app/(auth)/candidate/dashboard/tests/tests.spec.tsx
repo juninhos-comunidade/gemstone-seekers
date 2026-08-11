@@ -107,7 +107,9 @@ describe("Candidate Tests Page", () => {
     const cards = screen.getAllByTestId("test-card");
     expect(cards).toHaveLength(3);
     expect(screen.getByText(/react para iniciantes/i)).toBeInTheDocument();
-    expect(screen.queryByText(/python para iniciantes/i)).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(/python para iniciantes/i),
+    ).not.toBeInTheDocument();
   });
 
   it("filters cards by technology and level together", () => {
@@ -129,9 +131,7 @@ describe("Candidate Tests Page", () => {
 
     expect(screen.getAllByTestId("test-card")).toHaveLength(1);
     expect(screen.getByText(/react avançado/i)).toBeInTheDocument();
-    expect(
-      screen.queryByText(/react intermediário/i),
-    ).not.toBeInTheDocument();
+    expect(screen.queryByText(/react intermediário/i)).not.toBeInTheDocument();
   });
 
   it("restores all cards when technology filter is cleared", () => {
