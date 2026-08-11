@@ -41,4 +41,40 @@ describe("QuizQuestion", () => {
     expect(screen.getByText("Qual é a capital da França?")).toBeInTheDocument();
     expect(screen.getByText("Paris")).toBeInTheDocument();
   });
+
+  it("disables the previous button on the first question", () => {
+    render(
+      <QuizQuestion
+        progressPercent={0}
+        currentIndex={0}
+        totalQuestions={4}
+        currentQuestion={mockQuestion}
+        selectedOptionId=""
+        handleSetAnswer={() => {}}
+        handlePrevious={() => {}}
+        handleNext={() => {}}
+        isLastQuestion={false}
+      />,
+    );
+
+    expect(screen.getByText("Anterior")).toBeDisabled();
+  });
+
+  it("changes 'Próxima' button text to 'Finalizar' on the last question", () => {
+    render(
+      <QuizQuestion
+        progressPercent={100}
+        currentIndex={3}
+        totalQuestions={4}
+        currentQuestion={mockQuestion}
+        selectedOptionId="a"
+        handleSetAnswer={() => {}}
+        handlePrevious={() => {}}
+        handleNext={() => {}}
+        isLastQuestion={true}
+      />,
+    );
+
+    expect(screen.getByText("Finalizar")).toBeInTheDocument();
+  });
 });

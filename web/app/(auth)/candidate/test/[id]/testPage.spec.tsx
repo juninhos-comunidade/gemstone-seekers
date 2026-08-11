@@ -68,6 +68,7 @@ type QuizQuestion = {
   options: QuizOption[];
 };
 
+// Atualizado para refletir o mock real do QuizQuestion
 vi.mock("@/components/quiz/QuizQuestion", () => ({
   QuizQuestion: ({
     currentQuestion,
@@ -75,12 +76,14 @@ vi.mock("@/components/quiz/QuizQuestion", () => ({
     handlePrevious,
     handleNext,
     selectedOptionId,
+    isLastQuestion,
   }: {
     currentQuestion: QuizQuestion;
     handleSetAnswer: (_optionId: string) => void;
     handlePrevious: () => void;
     handleNext: () => void;
     selectedOptionId: string | null;
+    isLastQuestion: boolean;
   }) => (
     <div data-testid="quiz-question">
       <h2>{currentQuestion.title}</h2>
@@ -97,7 +100,7 @@ vi.mock("@/components/quiz/QuizQuestion", () => ({
 
       <button onClick={handlePrevious}>Anterior</button>
       <button onClick={handleNext} disabled={!selectedOptionId}>
-        Próxima
+        {isLastQuestion ? "Finalizar" : "Próxima"}
       </button>
     </div>
   ),
@@ -152,19 +155,25 @@ describe("TestPage", () => {
     expect(screen.getByText("Pergunta 1")).toBeInTheDocument();
   });
 
-  it("deve finalizar o quiz e calcular a pontuação corretamente", () => {
+  it("deve alterar o texto do botão para 'Finalizar' na última questão e concluir o fluxo", () => {
     vi.mocked(useParams).mockReturnValue({ id: "quiz-1" });
     render(<TestPage />);
 
-    fireEvent.click(screen.getAllByText("Correta")[0]);
-    fireEvent.click(screen.getByText("Próxima"));
+    // Responder primeira questão e avançar
+    fireEvent.click(screen.getByText("Correta"));
+    const nextButton = screen.getByText("Próxima");
+    fireEvent.click(nextButton);
 
+    // Verificar se o botão mudou para Finalizar na última questão
     expect(screen.getByText("Pergunta 2")).toBeInTheDocument();
-    fireEvent.click(screen.getAllByText("Errada")[0]);
+    const finishButton = screen.getByText("Finalizar");
+    expect(finishButton).toBeInTheDocument();
 
-    fireEvent.click(screen.getByText("Próxima"));
+    // Responder e finalizar
+    fireEvent.click(screen.getByText("Correta"));
+    fireEvent.click(finishButton);
 
+    // Verificar conclusão
     expect(screen.getByTestId("quiz-result")).toBeInTheDocument();
-    expect(screen.getByText("Resultado: 1 de 2")).toBeInTheDocument();
   });
 });

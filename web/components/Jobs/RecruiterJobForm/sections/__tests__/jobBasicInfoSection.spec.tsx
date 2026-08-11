@@ -68,19 +68,26 @@ describe("JobBasicInfoSection Component", () => {
     expect(screen.getByDisplayValue("Engenharia")).toBeInTheDocument();
   });
 
-  it("renders loading state for companies and recruiters", () => {
+  it("shows loading state when companies are loading", () => {
+    // data undefined = estado real de loading sem cache
     vi.mocked(useCompaniesQuery).mockReturnValue({
-      data: [],
+      data: undefined,
       isLoading: true,
+      isPending: true,
     } as ReturnType<typeof useCompaniesQuery>);
 
     vi.mocked(useCompanyRecruitersQuery).mockReturnValue({
       data: [],
-      isLoading: true,
+      isLoading: false,
     } as ReturnType<typeof useCompanyRecruitersQuery>);
 
-    render(<TestWrapper initialValues={{ companyId: "comp-1" }} />);
+    render(<TestWrapper initialValues={{ companyId: "" }} />);
 
-    expect(screen.getByLabelText(/Título da Vaga \*/i)).toBeInTheDocument();
+    // O placeholder do trigger mostra o loading enquanto as empresas carregam,
+    // e o trigger fica desabilitado (não permite abrir o menu).
+    expect(screen.getByText("Carregando empresas...")).toBeInTheDocument();
+    expect(
+      screen.getByRole("combobox", { name: /empresa contratante/i }),
+    ).toBeDisabled();
   });
 });
