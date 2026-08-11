@@ -6,18 +6,22 @@ export type Technology = {
   category: string;
 };
 
+type TechnologiesError =
+  | {
+      code: string;
+      message: string;
+      validations: {
+        field: string;
+        message: string;
+      }[];
+    }
+  | string;
+
 type TechnologiesResponse = {
   success: boolean;
   message: string;
   result: Technology[];
-  error: {
-    code: string;
-    message: string;
-    validations: {
-      field: string;
-      message: string;
-    }[];
-  } | null;
+  error: TechnologiesError | null;
 };
 
 export const getTechnologies = async (): Promise<Technology[]> => {

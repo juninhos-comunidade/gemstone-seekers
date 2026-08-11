@@ -25,12 +25,10 @@ describe("techIcons", () => {
     ];
 
     vi.mocked(httpClient.get).mockResolvedValueOnce({
-      data: {
-        success: true,
-        message: "ok",
-        result: mockTechnologies,
-        error: null,
-      },
+      success: true,
+      message: "ok",
+      result: mockTechnologies,
+      error: null,
     } as Awaited<ReturnType<typeof httpClient.get>>);
 
     const result = await getTechnologies();
@@ -41,15 +39,13 @@ describe("techIcons", () => {
 
   it("throws API error message when technology request fails", async () => {
     vi.mocked(httpClient.get).mockResolvedValueOnce({
-      data: {
-        success: false,
-        message: "erro",
-        result: [],
-        error: {
-          code: "TECH_FETCH_ERROR",
-          message: "Falha ao buscar tecnologias",
-          validations: [],
-        },
+      success: false,
+      message: "erro",
+      result: [],
+      error: {
+        code: "TECH_FETCH_ERROR",
+        message: "Falha ao buscar tecnologias",
+        validations: [],
       },
     } as Awaited<ReturnType<typeof httpClient.get>>);
 
@@ -60,12 +56,10 @@ describe("techIcons", () => {
 
   it("throws fallback error message when API error has no message", async () => {
     vi.mocked(httpClient.get).mockResolvedValueOnce({
-      data: {
-        success: false,
-        message: "erro",
-        result: [],
-        error: null,
-      },
+      success: false,
+      message: "erro",
+      result: [],
+      error: null,
     } as Awaited<ReturnType<typeof httpClient.get>>);
 
     await expect(getTechnologies()).rejects.toThrow(
