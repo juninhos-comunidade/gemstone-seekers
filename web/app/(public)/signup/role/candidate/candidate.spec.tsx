@@ -85,6 +85,12 @@ describe("Candidate Signup Page", () => {
       screen.getByRole("link", { name: /voltar e alterar perfil/i }),
     ).toHaveAttribute("href", "/signup/role");
 
+    fireEvent.change(screen.getByLabelText(/tipo de documento/i), {
+      target: { value: "CPF" },
+    });
+    fireEvent.change(screen.getByLabelText(/número do documento/i), {
+      target: { value: "123.456.789-00" },
+    });
     fireEvent.change(
       document.querySelector("input[type='tel']") as HTMLInputElement,
       {

@@ -97,12 +97,13 @@ describe("auth api hooks", () => {
     mutation.onSuccess({
       success: true,
       result: {
+        token: "jwt-token",
         role: "CANDIDATE",
         registrationCompleted: false,
       },
     });
 
-    expect(mockSetAuthToken).not.toHaveBeenCalled();
+    expect(mockSetAuthToken).toHaveBeenCalledWith("jwt-token");
     expect(mockPush).toHaveBeenCalledWith("/signup/role/candidate");
   });
 
@@ -170,6 +171,8 @@ describe("auth api hooks", () => {
     const mutation = useUpdateCandidate();
 
     await mutation.mutationFn({
+      documentType: "CPF",
+      documentNumber: "123.456.789-00",
       phone: "(11) 99999-9999",
       area: "Tecnologia",
       role: "Frontend",
@@ -180,6 +183,8 @@ describe("auth api hooks", () => {
 
     expect(mockHttpPatch).toHaveBeenCalledWith("/auth/complete-registration", {
       role: "CANDIDATE",
+      documentType: "CPF",
+      documentNumber: "123.456.789-00",
       phone: "(11) 99999-9999",
       summary: "Frontend • Tecnologia • Júnior • São Paulo",
     });
@@ -213,6 +218,8 @@ describe("auth api hooks", () => {
     const mutation = useUpdateRecruiter();
 
     await mutation.mutationFn({
+      documentType: "CNPJ",
+      documentNumber: "00.000.000/0000-00",
       companyName: "Gemstone Seekers",
       jobTitle: "Analista de RH",
       phone: "(11) 99999-9999",
@@ -222,6 +229,8 @@ describe("auth api hooks", () => {
 
     expect(mockHttpPatch).toHaveBeenCalledWith("/auth/complete-registration", {
       role: "RECRUITER",
+      documentType: "CNPJ",
+      documentNumber: "00.000.000/0000-00",
       phone: "(11) 99999-9999",
       department: "Analista de RH",
     });

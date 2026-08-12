@@ -29,6 +29,8 @@ export default function CandidateRegistrationPage() {
   } = useForm<CandidateRoleFormData>({
     resolver: zodResolver(candidateRoleSchema),
     defaultValues: {
+      documentType: "",
+      documentNumber: "",
       phone: "",
       area: "",
       role: "",
@@ -66,6 +68,42 @@ export default function CandidateRegistrationPage() {
         </div>
 
         <form className="grid gap-5" onSubmit={handleSubmit(onSubmit)}>
+          <div className="grid gap-5 md:grid-cols-2">
+            <div className="space-y-1.5">
+              <Label htmlFor="documentType">Tipo de documento</Label>
+              <Input
+                id="documentType"
+                type="text"
+                placeholder="Ex: CPF"
+                disabled={isLoading}
+                aria-invalid={!!errors.documentType}
+                {...register("documentType")}
+              />
+              {errors.documentType?.message && (
+                <span className="block text-xs font-medium text-red-500">
+                  {errors.documentType.message}
+                </span>
+              )}
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="documentNumber">Número do documento</Label>
+              <Input
+                id="documentNumber"
+                type="text"
+                placeholder="Ex: 123.456.789-00"
+                disabled={isLoading}
+                aria-invalid={!!errors.documentNumber}
+                {...register("documentNumber")}
+              />
+              {errors.documentNumber?.message && (
+                <span className="block text-xs font-medium text-red-500">
+                  {errors.documentNumber.message}
+                </span>
+              )}
+            </div>
+          </div>
+
           <div className="grid gap-5 md:grid-cols-2">
             <div className="space-y-1.5">
               <Label htmlFor="phone">Telefone</Label>

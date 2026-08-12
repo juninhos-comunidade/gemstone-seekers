@@ -1,6 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { Dispatch, SetStateAction } from "react";
 import { setAuthToken } from "@/lib/api/auth";
 import { httpClient } from "@/lib/api/client";
 
@@ -35,7 +36,12 @@ function isTimeoutOrNetworkError(error: unknown): boolean {
   );
 }
 
-export function useLogin() {
+interface UseLoginOptions {
+  onErrorMessage?: Dispatch<SetStateAction<string | null>>;
+}
+
+export function useLogin(_options?: UseLoginOptions) {
+  const { onErrorMessage } = _options ?? {};
   const router = useRouter();
 
   return useMutation({
@@ -86,12 +92,15 @@ export function useLogin() {
     },
     onError: (error: Error) => {
       if (isTimeoutOrNetworkError(error)) {
-        toast.error(
-          "O servidor está iniciando, isso pode levar até 1 minuto. Tente novamente.",
-        );
+        const msg =
+          "O servidor está iniciando, isso pode levar até 1 minuto. Tente novamente.";
+        onErrorMessage?.(msg);
+        toast.error(msg);
         return;
       }
-      toast.error(error.message ?? "Erro ao fazer login");
+      const msg = error.message ?? "Erro ao fazer login";
+      onErrorMessage?.(msg);
+      toast.error(msg);
     },
   });
 }

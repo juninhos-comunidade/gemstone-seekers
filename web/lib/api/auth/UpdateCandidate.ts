@@ -26,6 +26,8 @@ async function updateCandidateRequest(
 ): Promise<UpdateCandidateResponse> {
   const payload: CompleteRegistrationRequest = {
     role: "CANDIDATE",
+    documentType: data.documentType,
+    documentNumber: data.documentNumber,
     phone: data.phone,
     summary: `${data.role} • ${data.area} • ${data.experience} • ${data.location}`,
   };

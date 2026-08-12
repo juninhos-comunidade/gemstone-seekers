@@ -7,6 +7,8 @@ import type { RecruiterRoleFormData } from "@/lib/schemas/recruiterRoleSchema";
 
 type CompleteRegistrationRequest = {
   role: "RECRUITER";
+  documentType?: string;
+  documentNumber?: string;
   phone: string;
   companyId?: string;
   department?: string;
@@ -23,6 +25,8 @@ async function updateRecruiterRequest(
 ): Promise<UpdateRecruiterResponse> {
   const payload: CompleteRegistrationRequest = {
     role: "RECRUITER",
+    documentType: data.documentType,
+    documentNumber: data.documentNumber,
     phone: data.phone,
     department: data.jobTitle,
   };
