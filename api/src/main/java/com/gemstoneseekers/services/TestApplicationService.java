@@ -23,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -223,6 +224,31 @@ public class TestApplicationService {
         }
 
         return testMapper.toDetailedResultResponse(test);
+    }
+
+    @Transactional
+    public void cancelTest(UUID testId, String email) {
+        Candidate candidate = candidateService.getCandidateByEmailSession(email);
+
+        Test test = testRepository.findById(testId)
+            .orElseThrow(() -> new EntityNotFoundException("Test", testId));
+
+        if (!test.getCandidate().getId().equals(candidate.getId())) {
+            throw new AccessDeniedException("You do not have permission to modify this test");
+        }
+
+        if (test.getStatus() != TestStatus.IN_PROGRESS) {
+            throw new BusinessRuleException(
+                String.format("Cannot cancel test. Current status is %s, expected IN_PROGRESS", test.getStatus())
+            );
+        }
+
+
+        test.setStatus(TestStatus.CANCELED);
+
+        test.setCompletedAt(Instant.now());
+
+        testRepository.save(test);
     }
 
 }

@@ -90,4 +90,18 @@ public class TestController {
         );
     }
 
+    @PostMapping("/{testId}/cancel")
+    public ResponseEntity<BaseResponse<Void>> cancelTest(
+        @PathVariable UUID testId,
+        @AuthenticationPrincipal UserDetails userDetails
+    ) {
+        String email = userDetails.getUsername();
+
+        testApplicationService.cancelTest(testId, email);
+
+        return ResponseEntity.ok(
+            new BaseResponse<>(true, "Test canceled successfully", null, null)
+        );
+    }
+
 }
