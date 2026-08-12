@@ -1,10 +1,10 @@
 package com.gemstoneseekers.controllers;
 
 import com.gemstoneseekers.dtos.request.SaveAnswerRequest;
-import com.gemstoneseekers.dtos.response.BaseResponse;
-import com.gemstoneseekers.dtos.response.TestResponse;
-import com.gemstoneseekers.dtos.response.TestResultResponse;
+import com.gemstoneseekers.dtos.request.TestHistoryFilterParams;
+import com.gemstoneseekers.dtos.response.*;
 import com.gemstoneseekers.enums.QuestionDifficulty;
+import com.gemstoneseekers.enums.TestStatus;
 import com.gemstoneseekers.services.TestApplicationService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -61,6 +61,19 @@ public class TestController {
         TestResultResponse response = testApplicationService.submitTest(testId, email);
 
         return ResponseEntity.ok(new BaseResponse<>(true, "Test submitted successfully", response, null));
+    }
+    @GetMapping("/history")
+    public ResponseEntity<BaseResponse<CandidateTestHistoryResponse>> getTestHistory(
+        @AuthenticationPrincipal UserDetails userDetails,
+        TestHistoryFilterParams filters
+    ) {
+        String email = userDetails.getUsername();
+
+        CandidateTestHistoryResponse response = testApplicationService.getCandidateTestHistory(email, filters);
+
+        return ResponseEntity.ok(
+            new BaseResponse<>(true, "Test history retrieved successfully", response, null)
+        );
     }
 
 }

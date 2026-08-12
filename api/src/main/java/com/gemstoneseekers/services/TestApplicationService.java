@@ -1,8 +1,8 @@
 package com.gemstoneseekers.services;
 
 import com.gemstoneseekers.dtos.request.SaveAnswerRequest;
-import com.gemstoneseekers.dtos.response.TestResponse;
-import com.gemstoneseekers.dtos.response.TestResultResponse;
+import com.gemstoneseekers.dtos.request.TestHistoryFilterParams;
+import com.gemstoneseekers.dtos.response.*;
 import com.gemstoneseekers.enums.QuestionDifficulty;
 import com.gemstoneseekers.enums.TestStatus;
 import com.gemstoneseekers.exceptions.AccessDeniedException;
@@ -14,15 +14,19 @@ import com.gemstoneseekers.repositories.QuestionOptionRepository;
 import com.gemstoneseekers.repositories.QuestionRepository;
 import com.gemstoneseekers.repositories.TestRepository;
 
+import com.gemstoneseekers.repositories.specifications.TestSpecifications;
 import jakarta.validation.constraints.NotNull;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.*;
 import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toList;
 
 @Service
 public class TestApplicationService {
@@ -48,6 +52,7 @@ public class TestApplicationService {
         this.testMapper = testMapper;
         this.questionOptionRepository = questionOptionRepository;
     }
+
     @Transactional
     public TestResponse startTest(String email, String technologyName, QuestionDifficulty difficulty) {
 
@@ -63,7 +68,7 @@ public class TestApplicationService {
         }
 
         List<Question> questions = questionRepository.findUnansweredRandomByTechnologyAndDifficulty(
-            technologyName, difficulty,candidate.getId(), REQUIRED_AMOUNT
+            technologyName, difficulty, candidate.getId(), REQUIRED_AMOUNT
         );
 
         if (questions.isEmpty()) {
@@ -117,6 +122,7 @@ public class TestApplicationService {
 
         test.answerQuestion(questionId, selectedOption);
     }
+
     @Transactional
     public TestResultResponse submitTest(UUID testId, String email) {
         Candidate candidate = candidateService.getCandidateByEmailSession(email);
@@ -133,5 +139,71 @@ public class TestApplicationService {
         Test savedTest = testRepository.save(test);
 
         return testMapper.toTestResultResponse(savedTest);
+    }
+
+    @Transactional(readOnly = true)
+    public CandidateTestHistoryResponse getCandidateTestHistory(String email, TestHistoryFilterParams filters) {
+        Candidate candidate = candidateService.getCandidateByEmailSession(email);
+
+        Specification<Test> specification = TestSpecifications.withFilters(candidate.getId(), filters);
+
+        Sort sort = Sort.by(Sort.Direction.DESC, "createdAt");
+
+        List<Test> filteredTests = testRepository.findAll(specification, sort);
+
+        Map<String, Map<QuestionDifficulty, List<Test>>> grouped = filteredTests.stream()
+            .collect(Collectors.groupingBy(
+                test -> test.getTechnology().getName(),
+                Collectors.groupingBy(Test::getDerivedDifficulty)
+            ));
+
+        List<TechnologyHistoryGroupResponse> historyByTechnology = grouped.entrySet().stream()
+            .map(techEntry -> {
+                String techName = techEntry.getKey();
+                Map<QuestionDifficulty, List<Test>> difficultyMap = techEntry.getValue();
+
+                List<DifficultyHistoryGroupResponse> difficultyGroups = difficultyMap.entrySet().stream()
+                    .map(diffEntry -> {
+                        QuestionDifficulty difficulty = diffEntry.getKey();
+                        List<Test> diffTests = diffEntry.getValue();
+
+                        List<TestSummaryResponse> summaryList = diffTests.stream()
+                            .map(testMapper::toSummaryResponse)
+                            .toList();
+
+                        BigDecimal avgScore = calculateAverageScore(diffTests);
+
+                        return new DifficultyHistoryGroupResponse(
+                            difficulty,
+                            diffTests.size(),
+                            avgScore,
+                            summaryList
+                        );
+                    })
+                    .sorted(Comparator.comparing(d -> d.difficulty().ordinal()))
+                    .toList();
+
+                return new TechnologyHistoryGroupResponse(techName, difficultyGroups);
+            })
+            .toList();
+
+        return new CandidateTestHistoryResponse(candidate.getId(), filteredTests.size(), historyByTechnology);
+    }
+
+
+    private BigDecimal calculateAverageScore(List<Test> tests) {
+        List<Test> completedTests = tests.stream()
+            .filter(t -> t.getScore() != null)
+            .toList();
+
+        if (completedTests.isEmpty()) {
+            return BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP);
+        }
+
+        BigDecimal sum = completedTests.stream()
+            .map(Test::getScore)
+            .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        return sum.divide(BigDecimal.valueOf(completedTests.size()), 2, RoundingMode.HALF_UP);
     }
 }

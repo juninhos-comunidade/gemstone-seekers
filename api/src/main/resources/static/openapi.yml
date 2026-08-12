@@ -576,6 +576,24 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/BaseResponseCompleteRegistrationResponse"
+  /api/v1/tests/history:
+    get:
+      tags:
+      - test-controller
+      operationId: getTestHistory
+      parameters:
+      - name: filters
+        in: query
+        required: true
+        schema:
+          $ref: "#/components/schemas/TestHistoryFilterParams"
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/BaseResponseCandidateTestHistoryResponse"
   /api/v1/technologies:
     get:
       tags:
@@ -1621,6 +1639,94 @@ components:
           type: string
         documentNumber:
           type: string
+    TestHistoryFilterParams:
+      type: object
+      properties:
+        technology:
+          type: string
+        status:
+          type: string
+          enum:
+          - IN_PROGRESS
+          - COMPLETED
+          - CANCELED
+    BaseResponseCandidateTestHistoryResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        result:
+          $ref: "#/components/schemas/CandidateTestHistoryResponse"
+        error:
+          $ref: "#/components/schemas/ErrorResponse"
+    CandidateTestHistoryResponse:
+      type: object
+      properties:
+        candidateId:
+          type: string
+          format: uuid
+        totalExecutedTests:
+          type: integer
+          format: int32
+        historyByTechnology:
+          type: array
+          items:
+            $ref: "#/components/schemas/TechnologyHistoryGroupResponse"
+    DifficultyHistoryGroupResponse:
+      type: object
+      properties:
+        difficulty:
+          type: string
+          enum:
+          - BEGINNER
+          - INTERMEDIATE
+          - ADVANCED
+        testsCount:
+          type: integer
+          format: int32
+        averageScore:
+          type: number
+        tests:
+          type: array
+          items:
+            $ref: "#/components/schemas/TestSummaryResponse"
+    TechnologyHistoryGroupResponse:
+      type: object
+      properties:
+        technologyName:
+          type: string
+        difficulties:
+          type: array
+          items:
+            $ref: "#/components/schemas/DifficultyHistoryGroupResponse"
+    TestSummaryResponse:
+      type: object
+      properties:
+        testId:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum:
+          - IN_PROGRESS
+          - COMPLETED
+          - CANCELED
+        difficulty:
+          type: string
+          enum:
+          - BEGINNER
+          - INTERMEDIATE
+          - ADVANCED
+        score:
+          type: number
+        createdAt:
+          type: string
+          format: date-time
+        completedAt:
+          type: string
+          format: date-time
     BaseResponseListTechnologyResponse:
       type: object
       properties:
