@@ -124,6 +124,8 @@ describe("Candidate Signup Page", () => {
         phone: "+55 11 99999-9999",
         area: "Tecnologia",
         role: "Desenvolvedor Front-end",
+        documentType: "CPF",
+        documentNumber: "123.456.789-00",
         experience: "junior",
         location: "São Paulo, SP",
         resume: "https://linkedin.com/in/teste",
