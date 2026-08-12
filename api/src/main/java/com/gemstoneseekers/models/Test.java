@@ -6,21 +6,10 @@ import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.*;
 
+import com.gemstoneseekers.enums.QuestionDifficulty;
 import com.gemstoneseekers.enums.TestStatus;
 import com.gemstoneseekers.exceptions.BusinessRuleException;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
-import jakarta.persistence.OrderBy;
+import jakarta.persistence.*;
 
 
 import org.hibernate.annotations.JdbcTypeCode;
@@ -69,7 +58,7 @@ public class Test extends BaseModel {
 
     @OneToMany(mappedBy = "test", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("id ASC")
-    private Set<CandidateAnswer> answers = new LinkedHashSet<>();;
+    private Set<CandidateAnswer> answers = new LinkedHashSet<>();
 
 
     public void addAnswer(CandidateAnswer answer) {
@@ -115,5 +104,16 @@ public class Test extends BaseModel {
         return BigDecimal.valueOf(correctAnswersCount)
             .multiply(BigDecimal.valueOf(10))
             .divide(BigDecimal.valueOf(totalQuestions), 2, RoundingMode.HALF_UP);
+    }
+
+    @Transient
+    public QuestionDifficulty getDerivedDifficulty() {
+        if (this.answers == null || this.answers.isEmpty()) {
+            return QuestionDifficulty.BEGINNER; // Fallback
+        }
+        return this.answers.stream()
+            .map(answer -> answer.getQuestion().getDifficultyLevel())
+            .findFirst()
+            .orElse(QuestionDifficulty.BEGINNER);
     }
 }
