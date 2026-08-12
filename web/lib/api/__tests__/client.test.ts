@@ -264,3 +264,49 @@ describe("api interceptors", () => {
     });
   });
 });
+
+describe("getBaseUrl", () => {
+  const originalApiInternalUrl = process.env.API_INTERNAL_URL;
+  const originalAppUrl = process.env.NEXT_PUBLIC_APP_URL;
+  const originalWindow = globalThis.window;
+
+  afterEach(() => {
+    process.env.API_INTERNAL_URL = originalApiInternalUrl;
+    process.env.NEXT_PUBLIC_APP_URL = originalAppUrl;
+
+    if (typeof originalWindow === "undefined") {
+      // @ts-expect-error restoring test environment
+      delete globalThis.window;
+    } else {
+      globalThis.window = originalWindow;
+    }
+  });
+
+  it("should use /api in the browser", async () => {
+    vi.resetModules();
+    globalThis.window = {} as Window & typeof globalThis;
+    const { api: freshApi } = await import("@/lib/api/client");
+    expect(freshApi.defaults.baseURL).toBe("/api");
+  });
+
+  it("should use process.env.API_INTERNAL_URL on the server if defined", async () => {
+    vi.resetModules();
+    // @ts-expect-error simulating server environment
+    delete globalThis.window;
+    process.env.API_INTERNAL_URL = "https://custom-api.example.com/api/v1";
+    const { api: freshApi } = await import("@/lib/api/client");
+    expect(freshApi.defaults.baseURL).toBe(
+      "https://custom-api.example.com/api/v1",
+    );
+  });
+
+  it("should fallback to NEXT_PUBLIC_APP_URL/api on the server", async () => {
+    vi.resetModules();
+    // @ts-expect-error simulating server environment
+    delete globalThis.window;
+    delete process.env.API_INTERNAL_URL;
+    process.env.NEXT_PUBLIC_APP_URL = "http://localhost:3000";
+    const { api: freshApi } = await import("@/lib/api/client");
+    expect(freshApi.defaults.baseURL).toBe("http://localhost:3000/api");
+  });
+});

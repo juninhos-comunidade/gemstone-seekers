@@ -52,7 +52,7 @@ describe("Role Selection Page", () => {
     );
   });
 
-  it("should set selected role on button clicks", () => {
+  it("should set selected role on button clicks and navigate", () => {
     render(<Role />);
     const buttons = screen.getAllByRole("button", { name: "Selecionar" });
 
@@ -61,5 +61,26 @@ describe("Role Selection Page", () => {
 
     fireEvent.click(buttons[1]);
     expect(mockSetValue).toHaveBeenCalledWith("role", "candidate");
+  });
+
+  it("handles recruiter role selection and catch block on setItem failure", () => {
+    mockHandleSubmit.mockImplementation(
+      (callback) => () => callback({ role: "recruiter" }),
+    );
+
+    render(<Role />);
+    const buttons = screen.getAllByRole("button", { name: "Selecionar" });
+    fireEvent.submit(buttons[0].closest("form")!);
+
+    expect(mockPush).toHaveBeenCalledWith("/signup/role/recruiter");
+
+    const spySetItem = vi
+      .spyOn(Storage.prototype, "setItem")
+      .mockImplementationOnce(() => {
+        throw new Error("localStorage blocked");
+      });
+
+    fireEvent.submit(buttons[0].closest("form")!);
+    spySetItem.mockRestore();
   });
 });

@@ -1,16 +1,7 @@
 package com.gemstoneseekers.integration;
 
 import com.gemstoneseekers.enums.UserRole;
-import com.gemstoneseekers.models.Address;
-import com.gemstoneseekers.models.Candidate;
-import com.gemstoneseekers.models.City;
-import com.gemstoneseekers.models.Company;
-import com.gemstoneseekers.models.Country;
-import com.gemstoneseekers.models.Language;
-import com.gemstoneseekers.models.Recruiter;
-import com.gemstoneseekers.models.State;
-import com.gemstoneseekers.models.Technology;
-import com.gemstoneseekers.models.User;
+import com.gemstoneseekers.models.*;
 import jakarta.persistence.EntityManager;
 import org.flywaydb.core.Flyway;
 import org.hibernate.SessionFactory;
@@ -58,6 +49,12 @@ class DomainRepositoryTest {
         cfg.addAnnotatedClass(Country.class);
         cfg.addAnnotatedClass(Technology.class);
         cfg.addAnnotatedClass(Language.class);
+        cfg.addAnnotatedClass(Certification.class);
+        cfg.addAnnotatedClass(Education.class);
+        cfg.addAnnotatedClass(Experience.class);
+        cfg.addAnnotatedClass(Project.class);
+        cfg.addAnnotatedClass(CandidateLanguage.class);
+        cfg.addAnnotatedClass(CandidateLink.class);
 
         sessionFactory = cfg.buildSessionFactory();
     }

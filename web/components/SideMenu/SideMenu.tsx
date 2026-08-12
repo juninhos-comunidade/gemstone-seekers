@@ -1,6 +1,7 @@
 "use client";
 
 import { FaBriefcase, FaCode, FaHome, FaUsers } from "react-icons/fa";
+import { LuRadar } from "react-icons/lu";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -11,6 +12,7 @@ const menuIcons = {
   code: FaCode,
   home: FaHome,
   users: FaUsers,
+  LuRadar,
 };
 
 export interface MenuItem {
@@ -21,12 +23,12 @@ export interface MenuItem {
 
 interface SideMenuProps {
   items: MenuItem[];
+  mobile?: boolean;
 }
 
-export function SideMenu({ items }: SideMenuProps) {
+export function SideMenu({ items, mobile = false }: SideMenuProps) {
   const pathname = usePathname();
 
-  /** Finds the item with the most specific (longest) matching href for the current route */
   const activeHref = items
     .filter((item) => {
       if (!item.href) return false;
@@ -35,8 +37,18 @@ export function SideMenu({ items }: SideMenuProps) {
     .sort((a, b) => (b.href?.length ?? 0) - (a.href?.length ?? 0))[0]?.href;
 
   return (
-    <aside className="border-sidebar-border bg-sidebar/95 fixed top-16 bottom-0 left-0 z-40 hidden w-72 border-r px-3 py-5 backdrop-blur md:block">
-      <nav aria-label="Navegação do painel" className="flex h-full flex-col">
+    <aside
+      className={cn(
+        "border-sidebar-border bg-sidebar/95 border-r px-3 py-5 backdrop-blur",
+        mobile
+          ? "relative top-0 left-0 block h-auto w-full border-0 bg-transparent p-0"
+          : "fixed top-16 bottom-0 left-0 z-40 hidden w-72 md:block",
+      )}
+    >
+      <nav
+        aria-label="Navegação do painel"
+        className={cn("flex h-full flex-col", mobile && "h-auto")}
+      >
         <p className="text-muted-foreground px-3 pb-3 text-xs font-semibold tracking-[0.16em] uppercase">
           Menu principal
         </p>
@@ -74,7 +86,12 @@ export function SideMenu({ items }: SideMenuProps) {
           })}
         </ul>
 
-        <div className="border-sidebar-border bg-background/60 text-muted-foreground mt-auto rounded-xl border p-3 text-xs leading-relaxed">
+        <div
+          className={cn(
+            "border-sidebar-border bg-background/60 text-muted-foreground mt-auto rounded-xl border p-3 text-xs leading-relaxed",
+            mobile && "mt-4",
+          )}
+        >
           Acesse rapidamente as principais áreas do seu painel.
         </div>
       </nav>

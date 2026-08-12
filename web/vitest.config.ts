@@ -21,6 +21,7 @@ export default defineConfig({
         "components/providers/**",
         "app/**/layout.tsx",
         "lib/mocks/**",
+        "lib/types/**",
         "app/api/**",
         "components/reui/**",
         "components/selectLevel/**",

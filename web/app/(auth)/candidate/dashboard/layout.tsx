@@ -1,3 +1,4 @@
+import { DashboardHeader } from "@/components/DashboardHeader/DashboardHeader";
 import { SideMenu } from "@/components/SideMenu/SideMenu";
 
 export default function Layout({
@@ -5,30 +6,38 @@ export default function Layout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const menuItems = [
+    {
+      label: "Dashboard",
+      href: "/candidate/dashboard",
+      icon: "home" as const,
+    },
+    {
+      label: "Vagas",
+      href: "/candidate/dashboard/jobs",
+      icon: "briefcase" as const,
+    },
+    {
+      label: "Testes",
+      href: "/candidate/dashboard/tests",
+      icon: "code" as const,
+    },
+    {
+      label: "Radar",
+      href: "/candidate/dashboard/radar",
+      icon: "LuRadar" as const,
+    },
+  ];
+
   return (
     <main className="flex min-h-screen flex-col">
+      <DashboardHeader role="candidate" menuItems={menuItems} />
       <div className="flex flex-1">
-        <SideMenu
-          items={[
-            {
-              label: "Dashboard",
-              href: "/candidate/dashboard",
-              icon: "home",
-            },
-            {
-              label: "Vagas",
-              href: "/candidate/dashboard/jobs",
-              icon: "briefcase",
-            },
-            {
-              label: "Testes",
-              href: "/candidate/dashboard/tests",
-              icon: "code",
-            },
-          ]}
-        />
+        <SideMenu items={menuItems} />
 
-        <section className="mt-16 ml-72 p-6">{children}</section>
+        <section className="mt-16 w-full p-4 md:ml-72 md:p-6">
+          {children}
+        </section>
       </div>
     </main>
   );

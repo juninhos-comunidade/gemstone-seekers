@@ -138,6 +138,114 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/BaseResponseVoid"
+  /api/v1/profile/projects:
+    post:
+      tags:
+      - user-profile-controller
+      operationId: addProjects
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProjectRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/BaseResponseCandidateProfileResponse"
+  /api/v1/profile/links:
+    post:
+      tags:
+      - user-profile-controller
+      operationId: addCandidateLink
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LinkItemRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/BaseResponseCandidateProfileResponse"
+  /api/v1/profile/languages:
+    post:
+      tags:
+      - user-profile-controller
+      operationId: addLanguage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CandidateLanguageRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/BaseResponseCandidateProfileResponse"
+  /api/v1/profile/experiences:
+    post:
+      tags:
+      - user-profile-controller
+      operationId: addCandidateExperience
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ExperienceRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/BaseResponseCandidateProfileResponse"
+  /api/v1/profile/educations:
+    post:
+      tags:
+      - user-profile-controller
+      operationId: addEducation
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EducationRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/BaseResponseCandidateProfileResponse"
+  /api/v1/profile/certifications:
+    post:
+      tags:
+      - user-profile-controller
+      operationId: addCertification
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CertificationRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/BaseResponseCandidateProfileResponse"
   /api/v1/jobs:
     get:
       tags:
@@ -336,6 +444,42 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/BaseResponseLoginResponse"
+  /api/v1/profile/user:
+    patch:
+      tags:
+      - user-profile-controller
+      operationId: updateCandidateProfile
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/BaseResponseCandidateProfileResponse"
+  /api/v1/profile/address:
+    patch:
+      tags:
+      - user-profile-controller
+      operationId: updateCandidateAddres
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AddressRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/BaseResponseCandidateProfileResponse"
   /api/v1/auth/complete-registration:
     patch:
       tags:
@@ -416,6 +560,18 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/BaseResponseRecruiterResponse"
+  /api/v1/profile:
+    get:
+      tags:
+      - user-profile-controller
+      operationId: getCandidateProfile
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/BaseResponseCandidateProfileResponse"
   /api/v1/market-radar/technology-demand:
     get:
       tags:
@@ -483,6 +639,120 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/BaseResponseListCityResponse"
+  /api/v1/profile/projects/{projectId}:
+    delete:
+      tags:
+      - user-profile-controller
+      operationId: deleteProject
+      parameters:
+      - name: projectId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/BaseResponseCandidateProfileResponse"
+  /api/v1/profile/links/{linkId}:
+    delete:
+      tags:
+      - user-profile-controller
+      operationId: deleteCandidateLink
+      parameters:
+      - name: linkId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/BaseResponseCandidateProfileResponse"
+  /api/v1/profile/languages/{languageId}:
+    delete:
+      tags:
+      - user-profile-controller
+      operationId: deleteLanguage
+      parameters:
+      - name: languageId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int32
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/BaseResponseCandidateProfileResponse"
+  /api/v1/profile/experiences/{experienceId}:
+    delete:
+      tags:
+      - user-profile-controller
+      operationId: deleteCandidateExperience
+      parameters:
+      - name: experienceId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/BaseResponseCandidateProfileResponse"
+  /api/v1/profile/educations/{educationId}:
+    delete:
+      tags:
+      - user-profile-controller
+      operationId: deleteCandidateEducation
+      parameters:
+      - name: educationId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/BaseResponseCandidateProfileResponse"
+  /api/v1/profile/certifications/{certificationId}:
+    delete:
+      tags:
+      - user-profile-controller
+      operationId: deleteCandidateCertification
+      parameters:
+      - name: certificationId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/BaseResponseCandidateProfileResponse"
   /api/v1/jobs/{jobId}/technologies/{technologyId}:
     delete:
       tags:
@@ -627,6 +897,284 @@ components:
         name:
           type: string
         cnpj:
+          type: string
+    ProjectRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        projectUrl:
+          type: string
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+    AddressResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        city:
+          $ref: "#/components/schemas/CityResponse"
+        zipCode:
+          type: string
+        street:
+          type: string
+        number:
+          type: string
+        neighborhood:
+          type: string
+        complement:
+          type: string
+    BaseResponseCandidateProfileResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        result:
+          $ref: "#/components/schemas/CandidateProfileResponse"
+        error:
+          $ref: "#/components/schemas/ErrorResponse"
+    CandidateLanguageResponse:
+      type: object
+      properties:
+        languageId:
+          type: integer
+          format: int32
+        languageName:
+          type: string
+        proficiency:
+          type: string
+          enum:
+          - BASIC
+          - INTERMEDIATE
+          - ADVANCED
+          - FLUENT
+          - NATIVE
+    CandidateLinkResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        url:
+          type: string
+    CandidateProfileResponse:
+      type: object
+      properties:
+        candidate:
+          $ref: "#/components/schemas/CandidateResponse"
+        address:
+          $ref: "#/components/schemas/AddressResponse"
+    CandidateResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        user:
+          $ref: "#/components/schemas/UserResponse"
+        phone:
+          type: string
+        summary:
+          type: string
+        links:
+          type: array
+          items:
+            $ref: "#/components/schemas/CandidateLinkResponse"
+        experiences:
+          type: array
+          items:
+            $ref: "#/components/schemas/ExperienceResponse"
+        educations:
+          type: array
+          items:
+            $ref: "#/components/schemas/EducationResponse"
+        certifications:
+          type: array
+          items:
+            $ref: "#/components/schemas/CertificationResponse"
+        projects:
+          type: array
+          items:
+            $ref: "#/components/schemas/ProjectResponse"
+        languages:
+          type: array
+          items:
+            $ref: "#/components/schemas/CandidateLanguageResponse"
+    CertificationResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        issuingOrganization:
+          type: string
+        issueDate:
+          type: string
+          format: date
+        expirationDate:
+          type: string
+          format: date
+        credentialUrl:
+          type: string
+    CityResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+        name:
+          type: string
+        stateId:
+          type: integer
+          format: int32
+    EducationResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        institution:
+          type: string
+        fieldOfStudy:
+          type: string
+        degree:
+          type: string
+        startDate:
+          type: string
+          format: date
+        completionDate:
+          type: string
+          format: date
+    ExperienceResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        companyName:
+          type: string
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+        isCurrent:
+          type: boolean
+        description:
+          type: string
+    ProjectResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        description:
+          type: string
+        projectUrl:
+          type: string
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+    UserResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        email:
+          type: string
+        role:
+          type: string
+          enum:
+          - CANDIDATE
+          - RECRUITER
+        documentType:
+          type: string
+        documentNumber:
+          type: string
+    LinkItemRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        url:
+          type: string
+    CandidateLanguageRequest:
+      type: object
+      properties:
+        languageName:
+          type: string
+        proficiency:
+          type: string
+    ExperienceRequest:
+      type: object
+      properties:
+        title:
+          type: string
+        companyName:
+          type: string
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+        isCurrent:
+          type: boolean
+        description:
+          type: string
+    EducationRequest:
+      type: object
+      properties:
+        institution:
+          type: string
+        fieldOfStudy:
+          type: string
+        degree:
+          type: string
+        startDate:
+          type: string
+          format: date
+        completionDate:
+          type: string
+          format: date
+    CertificationRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        issuingOrganization:
+          type: string
+        issueDate:
+          type: string
+          format: date
+        expirationDate:
+          type: string
+          format: date
+        credentialUrl:
           type: string
     JobTechnologyRequest:
       type: object
@@ -775,6 +1323,45 @@ components:
       required:
       - email
       - password
+    UserRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        password:
+          type: string
+        documentType:
+          type: string
+        documentNumber:
+          type: string
+        phone:
+          type: string
+        summary:
+          type: string
+    AddressRequest:
+      type: object
+      properties:
+        zipCode:
+          type: string
+        street:
+          type: string
+        number:
+          type: string
+        neighborhood:
+          type: string
+        complement:
+          type: string
+        location:
+          $ref: "#/components/schemas/LocationRequest"
+    LocationRequest:
+      type: object
+      properties:
+        city:
+          type: string
+        state:
+          type: string
+        country:
+          type: string
     CompleteRegistrationRequest:
       type: object
       properties:
@@ -888,17 +1475,6 @@ components:
             $ref: "#/components/schemas/CityResponse"
         error:
           $ref: "#/components/schemas/ErrorResponse"
-    CityResponse:
-      type: object
-      properties:
-        id:
-          type: integer
-          format: int32
-        name:
-          type: string
-        stateId:
-          type: integer
-          format: int32
     BaseResponseListTechnologyDemandResponse:
       type: object
       properties:
