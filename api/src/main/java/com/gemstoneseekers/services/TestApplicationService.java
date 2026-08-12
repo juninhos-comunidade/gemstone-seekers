@@ -206,4 +206,23 @@ public class TestApplicationService {
 
         return sum.divide(BigDecimal.valueOf(completedTests.size()), 2, RoundingMode.HALF_UP);
     }
+
+    @Transactional(readOnly = true)
+    public TestDetailedResultResponse getTestResult(UUID testId, String email) {
+        Candidate candidate = candidateService.getCandidateByEmailSession(email);
+
+        Test test = testRepository.findById(testId)
+            .orElseThrow(() -> new EntityNotFoundException("Test", testId));
+
+        if (!test.getCandidate().getId().equals(candidate.getId())) {
+            throw new AccessDeniedException("You do not have permission to view this test");
+        }
+
+        if (test.getStatus() == TestStatus.IN_PROGRESS) {
+            throw new BusinessRuleException("Cannot view detailed results for a test that is currently IN_PROGRESS");
+        }
+
+        return testMapper.toDetailedResultResponse(test);
+    }
+
 }

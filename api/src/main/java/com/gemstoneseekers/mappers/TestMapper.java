@@ -1,12 +1,10 @@
 package com.gemstoneseekers.mappers;
 
-import com.gemstoneseekers.dtos.response.QuestionResponse;
-import com.gemstoneseekers.dtos.response.TestResponse;
-import com.gemstoneseekers.dtos.response.TestResultResponse;
-import com.gemstoneseekers.dtos.response.TestSummaryResponse;
+import com.gemstoneseekers.dtos.response.*;
 import com.gemstoneseekers.enums.QuestionDifficulty;
 import com.gemstoneseekers.models.CandidateAnswer;
 import com.gemstoneseekers.models.Question;
+import com.gemstoneseekers.models.QuestionOption;
 import com.gemstoneseekers.models.Test;
 import org.springframework.stereotype.Component;
 
@@ -82,6 +80,53 @@ public class TestMapper {
             test.getScore(),
             test.getCreatedAt(),
             test.getCompletedAt()
+        );
+    }
+
+    public TestDetailedResultResponse toDetailedResultResponse(Test test) {
+        if (test == null) return null;
+
+        List<QuestionResultResponse> questions = test.getAnswers().stream()
+            .map(answer -> {
+                // Descobre a opcao correta no banco
+                QuestionOption correctOption = answer.getQuestion().getOptions().stream()
+                    .filter(QuestionOption::isCorrect)
+                    .findFirst()
+                    .orElse(null);
+
+                Long correctOptionId = correctOption != null ? correctOption.getId() : null;
+                Long selectedOptionId = answer.getSelectedOption() != null ? answer.getSelectedOption().getId() : null;
+                boolean isCorrect = selectedOptionId != null && selectedOptionId.equals(correctOptionId);
+
+                // Mapeia todas as opcoes da questao
+                List<OptionResultResponse> mappedOptions = answer.getQuestion().getOptions().stream()
+                    .map(opt -> new OptionResultResponse(opt.getId(), opt.getOptionText(), opt.isCorrect()))
+                    .toList();
+
+                return new QuestionResultResponse(
+                    answer.getQuestion().getId(),
+                    answer.getQuestion().getStatement(),
+                    selectedOptionId,
+                    correctOptionId,
+                    isCorrect,
+                    mappedOptions
+                );
+            })
+            .toList();
+
+        // O score e correctAnswers ja foram preenchidos pelo metodo submitTest na entidade
+        long correctAnswersCount = questions.stream().filter(QuestionResultResponse::isCorrect).count();
+
+        return new TestDetailedResultResponse(
+            test.getId(),
+            test.getTechnology().getName(),
+            test.getStatus(),
+            test.getDerivedDifficulty(),
+            test.getScore(),
+            questions.size(),
+            (int) correctAnswersCount,
+            test.getCompletedAt(),
+            questions
         );
     }
 }

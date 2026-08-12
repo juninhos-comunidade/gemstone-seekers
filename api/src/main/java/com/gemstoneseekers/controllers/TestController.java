@@ -76,4 +76,18 @@ public class TestController {
         );
     }
 
+    @GetMapping("/{testId}/result")
+    public ResponseEntity<BaseResponse<TestDetailedResultResponse>> getTestResult(
+        @PathVariable UUID testId,
+        @AuthenticationPrincipal UserDetails userDetails
+    ) {
+        String email = userDetails.getUsername();
+
+        TestDetailedResultResponse response = testApplicationService.getTestResult(testId, email);
+
+        return ResponseEntity.ok(
+            new BaseResponse<>(true, "Test result retrieved successfully", response, null)
+        );
+    }
+
 }
