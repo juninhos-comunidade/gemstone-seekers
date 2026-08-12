@@ -313,4 +313,57 @@ describe("auth api hooks", () => {
     );
     expect(mockPush).toHaveBeenCalledWith("/recruiter/dashboard");
   });
+
+  it("useLogin onError handles timeout and calls onErrorMessage", async () => {
+    const { useLogin } = await import("./login");
+    const mockOnErrorMessage = vi.fn();
+    const mutation = useLogin({ onErrorMessage: mockOnErrorMessage });
+
+    mutation.onError(new Error("timeout occurred"));
+
+    expect(mockToastError).toHaveBeenCalledWith(
+      "O servidor está iniciando, isso pode levar até 1 minuto. Tente novamente.",
+    );
+    expect(mockOnErrorMessage).toHaveBeenCalledWith(
+      "O servidor está iniciando, isso pode levar até 1 minuto. Tente novamente.",
+    );
+  });
+
+  it("useLogin onError handles generic errors and forwards message", async () => {
+    const { useLogin } = await import("./login");
+    const mockOnErrorMessage = vi.fn();
+    const mutation = useLogin({ onErrorMessage: mockOnErrorMessage });
+
+    mutation.onError(new Error("something went wrong"));
+
+    expect(mockToastError).toHaveBeenCalledWith("something went wrong");
+    expect(mockOnErrorMessage).toHaveBeenCalledWith("something went wrong");
+  });
+
+  it("useLogin retry logic retries only on timeout/network once", async () => {
+    const { useLogin } = await import("./login");
+    const mutation = useLogin();
+
+    // retry should return true for first timeout/network error
+    expect(mutation.retry?.(0, new Error("timeout"))).toBe(true);
+    // but not after one failure
+    expect(mutation.retry?.(1, new Error("timeout"))).toBe(false);
+    // non-network errors should not retry
+    expect(mutation.retry?.(0, new Error("other"))).toBe(false);
+  });
+
+  it("useLogin onSuccess handles failure and missing token cases", async () => {
+    const { useLogin } = await import("./login");
+    const mutation = useLogin();
+
+    // success === false should show message
+    mutation.onSuccess({ success: false, message: "Invalid credentials" });
+    expect(mockToastError).toHaveBeenCalledWith("Invalid credentials");
+
+    // success true but no token should show fallback error
+    mutation.onSuccess({ success: true });
+    expect(mockToastError).toHaveBeenCalledWith(
+      "Não foi possível autenticar. Tente novamente.",
+    );
+  });
 });
