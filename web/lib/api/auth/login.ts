@@ -26,25 +26,50 @@ async function loginRequest(data: LoginData): Promise<LoginResponse> {
   return httpClient.post<LoginResponse>("/auth/login", data);
 }
 
+function isTimeoutOrNetworkError(error: unknown): boolean {
+  const message = (error as Error)?.message?.toLowerCase() ?? "";
+  return (
+    message.includes("timeout") ||
+    message.includes("network") ||
+    message.includes("econnaborted")
+  );
+}
+
 export function useLogin() {
   const router = useRouter();
 
   return useMutation({
     mutationFn: loginRequest,
+    retry: (failureCount, error) => {
+      // só tenta de novo automaticamente se for timeout/rede (cold start do Render)
+      // e no máximo 1 vez, pra não deixar o usuário esperando demais
+      if (isTimeoutOrNetworkError(error) && failureCount < 1) {
+        return true;
+      }
+      return false;
+    },
+    retryDelay: 1000,
     onSuccess: (result) => {
+      if (!result.success) {
+        toast.error(result.message ?? "Erro ao fazer login");
+        return;
+      }
+
       const token =
         result?.result?.token ??
         result?.token ??
         result?.accessToken ??
         result?.result?.accessToken;
 
-      if (token) {
-        setAuthToken(token);
+      if (!token) {
+        toast.error("Não foi possível autenticar. Tente novamente.");
+        return;
       }
+
+      setAuthToken(token);
 
       const role = result?.result?.role;
       const registrationCompleted = result?.result?.registrationCompleted;
-
       toast.success("Login realizado com sucesso!");
 
       if (!registrationCompleted) {
@@ -55,12 +80,17 @@ export function useLogin() {
         );
         return;
       }
-
       router.push(
         role === "RECRUITER" ? "/recruiter/dashboard" : "/candidate/dashboard",
       );
     },
     onError: (error: Error) => {
+      if (isTimeoutOrNetworkError(error)) {
+        toast.error(
+          "O servidor está iniciando, isso pode levar até 1 minuto. Tente novamente.",
+        );
+        return;
+      }
       toast.error(error.message ?? "Erro ao fazer login");
     },
   });

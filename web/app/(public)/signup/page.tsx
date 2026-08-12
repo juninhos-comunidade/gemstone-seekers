@@ -82,6 +82,27 @@ export default function Page() {
           </div>
 
           <div className="space-y-1.5">
+            <Label htmlFor="confirmEmail" className="text-sm font-medium">
+              Confirmar e-mail
+            </Label>
+            <Input
+              id="confirmEmail"
+              type="email"
+              autoComplete="email"
+              disabled={isLoading}
+              aria-invalid={!!errors.confirmEmail}
+              onPaste={(e) => e.preventDefault()}
+              className="focus-visible:ring-primary/40 transition-colors focus-visible:ring-2 aria-[invalid=true]:border-red-500"
+              {...register("confirmEmail")}
+            />
+            {errors.confirmEmail?.message && (
+              <span className="block text-xs font-medium text-red-500">
+                {errors.confirmEmail.message}
+              </span>
+            )}
+          </div>
+
+          <div className="space-y-1.5">
             <Label htmlFor="password" className="text-sm font-medium">
               Senha
             </Label>
