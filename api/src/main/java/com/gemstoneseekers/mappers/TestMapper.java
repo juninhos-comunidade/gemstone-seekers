@@ -3,7 +3,10 @@ package com.gemstoneseekers.mappers;
 import com.gemstoneseekers.dtos.response.QuestionResponse;
 import com.gemstoneseekers.dtos.response.TestResponse;
 import com.gemstoneseekers.dtos.response.TestResultResponse;
+import com.gemstoneseekers.dtos.response.TestSummaryResponse;
+import com.gemstoneseekers.enums.QuestionDifficulty;
 import com.gemstoneseekers.models.CandidateAnswer;
+import com.gemstoneseekers.models.Question;
 import com.gemstoneseekers.models.Test;
 import org.springframework.stereotype.Component;
 
@@ -61,4 +64,24 @@ public class TestMapper {
         );
     }
 
+    public TestSummaryResponse toSummaryResponse(Test test) {
+        if (test == null) {
+            return null;
+        }
+
+        QuestionDifficulty derivedDifficulty = test.getAnswers().stream()
+            .map(CandidateAnswer::getQuestion)
+            .map(Question::getDifficultyLevel)
+            .findFirst()
+            .orElse(null);
+
+        return new TestSummaryResponse(
+            test.getId(),
+            test.getStatus(),
+            derivedDifficulty,
+            test.getScore(),
+            test.getCreatedAt(),
+            test.getCompletedAt()
+        );
+    }
 }

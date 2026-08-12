@@ -1,4 +1,8 @@
 package com.gemstoneseekers.dtos.response;
 
-public record TechnologyHistoryGroupResponse() {
-}
+import java.util.List;
+
+public record TechnologyHistoryGroupResponse(
+    String technologyName,
+    List<DifficultyHistoryGroupResponse> difficulties
+) {}
