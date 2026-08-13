@@ -410,4 +410,197 @@ describe("auth api hooks", () => {
       "Não foi possível autenticar. Tente novamente.",
     );
   });
+
+  // ─── useSignup – onError ───────────────────────────────────────────────────
+
+  it("useSignup onError handles timeout and calls onErrorMessage", async () => {
+    const { useSignup } = await import("./signup");
+    const mockOnErrorMessage = vi.fn();
+    const mutation = useSignup({ onErrorMessage: mockOnErrorMessage });
+
+    mutation.onError(new Error("network error"));
+
+    const expected =
+      "O servidor está iniciando, isso pode levar até 1 minuto. Tente novamente.";
+    expect(mockToastError).toHaveBeenCalledWith(expected);
+    expect(mockOnErrorMessage).toHaveBeenCalledWith(expected);
+  });
+
+  it("useSignup onError handles timeout without onErrorMessage option", async () => {
+    const { useSignup } = await import("./signup");
+    const mutation = useSignup();
+
+    mutation.onError(new Error("econnaborted"));
+
+    expect(mockToastError).toHaveBeenCalledWith(
+      "O servidor está iniciando, isso pode levar até 1 minuto. Tente novamente.",
+    );
+  });
+
+  it("useSignup onError handles generic errors and forwards message", async () => {
+    const { useSignup } = await import("./signup");
+    const mockOnErrorMessage = vi.fn();
+    const mutation = useSignup({ onErrorMessage: mockOnErrorMessage });
+
+    mutation.onError(new Error("something went wrong"));
+
+    expect(mockToastError).toHaveBeenCalledWith("something went wrong");
+    expect(mockOnErrorMessage).toHaveBeenCalledWith("something went wrong");
+  });
+
+  it("useSignup onError uses fallback message when error has no message", async () => {
+    const { useSignup } = await import("./signup");
+    const mockOnErrorMessage = vi.fn();
+    const mutation = useSignup({ onErrorMessage: mockOnErrorMessage });
+
+    mutation.onError({} as Error);
+
+    expect(mockToastError).toHaveBeenCalledWith("Falha ao cadastrar");
+    expect(mockOnErrorMessage).toHaveBeenCalledWith("Falha ao cadastrar");
+  });
+
+  // ─── useSignup – retry ────────────────────────────────────────────────────
+
+  it("useSignup retry logic retries on timeout/network up to 2 times", async () => {
+    const { useSignup } = await import("./signup");
+    const mutation = useSignup();
+
+    expect(mutation.retry?.(0, new Error("timeout"))).toBe(true);
+    expect(mutation.retry?.(1, new Error("network failure"))).toBe(true);
+    // third failure (failureCount === 2) should not retry
+    expect(mutation.retry?.(2, new Error("timeout"))).toBe(false);
+    // non-network errors should never retry
+    expect(mutation.retry?.(0, new Error("bad request"))).toBe(false);
+  });
+
+  // ─── useSignup – onSuccess token fallbacks ────────────────────────────────
+
+  it("useSignup onSuccess uses root accessToken fallback", async () => {
+    const { useSignup } = await import("./signup");
+    const mutation = useSignup();
+
+    mutation.onSuccess({ success: true, accessToken: "root-access-token" });
+
+    expect(mockSetAuthToken).toHaveBeenCalledWith("root-access-token");
+    expect(mockPush).toHaveBeenCalledWith("/role");
+  });
+
+  it("useSignup onSuccess shows toast error when success is false", async () => {
+    const { useSignup } = await import("./signup");
+    const mutation = useSignup();
+
+    mutation.onSuccess({ success: false, message: "Email já cadastrado" });
+
+    expect(mockToastError).toHaveBeenCalledWith("Email já cadastrado");
+    expect(mockSetAuthToken).not.toHaveBeenCalled();
+    expect(mockPush).not.toHaveBeenCalled();
+  });
+
+  it("useSignup onSuccess uses default message when success is false and message is absent", async () => {
+    const { useSignup } = await import("./signup");
+    const mutation = useSignup();
+
+    mutation.onSuccess({ success: false });
+
+    expect(mockToastError).toHaveBeenCalledWith("Falha ao cadastrar");
+  });
+
+  // ─── signupRequest – auto-login token variant fallbacks ───────────────────
+
+  it("signupRequest auto-login uses data.token fallback", async () => {
+    const { useSignup } = await import("./signup");
+    const mutation = useSignup();
+
+    mockHttpPost
+      .mockResolvedValueOnce({ success: true })
+      .mockResolvedValueOnce({ success: true, data: { token: "data-token" } });
+
+    const result = await mutation.mutationFn({
+      fullName: "Ana Silva",
+      email: "ana@example.com",
+      password: "pass",
+      confirmPassword: "pass",
+    });
+
+    expect(result.token).toBe("data-token");
+  });
+
+  it("signupRequest auto-login uses data.accessToken fallback", async () => {
+    const { useSignup } = await import("./signup");
+    const mutation = useSignup();
+
+    mockHttpPost
+      .mockResolvedValueOnce({ success: true })
+      .mockResolvedValueOnce({
+        success: true,
+        data: { accessToken: "data-access-token" },
+      });
+
+    const result = await mutation.mutationFn({
+      fullName: "Ana Silva",
+      email: "ana@example.com",
+      password: "pass",
+      confirmPassword: "pass",
+    });
+
+    expect(result.token).toBe("data-access-token");
+  });
+
+  it("signupRequest auto-login uses jwt fallback", async () => {
+    const { useSignup } = await import("./signup");
+    const mutation = useSignup();
+
+    mockHttpPost
+      .mockResolvedValueOnce({ success: true })
+      .mockResolvedValueOnce({ success: true, jwt: "jwt-value" });
+
+    const result = await mutation.mutationFn({
+      fullName: "Ana Silva",
+      email: "ana@example.com",
+      password: "pass",
+      confirmPassword: "pass",
+    });
+
+    expect(result.token).toBe("jwt-value");
+  });
+
+  it("signupRequest returns original response when auto-login throws", async () => {
+    const { useSignup } = await import("./signup");
+    const mutation = useSignup();
+
+    const originalResponse = { success: true, message: "User registered" };
+    mockHttpPost
+      .mockResolvedValueOnce(originalResponse)
+      .mockRejectedValueOnce(new Error("login failed"));
+
+    const result = await mutation.mutationFn({
+      fullName: "Ana Silva",
+      email: "ana@example.com",
+      password: "pass",
+      confirmPassword: "pass",
+    });
+
+    // auto-login threw → original response returned unchanged
+    expect(result).toEqual(originalResponse);
+    expect(result.token).toBeUndefined();
+  });
+
+  it("signupRequest skips auto-login when register returns success===false", async () => {
+    const { useSignup } = await import("./signup");
+    const mutation = useSignup();
+
+    const failResponse = { success: false, message: "Email já usado" };
+    mockHttpPost.mockResolvedValueOnce(failResponse);
+
+    const result = await mutation.mutationFn({
+      fullName: "Ana Silva",
+      email: "ana@example.com",
+      password: "pass",
+      confirmPassword: "pass",
+    });
+
+    // only one call to httpClient.post (no auto-login attempt)
+    expect(mockHttpPost).toHaveBeenCalledTimes(1);
+    expect(result).toEqual(failResponse);
+  });
 });
