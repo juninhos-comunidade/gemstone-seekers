@@ -109,7 +109,7 @@ public class Test extends BaseModel {
     @Transient
     public QuestionDifficulty getDerivedDifficulty() {
         if (this.answers == null || this.answers.isEmpty()) {
-            return QuestionDifficulty.BEGINNER; // Fallback
+            return QuestionDifficulty.BEGINNER;
         }
         return this.answers.stream()
             .map(answer -> answer.getQuestion().getDifficultyLevel())

@@ -1,6 +1,6 @@
 package com.gemstoneseekers.models;
 
-import jakarta.persistence.AttributeOverride; // ALTERAÇÃO: Import para anulação de campo herdado
+import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;

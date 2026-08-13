@@ -88,7 +88,7 @@ public class TestMapper {
 
         List<QuestionResultResponse> questions = test.getAnswers().stream()
             .map(answer -> {
-                // Descobre a opcao correta no banco
+
                 QuestionOption correctOption = answer.getQuestion().getOptions().stream()
                     .filter(QuestionOption::isCorrect)
                     .findFirst()
@@ -98,7 +98,6 @@ public class TestMapper {
                 Long selectedOptionId = answer.getSelectedOption() != null ? answer.getSelectedOption().getId() : null;
                 boolean isCorrect = selectedOptionId != null && selectedOptionId.equals(correctOptionId);
 
-                // Mapeia todas as opcoes da questao
                 List<OptionResultResponse> mappedOptions = answer.getQuestion().getOptions().stream()
                     .map(opt -> new OptionResultResponse(opt.getId(), opt.getOptionText(), opt.isCorrect()))
                     .toList();
@@ -114,7 +113,6 @@ public class TestMapper {
             })
             .toList();
 
-        // O score e correctAnswers ja foram preenchidos pelo metodo submitTest na entidade
         long correctAnswersCount = questions.stream().filter(QuestionResultResponse::isCorrect).count();
 
         return new TestDetailedResultResponse(
