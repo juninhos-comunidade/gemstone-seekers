@@ -17,7 +17,7 @@ import { useLoadingMessages } from "@/lib/hooks/useLoadingMessages";
 export default function Page() {
   const [apiError, setApiError] = useState<string | null>(null);
 
-  const { mutateAsync: login, isPending } = useLogin({
+  const { mutate: login, isPending } = useLogin({
     onErrorMessage: setApiError,
   });
 
@@ -37,13 +37,9 @@ export default function Page() {
 
   const isLoading = isSubmitting || isPending;
 
-  const handleLogin = handleSubmit(async (data) => {
+  const handleLogin = handleSubmit((data) => {
     setApiError(null);
-    try {
-      await login(data);
-    } catch {
-      // erro já tratado no onError do useLogin (toast + apiError acima)
-    }
+    login(data);
   });
 
   const loadingMessage = useLoadingMessages(isPending);

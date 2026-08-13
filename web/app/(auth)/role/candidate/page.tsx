@@ -51,11 +51,7 @@ export default function CandidateRegistrationPage() {
   const isLoading = isSubmitting || isPending;
 
   const onSubmit = async (data: CandidateRoleFormData) => {
-    try {
-      await updateCandidate(data);
-    } catch {
-      // Tratado no onError do useUpdateCandidate
-    }
+    await updateCandidate(data);
   };
 
   return (

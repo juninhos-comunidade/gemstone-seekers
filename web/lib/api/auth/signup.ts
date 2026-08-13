@@ -112,15 +112,12 @@ export function useSignup(_options?: UseSignupOptions) {
   return useMutation({
     mutationFn: signupRequest,
     retry: (failureCount, error) => {
-      // Tenta de novo automaticamente se for timeout/rede (cold start do Render).
-      // Permitindo até 2 tentativas extras para dar mais tempo ao servidor.
       if (isTimeoutOrNetworkError(error) && failureCount < 2) {
         return true;
       }
       return false;
     },
-    // Tempo maior entre as tentativas (3 segundos)
-    retryDelay: 3000,
+    retryDelay: 2000,
     onSuccess: (result) => {
       if (result && "success" in result && result.success === false) {
         toast.error(result.message ?? "Falha ao cadastrar");

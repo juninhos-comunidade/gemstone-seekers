@@ -384,15 +384,13 @@ describe("auth api hooks", () => {
     expect(mockOnErrorMessage).toHaveBeenCalledWith("something went wrong");
   });
 
-  it("useLogin retry logic retries only on timeout/network once", async () => {
+  it("useLogin retry logic retries on timeout/network up to 2 times", async () => {
     const { useLogin } = await import("./login");
     const mutation = useLogin();
 
-    // retry should return true for first timeout/network error
     expect(mutation.retry?.(0, new Error("timeout"))).toBe(true);
-    // but not after one failure
-    expect(mutation.retry?.(1, new Error("timeout"))).toBe(false);
-    // non-network errors should not retry
+    expect(mutation.retry?.(1, new Error("network failure"))).toBe(true);
+    expect(mutation.retry?.(2, new Error("timeout"))).toBe(false);
     expect(mutation.retry?.(0, new Error("other"))).toBe(false);
   });
 

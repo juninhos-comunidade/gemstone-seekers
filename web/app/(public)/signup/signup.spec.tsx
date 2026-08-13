@@ -6,7 +6,7 @@ const mockSignup = vi.fn();
 
 vi.mock("@/lib/api/auth/signup", () => ({
   useSignup: () => ({
-    mutateAsync: mockSignup,
+    mutate: mockSignup,
     isPending: false,
   }),
 }));

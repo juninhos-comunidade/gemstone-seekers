@@ -14,26 +14,24 @@ type RoleFormData = {
 };
 
 type ProfileResponse = {
-  result?: unknown;
+  result?: {
+    id?: string;
+    role?: "CANDIDATE" | "RECRUITER";
+    registrationCompleted?: boolean;
+  };
 };
 
 export default function Page() {
   const router = useRouter();
 
-  // Em ambiente de teste, não bloqueia a renderização (tests fornecem mocks),
-  // então já iniciamos com checkingAuth = false nesse caso.
-  const [checkingAuth, setCheckingAuth] = useState(
-    () => process.env.NODE_ENV !== "test",
-  );
+  // Inicia sempre como true: o efeito de autenticação determina se
+  // o usuário já concluiu o cadastro antes de liberar a tela de seleção.
+  const [checkingAuth, setCheckingAuth] = useState(true);
 
-  // Só permite entrar aqui se o usuário estiver autenticado e
-  // `registrationCompleted` for false. O backend não setou cookie httpOnly,
-  // então lemos o token do localStorage e decodificamos o payload JWT.
+  // Consulta GET /profile para determinar `role` e `registrationCompleted`.
+  // A decodificação manual do JWT foi removida porque a API não inclui a
+  // claim `role` no payload do token.
   useEffect(() => {
-    if (process.env.NODE_ENV === "test") {
-      return;
-    }
-
     const token = getAuthToken();
 
     if (!token) {
@@ -41,43 +39,23 @@ export default function Page() {
       return;
     }
 
-    try {
-      const parts = token.split(".");
-      if (parts.length < 2) throw new Error("invalid token");
-      const base64 = parts[1].replace(/-/g, "+").replace(/_/g, "/");
-      const padded = base64.padEnd(
-        base64.length + ((4 - (base64.length % 4)) % 4),
-        "=",
-      );
-      const payload = JSON.parse(atob(padded));
-
-      const registrationCompleted = payload?.registrationCompleted;
-      const role = payload?.role;
-
-      if (registrationCompleted) {
-        router.replace(
-          role === "RECRUITER"
-            ? "/recruiter/dashboard"
-            : "/candidate/dashboard",
-        );
-        return;
-      }
-
-      // Adiado para o próximo microtask para não disparar setState
-      // de forma síncrona dentro do corpo do efeito.
-      Promise.resolve().then(() => setCheckingAuth(false));
-    } catch {
-      httpClient
-        .get<ProfileResponse>("/profile")
-        .then((res) => {
-          if (res?.result) {
-            router.replace("/candidate/dashboard");
-            return;
-          }
-          setCheckingAuth(false);
-        })
-        .catch(() => router.replace("/login"));
-    }
+    httpClient
+      .get<ProfileResponse>("/profile")
+      .then((res) => {
+        const profile = res?.result;
+        if (profile?.registrationCompleted) {
+          router.replace(
+            profile.role === "RECRUITER"
+              ? "/recruiter/dashboard"
+              : "/candidate/dashboard",
+          );
+          return;
+        }
+        setCheckingAuth(false);
+      })
+      .catch(() => {
+        setCheckingAuth(false);
+      });
   }, [router]);
 
   const {

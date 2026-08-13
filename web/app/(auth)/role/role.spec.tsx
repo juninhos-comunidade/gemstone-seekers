@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { useRouter } from "next/navigation";
 import { getAuthToken } from "@/lib/api/auth";
@@ -60,17 +60,6 @@ const mockRouter = {
   prefetch: vi.fn(),
 };
 
-// Builds a fake JWT with the given payload, matching how the component decodes
-// the token (base64url in the second segment).
-function makeToken(payload: Record<string, unknown>) {
-  const json = JSON.stringify(payload);
-  const base64 = btoa(json)
-    .replace(/\+/g, "-")
-    .replace(/\//g, "_")
-    .replace(/=+$/, "");
-  return `header.${base64}.signature`;
-}
-
 describe("Role Selection Page - form interactions", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -79,13 +68,20 @@ describe("Role Selection Page - form interactions", () => {
     mockHandleSubmit.mockImplementation(
       (callback) => () => callback({ role: "candidate" }),
     );
+    // Seed a valid auth state so the effect resolves before form assertions.
+    mockGetAuthToken.mockReturnValue("valid-token");
+    mockHttpClientGet.mockResolvedValue({
+      result: { registrationCompleted: false },
+    });
   });
 
-  it("should renders role selection cards for recruiter and candidate", () => {
+  it("should renders role selection cards for recruiter and candidate", async () => {
     render(<Role />);
-    expect(
-      screen.getByRole("heading", { name: "Recrutador" }),
-    ).toBeInTheDocument();
+    await waitFor(() =>
+      expect(
+        screen.getByRole("heading", { name: "Recrutador" }),
+      ).toBeInTheDocument(),
+    );
     expect(
       screen.getByRole("heading", { name: "Candidato(a)" }),
     ).toBeInTheDocument();
@@ -94,8 +90,14 @@ describe("Role Selection Page - form interactions", () => {
     );
   });
 
-  it("should set selected role on button clicks and navigate", () => {
+  it("should set selected role on button clicks and navigate", async () => {
     render(<Role />);
+    await waitFor(() =>
+      expect(
+        screen.getByRole("heading", { name: "Recrutador" }),
+      ).toBeInTheDocument(),
+    );
+
     const buttons = screen.getAllByRole("button", { name: "Selecionar" });
 
     fireEvent.click(buttons[0]);
@@ -105,12 +107,18 @@ describe("Role Selection Page - form interactions", () => {
     expect(mockSetValue).toHaveBeenCalledWith("role", "candidate");
   });
 
-  it("handles recruiter role selection and catch block on setItem failure", () => {
+  it("handles recruiter role selection and catch block on setItem failure", async () => {
     mockHandleSubmit.mockImplementation(
       (callback) => () => callback({ role: "recruiter" }),
     );
 
     render(<Role />);
+    await waitFor(() =>
+      expect(
+        screen.getByRole("heading", { name: "Recrutador" }),
+      ).toBeInTheDocument(),
+    );
+
     const buttons = screen.getAllByRole("button", { name: "Selecionar" });
     fireEvent.submit(buttons[0].closest("form")!);
 
@@ -126,21 +134,34 @@ describe("Role Selection Page - form interactions", () => {
     spySetItem.mockRestore();
   });
 
-  it("navigates to /role/candidate on candidate selection", () => {
+  it("navigates to /role/candidate on candidate selection", async () => {
     mockHandleSubmit.mockImplementation(
       (callback) => () => callback({ role: "candidate" }),
     );
 
     render(<Role />);
+    await waitFor(() =>
+      expect(
+        screen.getByRole("heading", { name: "Recrutador" }),
+      ).toBeInTheDocument(),
+    );
+
     const buttons = screen.getAllByRole("button", { name: "Selecionar" });
     fireEvent.submit(buttons[1].closest("form")!);
 
     expect(mockPush).toHaveBeenCalledWith("/role/candidate");
   });
 
-  it("shows a toast error and does not navigate when setItem throws", () => {
+  it("shows a toast error and does not navigate when setItem throws", async () => {
     mockHandleSubmit.mockImplementation(
       (callback) => () => callback({ role: "recruiter" }),
+    );
+
+    render(<Role />);
+    await waitFor(() =>
+      expect(
+        screen.getByRole("heading", { name: "Recrutador" }),
+      ).toBeInTheDocument(),
     );
 
     const spySetItem = vi
@@ -149,7 +170,6 @@ describe("Role Selection Page - form interactions", () => {
         throw new Error("localStorage blocked");
       });
 
-    render(<Role />);
     const buttons = screen.getAllByRole("button", { name: "Selecionar" });
     fireEvent.submit(buttons[0].closest("form")!);
 
@@ -159,14 +179,18 @@ describe("Role Selection Page - form interactions", () => {
     spySetItem.mockRestore();
   });
 
-  it("renders the loading state with spinners and disabled buttons while submitting", () => {
+  it("renders the loading state with spinners and disabled buttons while submitting", async () => {
     isSubmittingMock = true;
 
     render(<Role />);
-    const buttons = screen.getAllByRole("button");
-
-    expect(screen.getAllByText("Selecionando...")).toHaveLength(2);
-    buttons.forEach((button) => expect(button).toBeDisabled());
+    // Auth check must complete (checkingAuth → false) before the form renders.
+    // With isSubmitting=true the buttons show "Selecionando..." instead of "Selecionar".
+    await waitFor(() =>
+      expect(screen.getAllByText("Selecionando...")).toHaveLength(2),
+    );
+    screen
+      .getAllByRole("button")
+      .forEach((button) => expect(button).toBeDisabled());
     expect(screen.queryByText("Selecionar")).not.toBeInTheDocument();
   });
 });
@@ -179,12 +203,6 @@ describe("Role Selection Page - auth check effect", () => {
     mockHandleSubmit.mockImplementation(
       (callback) => () => callback({ role: "candidate" }),
     );
-    // Force the branch that only runs outside of the test-only early return.
-    vi.stubEnv("NODE_ENV", "development");
-  });
-
-  afterEach(() => {
-    vi.unstubAllEnvs();
   });
 
   it("redirects to /login when there is no token", async () => {
@@ -198,9 +216,10 @@ describe("Role Selection Page - auth check effect", () => {
   });
 
   it("redirects to /recruiter/dashboard when registration is complete and role is RECRUITER", async () => {
-    mockGetAuthToken.mockReturnValue(
-      makeToken({ registrationCompleted: true, role: "RECRUITER" }),
-    );
+    mockGetAuthToken.mockReturnValue("valid-token");
+    mockHttpClientGet.mockResolvedValue({
+      result: { registrationCompleted: true, role: "RECRUITER" },
+    });
 
     render(<Role />);
 
@@ -210,9 +229,10 @@ describe("Role Selection Page - auth check effect", () => {
   });
 
   it("redirects to /candidate/dashboard when registration is complete and role is not RECRUITER", async () => {
-    mockGetAuthToken.mockReturnValue(
-      makeToken({ registrationCompleted: true, role: "CANDIDATE" }),
-    );
+    mockGetAuthToken.mockReturnValue("valid-token");
+    mockHttpClientGet.mockResolvedValue({
+      result: { registrationCompleted: true, role: "CANDIDATE" },
+    });
 
     render(<Role />);
 
@@ -222,9 +242,10 @@ describe("Role Selection Page - auth check effect", () => {
   });
 
   it("stops checking and shows the form when registration is not complete", async () => {
-    mockGetAuthToken.mockReturnValue(
-      makeToken({ registrationCompleted: false }),
-    );
+    mockGetAuthToken.mockReturnValue("valid-token");
+    mockHttpClientGet.mockResolvedValue({
+      result: { registrationCompleted: false },
+    });
 
     render(<Role />);
 
@@ -236,21 +257,9 @@ describe("Role Selection Page - auth check effect", () => {
     expect(mockRouter.replace).not.toHaveBeenCalled();
   });
 
-  it("falls back to /profile and redirects to /candidate/dashboard when the token is malformed but a profile exists", async () => {
-    mockGetAuthToken.mockReturnValue("not-a-valid-jwt");
-    mockHttpClientGet.mockResolvedValue({ result: { id: "1" } });
-
-    render(<Role />);
-
-    await waitFor(() =>
-      expect(mockRouter.replace).toHaveBeenCalledWith("/candidate/dashboard"),
-    );
-    expect(mockHttpClientGet).toHaveBeenCalledWith("/profile");
-  });
-
-  it("falls back to /profile and shows the form when the token is malformed and no profile exists", async () => {
-    mockGetAuthToken.mockReturnValue("not-a-valid-jwt");
-    mockHttpClientGet.mockResolvedValue({});
+  it("shows the form when the /profile request fails", async () => {
+    mockGetAuthToken.mockReturnValue("valid-token");
+    mockHttpClientGet.mockRejectedValue(new Error("network error"));
 
     render(<Role />);
 
@@ -260,16 +269,5 @@ describe("Role Selection Page - auth check effect", () => {
       ).toBeInTheDocument(),
     );
     expect(mockRouter.replace).not.toHaveBeenCalledWith("/login");
-  });
-
-  it("redirects to /login when the /profile fallback request fails", async () => {
-    mockGetAuthToken.mockReturnValue("not-a-valid-jwt");
-    mockHttpClientGet.mockRejectedValue(new Error("network error"));
-
-    render(<Role />);
-
-    await waitFor(() =>
-      expect(mockRouter.replace).toHaveBeenCalledWith("/login"),
-    );
   });
 });

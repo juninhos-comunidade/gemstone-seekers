@@ -15,7 +15,7 @@ import { PasswordCheck } from "@/components/PasswordCheck/PasswordInput";
 import { useLoadingMessages } from "@/lib/hooks/useLoadingMessages";
 
 export default function Page() {
-  const { mutateAsync: signup, isPending } = useSignup();
+  const { mutate: signup, isPending } = useSignup();
 
   const {
     register,
@@ -27,8 +27,8 @@ export default function Page() {
 
   const isLoading = isSubmitting || isPending;
 
-  const handleSignUp = async (data: z.infer<typeof schema>) => {
-    await signup(data);
+  const handleSignUp = (data: z.infer<typeof schema>) => {
+    signup(data);
   };
 
   const loadingMessage = useLoadingMessages(isPending);

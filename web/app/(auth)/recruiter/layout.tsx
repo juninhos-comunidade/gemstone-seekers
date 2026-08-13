@@ -1,6 +1,6 @@
 import { DashboardHeader } from "@/components/DashboardHeader/DashboardHeader";
 
-export default function CandidateRootLayout({
+export default function RecruiterLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;

@@ -47,14 +47,12 @@ export function useLogin(_options?: UseLoginOptions) {
   return useMutation({
     mutationFn: loginRequest,
     retry: (failureCount, error) => {
-      // só tenta de novo automaticamente se for timeout/rede (cold start do Render)
-      // e no máximo 1 vez, pra não deixar o usuário esperando demais
-      if (isTimeoutOrNetworkError(error) && failureCount < 1) {
+      if (isTimeoutOrNetworkError(error) && failureCount < 2) {
         return true;
       }
       return false;
     },
-    retryDelay: 1000,
+    retryDelay: 2000,
     onSuccess: (result) => {
       if (!result.success) {
         toast.error(result.message ?? "Erro ao fazer login");
