@@ -18,7 +18,5 @@ public interface TestRepository extends JpaRepository<Test, UUID> {
 
     Optional<Test> findByCandidateIdAndTechnologyNameAndStatus(UUID id, String technologyName, TestStatus testStatus);
 
-    List<Test> findByCandidateIdOrderByCreatedAtDesc(UUID id);
-
     List<Test> findAll(Specification<Test> specification, Sort sort);
 }
