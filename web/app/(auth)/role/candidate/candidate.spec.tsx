@@ -83,7 +83,7 @@ describe("Candidate Signup Page", () => {
     expect(screen.getByLabelText(/currículo ou linkedin/i)).toBeInTheDocument();
     expect(
       screen.getByRole("link", { name: /voltar e alterar perfil/i }),
-    ).toHaveAttribute("href", "/signup/role");
+    ).toHaveAttribute("href", "/role");
 
     fireEvent.change(screen.getByLabelText(/tipo de documento/i), {
       target: { value: "CPF" },

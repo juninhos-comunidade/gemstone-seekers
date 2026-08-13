@@ -80,9 +80,7 @@ export function useLogin(_options?: UseLoginOptions) {
 
       if (!registrationCompleted) {
         router.push(
-          role === "RECRUITER"
-            ? "/signup/role/recruiter"
-            : "/signup/role/candidate",
+          role === "RECRUITER" ? "/role/recruiter" : "/role/candidate",
         );
         return;
       }

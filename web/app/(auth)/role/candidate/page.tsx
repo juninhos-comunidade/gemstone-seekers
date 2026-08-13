@@ -44,14 +44,18 @@ export default function CandidateRegistrationPage() {
     const selectedRole = localStorage.getItem("signup-role");
 
     if (selectedRole === "recruiter") {
-      router.replace("/signup/role/recruiter");
+      router.replace("/role/recruiter");
     }
   }, [router]);
 
   const isLoading = isSubmitting || isPending;
 
   const onSubmit = async (data: CandidateRoleFormData) => {
-    await updateCandidate(data);
+    try {
+      await updateCandidate(data);
+    } catch {
+      // Tratado no onError do useUpdateCandidate
+    }
   };
 
   return (
@@ -235,7 +239,7 @@ export default function CandidateRegistrationPage() {
         <p className="text-muted-foreground mt-8 text-center text-sm">
           Escolheu o perfil errado?{" "}
           <Link
-            href="/signup/role"
+            href="/role"
             className="text-primary font-medium underline-offset-4 hover:underline"
           >
             Voltar e alterar perfil

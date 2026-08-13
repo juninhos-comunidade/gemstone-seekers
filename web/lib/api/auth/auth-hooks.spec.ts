@@ -87,7 +87,7 @@ describe("auth api hooks", () => {
       },
     });
 
-    expect(mockPush).toHaveBeenCalledWith("/signup/role/recruiter");
+    expect(mockPush).toHaveBeenCalledWith("/role/recruiter");
   });
 
   it("useLogin redirects incomplete candidate registrations to the completion page", async () => {
@@ -104,7 +104,7 @@ describe("auth api hooks", () => {
     });
 
     expect(mockSetAuthToken).toHaveBeenCalledWith("jwt-token");
-    expect(mockPush).toHaveBeenCalledWith("/signup/role/candidate");
+    expect(mockPush).toHaveBeenCalledWith("/role/candidate");
   });
 
   it("useLogin uses accessToken fallback and redirects recruiters to dashboard", async () => {
@@ -148,7 +148,37 @@ describe("auth api hooks", () => {
 
     expect(mockSetAuthToken).toHaveBeenCalledWith("signup-token");
     expect(mockToastSuccess).toHaveBeenCalledWith("Conta criada com sucesso!");
-    expect(mockPush).toHaveBeenCalledWith("/signup/role");
+    expect(mockPush).toHaveBeenCalledWith("/role");
+  });
+
+  it("signupRequest performs auto-login when /auth/register returns no token", async () => {
+    const { useSignup } = await import("./signup");
+    const mutation = useSignup();
+
+    mockHttpPost
+      .mockResolvedValueOnce({ success: true, message: "User registered" })
+      .mockResolvedValueOnce({
+        success: true,
+        result: { token: "auto-login-token" },
+      });
+
+    const result = await mutation.mutationFn({
+      fullName: "João Pedro",
+      email: "joao@example.com",
+      password: "abc123",
+      confirmPassword: "abc123",
+    });
+
+    expect(mockHttpPost).toHaveBeenNthCalledWith(1, "/auth/register", {
+      name: "João Pedro",
+      email: "joao@example.com",
+      password: "abc123",
+    });
+    expect(mockHttpPost).toHaveBeenNthCalledWith(2, "/auth/login", {
+      email: "joao@example.com",
+      password: "abc123",
+    });
+    expect(result.token).toBe("auto-login-token");
   });
 
   it("useSignup uses nested accessToken fallback when token fields are absent", async () => {
@@ -163,7 +193,21 @@ describe("auth api hooks", () => {
     });
 
     expect(mockSetAuthToken).toHaveBeenCalledWith("nested-access-token");
-    expect(mockPush).toHaveBeenCalledWith("/signup/role");
+    expect(mockPush).toHaveBeenCalledWith("/role");
+  });
+
+  it("useSignup redirects to login when token is missing in response", async () => {
+    const { useSignup } = await import("./signup");
+    const mutation = useSignup();
+
+    mutation.onSuccess({
+      success: true,
+    });
+
+    expect(mockToastError).toHaveBeenCalledWith(
+      "Conta criada, mas não foi possível autenticar automaticamente. Faça login.",
+    );
+    expect(mockPush).toHaveBeenCalledWith("/login");
   });
 
   it("useUpdateCandidate posts profile data and redirects on success", async () => {
@@ -208,7 +252,7 @@ describe("auth api hooks", () => {
     );
 
     expect(mockToastSuccess).toHaveBeenCalledWith(
-      "Cadastro do candidato já estava concluído.",
+      "Cadastro do candidato já estava concluído ou dados já cadastrados.",
     );
     expect(mockPush).toHaveBeenCalledWith("/candidate/dashboard");
   });
@@ -309,7 +353,7 @@ describe("auth api hooks", () => {
     );
 
     expect(mockToastSuccess).toHaveBeenCalledWith(
-      "Cadastro do recrutador já estava concluído.",
+      "Cadastro do recrutador já estava concluído ou dados já cadastrados.",
     );
     expect(mockPush).toHaveBeenCalledWith("/recruiter/dashboard");
   });

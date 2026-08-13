@@ -72,7 +72,7 @@ describe("Role Selection Page", () => {
     const buttons = screen.getAllByRole("button", { name: "Selecionar" });
     fireEvent.submit(buttons[0].closest("form")!);
 
-    expect(mockPush).toHaveBeenCalledWith("/signup/role/recruiter");
+    expect(mockPush).toHaveBeenCalledWith("/role/recruiter");
 
     const spySetItem = vi
       .spyOn(Storage.prototype, "setItem")

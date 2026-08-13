@@ -12,6 +12,7 @@ import { PasswordInput } from "@/components/PasswordInput/PasswordInput";
 import { schema, SignupFormData } from "@/lib/schemas/signupSchema";
 import { useSignup } from "@/lib/api/auth/signup";
 import { PasswordCheck } from "@/components/PasswordCheck/PasswordInput";
+import { useLoadingMessages } from "@/lib/hooks/useLoadingMessages";
 
 export default function Page() {
   const { mutateAsync: signup, isPending } = useSignup();
@@ -29,6 +30,8 @@ export default function Page() {
   const handleSignUp = async (data: z.infer<typeof schema>) => {
     await signup(data);
   };
+
+  const loadingMessage = useLoadingMessages(isPending);
 
   return (
     <main className="from-muted/40 via-background to-muted/20 flex min-h-screen items-center justify-center bg-gradient-to-br px-4 py-12">
@@ -146,7 +149,7 @@ export default function Page() {
             {isLoading ? (
               <>
                 <Spinner className="h-4 w-4" />
-                <span>Cadastrando...</span>
+                <span>{loadingMessage}</span>
               </>
             ) : (
               "Cadastrar"

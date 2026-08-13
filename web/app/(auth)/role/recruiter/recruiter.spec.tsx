@@ -97,7 +97,7 @@ describe("Recruiter Signup Page", () => {
     expect(screen.getByLabelText(/tamanho da empresa/i)).toBeInTheDocument();
     expect(
       screen.getByRole("link", { name: /voltar e alterar perfil/i }),
-    ).toHaveAttribute("href", "/signup/role");
+    ).toHaveAttribute("href", "/role");
 
     fireEvent.change(screen.getByLabelText(/tipo de documento/i), {
       target: { value: "CNPJ" },
