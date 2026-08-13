@@ -1,5 +1,3 @@
-import { DashboardHeader } from "@/components/DashboardHeader/DashboardHeader";
-
 export default function Layout({
   children,
 }: Readonly<{
@@ -7,7 +5,6 @@ export default function Layout({
 }>) {
   return (
     <main>
-      <DashboardHeader role="recruiter" />
       <div>{children}</div>
     </main>
   );

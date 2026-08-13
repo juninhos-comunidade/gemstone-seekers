@@ -6,7 +6,7 @@ const mockSignup = vi.fn();
 
 vi.mock("@/lib/api/auth/signup", () => ({
   useSignup: () => ({
-    mutateAsync: mockSignup,
+    mutate: mockSignup,
     isPending: false,
   }),
 }));
@@ -45,13 +45,16 @@ describe("Signup Page", () => {
     fireEvent.change(screen.getByLabelText(/^e-mail$/i), {
       target: { value: "joao@example.com" },
     });
+    fireEvent.change(screen.getByLabelText(/confirmar e-mail/i), {
+      target: { value: "joao@example.com" },
+    });
 
     const passwordInputs = document.querySelectorAll("input[type='password']");
     fireEvent.change(passwordInputs[0], {
-      target: { value: "abc123" },
+      target: { value: "abc123456" },
     });
     fireEvent.change(passwordInputs[1], {
-      target: { value: "abc123" },
+      target: { value: "abc123456" },
     });
 
     fireEvent.click(screen.getByRole("button", { name: /cadastrar/i }));
@@ -60,8 +63,9 @@ describe("Signup Page", () => {
       expect(mockSignup).toHaveBeenCalledWith({
         fullName: "João Pedro",
         email: "joao@example.com",
-        password: "abc123",
-        confirmPassword: "abc123",
+        confirmEmail: "joao@example.com",
+        password: "abc123456",
+        confirmPassword: "abc123456",
       });
     });
   });
@@ -73,7 +77,10 @@ describe("Signup Page", () => {
       target: { value: "Jo" },
     });
     fireEvent.change(screen.getByLabelText(/^e-mail$/i), {
-      target: { value: "invalid-email" },
+      target: { value: "joao@example.com" },
+    });
+    fireEvent.change(screen.getByLabelText(/confirmar e-mail/i), {
+      target: { value: "joao2@example.com" },
     });
 
     const passwordInputs = document.querySelectorAll("input[type='password']");
@@ -92,8 +99,8 @@ describe("Signup Page", () => {
       expect(
         screen.getByText("Nome completo é obrigatório"),
       ).toBeInTheDocument();
-      expect(screen.getByText("E-mail inválido")).toBeInTheDocument();
-      expect(screen.getByText("Senhas não coincidem")).toBeInTheDocument();
+      expect(screen.getByText("Os e-mails não coincidem")).toBeInTheDocument();
+      expect(screen.getByText("As senhas não coincidem")).toBeInTheDocument();
     });
   });
 });

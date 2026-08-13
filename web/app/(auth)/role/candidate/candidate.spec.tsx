@@ -83,8 +83,14 @@ describe("Candidate Signup Page", () => {
     expect(screen.getByLabelText(/currículo ou linkedin/i)).toBeInTheDocument();
     expect(
       screen.getByRole("link", { name: /voltar e alterar perfil/i }),
-    ).toHaveAttribute("href", "/signup/role");
+    ).toHaveAttribute("href", "/role");
 
+    fireEvent.change(screen.getByLabelText(/tipo de documento/i), {
+      target: { value: "CPF" },
+    });
+    fireEvent.change(screen.getByLabelText(/número do documento/i), {
+      target: { value: "123.456.789-00" },
+    });
     fireEvent.change(
       document.querySelector("input[type='tel']") as HTMLInputElement,
       {
@@ -118,6 +124,8 @@ describe("Candidate Signup Page", () => {
         phone: "+55 11 99999-9999",
         area: "Tecnologia",
         role: "Desenvolvedor Front-end",
+        documentType: "CPF",
+        documentNumber: "123.456.789-00",
         experience: "junior",
         location: "São Paulo, SP",
         resume: "https://linkedin.com/in/teste",
