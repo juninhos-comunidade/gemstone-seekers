@@ -9,7 +9,7 @@ import {
   TrendingUp,
 } from "lucide-react";
 import { Spinner } from "@/components/ui/spinner";
-import { useJobs, useTechnologyDemand } from "@/lib/api/radar";
+import { useJobs, useTechnologyDemand } from "@/lib/api/radar/radar";
 import { RADAR_COLORS } from "@/components/dashboard/radar/chart-config";
 import { EmptyState } from "@/components/dashboard/radar/EmptyState";
 import { MetricCard } from "@/components/dashboard/radar/MetricCard";

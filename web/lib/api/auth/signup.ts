@@ -42,10 +42,7 @@ export function useSignup() {
     mutationFn: signupRequest,
     onSuccess: (result) => {
       const token =
-        result?.result?.token ??
-        result?.token ??
-        result?.accessToken ??
-        result?.result?.accessToken;
+        result?.result?.accessToken ?? result?.accessToken ?? result?.token;
 
       if (token) {
         setAuthToken(token);

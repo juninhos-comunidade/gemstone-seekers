@@ -17,7 +17,7 @@ vi.mock("next/navigation", () => ({
   usePathname: () => "/candidate/dashboard/radar",
 }));
 
-vi.mock("@/lib/api/radar", () => ({
+vi.mock("@/lib/api/radar/radar", () => ({
   useJobs: () => mockUseJobs(),
   useTechnologyDemand: () => mockUseTechnologyDemand(),
 }));
