@@ -12,7 +12,7 @@ vi.mock("next/navigation", () => ({
 
 vi.mock("@/lib/api/auth/login", () => ({
   useLogin: () => ({
-    mutateAsync: mockLogin,
+    mutate: mockLogin,
     isPending: false,
   }),
 }));

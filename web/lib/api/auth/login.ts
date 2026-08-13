@@ -3,6 +3,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { setAuthToken } from "@/lib/api/auth";
 import { httpClient } from "@/lib/api/client";
+import { ApiError } from "@/lib/api/errors";
 
 interface LoginData {
   email: string;
@@ -10,14 +11,11 @@ interface LoginData {
 }
 
 interface LoginResponse {
-  success: boolean;
-  message?: string;
-  token?: string;
-  accessToken?: string;
-  result?: {
-    token?: string;
-    accessToken?: string;
-    role?: "CANDIDATE" | "RECRUITER";
+  message: string;
+  result: {
+    refreshToken: string;
+    accessToken: string;
+    role: "CANDIDATE" | "RECRUITER";
     registrationCompleted?: boolean;
   };
 }
@@ -31,22 +29,13 @@ export function useLogin() {
 
   return useMutation({
     mutationFn: loginRequest,
-    onSuccess: (result) => {
-      const token =
-        result?.result?.token ??
-        result?.token ??
-        result?.accessToken ??
-        result?.result?.accessToken;
+    onSuccess: (data) => {
+      setAuthToken(data.result.accessToken);
 
-      if (token) {
-        setAuthToken(token);
-      }
+      const role = data.result.role;
+      const registrationCompleted = data.result.registrationCompleted;
 
-      const role = result?.result?.role;
-      const registrationCompleted = result?.result?.registrationCompleted;
-
-      toast.success("Login realizado com sucesso!");
-
+      toast.success(data.message ?? "Login realizado com sucesso!");
       if (!registrationCompleted) {
         router.push(
           role === "RECRUITER"
@@ -60,8 +49,12 @@ export function useLogin() {
         role === "RECRUITER" ? "/recruiter/dashboard" : "/candidate/dashboard",
       );
     },
-    onError: (error: Error) => {
-      toast.error(error.message ?? "Erro ao fazer login");
+    onError: (error) => {
+      if (error instanceof ApiError) {
+        toast.error(error.message);
+      } else {
+        toast.error("Ocorreu um erro ao realizar o login.");
+      }
     },
   });
 }

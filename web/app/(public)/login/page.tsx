@@ -13,7 +13,7 @@ import { useLogin } from "@/lib/api/auth/login";
 import { Spinner } from "@/components/ui/spinner";
 
 export default function Page() {
-  const { mutateAsync: login, isPending } = useLogin();
+  const { mutate: login, isPending } = useLogin();
 
   type FormValues = z.infer<typeof schema>;
 
@@ -25,11 +25,10 @@ export default function Page() {
     resolver: zodResolver(schema),
   });
 
-  // Estado unificado de carregamento
   const isLoading = isSubmitting || isPending;
 
-  const handleLogin = handleSubmit(async (data) => {
-    await login(data);
+  const handleLogin = handleSubmit((data) => {
+    login(data);
   });
 
   return (
