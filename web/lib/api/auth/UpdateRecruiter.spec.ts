@@ -78,7 +78,7 @@ describe("useUpdateRecruiter", () => {
     );
 
     expect(mockToastSuccess).toHaveBeenCalledWith(
-      "Cadastro do recrutador já estava concluído.",
+      "Cadastro do recrutador já estava concluído ou dados já cadastrados.",
     );
     expect(mockPush).toHaveBeenCalledWith("/recruiter/dashboard");
   });

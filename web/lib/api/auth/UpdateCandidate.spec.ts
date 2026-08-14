@@ -79,7 +79,7 @@ describe("useUpdateCandidate", () => {
     );
 
     expect(mockToastSuccess).toHaveBeenCalledWith(
-      "Cadastro do candidato já estava concluído.",
+      "Cadastro do candidato já estava concluído ou dados já cadastrados.",
     );
     expect(mockPush).toHaveBeenCalledWith("/candidate/dashboard");
   });

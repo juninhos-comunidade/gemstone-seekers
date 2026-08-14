@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { httpClient } from "@/lib/api/client";
 
-const protectedRoutes = ["/candidate/dashboard", "/recruiter/dashboard"];
+const protectedRoutes = [
+  "/role",
+  "/candidate/dashboard",
+  "/recruiter/dashboard",
+];
 
 type RefreshResponse = {
   success: boolean;
@@ -61,5 +65,5 @@ export async function proxy(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/candidate/:path*", "/recruiter/:path*"],
+  matcher: ["/role", "/role/:path*", "/candidate/:path*", "/recruiter/:path*"],
 };

@@ -19,6 +19,18 @@ vi.mock("@/lib/api/auth/UpdateRecruiter", () => ({
   }),
 }));
 
+const mockCompanies = [
+  { id: "1", name: "Gemstone Seekers" },
+  { id: "2", name: "Tech Corp" },
+];
+
+vi.mock("@/lib/api/companies/getCompanies", () => ({
+  useCompaniesQuery: () => ({
+    data: mockCompanies,
+    isLoading: false,
+  }),
+}));
+
 type MockPhoneInputProps = InputHTMLAttributes<HTMLInputElement> & {
   value?: string;
   onChange?: (_value: string) => void;
@@ -59,7 +71,7 @@ vi.mock("@/components/reui/phone-input", () => ({
 vi.mock("@/components/ui/select", () => ({
   Select: ({ value, onValueChange, children }: MockSelectProps) => (
     <select
-      aria-label="Tamanho da empresa"
+      aria-label="Empresa"
       value={value ?? ""}
       onChange={(event) => onValueChange?.(event.target.value)}
     >
@@ -90,17 +102,21 @@ describe("Recruiter Signup Page", () => {
         name: /complete seu cadastro de recrutador/i,
       }),
     ).toBeInTheDocument();
-    expect(screen.getByLabelText(/nome da empresa/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/empresa/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/^cargo$/i)).toBeInTheDocument();
     expect(screen.getByText(/telefone/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/site da empresa/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/tamanho da empresa/i)).toBeInTheDocument();
     expect(
       screen.getByRole("link", { name: /voltar e alterar perfil/i }),
-    ).toHaveAttribute("href", "/signup/role");
+    ).toHaveAttribute("href", "/role");
 
-    fireEvent.change(screen.getByLabelText(/nome da empresa/i), {
-      target: { value: "Gemstone Seekers" },
+    fireEvent.change(screen.getByLabelText(/tipo de documento/i), {
+      target: { value: "CNPJ" },
+    });
+    fireEvent.change(screen.getByLabelText(/número do documento/i), {
+      target: { value: "00.000.000/0000-00" },
+    });
+    fireEvent.change(screen.getByLabelText(/empresa/i), {
+      target: { value: "1" },
     });
     fireEvent.change(screen.getByLabelText(/^cargo$/i), {
       target: { value: "Analista de RH" },
@@ -111,12 +127,6 @@ describe("Recruiter Signup Page", () => {
         target: { value: "+55 11 99999-9999" },
       },
     );
-    fireEvent.change(screen.getByLabelText(/site da empresa/i), {
-      target: { value: "https://gemstoneseekers.com" },
-    });
-    fireEvent.change(screen.getByLabelText(/tamanho da empresa/i), {
-      target: { value: "11-50" },
-    });
 
     fireEvent.click(
       screen.getByRole("button", {
@@ -126,11 +136,11 @@ describe("Recruiter Signup Page", () => {
 
     await waitFor(() => {
       expect(mockUpdateRecruiter).toHaveBeenCalledWith({
-        companyName: "Gemstone Seekers",
+        documentType: "CNPJ",
+        documentNumber: "00.000.000/0000-00",
+        companyId: "1",
         jobTitle: "Analista de RH",
         phone: "+55 11 99999-9999",
-        companyWebsite: "https://gemstoneseekers.com",
-        companySize: "11-50",
       });
     });
   });

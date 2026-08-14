@@ -4,6 +4,8 @@ import { candidateRoleSchema } from "./candidateRoleSchema";
 describe("candidateRoleSchema", () => {
   it("accepts valid candidate role data", () => {
     const result = candidateRoleSchema.safeParse({
+      documentType: "CPF",
+      documentNumber: "123.456.789-00",
       phone: "+55 11 99999-9999",
       area: "Tecnologia",
       role: "Desenvolvedor Front-end",
@@ -17,6 +19,8 @@ describe("candidateRoleSchema", () => {
 
   it("rejects empty required fields", () => {
     const result = candidateRoleSchema.safeParse({
+      documentType: "",
+      documentNumber: "",
       phone: "",
       area: "",
       role: "",
@@ -30,6 +34,10 @@ describe("candidateRoleSchema", () => {
     if (!result.success) {
       const fieldErrors = result.error.flatten().fieldErrors;
 
+      expect(fieldErrors.documentType).toContain("Informe o tipo de documento");
+      expect(fieldErrors.documentNumber).toContain(
+        "Informe o número do documento",
+      );
       expect(fieldErrors.phone).toContain("Informe o telefone");
       expect(fieldErrors.area).toContain("Informe a área de interesse");
       expect(fieldErrors.role).toContain("Informe o cargo desejado");

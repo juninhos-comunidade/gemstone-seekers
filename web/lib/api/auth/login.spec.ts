@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { ApiError } from "@/lib/api/errors";
-import { useLogin } from "./login";
+import { useLogin, loginRequest } from "./login";
 
 const mockUseRouter = vi.fn();
 const mockUseMutation = vi.fn();
@@ -34,7 +34,7 @@ vi.mock("@/lib/api/client", () => ({
   },
 }));
 
-describe("useLogin", () => {
+describe("useLogin and loginRequest", () => {
   const mockPush = vi.fn();
 
   beforeEach(() => {
@@ -43,105 +43,193 @@ describe("useLogin", () => {
     mockUseMutation.mockImplementation((options) => options);
   });
 
-  it("configures mutation and executes login request", async () => {
-    const mutation = useLogin();
-    mockHttpPost.mockResolvedValueOnce({
-      message: "ok",
-      result: { accessToken: "token", refreshToken: "ref", role: "CANDIDATE" },
-    });
+  describe("loginRequest", () => {
+    it("configures mutation and executes login request", async () => {
+      mockHttpPost.mockResolvedValueOnce({
+        success: true,
+        message: "ok",
+        result: {
+          accessToken: "token",
+          refreshToken: "ref",
+          role: "CANDIDATE",
+        },
+      });
 
-    await mutation.mutationFn({
-      email: "user@example.com",
-      password: "123456",
-    });
+      const response = await loginRequest({
+        email: "user@example.com",
+        password: "123456",
+      });
 
-    expect(mockHttpPost).toHaveBeenCalledWith("/auth/login", {
-      email: "user@example.com",
-      password: "123456",
+      expect(mockHttpPost).toHaveBeenCalledWith("/auth/login", {
+        email: "user@example.com",
+        password: "123456",
+      });
+      expect(response.success).toBe(true);
     });
   });
 
-  it("redirects completed candidate to candidate dashboard with custom message", () => {
-    const mutation = useLogin();
+  describe("useLogin hook", () => {
+    it("redirects completed candidate to candidate dashboard with custom message", () => {
+      const mutation = useLogin();
 
-    mutation.onSuccess({
-      message: "Bem vindo!",
-      result: {
-        accessToken: "jwt-candidate",
-        role: "CANDIDATE",
-        refreshToken: "refresh",
-        registrationCompleted: true,
-      },
+      mutation.onSuccess({
+        success: true,
+        message: "Bem vindo!",
+        result: {
+          accessToken: "jwt-candidate",
+          role: "CANDIDATE",
+          refreshToken: "refresh",
+          registrationCompleted: true,
+        },
+      });
+
+      expect(mockSetAuthToken).toHaveBeenCalledWith("jwt-candidate");
+      expect(mockToastSuccess).toHaveBeenCalledWith("Bem vindo!");
+      expect(mockPush).toHaveBeenCalledWith("/candidate/dashboard");
     });
 
-    expect(mockSetAuthToken).toHaveBeenCalledWith("jwt-candidate");
-    expect(mockToastSuccess).toHaveBeenCalledWith("Bem vindo!");
-    expect(mockPush).toHaveBeenCalledWith("/candidate/dashboard");
-  });
+    it("redirects completed recruiter to recruiter dashboard with default message", () => {
+      const mutation = useLogin();
 
-  it("redirects completed recruiter to recruiter dashboard with default message", () => {
-    const mutation = useLogin();
+      mutation.onSuccess({
+        success: true,
+        result: {
+          accessToken: "jwt-recruiter",
+          role: "RECRUITER",
+          refreshToken: "refresh",
+          registrationCompleted: true,
+        },
+      });
 
-    mutation.onSuccess({
-      result: {
-        accessToken: "jwt-recruiter",
-        role: "RECRUITER",
-        refreshToken: "refresh",
-        registrationCompleted: true,
-      },
+      expect(mockSetAuthToken).toHaveBeenCalledWith("jwt-recruiter");
+      expect(mockToastSuccess).toHaveBeenCalledWith(
+        "Login realizado com sucesso!",
+      );
+      expect(mockPush).toHaveBeenCalledWith("/recruiter/dashboard");
     });
 
-    expect(mockSetAuthToken).toHaveBeenCalledWith("jwt-recruiter");
-    expect(mockToastSuccess).toHaveBeenCalledWith(
-      "Login realizado com sucesso!",
-    );
-    expect(mockPush).toHaveBeenCalledWith("/recruiter/dashboard");
-  });
+    it("redirects incomplete recruiter to recruiter completion page", () => {
+      const mutation = useLogin();
 
-  it("redirects incomplete recruiter to recruiter completion page", () => {
-    const mutation = useLogin();
+      mutation.onSuccess({
+        success: true,
+        result: {
+          accessToken: "jwt-token",
+          role: "RECRUITER",
+          refreshToken: "refresh-token",
+          registrationCompleted: false,
+        },
+      });
 
-    mutation.onSuccess({
-      result: {
-        accessToken: "jwt-token",
-        role: "RECRUITER",
-        refreshToken: "refresh-token",
-        registrationCompleted: false,
-      },
+      expect(mockPush).toHaveBeenCalledWith("/role/recruiter");
     });
 
-    expect(mockPush).toHaveBeenCalledWith("/signup/role/recruiter");
-  });
+    it("redirects incomplete candidate to candidate completion page", () => {
+      const mutation = useLogin();
 
-  it("redirects incomplete candidate to candidate completion page", () => {
-    const mutation = useLogin();
+      mutation.onSuccess({
+        success: true,
+        result: {
+          accessToken: "jwt-token",
+          role: "CANDIDATE",
+          registrationCompleted: false,
+        },
+      });
 
-    mutation.onSuccess({
-      result: {
-        accessToken: "jwt-token",
-        role: "CANDIDATE",
-        registrationCompleted: false,
-      },
+      expect(mockPush).toHaveBeenCalledWith("/role/candidate");
     });
 
-    expect(mockPush).toHaveBeenCalledWith("/signup/role/candidate");
-  });
+    it("handles failure when success is false with message", () => {
+      const mutation = useLogin();
 
-  it("handles ApiError in onError", () => {
-    const mutation = useLogin();
+      mutation.onSuccess({
+        success: false,
+        message: "Credenciais inválidas",
+      });
 
-    mutation.onError(new ApiError(401, "Credenciais inválidas", {}));
+      expect(mockToastError).toHaveBeenCalledWith("Credenciais inválidas");
+      expect(mockSetAuthToken).not.toHaveBeenCalled();
+      expect(mockPush).not.toHaveBeenCalled();
+    });
 
-    expect(mockToastError).toHaveBeenCalledWith("Credenciais inválidas");
-  });
+    it("handles failure when success is false without message", () => {
+      const mutation = useLogin();
 
-  it("handles generic Error in onError", () => {
-    const mutation = useLogin();
+      mutation.onSuccess({
+        success: false,
+      });
 
-    mutation.onError(new Error("Erro inesperado"));
+      expect(mockToastError).toHaveBeenCalledWith("Erro ao fazer login");
+    });
 
-    expect(mockToastError).toHaveBeenCalledWith(
-      "Ocorreu um erro ao realizar o login.",
-    );
+    it("handles missing token in successful response", () => {
+      const mutation = useLogin();
+
+      mutation.onSuccess({
+        success: true,
+        result: {},
+      });
+
+      expect(mockToastError).toHaveBeenCalledWith(
+        "Não foi possível autenticar. Tente novamente.",
+      );
+      expect(mockSetAuthToken).not.toHaveBeenCalled();
+      expect(mockPush).not.toHaveBeenCalled();
+    });
+
+    it("handles timeout error in onError", () => {
+      const mutation = useLogin();
+
+      mutation.onError(new Error("timeout of 10000ms exceeded"));
+
+      expect(mockToastError).toHaveBeenCalledWith(
+        "O servidor está iniciando, isso pode levar até 1 minuto. Tente novamente.",
+      );
+    });
+
+    it("handles ApiError in onError", () => {
+      const mutation = useLogin();
+
+      mutation.onError(
+        new ApiError(401, "Credenciais inválidas", {
+          success: false,
+          message: "Credenciais inválidas",
+          error: {
+            code: "INVALID_CREDENTIALS",
+            message: "Credenciais inválidas",
+          },
+        }),
+      );
+
+      expect(mockToastError).toHaveBeenCalledWith("Credenciais inválidas");
+    });
+
+    it("handles generic Error in onError", () => {
+      const mutation = useLogin();
+
+      mutation.onError(new Error("Erro inesperado"));
+
+      expect(mockToastError).toHaveBeenCalledWith("Erro inesperado");
+    });
+
+    it("handles empty error in onError with fallback", () => {
+      const mutation = useLogin();
+
+      mutation.onError({} as Error);
+
+      expect(mockToastError).toHaveBeenCalledWith(
+        "Ocorreu um erro ao realizar o login.",
+      );
+    });
+
+    it("handles null/undefined error in onError gracefully", () => {
+      const mutation = useLogin();
+
+      mutation.onError(null as unknown as Error);
+
+      expect(mockToastError).toHaveBeenCalledWith(
+        "Ocorreu um erro ao realizar o login.",
+      );
+    });
   });
 });
