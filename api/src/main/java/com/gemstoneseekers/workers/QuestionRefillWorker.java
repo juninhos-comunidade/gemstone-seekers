@@ -62,7 +62,6 @@ public class QuestionRefillWorker {
     }
 
     @EventListener(ApplicationReadyEvent.class)
-    @SuppressWarnings("PMD.AvoidCatchingGenericException")
     public void executeRefillJob() {
         if (log.isInfoEnabled()) {
             log.info("[WORKER] Starting Question Refill Job...");
@@ -134,9 +133,11 @@ public class QuestionRefillWorker {
                 }
                 Thread.currentThread().interrupt();
                 break;
-            } catch (Exception e) {
+            } catch (org.springframework.ai.retry.NonTransientAiException
+                     | org.springframework.ai.retry.TransientAiException
+                     | org.springframework.dao.DataAccessException e) {
                 if (log.isErrorEnabled()) {
-                    log.error("[WORKER] Failed to generate questions for {} ({})",
+                    log.error("[WORKER] Failed to generate or save questions for {} ({})",
                         tech.getName(), difficulty, e);
                 }
                 break;
