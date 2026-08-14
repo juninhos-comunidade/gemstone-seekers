@@ -16,7 +16,12 @@ import com.gemstoneseekers.exceptions.AccessDeniedException;
 import com.gemstoneseekers.exceptions.BusinessRuleException;
 import com.gemstoneseekers.exceptions.EntityNotFoundException;
 import com.gemstoneseekers.mappers.TestMapper;
-import com.gemstoneseekers.models.*;
+import com.gemstoneseekers.models.Candidate;
+import com.gemstoneseekers.models.CandidateAnswer;
+import com.gemstoneseekers.models.Question;
+import com.gemstoneseekers.models.QuestionOption;
+import com.gemstoneseekers.models.Technology;
+import com.gemstoneseekers.models.User;
 import com.gemstoneseekers.repositories.QuestionOptionRepository;
 import com.gemstoneseekers.repositories.QuestionRepository;
 import com.gemstoneseekers.repositories.TestRepository;
@@ -34,16 +39,22 @@ import org.springframework.data.jpa.domain.Specification;
 
 import java.math.BigDecimal;
 import java.time.Instant;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.UUID;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class TestApplicationServiceTest {

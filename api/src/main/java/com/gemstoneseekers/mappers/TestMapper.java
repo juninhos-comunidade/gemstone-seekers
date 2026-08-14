@@ -1,17 +1,23 @@
 package com.gemstoneseekers.mappers;
 
-import com.gemstoneseekers.dtos.response.*;
+import com.gemstoneseekers.dtos.response.OptionResultResponse;
+import com.gemstoneseekers.dtos.response.QuestionResultResponse;
+import com.gemstoneseekers.dtos.response.TestDetailedResultResponse;
+import com.gemstoneseekers.dtos.response.TestResponse;
+import com.gemstoneseekers.dtos.response.TestResultResponse;
+import com.gemstoneseekers.dtos.response.TestSummaryResponse;
+import com.gemstoneseekers.dtos.response.QuestionResponse;
 import com.gemstoneseekers.enums.QuestionDifficulty;
 import com.gemstoneseekers.models.CandidateAnswer;
 import com.gemstoneseekers.models.Question;
 import com.gemstoneseekers.models.QuestionOption;
 import com.gemstoneseekers.models.Test;
 import org.springframework.stereotype.Component;
-
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+@SuppressWarnings("PMD.TestClassWithoutTestCases")
 @Component
 public class TestMapper {
 
@@ -84,7 +90,9 @@ public class TestMapper {
     }
 
     public TestDetailedResultResponse toDetailedResultResponse(Test test) {
-        if (test == null) return null;
+        if (test == null) {
+            return null;
+        }
 
         List<QuestionResultResponse> questions = test.getAnswers().stream()
             .map(answer -> {
