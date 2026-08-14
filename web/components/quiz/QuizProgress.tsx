@@ -10,16 +10,19 @@ export function QuizProgress({
   totalQuestions: number;
 }) {
   return (
-    <div className="w-full space-y-2">
+    <div className="w-full space-y-3">
       <div className="flex items-center justify-between">
         <span className="text-muted-foreground text-sm font-medium">
           Questão {currentIndex + 1} de {totalQuestions}
         </span>
-        <span className="text-foreground text-sm font-semibold">
-          {Math.round(progressPercent)}%
-        </span>
+        <div className="flex items-center gap-2">
+          <span className="text-primary text-sm font-bold">
+            {Math.round(progressPercent)}%
+          </span>
+          <div className="bg-primary h-2 w-2 animate-pulse rounded-full" />
+        </div>
       </div>
-      <Progress value={progressPercent} className="h-2" />
+      <Progress value={progressPercent} className="h-3" />
     </div>
   );
 }
