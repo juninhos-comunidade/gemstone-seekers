@@ -97,7 +97,6 @@ class TestApplicationServiceTest {
     @Test
     @DisplayName("startTest should create a new test when no test is in progress")
     void startTest_shouldCreateNewTest_whenNoTestIsInProgress() {
-        // Arrange
         String userEmail = "candidate@test.com";
         String technologyName = "Java";
         QuestionDifficulty difficulty = QuestionDifficulty.BEGINNER;
@@ -127,10 +126,10 @@ class TestApplicationServiceTest {
         when(testRepository.save(any(com.gemstoneseekers.models.Test.class))).thenAnswer(invocation -> invocation.getArgument(0));
         when(testMapper.toTestAndQuestionsResponse(any(com.gemstoneseekers.models.Test.class))).thenReturn(expectedResponse);
 
-        // Act
+
         TestResponse actualResponse = testApplicationService.startTest(userEmail, technologyName, difficulty);
 
-        // Assert
+
         assertThat(actualResponse).isEqualTo(expectedResponse);
 
         verify(testRepository).save(testArgumentCaptor.capture());
@@ -147,7 +146,7 @@ class TestApplicationServiceTest {
     @Test
     @DisplayName("startTest should return in-progress test when one already exists")
     void startTest_shouldReturnInProgressTest_whenTestAlreadyExists() {
-        // Arrange
+
         String userEmail = "candidate@test.com";
         String technologyName = "Java";
         QuestionDifficulty difficulty = QuestionDifficulty.BEGINNER;
@@ -171,10 +170,10 @@ class TestApplicationServiceTest {
                 .thenReturn(Optional.of(existingTest));
         when(testMapper.toTestAndQuestionsResponse(existingTest)).thenReturn(expectedResponse);
 
-        // Act
+
         TestResponse actualResponse = testApplicationService.startTest(userEmail, technologyName, difficulty);
 
-        // Assert
+
         assertThat(actualResponse).isEqualTo(expectedResponse);
         verify(questionRepository, never()).findUnansweredRandomByTechnologyAndDifficulty(anyString(), any(), any(UUID.class), anyInt());
         verify(testRepository, never()).save(any(com.gemstoneseekers.models.Test.class));
@@ -183,7 +182,7 @@ class TestApplicationServiceTest {
     @Test
     @DisplayName("startTest should throw BusinessRuleException when no questions are found")
     void startTest_shouldThrowBusinessRuleException_whenNoQuestionsAreFound() {
-        // Arrange
+
         String userEmail = "candidate@test.com";
         String technologyName = "Java";
         QuestionDifficulty difficulty = QuestionDifficulty.BEGINNER;
@@ -196,7 +195,7 @@ class TestApplicationServiceTest {
         when(questionRepository.findUnansweredRandomByTechnologyAndDifficulty(technologyName, difficulty, mockCandidate.getId(), requiredAmount))
                 .thenReturn(Collections.emptyList());
 
-        // Act & Assert
+
         assertThatThrownBy(() -> testApplicationService.startTest(userEmail, technologyName, difficulty))
                 .isInstanceOf(BusinessRuleException.class)
                 .hasMessage("No questions found for technology 'Java' with difficulty 'BEGINNER'");
@@ -207,7 +206,7 @@ class TestApplicationServiceTest {
     @Test
     @DisplayName("saveCandidateAnswer should save the selected option for the given question")
     void saveCandidateAnswer_shouldSaveSelectedOption() {
-        // Arrange
+
         String userEmail = "candidate@test.com";
         UUID testId = UUID.randomUUID();
         Long questionId = 1L;
@@ -236,10 +235,10 @@ class TestApplicationServiceTest {
         when(testRepository.findById(testId)).thenReturn(Optional.of(test));
         when(questionOptionRepository.findById(selectedOptionId)).thenReturn(Optional.of(selectedOption));
 
-        // Act
+
         testApplicationService.saveCandidateAnswer(testId, questionId, request, userEmail);
 
-        // Assert
+
         Optional<CandidateAnswer> answerOptional = test.getAnswers().stream()
                 .filter(a -> a.getQuestion().getId().equals(questionId))
                 .findFirst();
@@ -251,7 +250,7 @@ class TestApplicationServiceTest {
     @Test
     @DisplayName("saveCandidateAnswer should throw EntityNotFoundException when test is not found")
     void saveCandidateAnswer_shouldThrowEntityNotFoundException_whenTestNotFound() {
-        // Arrange
+
         String userEmail = "candidate@test.com";
         UUID testId = UUID.randomUUID();
         Long questionId = 1L;
@@ -260,7 +259,6 @@ class TestApplicationServiceTest {
         when(candidateService.getCandidateByEmailSession(userEmail)).thenReturn(mockCandidate);
         when(testRepository.findById(testId)).thenReturn(Optional.empty());
 
-        // Act & Assert
         assertThatThrownBy(() -> testApplicationService.saveCandidateAnswer(testId, questionId, request, userEmail))
                 .isInstanceOf(EntityNotFoundException.class)
                 .hasMessage("Test with id " + testId + " not found");
@@ -269,7 +267,7 @@ class TestApplicationServiceTest {
     @Test
     @DisplayName("saveCandidateAnswer should throw AccessDeniedException when candidate does not own the test")
     void saveCandidateAnswer_shouldThrowAccessDeniedException_whenCandidateDoesNotOwnTest() {
-        // Arrange
+
         String userEmail = "attacker@test.com";
         UUID testId = UUID.randomUUID();
         Long questionId = 1L;
@@ -283,12 +281,11 @@ class TestApplicationServiceTest {
 
         com.gemstoneseekers.models.Test test = new com.gemstoneseekers.models.Test();
         test.setId(testId);
-        test.setCandidate(mockCandidate); // Test belongs to mockCandidate (ID 1)
+        test.setCandidate(mockCandidate);
 
         when(candidateService.getCandidateByEmailSession(userEmail)).thenReturn(attacker);
         when(testRepository.findById(testId)).thenReturn(Optional.of(test));
 
-        // Act & Assert
         assertThatThrownBy(() -> testApplicationService.saveCandidateAnswer(testId, questionId, request, userEmail))
                 .isInstanceOf(AccessDeniedException.class)
                 .hasMessage("You do not have permission to modify this test");

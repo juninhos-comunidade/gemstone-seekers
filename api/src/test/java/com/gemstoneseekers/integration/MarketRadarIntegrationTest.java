@@ -33,6 +33,7 @@ class MarketRadarIntegrationTest {
     @BeforeAll
     static void setup() {
         context = new SpringApplicationBuilder(GemstoneSeekersApplication.class).run(
+                "--spring.profiles.active=test",
                 "--spring.datasource.url=" + postgres.getJdbcUrl(),
                 "--spring.datasource.username=" + postgres.getUsername(),
                 "--spring.datasource.password=" + postgres.getPassword(), "--server.port=0",
