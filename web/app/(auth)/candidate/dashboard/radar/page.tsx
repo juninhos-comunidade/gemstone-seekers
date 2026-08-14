@@ -9,7 +9,8 @@ import {
   TrendingUp,
 } from "lucide-react";
 import { Spinner } from "@/components/ui/spinner";
-import { useJobs, useTechnologyDemand } from "@/lib/api/radar/radar";
+import { useJobsQuery } from "@/lib/api/jobs/getJobs";
+import { useTechnologyDemand } from "@/lib/api/radar/radar";
 import { RADAR_COLORS } from "@/components/dashboard/radar/chart-config";
 import { EmptyState } from "@/components/dashboard/radar/EmptyState";
 import { MetricCard } from "@/components/dashboard/radar/MetricCard";
@@ -21,14 +22,14 @@ export default function RadarPage() {
     data: jobsResponse,
     isLoading: isLoadingJobs,
     error: jobsError,
-  } = useJobs();
+  } = useJobsQuery();
   const {
     data: technologyDemandResponse,
     isLoading: isLoadingDemand,
     error: demandError,
   } = useTechnologyDemand();
 
-  const jobs = useMemo(() => jobsResponse?.result ?? [], [jobsResponse]);
+  const jobs = useMemo(() => jobsResponse ?? [], [jobsResponse]);
   const technologies = useMemo(
     () => technologyDemandResponse?.result ?? [],
     [technologyDemandResponse],

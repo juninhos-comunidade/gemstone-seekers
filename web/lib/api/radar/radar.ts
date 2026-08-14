@@ -1,20 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { httpClient } from "@/lib/api/client";
-
-export type JobStatus = "OPEN" | "CLOSED" | "CANCELLED";
-
-export type JobResponse = {
-  id: string;
-  title: string;
-  description: string;
-  seniorityLevel: string;
-  department: string;
-  salaryMin: number;
-  salaryMax: number;
-  status: JobStatus;
-  recruiterId: string;
-  companyId: string;
-};
+import { ApiResponse } from "@/lib/types/api/response";
 
 export type TechnologyDemandResponse = {
   technologyId: number;
@@ -24,27 +10,10 @@ export type TechnologyDemandResponse = {
   mandatoryCount: number;
 };
 
-type ApiListResponse<T> = {
-  success: boolean;
-  message?: string;
-  result: T[];
-};
-
-async function getJobs() {
-  return httpClient.get<ApiListResponse<JobResponse>>("/jobs");
-}
-
 async function getTechnologyDemand() {
-  return httpClient.get<ApiListResponse<TechnologyDemandResponse>>(
+  return httpClient.get<ApiResponse<TechnologyDemandResponse[]>>(
     "/market-radar/technology-demand",
   );
-}
-
-export function useJobs() {
-  return useQuery({
-    queryKey: ["jobs"],
-    queryFn: getJobs,
-  });
 }
 
 export function useTechnologyDemand() {

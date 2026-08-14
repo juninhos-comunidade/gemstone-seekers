@@ -76,6 +76,7 @@ api.interceptors.response.use(
         const rawMessage = error.message || "timeout of 10000ms exceeded";
         const message = translateErrorMessage(rawMessage, "ECONNABORTED");
         const data: ApiErrorResponse = {
+          success: false,
           message,
           error: {
             code: "ECONNABORTED",
