@@ -1,8 +1,9 @@
 package com.gemstoneseekers.workers;
 
-import com.gemstoneseekers.dtos.ai.AiQuestionBatchResponse;
+import com.gemstoneseekers.dtos.response.AiQuestionBatchResponse;
 import com.gemstoneseekers.enums.QuestionDifficulty;
 import com.gemstoneseekers.models.Technology;
+import com.gemstoneseekers.projections.StockProjection;
 import com.gemstoneseekers.repositories.QuestionRepository;
 import com.gemstoneseekers.repositories.TechnologyRepository;
 import com.gemstoneseekers.services.AiQuestionGeneratorService;
@@ -76,14 +77,14 @@ public class QuestionRefillWorker {
             return;
         }
 
-        List<QuestionRepository.StockProjection> stockReport = questionRepository.getQuestionStockReport();
+        List<StockProjection> stockReport = questionRepository.getQuestionStockReport();
 
         Map<Integer, Map<QuestionDifficulty, Long>> stockMatrix = stockReport.stream()
             .collect(Collectors.groupingBy(
-                QuestionRepository.StockProjection::getTechnologyId,
+                StockProjection::getTechnologyId,
                 Collectors.toMap(
-                    QuestionRepository.StockProjection::getDifficultyLevel,
-                    QuestionRepository.StockProjection::getStockCount
+                    StockProjection::getDifficultyLevel,
+                    StockProjection::getStockCount
                 )
             ));
 

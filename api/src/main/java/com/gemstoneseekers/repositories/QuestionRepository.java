@@ -2,6 +2,7 @@ package com.gemstoneseekers.repositories;
 
 import com.gemstoneseekers.enums.QuestionDifficulty;
 import com.gemstoneseekers.models.Question;
+import com.gemstoneseekers.projections.StockProjection;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -37,14 +38,6 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
         @Param(PARAM_CANDIDATE_ID) UUID candidateId,
         @Param("amount") int amount
     );
-
-    interface StockProjection {
-        Integer getTechnologyId();
-
-        QuestionDifficulty getDifficultyLevel();
-
-        Long getStockCount();
-    }
 
     @Query("""
         SELECT q.technology.id as technologyId,

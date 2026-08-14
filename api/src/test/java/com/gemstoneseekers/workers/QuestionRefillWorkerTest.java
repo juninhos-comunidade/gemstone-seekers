@@ -1,6 +1,6 @@
 package com.gemstoneseekers.workers;
 
-import com.gemstoneseekers.dtos.ai.AiQuestionBatchResponse;
+import com.gemstoneseekers.dtos.response.AiQuestionBatchResponse;
 import com.gemstoneseekers.enums.QuestionDifficulty;
 import com.gemstoneseekers.models.Technology;
 import com.gemstoneseekers.repositories.QuestionRepository;
