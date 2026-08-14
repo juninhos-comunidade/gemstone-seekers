@@ -32,6 +32,7 @@ vi.mock("react-hook-form", () => ({
 
 vi.mock("@/lib/api/auth", () => ({
   getAuthToken: vi.fn(),
+  setUserRole: vi.fn(),
 }));
 
 vi.mock("@/lib/api/client", () => ({

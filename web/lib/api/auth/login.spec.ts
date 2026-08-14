@@ -7,7 +7,9 @@ const mockUseMutation = vi.fn();
 const mockToastSuccess = vi.fn();
 const mockToastError = vi.fn();
 const mockSetAuthToken = vi.fn();
+const mockSetUserRole = vi.fn();
 const mockHttpPost = vi.fn();
+const mockHttpGet = vi.fn();
 
 vi.mock("next/navigation", () => ({
   useRouter: () => mockUseRouter(),
@@ -26,11 +28,13 @@ vi.mock("sonner", () => ({
 
 vi.mock("@/lib/api/auth", () => ({
   setAuthToken: (...args: unknown[]) => mockSetAuthToken(...args),
+  setUserRole: (...args: unknown[]) => mockSetUserRole(...args),
 }));
 
 vi.mock("@/lib/api/client", () => ({
   httpClient: {
     post: (...args: unknown[]) => mockHttpPost(...args),
+    get: (...args: unknown[]) => mockHttpGet(...args),
   },
 }));
 
@@ -51,7 +55,6 @@ describe("useLogin and loginRequest", () => {
         result: {
           accessToken: "token",
           refreshToken: "ref",
-          role: "CANDIDATE",
         },
       });
 
@@ -69,74 +72,136 @@ describe("useLogin and loginRequest", () => {
   });
 
   describe("useLogin hook", () => {
-    it("redirects completed candidate to candidate dashboard with custom message", () => {
+    it("redirects completed candidate to candidate dashboard with custom message", async () => {
+      mockHttpGet.mockResolvedValueOnce({
+        result: {
+          candidate: {
+            id: "cand-1",
+            user: {
+              role: "CANDIDATE",
+            },
+          },
+        },
+      });
+
       const mutation = useLogin();
 
-      mutation.onSuccess({
+      await mutation.onSuccess({
         success: true,
         message: "Bem vindo!",
         result: {
           accessToken: "jwt-candidate",
-          role: "CANDIDATE",
           refreshToken: "refresh",
-          registrationCompleted: true,
         },
       });
 
       expect(mockSetAuthToken).toHaveBeenCalledWith("jwt-candidate");
+      expect(mockHttpGet).toHaveBeenCalledWith("/profile");
+      expect(mockSetUserRole).toHaveBeenCalledWith("CANDIDATE");
       expect(mockToastSuccess).toHaveBeenCalledWith("Bem vindo!");
       expect(mockPush).toHaveBeenCalledWith("/candidate/dashboard");
     });
 
-    it("redirects completed recruiter to recruiter dashboard with default message", () => {
+    it("redirects completed recruiter to recruiter dashboard with default message", async () => {
+      mockHttpGet.mockResolvedValueOnce({
+        result: {
+          candidate: {
+            id: "rec-1",
+            user: {
+              role: "RECRUITER",
+            },
+          },
+        },
+      });
+
       const mutation = useLogin();
 
-      mutation.onSuccess({
+      await mutation.onSuccess({
         success: true,
         result: {
           accessToken: "jwt-recruiter",
-          role: "RECRUITER",
           refreshToken: "refresh",
-          registrationCompleted: true,
         },
       });
 
       expect(mockSetAuthToken).toHaveBeenCalledWith("jwt-recruiter");
+      expect(mockHttpGet).toHaveBeenCalledWith("/profile");
+      expect(mockSetUserRole).toHaveBeenCalledWith("RECRUITER");
       expect(mockToastSuccess).toHaveBeenCalledWith(
         "Login realizado com sucesso!",
       );
       expect(mockPush).toHaveBeenCalledWith("/recruiter/dashboard");
     });
 
-    it("redirects incomplete recruiter to recruiter completion page", () => {
-      const mutation = useLogin();
-
-      mutation.onSuccess({
-        success: true,
+    it("redirects incomplete recruiter to /role to select profile", async () => {
+      mockHttpGet.mockResolvedValueOnce({
         result: {
-          accessToken: "jwt-token",
-          role: "RECRUITER",
-          refreshToken: "refresh-token",
-          registrationCompleted: false,
+          candidate: {
+            user: {
+              role: "RECRUITER",
+            },
+          },
         },
       });
 
-      expect(mockPush).toHaveBeenCalledWith("/role/recruiter");
+      const mutation = useLogin();
+
+      await mutation.onSuccess({
+        success: true,
+        result: {
+          accessToken: "jwt-token",
+          refreshToken: "refresh-token",
+        },
+      });
+
+      expect(mockHttpGet).toHaveBeenCalledWith("/profile");
+      expect(mockSetUserRole).toHaveBeenCalledWith("RECRUITER");
+      expect(mockPush).toHaveBeenCalledWith("/role");
     });
 
-    it("redirects incomplete candidate to candidate completion page", () => {
-      const mutation = useLogin();
-
-      mutation.onSuccess({
-        success: true,
+    it("redirects incomplete candidate to /role to select profile", async () => {
+      mockHttpGet.mockResolvedValueOnce({
         result: {
-          accessToken: "jwt-token",
-          role: "CANDIDATE",
-          registrationCompleted: false,
+          candidate: {
+            user: {
+              role: "CANDIDATE",
+            },
+          },
         },
       });
 
-      expect(mockPush).toHaveBeenCalledWith("/role/candidate");
+      const mutation = useLogin();
+
+      await mutation.onSuccess({
+        success: true,
+        result: {
+          accessToken: "jwt-token",
+        },
+      });
+
+      expect(mockSetAuthToken).toHaveBeenCalledWith("jwt-token");
+      expect(mockHttpGet).toHaveBeenCalledWith("/profile");
+      expect(mockSetUserRole).toHaveBeenCalledWith("CANDIDATE");
+      expect(mockPush).toHaveBeenCalledWith("/role");
+    });
+
+    it("redirects to /role if profile lookup fails", async () => {
+      mockHttpGet.mockRejectedValueOnce(new Error("Network error"));
+
+      const mutation = useLogin();
+
+      await mutation.onSuccess({
+        success: true,
+        result: {
+          accessToken: "jwt-token",
+        },
+      });
+
+      expect(mockSetAuthToken).toHaveBeenCalledWith("jwt-token");
+      expect(mockToastSuccess).toHaveBeenCalledWith(
+        "Login realizado com sucesso!",
+      );
+      expect(mockPush).toHaveBeenCalledWith("/role");
     });
 
     it("handles failure when success is false with message", () => {
@@ -149,6 +214,7 @@ describe("useLogin and loginRequest", () => {
 
       expect(mockToastError).toHaveBeenCalledWith("Credenciais inválidas");
       expect(mockSetAuthToken).not.toHaveBeenCalled();
+      expect(mockSetUserRole).not.toHaveBeenCalled();
       expect(mockPush).not.toHaveBeenCalled();
     });
 
@@ -174,6 +240,7 @@ describe("useLogin and loginRequest", () => {
         "Não foi possível autenticar. Tente novamente.",
       );
       expect(mockSetAuthToken).not.toHaveBeenCalled();
+      expect(mockSetUserRole).not.toHaveBeenCalled();
       expect(mockPush).not.toHaveBeenCalled();
     });
 

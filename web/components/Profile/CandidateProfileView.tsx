@@ -26,6 +26,7 @@ import {
 import { cn } from "@/lib/utils";
 
 import { useStatesQuery, useCountriesQuery } from "@/lib/api/location/location";
+import { getLanguageLabel, getProficiencyLabel } from "@/lib/utils/languages";
 
 interface CandidateProfileViewProps {
   initialData: CandidateProfileResponse | null;
@@ -412,9 +413,9 @@ export function CandidateProfileView({
                   variant="secondary"
                   className="px-3 py-1 text-xs"
                 >
-                  {lang.languageName} —{" "}
+                  {getLanguageLabel(lang.languageName)} —{" "}
                   <span className="text-muted-foreground ml-1 font-normal">
-                    {lang.proficiency}
+                    {getProficiencyLabel(lang.proficiency)}
                   </span>
                 </Badge>
               ))}

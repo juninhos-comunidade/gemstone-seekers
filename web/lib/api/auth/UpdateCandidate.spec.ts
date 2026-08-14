@@ -7,6 +7,7 @@ const mockUseMutation = vi.fn();
 const mockToastSuccess = vi.fn();
 const mockToastError = vi.fn();
 const mockHttpPatch = vi.fn();
+const mockSetUserRole = vi.fn();
 
 vi.mock("next/navigation", () => ({
   useRouter: () => mockUseRouter(),
@@ -21,6 +22,10 @@ vi.mock("sonner", () => ({
     success: (...args: unknown[]) => mockToastSuccess(...args),
     error: (...args: unknown[]) => mockToastError(...args),
   },
+}));
+
+vi.mock("@/lib/api/auth", () => ({
+  setUserRole: (...args: unknown[]) => mockSetUserRole(...args),
 }));
 
 vi.mock("@/lib/api/client", () => ({
@@ -58,11 +63,12 @@ describe("useUpdateCandidate", () => {
     });
   });
 
-  it("handles onSuccess by showing toast and redirecting", () => {
+  it("handles onSuccess by setting user role, showing toast and redirecting", () => {
     const mutation = useUpdateCandidate();
 
     mutation.onSuccess();
 
+    expect(mockSetUserRole).toHaveBeenCalledWith("CANDIDATE");
     expect(mockToastSuccess).toHaveBeenCalledWith(
       "Perfil do candidato atualizado com sucesso!",
     );
@@ -78,6 +84,7 @@ describe("useUpdateCandidate", () => {
       }),
     );
 
+    expect(mockSetUserRole).toHaveBeenCalledWith("CANDIDATE");
     expect(mockToastSuccess).toHaveBeenCalledWith(
       "Cadastro do candidato já estava concluído ou dados já cadastrados.",
     );

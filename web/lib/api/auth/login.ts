@@ -1,7 +1,8 @@
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { setAuthToken } from "@/lib/api/auth";
+import { setAuthToken, setUserRole } from "@/lib/api/auth";
+import { getCandidateProfile } from "@/lib/api/candidate/getCandidateProfile";
 import { httpClient } from "@/lib/api/client";
 import { ApiError } from "@/lib/api/errors";
 
@@ -16,8 +17,6 @@ export interface LoginResponse {
   result?: {
     refreshToken?: string;
     accessToken?: string;
-    role?: "CANDIDATE" | "RECRUITER";
-    registrationCompleted?: boolean;
   };
 }
 
@@ -44,7 +43,7 @@ export function useLogin() {
 
   return useMutation({
     mutationFn: loginRequest,
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       if (!data || data.success === false) {
         toast.error(data?.message ?? "Erro ao fazer login");
         return;
@@ -59,19 +58,30 @@ export function useLogin() {
 
       setAuthToken(token);
 
-      const role = data.result?.role;
-      const registrationCompleted = data.result?.registrationCompleted;
+      try {
+        const profile = await getCandidateProfile();
+        const role = profile?.candidate?.user?.role;
+        const registrationCompleted = Boolean(profile?.candidate?.id);
 
-      toast.success(data.message || "Login realizado com sucesso!");
-      if (!registrationCompleted) {
+        if (role === "CANDIDATE" || role === "RECRUITER") {
+          setUserRole(role);
+        }
+
+        toast.success(data.message || "Login realizado com sucesso!");
+        if (!registrationCompleted) {
+          router.push("/role");
+          return;
+        }
+
         router.push(
-          role === "RECRUITER" ? "/role/recruiter" : "/role/candidate",
+          role === "RECRUITER"
+            ? "/recruiter/dashboard"
+            : "/candidate/dashboard",
         );
-        return;
+      } catch {
+        toast.success(data.message || "Login realizado com sucesso!");
+        router.push("/role");
       }
-      router.push(
-        role === "RECRUITER" ? "/recruiter/dashboard" : "/candidate/dashboard",
-      );
     },
     onError: (error: Error) => {
       if (isTimeoutOrNetworkError(error)) {

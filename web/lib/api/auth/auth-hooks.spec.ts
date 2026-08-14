@@ -6,8 +6,10 @@ const mockUseMutation = vi.fn();
 const mockToastSuccess = vi.fn();
 const mockToastError = vi.fn();
 const mockSetAuthToken = vi.fn();
+const mockSetUserRole = vi.fn();
 const mockHttpPost = vi.fn();
 const mockHttpPatch = vi.fn();
+const mockHttpGet = vi.fn();
 
 vi.mock("next/navigation", () => ({
   useRouter: () => mockUseRouter(),
@@ -26,12 +28,14 @@ vi.mock("sonner", () => ({
 
 vi.mock("@/lib/api/auth", () => ({
   setAuthToken: (...args: unknown[]) => mockSetAuthToken(...args),
+  setUserRole: (...args: unknown[]) => mockSetUserRole(...args),
 }));
 
 vi.mock("@/lib/api/client", () => ({
   httpClient: {
     post: (...args: unknown[]) => mockHttpPost(...args),
     patch: (...args: unknown[]) => mockHttpPatch(...args),
+    get: (...args: unknown[]) => mockHttpGet(...args),
   },
 }));
 
@@ -59,6 +63,17 @@ describe("auth api hooks", () => {
   // ─── useLogin ─────────────────────────────────────────────────────────────
 
   it("useLogin configures mutation, stores token and redirects on success", async () => {
+    mockHttpGet.mockResolvedValueOnce({
+      result: {
+        candidate: {
+          id: "cand-1",
+          user: {
+            role: "CANDIDATE",
+          },
+        },
+      },
+    });
+
     const { useLogin } = await import("./login");
     const mutation = useLogin();
 
@@ -72,69 +87,100 @@ describe("auth api hooks", () => {
       password: "123456",
     });
 
-    mutation.onSuccess({
+    await mutation.onSuccess({
       success: true,
       result: {
         accessToken: "jwt-token",
-        role: "CANDIDATE",
-        registrationCompleted: true,
       },
     });
 
     expect(mockSetAuthToken).toHaveBeenCalledWith("jwt-token");
+    expect(mockHttpGet).toHaveBeenCalledWith("/profile");
+    expect(mockSetUserRole).toHaveBeenCalledWith("CANDIDATE");
     expect(mockToastSuccess).toHaveBeenCalledWith(
       "Login realizado com sucesso!",
     );
     expect(mockPush).toHaveBeenCalledWith("/candidate/dashboard");
   });
 
-  it("useLogin redirects incomplete recruiter registrations to the completion page", async () => {
-    const { useLogin } = await import("./login");
-    const mutation = useLogin();
-
-    mutation.onSuccess({
-      success: true,
+  it("useLogin redirects incomplete recruiter registrations to /role", async () => {
+    mockHttpGet.mockResolvedValueOnce({
       result: {
-        accessToken: "jwt-token",
-        role: "RECRUITER",
-        registrationCompleted: false,
+        candidate: {
+          user: {
+            role: "RECRUITER",
+          },
+        },
       },
     });
 
-    expect(mockPush).toHaveBeenCalledWith("/role/recruiter");
-  });
-
-  it("useLogin redirects incomplete candidate registrations to the completion page", async () => {
     const { useLogin } = await import("./login");
     const mutation = useLogin();
 
-    mutation.onSuccess({
+    await mutation.onSuccess({
       success: true,
       result: {
         accessToken: "jwt-token",
-        role: "CANDIDATE",
-        registrationCompleted: false,
+      },
+    });
+
+    expect(mockHttpGet).toHaveBeenCalledWith("/profile");
+    expect(mockSetUserRole).toHaveBeenCalledWith("RECRUITER");
+    expect(mockPush).toHaveBeenCalledWith("/role");
+  });
+
+  it("useLogin redirects incomplete candidate registrations to /role", async () => {
+    mockHttpGet.mockResolvedValueOnce({
+      result: {
+        candidate: {
+          user: {
+            role: "CANDIDATE",
+          },
+        },
+      },
+    });
+
+    const { useLogin } = await import("./login");
+    const mutation = useLogin();
+
+    await mutation.onSuccess({
+      success: true,
+      result: {
+        accessToken: "jwt-token",
       },
     });
 
     expect(mockSetAuthToken).toHaveBeenCalledWith("jwt-token");
-    expect(mockPush).toHaveBeenCalledWith("/role/candidate");
+    expect(mockHttpGet).toHaveBeenCalledWith("/profile");
+    expect(mockSetUserRole).toHaveBeenCalledWith("CANDIDATE");
+    expect(mockPush).toHaveBeenCalledWith("/role");
   });
 
   it("useLogin uses accessToken and redirects recruiters to dashboard", async () => {
+    mockHttpGet.mockResolvedValueOnce({
+      result: {
+        candidate: {
+          id: "rec-1",
+          user: {
+            role: "RECRUITER",
+          },
+        },
+      },
+    });
+
     const { useLogin } = await import("./login");
     const mutation = useLogin();
 
-    mutation.onSuccess({
+    await mutation.onSuccess({
       success: true,
       result: {
         accessToken: "access-token",
-        role: "RECRUITER",
-        registrationCompleted: true,
       },
     });
 
     expect(mockSetAuthToken).toHaveBeenCalledWith("access-token");
+    expect(mockHttpGet).toHaveBeenCalledWith("/profile");
+    expect(mockSetUserRole).toHaveBeenCalledWith("RECRUITER");
     expect(mockPush).toHaveBeenCalledWith("/recruiter/dashboard");
   });
 
@@ -377,6 +423,7 @@ describe("auth api hooks", () => {
 
     mutation.onSuccess();
 
+    expect(mockSetUserRole).toHaveBeenCalledWith("CANDIDATE");
     expect(mockToastSuccess).toHaveBeenCalledWith(
       "Perfil do candidato atualizado com sucesso!",
     );
@@ -395,6 +442,7 @@ describe("auth api hooks", () => {
       }),
     );
 
+    expect(mockSetUserRole).toHaveBeenCalledWith("CANDIDATE");
     expect(mockToastSuccess).toHaveBeenCalledWith(
       "Cadastro do candidato já estava concluído ou dados já cadastrados.",
     );
@@ -437,6 +485,7 @@ describe("auth api hooks", () => {
 
     mutation.onSuccess();
 
+    expect(mockSetUserRole).toHaveBeenCalledWith("RECRUITER");
     expect(mockToastSuccess).toHaveBeenCalledWith(
       "Perfil do recrutador atualizado com sucesso!",
     );
@@ -461,6 +510,7 @@ describe("auth api hooks", () => {
     });
 
     mutation.onSuccess();
+    expect(mockSetUserRole).toHaveBeenCalledWith("RECRUITER");
     expect(mockToastSuccess).toHaveBeenCalledWith(
       "Perfil do recrutador atualizado com sucesso!",
     );
@@ -498,6 +548,7 @@ describe("auth api hooks", () => {
       }),
     );
 
+    expect(mockSetUserRole).toHaveBeenCalledWith("RECRUITER");
     expect(mockToastSuccess).toHaveBeenCalledWith(
       "Cadastro do recrutador já estava concluído ou dados já cadastrados.",
     );

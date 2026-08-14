@@ -35,7 +35,7 @@ export function CandidateProfileForm({
 }: CandidateProfileFormProps) {
   return (
     <div className="mx-auto max-w-5xl space-y-6 px-4 py-8 pt-20 pb-16">
-      <div className="flex items-center justify-between">
+      <div>
         <Link
           href="/candidate/user"
           className={cn(
@@ -46,9 +46,6 @@ export function CandidateProfileForm({
           <ArrowLeft className="size-4" />
           Voltar para o Perfil
         </Link>
-        <span className="text-muted-foreground font-mono text-xs">
-          Edição Granular do Perfil
-        </span>
       </div>
 
       <div className="border-border/40 space-y-1 border-b pb-2">
@@ -131,18 +128,6 @@ export function CandidateProfileForm({
               <span>Projetos</span>
             </TabsTrigger>
           </TabsList>
-
-          <div className="flex flex-col gap-2 pt-2">
-            <Link
-              href="/candidate/user"
-              className={cn(
-                buttonVariants({ variant: "outline" }),
-                "w-full justify-center",
-              )}
-            >
-              Concluir Edição
-            </Link>
-          </div>
         </div>
 
         <div className="w-full flex-1 space-y-6">
