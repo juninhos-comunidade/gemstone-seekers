@@ -97,8 +97,14 @@ describe("Recruiter Signup Page", () => {
     expect(screen.getByLabelText(/tamanho da empresa/i)).toBeInTheDocument();
     expect(
       screen.getByRole("link", { name: /voltar e alterar perfil/i }),
-    ).toHaveAttribute("href", "/signup/role");
+    ).toHaveAttribute("href", "/role");
 
+    fireEvent.change(screen.getByLabelText(/tipo de documento/i), {
+      target: { value: "CNPJ" },
+    });
+    fireEvent.change(screen.getByLabelText(/número do documento/i), {
+      target: { value: "00.000.000/0000-00" },
+    });
     fireEvent.change(screen.getByLabelText(/nome da empresa/i), {
       target: { value: "Gemstone Seekers" },
     });
@@ -126,6 +132,8 @@ describe("Recruiter Signup Page", () => {
 
     await waitFor(() => {
       expect(mockUpdateRecruiter).toHaveBeenCalledWith({
+        documentType: "CNPJ",
+        documentNumber: "00.000.000/0000-00",
         companyName: "Gemstone Seekers",
         jobTitle: "Analista de RH",
         phone: "+55 11 99999-9999",

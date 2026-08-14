@@ -1,7 +1,10 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
+import { getAuthToken } from "@/lib/api/auth";
+import { httpClient } from "@/lib/api/client";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { toast } from "sonner";
@@ -10,8 +13,50 @@ type RoleFormData = {
   role: "candidate" | "recruiter";
 };
 
+type ProfileResponse = {
+  result?: {
+    id?: string;
+    role?: "CANDIDATE" | "RECRUITER";
+    registrationCompleted?: boolean;
+  };
+};
+
 export default function Page() {
   const router = useRouter();
+
+  // Inicia sempre como true: o efeito de autenticação determina se
+  // o usuário já concluiu o cadastro antes de liberar a tela de seleção.
+  const [checkingAuth, setCheckingAuth] = useState(true);
+
+  // Consulta GET /profile para determinar `role` e `registrationCompleted`.
+  // A decodificação manual do JWT foi removida porque a API não inclui a
+  // claim `role` no payload do token.
+  useEffect(() => {
+    const token = getAuthToken();
+
+    if (!token) {
+      router.replace("/login");
+      return;
+    }
+
+    httpClient
+      .get<ProfileResponse>("/profile")
+      .then((res) => {
+        const profile = res?.result;
+        if (profile?.registrationCompleted) {
+          router.replace(
+            profile.role === "RECRUITER"
+              ? "/recruiter/dashboard"
+              : "/candidate/dashboard",
+          );
+          return;
+        }
+        setCheckingAuth(false);
+      })
+      .catch(() => {
+        setCheckingAuth(false);
+      });
+  }, [router]);
 
   const {
     handleSubmit,
@@ -25,15 +70,19 @@ export default function Page() {
 
   const isLoading = isSubmitting;
 
+  if (checkingAuth) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <Spinner />
+      </div>
+    );
+  }
+
   const handleChooseRole = async ({ role }: RoleFormData) => {
     try {
       localStorage.setItem("signup-role", role);
 
-      router.push(
-        role === "candidate"
-          ? "/signup/role/candidate"
-          : "/signup/role/recruiter",
-      );
+      router.push(role === "candidate" ? "/role/candidate" : "/role/recruiter");
     } catch {
       toast.error("Erro ao selecionar perfil");
     }

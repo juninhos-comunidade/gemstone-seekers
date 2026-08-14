@@ -12,9 +12,10 @@ import { PasswordInput } from "@/components/PasswordInput/PasswordInput";
 import { schema, SignupFormData } from "@/lib/schemas/signupSchema";
 import { useSignup } from "@/lib/api/auth/signup";
 import { PasswordCheck } from "@/components/PasswordCheck/PasswordInput";
+import { useLoadingMessages } from "@/lib/hooks/useLoadingMessages";
 
 export default function Page() {
-  const { mutateAsync: signup, isPending } = useSignup();
+  const { mutate: signup, isPending } = useSignup();
 
   const {
     register,
@@ -26,9 +27,11 @@ export default function Page() {
 
   const isLoading = isSubmitting || isPending;
 
-  const handleSignUp = async (data: z.infer<typeof schema>) => {
-    await signup(data);
+  const handleSignUp = (data: z.infer<typeof schema>) => {
+    signup(data);
   };
+
+  const loadingMessage = useLoadingMessages(isPending);
 
   return (
     <main className="from-muted/40 via-background to-muted/20 flex min-h-screen items-center justify-center bg-gradient-to-br px-4 py-12">
@@ -82,6 +85,27 @@ export default function Page() {
           </div>
 
           <div className="space-y-1.5">
+            <Label htmlFor="confirmEmail" className="text-sm font-medium">
+              Confirmar e-mail
+            </Label>
+            <Input
+              id="confirmEmail"
+              type="email"
+              autoComplete="email"
+              disabled={isLoading}
+              aria-invalid={!!errors.confirmEmail}
+              onPaste={(e) => e.preventDefault()}
+              className="focus-visible:ring-primary/40 transition-colors focus-visible:ring-2 aria-[invalid=true]:border-red-500"
+              {...register("confirmEmail")}
+            />
+            {errors.confirmEmail?.message && (
+              <span className="block text-xs font-medium text-red-500">
+                {errors.confirmEmail.message}
+              </span>
+            )}
+          </div>
+
+          <div className="space-y-1.5">
             <Label htmlFor="password" className="text-sm font-medium">
               Senha
             </Label>
@@ -125,7 +149,7 @@ export default function Page() {
             {isLoading ? (
               <>
                 <Spinner className="h-4 w-4" />
-                <span>Cadastrando...</span>
+                <span>{loadingMessage}</span>
               </>
             ) : (
               "Cadastrar"

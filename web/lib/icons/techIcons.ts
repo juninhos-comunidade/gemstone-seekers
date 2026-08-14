@@ -29,7 +29,11 @@ export const getTechnologies = async (): Promise<Technology[]> => {
     "/api/v1/technologies",
   );
   if (!response.success) {
-    throw new Error(response.error?.message ?? "Erro ao buscar tecnologias");
+    const errorMessage =
+      typeof response.error === "object" && response.error !== null
+        ? response.error.message
+        : (response.error ?? "Erro ao buscar tecnologias");
+    throw new Error(errorMessage);
   }
   return response.result;
 };

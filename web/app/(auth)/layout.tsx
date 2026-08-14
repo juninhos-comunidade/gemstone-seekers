@@ -4,8 +4,8 @@ export default function Layout({
   children: React.ReactNode;
 }>) {
   return (
-    <main className="flex min-h-screen flex-col">
-      <div className="flex-1">{children}</div>
+    <main>
+      <div>{children}</div>
     </main>
   );
 }

@@ -43,6 +43,8 @@ export default function RecruiterRegistrationPage() {
   } = useForm<RecruiterRoleFormData>({
     resolver: zodResolver(recruiterRoleSchema),
     defaultValues: {
+      documentType: "",
+      documentNumber: "",
       companyName: "",
       jobTitle: "",
       phone: "",
@@ -55,7 +57,7 @@ export default function RecruiterRegistrationPage() {
     const selectedRole = localStorage.getItem("signup-role");
 
     if (selectedRole === "candidate") {
-      router.replace("/signup/role/candidate");
+      router.replace("/role/candidate");
     }
   }, [router]);
 
@@ -78,6 +80,42 @@ export default function RecruiterRegistrationPage() {
         </div>
 
         <form className="grid gap-5" onSubmit={handleSubmit(onSubmit)}>
+          <div className="grid gap-5 md:grid-cols-2">
+            <div className="space-y-1.5">
+              <Label htmlFor="documentType">Tipo de documento</Label>
+              <Input
+                id="documentType"
+                type="text"
+                placeholder="Ex: CPF / CNPJ"
+                disabled={isLoading}
+                aria-invalid={!!errors.documentType}
+                {...register("documentType")}
+              />
+              {errors.documentType?.message && (
+                <span className="block text-xs font-medium text-red-500">
+                  {errors.documentType.message}
+                </span>
+              )}
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="documentNumber">Número do documento</Label>
+              <Input
+                id="documentNumber"
+                type="text"
+                placeholder="Ex: 00.000.000/0000-00"
+                disabled={isLoading}
+                aria-invalid={!!errors.documentNumber}
+                {...register("documentNumber")}
+              />
+              {errors.documentNumber?.message && (
+                <span className="block text-xs font-medium text-red-500">
+                  {errors.documentNumber.message}
+                </span>
+              )}
+            </div>
+          </div>
+
           <div className="grid gap-5 md:grid-cols-2">
             <div className="space-y-1.5">
               <Label htmlFor="company-name">Nome da empresa</Label>
@@ -208,7 +246,7 @@ export default function RecruiterRegistrationPage() {
         <p className="text-muted-foreground mt-8 text-center text-sm">
           Escolheu o perfil errado?{" "}
           <Link
-            href="/signup/role"
+            href="/role"
             className="text-primary font-medium underline-offset-4 hover:underline"
           >
             Voltar e alterar perfil

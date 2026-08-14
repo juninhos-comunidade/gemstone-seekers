@@ -26,6 +26,8 @@ async function updateCandidateRequest(
 ): Promise<UpdateCandidateResponse> {
   const payload: CompleteRegistrationRequest = {
     role: "CANDIDATE",
+    documentType: data.documentType,
+    documentNumber: data.documentNumber,
     phone: data.phone,
     summary: `${data.role} • ${data.area} • ${data.experience} • ${data.location}`,
   };
@@ -46,12 +48,22 @@ export function useUpdateCandidate() {
       router.push("/candidate/dashboard");
     },
     onError: (error: Error) => {
-      if (
-        error instanceof ApiError &&
-        error.status === 409 &&
-        error.message.toLowerCase().includes("already completed")
-      ) {
-        toast.success("Cadastro do candidato já estava concluído.");
+      if (error instanceof ApiError && error.status === 409) {
+        const msg = (error.message ?? "").toLowerCase();
+        if (
+          msg.includes("already completed") ||
+          msg.includes("concluído") ||
+          msg.includes("integrity") ||
+          msg.includes("integridade") ||
+          msg.includes("exists")
+        ) {
+          toast.success(
+            "Cadastro do candidato já estava concluído ou dados já cadastrados.",
+          );
+          router.push("/candidate/dashboard");
+          return;
+        }
+        toast.info("Cadastro já realizado. Redirecionando para o painel...");
         router.push("/candidate/dashboard");
         return;
       }
