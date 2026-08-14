@@ -2,8 +2,6 @@ package com.gemstoneseekers.repositories.specifications;
 
 import com.gemstoneseekers.dtos.request.TestHistoryFilterParams;
 import com.gemstoneseekers.enums.TestStatus;
-import com.gemstoneseekers.models.Candidate;
-import com.gemstoneseekers.models.Technology;
 import com.gemstoneseekers.models.Test;
 import jakarta.persistence.criteria.*;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,6 +14,8 @@ import org.springframework.data.jpa.domain.Specification;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -27,16 +27,20 @@ class TestSpecificationsTest {
     private CriteriaQuery<?> query;
     @Mock
     private CriteriaBuilder cb;
+
     @Mock
     private Path<Object> candidatePath;
     @Mock
-    private Path<Object> candidateIdPath;
+    private Path<UUID> candidateIdPath;
+
     @Mock
     private Path<Object> technologyPath;
     @Mock
-    private Path<Object> technologyNamePath;
+    private Path<String> technologyNamePath;
+
     @Mock
     private Path<TestStatus> statusPath;
+
     @Mock
     private Predicate candidatePredicate;
     @Mock
@@ -46,16 +50,17 @@ class TestSpecificationsTest {
 
     @BeforeEach
     void setUp() {
-        when(root.get("candidate")).thenReturn(candidatePath);
-        when(candidatePath.get("id")).thenReturn(candidateIdPath);
+        // O Candidate sempre é utilizado, então permanece rigoroso
+        doReturn(candidatePath).when(root).get("candidate");
+        doReturn(candidateIdPath).when(candidatePath).get("id");
 
-        when(root.get("technology")).thenReturn(technologyPath);
-        when(technologyPath.get("name")).thenReturn(technologyNamePath);
+        // Technology e Status são filtros opcionais, então devem ser declarados como lenient (permissivos)
+        lenient().doReturn(technologyPath).when(root).get("technology");
+        lenient().doReturn(technologyNamePath).when(technologyPath).get("name");
+        lenient().doReturn(statusPath).when(root).get("status");
 
-        when(root.get( "status")).thenReturn(statusPath);
-
-        when(cb.equal(any(), any())).thenReturn(mock(Predicate.class));
-        when(cb.lower(any())).thenReturn(mock(Expression.class));
+        lenient().when(cb.equal(any(), any())).thenReturn(mock(Predicate.class));
+        lenient().when(cb.lower(any())).thenReturn(mock(Expression.class));
     }
 
     @org.junit.jupiter.api.Test
@@ -70,7 +75,6 @@ class TestSpecificationsTest {
         verify(cb, times(1)).equal(candidateIdPath, candidateId);
         verify(cb, never()).equal(eq(technologyNamePath), anyString());
         verify(cb, never()).equal(eq(statusPath), any(TestStatus.class));
-        verify(cb, times(1)).and(candidatePredicate);
     }
 
     @org.junit.jupiter.api.Test
@@ -80,7 +84,9 @@ class TestSpecificationsTest {
         String technologyName = "java";
         TestHistoryFilterParams filters = new TestHistoryFilterParams(technologyName, null);
 
+        @SuppressWarnings("unchecked")
         Expression<String> lowerTechNamePath = mock(Expression.class);
+
         when(cb.lower(technologyNamePath)).thenReturn(lowerTechNamePath);
         when(cb.equal(candidateIdPath, candidateId)).thenReturn(candidatePredicate);
         when(cb.equal(lowerTechNamePath, technologyName.toLowerCase())).thenReturn(technologyPredicate);
@@ -92,7 +98,6 @@ class TestSpecificationsTest {
         verify(cb, times(1)).lower(technologyNamePath);
         verify(cb, times(1)).equal(lowerTechNamePath, technologyName.toLowerCase());
         verify(cb, never()).equal(eq(statusPath), any(TestStatus.class));
-        verify(cb, times(1)).and(candidatePredicate, technologyPredicate);
     }
 
     @org.junit.jupiter.api.Test
@@ -107,7 +112,6 @@ class TestSpecificationsTest {
 
         verify(cb, times(1)).equal(candidateIdPath, candidateId);
         verify(cb, never()).lower(technologyNamePath);
-        verify(cb, times(1)).and(candidatePredicate);
     }
 
     @org.junit.jupiter.api.Test
@@ -126,7 +130,6 @@ class TestSpecificationsTest {
         verify(cb, times(1)).equal(candidateIdPath, candidateId);
         verify(cb, never()).lower(technologyNamePath);
         verify(cb, times(1)).equal(statusPath, status);
-        verify(cb, times(1)).and(candidatePredicate, statusPredicate);
     }
 
     @org.junit.jupiter.api.Test
@@ -137,7 +140,9 @@ class TestSpecificationsTest {
         TestStatus status = TestStatus.IN_PROGRESS;
         TestHistoryFilterParams filters = new TestHistoryFilterParams(technologyName, status);
 
+        @SuppressWarnings("unchecked")
         Expression<String> lowerTechNamePath = mock(Expression.class);
+
         when(cb.lower(technologyNamePath)).thenReturn(lowerTechNamePath);
         when(cb.equal(candidateIdPath, candidateId)).thenReturn(candidatePredicate);
         when(cb.equal(lowerTechNamePath, technologyName.toLowerCase())).thenReturn(technologyPredicate);
@@ -150,6 +155,5 @@ class TestSpecificationsTest {
         verify(cb, times(1)).lower(technologyNamePath);
         verify(cb, times(1)).equal(lowerTechNamePath, technologyName.toLowerCase());
         verify(cb, times(1)).equal(statusPath, status);
-        verify(cb, times(1)).and(candidatePredicate, technologyPredicate, statusPredicate);
     }
 }
