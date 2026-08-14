@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { FaAward, FaCalendarAlt, FaCheckCircle, FaCode } from "react-icons/fa";
-import { useCandidateBadgesQuery } from "@/lib/api/badges";
+import { useCandidateBadgesQuery } from "@/lib/api/badges/badges";
 import {
   Card,
   CardContent,

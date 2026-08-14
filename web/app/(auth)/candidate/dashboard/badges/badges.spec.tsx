@@ -1,9 +1,9 @@
 import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import BadgesPage from "./page";
-import { useCandidateBadgesQuery } from "@/lib/api/badges";
+import { useCandidateBadgesQuery } from "@/lib/api/badges/badges";
 
-vi.mock("@/lib/api/badges");
+vi.mock("@/lib/api/badges/badges");
 
 const mockUseCandidateBadgesQuery = vi.mocked(useCandidateBadgesQuery);
 
