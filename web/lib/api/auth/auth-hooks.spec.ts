@@ -41,14 +41,26 @@ describe("auth api hooks", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockUseRouter.mockReturnValue({ push: mockPush });
-    mockUseMutation.mockImplementation((options) => options);
+    mockUseMutation.mockImplementation((options) => ({
+      ...options,
+      mutate: vi.fn((data) => options.mutationFn?.(data)),
+      mutateAsync: vi.fn((data) => options.mutationFn?.(data)),
+      data: undefined,
+      error: null,
+      isPending: false,
+      isSuccess: false,
+      isError: false,
+      isIdle: true,
+      status: "idle",
+      reset: vi.fn(),
+    }));
   });
 
   it("useLogin configures mutation, stores token and redirects on success", async () => {
     const { useLogin } = await import("./login");
     const mutation = useLogin();
 
-    await mutation.mutationFn({
+    await mutation.mutateAsync({
       email: "user@example.com",
       password: "123456",
     });
@@ -128,7 +140,7 @@ describe("auth api hooks", () => {
     const { useSignup } = await import("./signup");
     const mutation = useSignup();
 
-    await mutation.mutationFn({
+    await mutation.mutateAsync({
       fullName: "João Pedro",
       email: "joao@example.com",
       password: "abc123",
@@ -162,7 +174,7 @@ describe("auth api hooks", () => {
         result: { token: "auto-login-token" },
       });
 
-    const result = await mutation.mutationFn({
+    const result = await mutation.mutateAsync({
       fullName: "João Pedro",
       email: "joao@example.com",
       password: "abc123",
@@ -214,7 +226,7 @@ describe("auth api hooks", () => {
     const { useUpdateCandidate } = await import("./UpdateCandidate");
     const mutation = useUpdateCandidate();
 
-    await mutation.mutationFn({
+    await mutation.mutateAsync({
       documentType: "CPF",
       documentNumber: "123.456.789-00",
       phone: "(11) 99999-9999",
@@ -261,14 +273,12 @@ describe("auth api hooks", () => {
     const { useUpdateRecruiter } = await import("./UpdateRecruiter");
     const mutation = useUpdateRecruiter();
 
-    await mutation.mutationFn({
+    await mutation.mutateAsync({
       documentType: "CNPJ",
       documentNumber: "00.000.000/0000-00",
-      companyName: "Gemstone Seekers",
+      companyId: "company-uuid-123",
       jobTitle: "Analista de RH",
       phone: "(11) 99999-9999",
-      companyWebsite: "https://gemstoneseekers.com",
-      companySize: "11-50",
     });
 
     expect(mockHttpPatch).toHaveBeenCalledWith("/auth/complete-registration", {
@@ -277,6 +287,7 @@ describe("auth api hooks", () => {
       documentNumber: "00.000.000/0000-00",
       phone: "(11) 99999-9999",
       department: "Analista de RH",
+      companyId: "company-uuid-123",
     });
 
     mutation.onSuccess();
@@ -291,18 +302,17 @@ describe("auth api hooks", () => {
     const { useUpdateRecruiter } = await import("./UpdateRecruiter");
     const mutation = useUpdateRecruiter();
 
-    await mutation.mutationFn({
-      companyName: "Gemstone Seekers",
+    await mutation.mutateAsync({
+      companyId: "company-uuid-123",
       jobTitle: "Analista de RH",
       phone: "(11) 99999-9999",
-      companyWebsite: "https://gemstoneseekers.com",
-      companySize: "11-50",
     });
 
     expect(mockHttpPatch).toHaveBeenCalledWith("/auth/complete-registration", {
       role: "RECRUITER",
       phone: "(11) 99999-9999",
       department: "Analista de RH",
+      companyId: "company-uuid-123",
     });
 
     mutation.onSuccess();
@@ -513,7 +523,7 @@ describe("auth api hooks", () => {
       .mockResolvedValueOnce({ success: true })
       .mockResolvedValueOnce({ success: true, data: { token: "data-token" } });
 
-    const result = await mutation.mutationFn({
+    const result = await mutation.mutateAsync({
       fullName: "Ana Silva",
       email: "ana@example.com",
       password: "pass",
@@ -534,7 +544,7 @@ describe("auth api hooks", () => {
         data: { accessToken: "data-access-token" },
       });
 
-    const result = await mutation.mutationFn({
+    const result = await mutation.mutateAsync({
       fullName: "Ana Silva",
       email: "ana@example.com",
       password: "pass",
@@ -552,7 +562,7 @@ describe("auth api hooks", () => {
       .mockResolvedValueOnce({ success: true })
       .mockResolvedValueOnce({ success: true, jwt: "jwt-value" });
 
-    const result = await mutation.mutationFn({
+    const result = await mutation.mutateAsync({
       fullName: "Ana Silva",
       email: "ana@example.com",
       password: "pass",
@@ -571,7 +581,7 @@ describe("auth api hooks", () => {
       .mockResolvedValueOnce(originalResponse)
       .mockRejectedValueOnce(new Error("login failed"));
 
-    const result = await mutation.mutationFn({
+    const result = await mutation.mutateAsync({
       fullName: "Ana Silva",
       email: "ana@example.com",
       password: "pass",
@@ -590,7 +600,7 @@ describe("auth api hooks", () => {
     const failResponse = { success: false, message: "Email já usado" };
     mockHttpPost.mockResolvedValueOnce(failResponse);
 
-    const result = await mutation.mutationFn({
+    const result = await mutation.mutateAsync({
       fullName: "Ana Silva",
       email: "ana@example.com",
       password: "pass",

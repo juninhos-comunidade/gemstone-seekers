@@ -10,8 +10,8 @@ type CompleteRegistrationRequest = {
   documentType?: string;
   documentNumber?: string;
   phone: string;
-  companyId?: string;
   department?: string;
+  companyId?: string;
 };
 
 type UpdateRecruiterResponse = {
@@ -29,6 +29,7 @@ async function updateRecruiterRequest(
     documentNumber: data.documentNumber,
     phone: data.phone,
     department: data.jobTitle,
+    companyId: data.companyId,
   };
 
   return httpClient.patch<UpdateRecruiterResponse>(
