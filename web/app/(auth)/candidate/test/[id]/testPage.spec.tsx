@@ -6,17 +6,30 @@ import { useParams } from "next/navigation";
 // 1. Mock do next/navigation
 vi.mock("next/navigation", () => ({
   useParams: vi.fn(),
+  useRouter: () => ({
+    push: vi.fn(),
+  }),
 }));
 
 // 2. Mock dos dados do Quiz
-vi.mock("@/lib/mocks/quizMock", () => ({
-  quizMock: [
+vi.mock("@/lib/mocks/testsMock", () => ({
+  questionarios: [
     {
       id: "quiz-1",
+      candidateId: "candidate-001",
+      technologyId: 1,
+      status: "IN_PROGRESS",
+      Tech: "JavaScript",
+      Titulo: "JavaScript Test",
+      Descricao: "Test description",
+      NumQuestoes: 2,
+      Nivel: "iniciante",
       questions: [
         {
           id: "q1",
-          title: "Pergunta 1",
+          technologyId: 1,
+          statement: "Pergunta 1",
+          difficulty: "BEGINNER",
           options: [
             { id: "opt1", text: "Correta", isCorrect: true },
             { id: "opt2", text: "Errada", isCorrect: false },
@@ -24,7 +37,9 @@ vi.mock("@/lib/mocks/quizMock", () => ({
         },
         {
           id: "q2",
-          title: "Pergunta 2",
+          technologyId: 1,
+          statement: "Pergunta 2",
+          difficulty: "BEGINNER",
           options: [
             { id: "opt3", text: "Correta", isCorrect: true },
             { id: "opt4", text: "Errada", isCorrect: false },
@@ -64,7 +79,7 @@ type QuizOption = {
 
 type QuizQuestion = {
   id: string;
-  title: string;
+  statement: string;
   options: QuizOption[];
 };
 
@@ -86,7 +101,7 @@ vi.mock("@/components/quiz/QuizQuestion", () => ({
     isLastQuestion: boolean;
   }) => (
     <div data-testid="quiz-question">
-      <h2>{currentQuestion.title}</h2>
+      <h2>{currentQuestion.statement}</h2>
 
       {currentQuestion.options.map((opt: QuizOption) => (
         <button
