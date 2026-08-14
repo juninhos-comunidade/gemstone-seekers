@@ -45,6 +45,7 @@
         <logback.version>1.5.34</logback.version>
         <rest-assured.version>6.0.1</rest-assured.version>
         <spring-ai.version>2.0.0</spring-ai.version>
+        <log4j2.version>2.26.1</log4j2.version>
     </properties>
 
     <dependencyManagement>
