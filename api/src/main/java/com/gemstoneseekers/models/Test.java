@@ -26,7 +26,6 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.OrderBy;
 import jakarta.persistence.Transient;
 
-
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.UuidGenerator;
 
@@ -40,7 +39,10 @@ import org.hibernate.type.SqlTypes;
 @Getter
 @Setter
 @NoArgsConstructor
+@SuppressWarnings("PMD.TestClassWithoutTestCases")
 public class Test extends BaseModel {
+
+    private static final int MAX_SCORE = 10;
 
     @Id
     @GeneratedValue
@@ -90,6 +92,7 @@ public class Test extends BaseModel {
 
         answer.setSelectedOption(option);
     }
+
     public void submit() {
 
         if (this.status != TestStatus.IN_PROGRESS) {
@@ -117,7 +120,7 @@ public class Test extends BaseModel {
 
 
         return BigDecimal.valueOf(correctAnswersCount)
-            .multiply(BigDecimal.valueOf(10))
+            .multiply(BigDecimal.valueOf(MAX_SCORE))
             .divide(BigDecimal.valueOf(totalQuestions), 2, RoundingMode.HALF_UP);
     }
 

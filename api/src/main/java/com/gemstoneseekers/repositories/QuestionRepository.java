@@ -13,6 +13,10 @@ import java.util.UUID;
 @Repository
 public interface QuestionRepository extends JpaRepository<Question, Long> {
 
+    String PARAM_DIFFICULTY = "difficulty";
+    String PARAM_CANDIDATE_ID = "candidateId";
+    String PARAM_TECH_ID = "techId";
+
     @Query(value = """
         SELECT q.* FROM questions q
         JOIN technologies t ON q.technology_id = t.id
@@ -29,8 +33,8 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
         """, nativeQuery = true)
     List<Question> findUnansweredRandomByTechnologyAndDifficulty(
         @Param("technologyName") String technologyName,
-        @Param("difficulty") QuestionDifficulty difficulty,
-        @Param("candidateId") UUID candidateId,
+        @Param(PARAM_DIFFICULTY) QuestionDifficulty difficulty,
+        @Param(PARAM_CANDIDATE_ID) UUID candidateId,
         @Param("amount") int amount
     );
 
@@ -60,9 +64,9 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
             WHERE ca.id = :candidateId
         )
     """)
-    long countUnseenQuestions(@Param("candidateId") Long candidateId,
-                              @Param("techId") Long techId,
-                              @Param("difficulty") QuestionDifficulty difficulty);
+    long countUnseenQuestions(@Param(PARAM_CANDIDATE_ID) Long candidateId,
+                              @Param(PARAM_TECH_ID) Long techId,
+                              @Param(PARAM_DIFFICULTY) QuestionDifficulty difficulty);
 
     @Query(value = """
         SELECT q.* FROM questions q
@@ -76,9 +80,9 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
         ORDER BY RANDOM()
         LIMIT :limit
     """, nativeQuery = true)
-    List<Question> findRandomUnseenQuestions(@Param("candidateId") UUID candidateId,
-                                             @Param("techId") Integer techId,
-                                             @Param("difficulty") String difficulty,
+    List<Question> findRandomUnseenQuestions(@Param(PARAM_CANDIDATE_ID) UUID candidateId,
+                                             @Param(PARAM_TECH_ID) Integer techId,
+                                             @Param(PARAM_DIFFICULTY) String difficulty,
                                              @Param("limit") int limit);
 
     @Query(value = """
@@ -93,9 +97,9 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
         ORDER BY RANDOM()
         LIMIT :limit
     """, nativeQuery = true)
-    List<Question> findRandomSeenQuestions(@Param("candidateId") UUID candidateId,
-                                           @Param("techId") Integer techId,
-                                           @Param("difficulty") String difficulty,
+    List<Question> findRandomSeenQuestions(@Param(PARAM_CANDIDATE_ID) UUID candidateId,
+                                           @Param(PARAM_TECH_ID) Integer techId,
+                                           @Param(PARAM_DIFFICULTY) String difficulty,
                                            @Param("limit") int limit);
 
 }

@@ -8,7 +8,7 @@ import org.springframework.data.jpa.domain.Specification;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-
+@SuppressWarnings("PMD.TestClassWithoutTestCases")
 public class TestSpecifications {
 
     public static Specification<Test> withFilters(UUID candidateId, TestHistoryFilterParams filters) {
