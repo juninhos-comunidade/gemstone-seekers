@@ -24,6 +24,7 @@ public class QuestionRefillWorker {
     private static final Logger log = LoggerFactory.getLogger(QuestionRefillWorker.class);
     private static final int MINIMUM_STOCK_THRESHOLD = 12;
     private static final int BATCH_SIZE = 10;
+    private static final long RATE_LIMIT_DELAY_MS = 5000;
 
     private final TechnologyRepository technologyRepository;
     private final QuestionRepository questionRepository;
@@ -31,6 +32,7 @@ public class QuestionRefillWorker {
     private final AiQuestionGeneratorService aiService;
     private final Sleeper sleeper;
 
+    @FunctionalInterface
     public interface Sleeper {
         void sleep(long millis) throws InterruptedException;
     }
@@ -43,7 +45,14 @@ public class QuestionRefillWorker {
         }
     }
 
-    public QuestionRefillWorker(TechnologyRepository technologyRepository, QuestionRepository questionRepository, QuestionService questionService, AiQuestionGeneratorService aiService, Sleeper sleeper) {
+
+    public QuestionRefillWorker(
+        TechnologyRepository technologyRepository,
+        QuestionRepository questionRepository,
+        QuestionService questionService,
+        AiQuestionGeneratorService aiService,
+        Sleeper sleeper
+    ) {
         this.technologyRepository = technologyRepository;
         this.questionRepository = questionRepository;
         this.questionService = questionService;
@@ -52,18 +61,22 @@ public class QuestionRefillWorker {
     }
 
     @EventListener(ApplicationReadyEvent.class)
+    @SuppressWarnings("PMD.AvoidCatchingGenericException")
     public void executeRefillJob() {
-        log.info("[WORKER] Starting Question Refill Job...");
+        if (log.isInfoEnabled()) {
+            log.info("[WORKER] Starting Question Refill Job...");
+        }
 
         List<Technology> technologies = technologyRepository.findAll();
 
         if (technologies.isEmpty()) {
-            log.info("[WORKER] No technologies found. Skipping job.");
+            if (log.isInfoEnabled()) {
+                log.info("[WORKER] No technologies found. Skipping job.");
+            }
             return;
         }
 
         List<QuestionRepository.StockProjection> stockReport = questionRepository.getQuestionStockReport();
-
 
         Map<Integer, Map<QuestionDifficulty, Long>> stockMatrix = stockReport.stream()
             .collect(Collectors.groupingBy(
@@ -76,40 +89,56 @@ public class QuestionRefillWorker {
 
         for (Technology tech : technologies) {
             for (QuestionDifficulty difficulty : QuestionDifficulty.values()) {
-
                 long currentStock = stockMatrix
                     .getOrDefault(tech.getId(), Collections.emptyMap())
                     .getOrDefault(difficulty, 0L);
 
-                while (currentStock < MINIMUM_STOCK_THRESHOLD) {
-                    log.warn("[WORKER] Low stock for {} ({}). Current: {}. Target: {}. Triggering AI.",
-                        tech.getName(), difficulty, currentStock, MINIMUM_STOCK_THRESHOLD);
+                refillDifficultyStock(tech, difficulty, currentStock);
+            }
+        }
+    }
 
-                    try {
-                        AiQuestionBatchResponse aiResponse = aiService.generateQuestions(
-                            tech.getName(), difficulty, BATCH_SIZE
-                        );
 
-                        questionService.saveAiGeneratedBatch(tech, difficulty, aiResponse);
+    private void refillDifficultyStock(Technology tech, QuestionDifficulty difficulty, long initialStock) {
+        long currentStock = initialStock;
 
-                        log.info("[WORK-ER] Successfully generated and saved {} questions for {} ({}).",
-                            BATCH_SIZE, tech.getName(), difficulty);
+        while (currentStock < MINIMUM_STOCK_THRESHOLD) {
+            if (log.isWarnEnabled()) {
+                log.warn("[WORKER] Low stock for {} ({}). Current: {}. Target: {}. Triggering AI.",
+                    tech.getName(), difficulty, currentStock, MINIMUM_STOCK_THRESHOLD);
+            }
 
-                        currentStock += BATCH_SIZE;
+            try {
+                AiQuestionBatchResponse aiResponse = aiService.generateQuestions(
+                    tech.getName(), difficulty, BATCH_SIZE
+                );
 
-                        log.info("[WORKER] Sleeping for 5 seconds to respect API rate limits...");
-                        sleeper.sleep(5000);
+                questionService.saveAiGeneratedBatch(tech, difficulty, aiResponse);
 
-                    } catch (InterruptedException ie) {
-                        log.warn("[WORKER] Sleep was interrupted!");
-                        Thread.currentThread().interrupt();
-                        break;
-                    } catch (Exception e) {
-                        log.error("[WORKER] Failed to generate questions for {} ({})",
-                            tech.getName(), difficulty, e);
-                        break;
-                    }
+                if (log.isInfoEnabled()) {
+                    log.info("[WORKER] Successfully generated and saved {} questions for {} ({}).",
+                        BATCH_SIZE, tech.getName(), difficulty);
                 }
+
+                currentStock += BATCH_SIZE;
+
+                if (log.isInfoEnabled()) {
+                    log.info("[WORKER] Sleeping to respect API rate limits...");
+                }
+                sleeper.sleep(RATE_LIMIT_DELAY_MS);
+
+            } catch (InterruptedException ie) {
+                if (log.isWarnEnabled()) {
+                    log.warn("[WORKER] Sleep was interrupted!");
+                }
+                Thread.currentThread().interrupt();
+                break;
+            } catch (Exception e) {
+                if (log.isErrorEnabled()) {
+                    log.error("[WORKER] Failed to generate questions for {} ({})",
+                        tech.getName(), difficulty, e);
+                }
+                break;
             }
         }
     }
