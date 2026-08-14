@@ -351,22 +351,19 @@
                                 <limit>
                                     <counter>INSTRUCTION</counter>
                                     <value>COVEREDRATIO</value>
-                                    <minimum
-                                    >${coverage.minimum.instruction}</minimum>
+                                    <minimum>${coverage.minimum.instruction}</minimum>
                                 </limit>
                                 <limit>
                                     <counter>BRANCH</counter>
                                     <value>COVEREDRATIO</value>
-                                    <minimum
-                                    >${coverage.minimum.branch}</minimum>
+                                    <minimum>${coverage.minimum.branch}</minimum>
                                 </limit>
                             </limits>
                         </rule>
                     </rules>
                     <excludes>
                         <exclude>com/gemstoneseekers/config/**</exclude>
-                        <exclude
-                        >com/gemstoneseekers/GemstoneSeekersApplication.class</exclude>
+                        <exclude>com/gemstoneseekers/GemstoneSeekersApplication.class</exclude>
                         <exclude>com/gemstoneseekers/dtos/**</exclude>
                         <exclude>com/gemstoneseekers/exceptions/**</exclude>
                         <exclude>com/gemstoneseekers/mappers/**</exclude>
@@ -410,14 +407,11 @@
                 <configuration>
                     <effort>Max</effort>
                     <threshold>${spotbugs.threshold}</threshold>
-                    <maxAllowedViolations
-                    >${spotbugs.maxAllowedViolations}</maxAllowedViolations>
+                    <maxAllowedViolations>${spotbugs.maxAllowedViolations}</maxAllowedViolations>
                     <xmlOutput>true</xmlOutput>
                     <htmlOutput>true</htmlOutput>
-                    <outputDirectory
-                    >${project.build.directory}/spotbugs</outputDirectory>
-                    <spotbugsXmlOutputDirectory
-                    >${project.build.directory}/spotbugs</spotbugsXmlOutputDirectory>
+                    <outputDirectory>${project.build.directory}/spotbugs</outputDirectory>
+                    <spotbugsXmlOutputDirectory>${project.build.directory}/spotbugs</spotbugsXmlOutputDirectory>
                     <excludeFilterFile>spotbugs-exclude.xml</excludeFilterFile>
                 </configuration>
             </plugin>
@@ -442,8 +436,7 @@
                     <targetJdk>${java.version}</targetJdk>
                     <failOnViolation>true</failOnViolation>
                     <printFailingErrors>true</printFailingErrors>
-                    <outputDirectory
-                    >${project.build.directory}/pmd</outputDirectory>
+                    <outputDirectory>${project.build.directory}/pmd</outputDirectory>
                     <rulesets>
                         <ruleset>category/java/bestpractices.xml</ruleset>
                         <ruleset>category/java/errorprone.xml</ruleset>
@@ -481,15 +474,13 @@
                     <failsOnError>true</failsOnError>
                     <failOnViolation>true</failOnViolation>
                     <violationSeverity>error</violationSeverity>
-                    <outputDirectory
-                    >${project.build.directory}/checkstyle</outputDirectory>
+                    <outputDirectory>${project.build.directory}/checkstyle</outputDirectory>
                     <excludes>
                         **/config/**,
                         **/dto/**,
                         **/GemstoneSeekersApplication.java
                     </excludes>
-                    <includeTestSourceDirectory
-                    >false</includeTestSourceDirectory>
+                    <includeTestSourceDirectory>false</includeTestSourceDirectory>
                     <linkXRef>false</linkXRef>
                 </configuration>
             </plugin>
@@ -538,11 +529,9 @@
                         <artifactId>springdoc-openapi-maven-plugin</artifactId>
                         <version>1.4</version>
                         <configuration>
-                            <apiDocsUrl
-                            >http://localhost:8080/v3/api-docs.yaml</apiDocsUrl>
+                            <apiDocsUrl>http://localhost:8080/v3/api-docs.yaml</apiDocsUrl>
                             <outputFileName>openapi.yml</outputFileName>
-                            <outputDir
-                            >${project.basedir}/src/main/resources/static</outputDir>
+                            <outputDir>${project.basedir}/src/main/resources/static</outputDir>
                         </configuration>
                         <executions>
                             <execution>
