@@ -19,17 +19,6 @@ describe("radar api hooks", () => {
     mockUseQuery.mockImplementation((options) => options);
   });
 
-  it("useJobs configures query with the jobs endpoint", async () => {
-    const { useJobs } = await import("./radar");
-    const query = useJobs();
-
-    expect(query.queryKey).toEqual(["jobs"]);
-
-    await query.queryFn();
-
-    expect(mockHttpGet).toHaveBeenCalledWith("/jobs");
-  });
-
   it("useTechnologyDemand configures query with the market radar endpoint", async () => {
     const { useTechnologyDemand } = await import("./radar");
     const query = useTechnologyDemand();

@@ -1,6 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { setUserRole } from "@/lib/api/auth";
 import { httpClient } from "@/lib/api/client";
 import { ApiError } from "@/lib/api/errors";
 import type { CandidateRoleFormData } from "@/lib/schemas/candidateRoleSchema";
@@ -44,6 +45,7 @@ export function useUpdateCandidate() {
   return useMutation({
     mutationFn: updateCandidateRequest,
     onSuccess: () => {
+      setUserRole("CANDIDATE");
       toast.success("Perfil do candidato atualizado com sucesso!");
       router.push("/candidate/dashboard");
     },
@@ -57,12 +59,14 @@ export function useUpdateCandidate() {
           msg.includes("integridade") ||
           msg.includes("exists")
         ) {
+          setUserRole("CANDIDATE");
           toast.success(
             "Cadastro do candidato já estava concluído ou dados já cadastrados.",
           );
           router.push("/candidate/dashboard");
           return;
         }
+        setUserRole("CANDIDATE");
         toast.info("Cadastro já realizado. Redirecionando para o painel...");
         router.push("/candidate/dashboard");
         return;

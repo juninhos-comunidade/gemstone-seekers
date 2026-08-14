@@ -1,14 +1,24 @@
+export interface ValidationErrorItem {
+  field: string;
+  message: string;
+}
+
 export interface ApiErrorResponse {
-  message?: string;
-  errors?: Record<string, string[]>;
-  [key: string]: unknown;
+  success: boolean;
+  message: string;
+  result?: unknown;
+  error: {
+    code: string;
+    message: string;
+    validations?: ValidationErrorItem[] | Record<string, string> | null;
+  };
 }
 
 export class ApiError extends Error {
   public status: number;
-  public data?: ApiErrorResponse;
+  public data: ApiErrorResponse;
 
-  constructor(status: number, message: string, data?: ApiErrorResponse) {
+  constructor(status: number, message: string, data: ApiErrorResponse) {
     super(message);
     this.name = "ApiError";
     this.status = status;

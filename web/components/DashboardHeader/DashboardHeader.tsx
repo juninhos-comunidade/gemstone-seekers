@@ -1,12 +1,12 @@
 "use client";
 
 import { FaGem } from "react-icons/fa";
-import { MenuIcon } from "lucide-react";
+import { LogOut, MenuIcon } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import { SettingsModal } from "@/components/SettingsModal/SettingsModal";
-import { NotificationsModal } from "@/components/NotificationsModal/NotificationsModal";
 import {
   Sheet,
   SheetContent,
@@ -15,7 +15,8 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { SideMenu, type MenuItem } from "@/components/SideMenu/SideMenu";
-import { useRouter } from "next/navigation";
+import { logout } from "@/lib/api/auth";
+
 type DashboardHeaderProps = {
   role: "candidate" | "recruiter";
   menuItems?: MenuItem[];
@@ -26,16 +27,16 @@ export function DashboardHeader({
   menuItems = [],
 }: DashboardHeaderProps) {
   const roleLabel = role === "candidate" ? "Candidato" : "Recrutador";
-  const initials = role === "candidate" ? "CA" : "RE";
-
   const router = useRouter();
 
   const handleProfile = () => {
     if (role === "candidate") {
       router.push("/candidate/user");
-    } else {
-      router.push("/recruiter/user");
     }
+  };
+
+  const handleLogout = () => {
+    logout();
   };
 
   return (
@@ -96,18 +97,28 @@ export function DashboardHeader({
         </div>
 
         <div className="flex shrink-0 items-center gap-1 sm:gap-2">
-          <NotificationsModal />
           <div className="sm:inline-flex">
             <SettingsModal />
           </div>
+          {role === "candidate" && (
+            <Button
+              variant="outline"
+              size="icon"
+              aria-label="Perfil"
+              className="ml-0 rounded-full sm:ml-1"
+              onClick={handleProfile}
+            >
+              <span className="text-[10px] font-bold">CA</span>
+            </Button>
+          )}
           <Button
-            variant="outline"
+            variant="ghost"
             size="icon"
-            aria-label="Perfil"
-            className="ml-0 rounded-full sm:ml-1"
-            onClick={handleProfile}
+            aria-label="Sair da conta"
+            title="Sair da conta"
+            onClick={handleLogout}
           >
-            <span className="text-[10px] font-bold">{initials}</span>
+            <LogOut className="size-4" />
           </Button>
         </div>
       </div>

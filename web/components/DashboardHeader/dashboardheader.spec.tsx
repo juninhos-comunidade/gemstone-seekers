@@ -1,10 +1,6 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { DashboardHeader } from "./DashboardHeader";
-
-vi.mock("@/components/NotificationsModal/NotificationsModal", () => ({
-  NotificationsModal: () => <div>Notifications</div>,
-}));
 
 vi.mock("@/components/SettingsModal/SettingsModal", () => ({
   SettingsModal: () => <div>Settings</div>,
@@ -35,7 +31,6 @@ vi.mock("@/components/SideMenu/SideMenu", () => ({
 }));
 
 const mockPush = vi.fn();
-
 vi.mock("next/navigation", () => ({
   useRouter: () => ({
     push: mockPush,
@@ -48,9 +43,17 @@ vi.mock("next/navigation", () => ({
   usePathname: () => "/candidate/dashboard",
 }));
 
+const mockLogout = vi.fn();
+vi.mock("@/lib/api/auth", () => ({
+  logout: () => mockLogout(),
+}));
+
 describe("DashboardHeader", () => {
-  it("renders candidate layout, initials, logo link and handles profile redirect", () => {
+  beforeEach(() => {
     vi.clearAllMocks();
+  });
+
+  it("renders candidate layout, initials, logo link and handles profile redirect", () => {
     render(<DashboardHeader role="candidate" />);
     expect(screen.getByText(/painel do candidato/i)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /perfil/i })).toHaveTextContent(
@@ -64,16 +67,24 @@ describe("DashboardHeader", () => {
     expect(mockPush).toHaveBeenCalledWith("/candidate/user");
   });
 
-  it("renders recruiter layout, initials, and handles profile redirect", () => {
-    vi.clearAllMocks();
+  it("renders recruiter layout and hides avatar button", () => {
     render(<DashboardHeader role="recruiter" />);
     expect(screen.getByText(/painel do recrutador/i)).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /perfil/i })).toHaveTextContent(
-      /RE/,
-    );
+    expect(
+      screen.queryByRole("button", { name: /perfil/i }),
+    ).not.toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("button", { name: /perfil/i }));
-    expect(mockPush).toHaveBeenCalledWith("/recruiter/user");
+    const logoLink = screen.getByRole("link", { name: /gemstone seekers/i });
+    expect(logoLink).toHaveAttribute("href", "/recruiter/dashboard");
+  });
+
+  it("handles logout when clicking the logout button", () => {
+    render(<DashboardHeader role="candidate" />);
+    const logoutBtn = screen.getByRole("button", { name: /sair da conta/i });
+    expect(logoutBtn).toBeInTheDocument();
+
+    fireEvent.click(logoutBtn);
+    expect(mockLogout).toHaveBeenCalledTimes(1);
   });
 
   it("renders mobile menu trigger content when menu items are provided", () => {

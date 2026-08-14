@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { getAuthToken } from "@/lib/api/auth";
+import { getAuthToken, setUserRole } from "@/lib/api/auth";
 import { httpClient } from "@/lib/api/client";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
@@ -43,6 +43,9 @@ export default function Page() {
       .get<ProfileResponse>("/profile")
       .then((res) => {
         const profile = res?.result;
+        if (profile?.role) {
+          setUserRole(profile.role);
+        }
         if (profile?.registrationCompleted) {
           router.replace(
             profile.role === "RECRUITER"
@@ -81,6 +84,7 @@ export default function Page() {
   const handleChooseRole = async ({ role }: RoleFormData) => {
     try {
       localStorage.setItem("signup-role", role);
+      setUserRole(role === "candidate" ? "CANDIDATE" : "RECRUITER");
 
       router.push(role === "candidate" ? "/role/candidate" : "/role/recruiter");
     } catch {

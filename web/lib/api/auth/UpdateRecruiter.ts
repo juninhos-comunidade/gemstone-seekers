@@ -1,6 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { setUserRole } from "@/lib/api/auth";
 import { httpClient } from "@/lib/api/client";
 import { ApiError } from "@/lib/api/errors";
 import type { RecruiterRoleFormData } from "@/lib/schemas/recruiterRoleSchema";
@@ -44,6 +45,7 @@ export function useUpdateRecruiter() {
   return useMutation({
     mutationFn: updateRecruiterRequest,
     onSuccess: () => {
+      setUserRole("RECRUITER");
       toast.success("Perfil do recrutador atualizado com sucesso!");
       router.push("/recruiter/dashboard");
     },
@@ -57,12 +59,14 @@ export function useUpdateRecruiter() {
           msg.includes("integridade") ||
           msg.includes("exists")
         ) {
+          setUserRole("RECRUITER");
           toast.success(
             "Cadastro do recrutador já estava concluído ou dados já cadastrados.",
           );
           router.push("/recruiter/dashboard");
           return;
         }
+        setUserRole("RECRUITER");
         toast.info("Cadastro já realizado. Redirecionando para o painel...");
         router.push("/recruiter/dashboard");
         return;
