@@ -1,6 +1,6 @@
 package com.gemstoneseekers.services;
 
-import com.gemstoneseekers.dtos.ai.AiQuestionBatchResponse;
+import com.gemstoneseekers.dtos.response.AiQuestionBatchResponse;
 import com.gemstoneseekers.enums.QuestionDifficulty;
 import com.gemstoneseekers.enums.QuestionSource;
 import com.gemstoneseekers.models.Question;

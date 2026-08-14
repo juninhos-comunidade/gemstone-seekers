@@ -1,4 +1,4 @@
-package com.gemstoneseekers.dtos.ai;
+package com.gemstoneseekers.dtos.response;
 
 import java.util.List;
 

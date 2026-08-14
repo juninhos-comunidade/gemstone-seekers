@@ -1,6 +1,6 @@
 package com.gemstoneseekers.services;
 
-import com.gemstoneseekers.dtos.ai.AiQuestionBatchResponse;
+import com.gemstoneseekers.dtos.response.AiQuestionBatchResponse;
 import com.gemstoneseekers.enums.QuestionDifficulty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

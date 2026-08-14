@@ -1,8 +1,8 @@
 package com.gemstoneseekers.services;
 
-import com.gemstoneseekers.dtos.ai.AiGeneratedQuestionDTO;
-import com.gemstoneseekers.dtos.ai.AiGeneratedOptionDTO;
-import com.gemstoneseekers.dtos.ai.AiQuestionBatchResponse;
+import com.gemstoneseekers.dtos.response.AiGeneratedQuestionDTO;
+import com.gemstoneseekers.dtos.response.AiGeneratedOptionDTO;
+import com.gemstoneseekers.dtos.response.AiQuestionBatchResponse;
 import com.gemstoneseekers.enums.QuestionDifficulty;
 import com.gemstoneseekers.enums.QuestionSource;
 import com.gemstoneseekers.models.Question;
