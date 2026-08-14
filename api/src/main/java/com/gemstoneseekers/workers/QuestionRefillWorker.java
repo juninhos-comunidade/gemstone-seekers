@@ -11,6 +11,7 @@ import com.gemstoneseekers.services.QuestionService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.annotation.Profile;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
@@ -19,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+@Profile("!test")
 @Component
 public class QuestionRefillWorker {
 
@@ -133,9 +135,7 @@ public class QuestionRefillWorker {
                 }
                 Thread.currentThread().interrupt();
                 break;
-            } catch (org.springframework.ai.retry.NonTransientAiException
-                     | org.springframework.ai.retry.TransientAiException
-                     | org.springframework.dao.DataAccessException e) {
+            } catch (RuntimeException e) {
                 if (log.isErrorEnabled()) {
                     log.error("[WORKER] Failed to generate or save questions for {} ({})",
                         tech.getName(), difficulty, e);

@@ -3,6 +3,7 @@ package com.gemstoneseekers.workers;
 import com.gemstoneseekers.dtos.response.AiQuestionBatchResponse;
 import com.gemstoneseekers.enums.QuestionDifficulty;
 import com.gemstoneseekers.models.Technology;
+import com.gemstoneseekers.projections.StockProjection;
 import com.gemstoneseekers.repositories.QuestionRepository;
 import com.gemstoneseekers.repositories.TechnologyRepository;
 import com.gemstoneseekers.services.AiQuestionGeneratorService;
@@ -52,9 +53,9 @@ class QuestionRefillWorkerTest {
 
         when(technologyRepository.findAll()).thenReturn(List.of(javaTech));
 
-        QuestionRepository.StockProjection beginnerStock = createMockProjection(1, QuestionDifficulty.BEGINNER, 12L);
-        QuestionRepository.StockProjection intermediateStock = createMockProjection(1, QuestionDifficulty.INTERMEDIATE, 15L);
-        QuestionRepository.StockProjection advancedStock = createMockProjection(1, QuestionDifficulty.ADVANCED, 20L);
+        StockProjection beginnerStock = createMockProjection(1, QuestionDifficulty.BEGINNER, 12L);
+        StockProjection intermediateStock = createMockProjection(1, QuestionDifficulty.INTERMEDIATE, 15L);
+        StockProjection advancedStock = createMockProjection(1, QuestionDifficulty.ADVANCED, 20L);
 
         when(questionRepository.getQuestionStockReport()).thenReturn(
             List.of(beginnerStock, intermediateStock, advancedStock)
@@ -66,13 +67,14 @@ class QuestionRefillWorkerTest {
         verify(questionService, never()).saveAiGeneratedBatch(any(), any(), any());
     }
 
-    private QuestionRepository.StockProjection createMockProjection(Integer techId, QuestionDifficulty difficulty, Long count) {
-        QuestionRepository.StockProjection projection = mock(QuestionRepository.StockProjection.class);
+    private StockProjection createMockProjection(Integer techId, QuestionDifficulty difficulty, Long count) {
+        StockProjection projection = mock(StockProjection.class);
         when(projection.getTechnologyId()).thenReturn(techId);
         when(projection.getDifficultyLevel()).thenReturn(difficulty);
         when(projection.getStockCount()).thenReturn(count);
         return projection;
     }
+
     @Test
     void shouldTriggerAiGenerationOnceWhenStockIsSlightlyBelowThreshold() throws InterruptedException {
         Technology javaTech = new Technology();
@@ -81,9 +83,9 @@ class QuestionRefillWorkerTest {
 
         when(technologyRepository.findAll()).thenReturn(List.of(javaTech));
 
-        QuestionRepository.StockProjection beginnerStock = createMockProjection(1, QuestionDifficulty.BEGINNER, 2L);
-        QuestionRepository.StockProjection intermediateStock = createMockProjection(1, QuestionDifficulty.INTERMEDIATE, 15L);
-        QuestionRepository.StockProjection advancedStock = createMockProjection(1, QuestionDifficulty.ADVANCED, 20L);
+        StockProjection beginnerStock = createMockProjection(1, QuestionDifficulty.BEGINNER, 2L);
+        StockProjection intermediateStock = createMockProjection(1, QuestionDifficulty.INTERMEDIATE, 15L);
+        StockProjection advancedStock = createMockProjection(1, QuestionDifficulty.ADVANCED, 20L);
 
         when(questionRepository.getQuestionStockReport()).thenReturn(
             List.of(beginnerStock, intermediateStock, advancedStock)
@@ -111,9 +113,9 @@ class QuestionRefillWorkerTest {
 
         when(technologyRepository.findAll()).thenReturn(List.of(pythonTech));
 
-        QuestionRepository.StockProjection beginnerStock = createMockProjection(2, QuestionDifficulty.BEGINNER, 0L);
-        QuestionRepository.StockProjection intermediateStock = createMockProjection(2, QuestionDifficulty.INTERMEDIATE, 15L);
-        QuestionRepository.StockProjection advancedStock = createMockProjection(2, QuestionDifficulty.ADVANCED, 15L);
+        StockProjection beginnerStock = createMockProjection(2, QuestionDifficulty.BEGINNER, 0L);
+        StockProjection intermediateStock = createMockProjection(2, QuestionDifficulty.INTERMEDIATE, 15L);
+        StockProjection advancedStock = createMockProjection(2, QuestionDifficulty.ADVANCED, 15L);
 
         when(questionRepository.getQuestionStockReport()).thenReturn(
             List.of(beginnerStock, intermediateStock, advancedStock)
@@ -141,9 +143,9 @@ class QuestionRefillWorkerTest {
 
         when(technologyRepository.findAll()).thenReturn(List.of(javaTech));
 
-        QuestionRepository.StockProjection beginnerStock = createMockProjection(1, QuestionDifficulty.BEGINNER, 0L);
-        QuestionRepository.StockProjection intermediateStock = createMockProjection(1, QuestionDifficulty.INTERMEDIATE, 0L);
-        QuestionRepository.StockProjection advancedStock = createMockProjection(1, QuestionDifficulty.ADVANCED, 15L);
+        StockProjection beginnerStock = createMockProjection(1, QuestionDifficulty.BEGINNER, 0L);
+        StockProjection intermediateStock = createMockProjection(1, QuestionDifficulty.INTERMEDIATE, 0L);
+        StockProjection advancedStock = createMockProjection(1, QuestionDifficulty.ADVANCED, 15L);
 
         when(questionRepository.getQuestionStockReport()).thenReturn(
             List.of(beginnerStock, intermediateStock, advancedStock)
@@ -175,9 +177,9 @@ class QuestionRefillWorkerTest {
 
         when(technologyRepository.findAll()).thenReturn(List.of(javaTech));
 
-        QuestionRepository.StockProjection beginnerStock = createMockProjection(1, QuestionDifficulty.BEGINNER, 0L);
-        QuestionRepository.StockProjection intermediateStock = createMockProjection(1, QuestionDifficulty.INTERMEDIATE, 15L);
-        QuestionRepository.StockProjection advancedStock = createMockProjection(1, QuestionDifficulty.ADVANCED, 15L);
+        StockProjection beginnerStock = createMockProjection(1, QuestionDifficulty.BEGINNER, 0L);
+        StockProjection intermediateStock = createMockProjection(1, QuestionDifficulty.INTERMEDIATE, 15L);
+        StockProjection advancedStock = createMockProjection(1, QuestionDifficulty.ADVANCED, 15L);
 
         when(questionRepository.getQuestionStockReport()).thenReturn(
             List.of(beginnerStock, intermediateStock, advancedStock)
@@ -207,9 +209,9 @@ class QuestionRefillWorkerTest {
 
         when(technologyRepository.findAll()).thenReturn(List.of(javaTech));
 
-        QuestionRepository.StockProjection beginnerStock = createMockProjection(1, QuestionDifficulty.BEGINNER, 0L);
-        QuestionRepository.StockProjection intermediateStock = createMockProjection(1, QuestionDifficulty.INTERMEDIATE, 0L);
-        QuestionRepository.StockProjection advancedStock = createMockProjection(1, QuestionDifficulty.ADVANCED, 15L);
+        StockProjection beginnerStock = createMockProjection(1, QuestionDifficulty.BEGINNER, 0L);
+        StockProjection intermediateStock = createMockProjection(1, QuestionDifficulty.INTERMEDIATE, 0L);
+        StockProjection advancedStock = createMockProjection(1, QuestionDifficulty.ADVANCED, 15L);
 
         when(questionRepository.getQuestionStockReport()).thenReturn(
             List.of(beginnerStock, intermediateStock, advancedStock)
