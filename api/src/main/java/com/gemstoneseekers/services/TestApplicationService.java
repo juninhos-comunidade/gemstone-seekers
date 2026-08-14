@@ -2,20 +2,30 @@ package com.gemstoneseekers.services;
 
 import com.gemstoneseekers.dtos.request.SaveAnswerRequest;
 import com.gemstoneseekers.dtos.request.TestHistoryFilterParams;
-import com.gemstoneseekers.dtos.response.*;
 import com.gemstoneseekers.enums.QuestionDifficulty;
+import com.gemstoneseekers.dtos.response.CandidateTestHistoryResponse;
+import com.gemstoneseekers.dtos.response.DifficultyHistoryGroupResponse;
+import com.gemstoneseekers.dtos.response.TechnologyHistoryGroupResponse;
+import com.gemstoneseekers.dtos.response.TestDetailedResultResponse;
+import com.gemstoneseekers.dtos.response.TestResponse;
+import com.gemstoneseekers.dtos.response.TestResultResponse;
+import com.gemstoneseekers.dtos.response.TestSummaryResponse;
 import com.gemstoneseekers.enums.TestStatus;
 import com.gemstoneseekers.exceptions.AccessDeniedException;
 import com.gemstoneseekers.exceptions.BusinessRuleException;
 import com.gemstoneseekers.exceptions.EntityNotFoundException;
 import com.gemstoneseekers.mappers.TestMapper;
-import com.gemstoneseekers.models.*;
+import com.gemstoneseekers.models.Candidate;
+import com.gemstoneseekers.models.CandidateAnswer;
+import com.gemstoneseekers.models.Question;
+import com.gemstoneseekers.models.Technology;
+import com.gemstoneseekers.models.Test;
+import com.gemstoneseekers.models.QuestionOption;
 import com.gemstoneseekers.repositories.QuestionOptionRepository;
 import com.gemstoneseekers.repositories.QuestionRepository;
 import com.gemstoneseekers.repositories.TestRepository;
 
 import com.gemstoneseekers.repositories.specifications.TestSpecifications;
-import jakarta.validation.constraints.NotNull;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -24,14 +34,18 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.Instant;
-import java.util.*;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
-import static java.util.stream.Collectors.toList;
-
+@SuppressWarnings("PMD.TestClassWithoutTestCases")
 @Service
 public class TestApplicationService {
-
+    private static final String TEST_ENTITY_NAME = "Test";
     private final QuestionRepository questionRepository;
     private final TestRepository testRepository;
     private final CandidateService candidateService;
@@ -102,7 +116,7 @@ public class TestApplicationService {
         Candidate candidate = candidateService.getCandidateByEmailSession(email);
 
         Test test = testRepository.findById(testId)
-            .orElseThrow(() -> new EntityNotFoundException("Test", testId));
+            .orElseThrow(() -> new EntityNotFoundException(TEST_ENTITY_NAME, testId));
 
         if (!test.getCandidate().getId().equals(candidate.getId())) {
             throw new AccessDeniedException("You do not have permission to modify this test");
@@ -129,7 +143,7 @@ public class TestApplicationService {
         Candidate candidate = candidateService.getCandidateByEmailSession(email);
 
         Test test = testRepository.findById(testId)
-            .orElseThrow(() -> new EntityNotFoundException("Test", testId));
+            .orElseThrow(() -> new EntityNotFoundException(TEST_ENTITY_NAME, testId));
 
         if (!test.getCandidate().getId().equals(candidate.getId())) {
             throw new AccessDeniedException("You do not have permission to submit this test");
@@ -213,7 +227,7 @@ public class TestApplicationService {
         Candidate candidate = candidateService.getCandidateByEmailSession(email);
 
         Test test = testRepository.findById(testId)
-            .orElseThrow(() -> new EntityNotFoundException("Test", testId));
+            .orElseThrow(() -> new EntityNotFoundException(TEST_ENTITY_NAME, testId));
 
         if (!test.getCandidate().getId().equals(candidate.getId())) {
             throw new AccessDeniedException("You do not have permission to view this test");
@@ -231,7 +245,7 @@ public class TestApplicationService {
         Candidate candidate = candidateService.getCandidateByEmailSession(email);
 
         Test test = testRepository.findById(testId)
-            .orElseThrow(() -> new EntityNotFoundException("Test", testId));
+            .orElseThrow(() -> new EntityNotFoundException(TEST_ENTITY_NAME, testId));
 
         if (!test.getCandidate().getId().equals(candidate.getId())) {
             throw new AccessDeniedException("You do not have permission to modify this test");

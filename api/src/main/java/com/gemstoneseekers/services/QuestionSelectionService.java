@@ -23,7 +23,7 @@ public class QuestionSelectionService {
     private static final Logger log = LoggerFactory.getLogger(QuestionSelectionService.class);
     private static final int QUESTIONS_PER_TEST = 10;
     private static final int MIN_UNSEEN_QUESTIONS = 3;
-
+    private static final int WARNING_STOCK_THRESHOLD = 6;
     private final QuestionRepository questionRepository;
     private final ApplicationEventPublisher eventPublisher;
 
@@ -43,16 +43,19 @@ public class QuestionSelectionService {
         );
 
         if (unseenQuestions.size() < MIN_UNSEEN_QUESTIONS) {
-            log.warn("[QUIZ] User {} blocked. Only {} unseen questions for {}. Triggering AI.",
-                user.getId(), unseenQuestions.size(), tech.getName());
-
+            if (log.isWarnEnabled()) {
+                log.warn("[QUIZ] User {} blocked. Only {} unseen questions for {}. Triggering AI.",
+                    user.getId(), unseenQuestions.size(), tech.getName());
+            }
             eventPublisher.publishEvent(new LowQuestionStockEvent(tech, difficulty));
-            throw new InsufficientQuestionsException("Estamos gerando questões inéditas para você! Aguarde alguns instantes e tente novamente.");
+            throw new InsufficientQuestionsException(
+                "Estamos gerando questões inéditas para você! Aguarde alguns instantes e tente novamente."
+            );
         }
 
         List<Question> testQuestions = new ArrayList<>(unseenQuestions);
 
-        if (unseenQuestions.size() < 6) {
+        if (unseenQuestions.size() < WARNING_STOCK_THRESHOLD) {
             eventPublisher.publishEvent(new LowQuestionStockEvent(tech, difficulty));
         }
 
@@ -68,7 +71,9 @@ public class QuestionSelectionService {
 
             if (seenQuestions.size() < missingQuestions) {
                 eventPublisher.publishEvent(new LowQuestionStockEvent(tech, difficulty));
-                throw new InsufficientQuestionsException("O acervo global ainda está sendo populado. Tente em breve.");
+                throw new InsufficientQuestionsException(
+                    "O acervo global ainda está sendo populado. Tente em breve."
+                );
             }
 
             testQuestions.addAll(seenQuestions);

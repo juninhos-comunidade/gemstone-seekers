@@ -13,8 +13,9 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+
 @Service
-public class QuestionService{
+public class QuestionService {
 
     private final QuestionRepository questionRepository;
 
@@ -23,10 +24,12 @@ public class QuestionService{
     }
 
     @Transactional
-    public void saveAiGeneratedBatch(Technology technology, QuestionDifficulty difficulty, AiQuestionBatchResponse aiResponse) {
-
+    public void saveAiGeneratedBatch(
+        Technology technology,
+        QuestionDifficulty difficulty,
+        AiQuestionBatchResponse aiResponse
+    ) {
         List<Question> questionsToSave = aiResponse.questions().stream().map(aiQuestion -> {
-
             Question question = new Question();
             question.setTechnology(technology);
             question.setDifficultyLevel(difficulty);
@@ -44,7 +47,6 @@ public class QuestionService{
 
             question.setOptions(options);
             return question;
-
         }).toList();
 
         questionRepository.saveAll(questionsToSave);

@@ -27,11 +27,12 @@ public class AiQuestionGeneratorService {
 
         String prompt = """
             Você é um Engenheiro de Software Sênior especializado na criação de testes técnicos.
-            Sua tarefa é gerar %d questões originais de múltipla escolha sobre a tecnologia '%s' com nível de dificuldade '%s'.
+            Sua tarefa é gerar %d questões originais de múltipla escolha sobre a tecnologia '%s'
+            com nível de dificuldade '%s'.
 
             REGRAS ABSOLUTAS:
             1. Cada questão deve ter exatamente 4 opções de resposta.
-            2. Apenas UMA opção pode ser verdadeira (isCorrect = true). As outras três devem ser estritamente falsas.
+            2. Apenas UMA opção pode ser verdadeira (isCorrect = true). As outras devem ser falsas.
             3. As opções incorretas devem ser plausíveis para confundir candidatos não preparados.
             4. Não repita questões clássicas ou clichês.
             5. O formato da saída deve obedecer ESTRITAMENTE ao esquema JSON fornecido.
