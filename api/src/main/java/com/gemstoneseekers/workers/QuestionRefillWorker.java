@@ -11,7 +11,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
@@ -30,12 +29,26 @@ public class QuestionRefillWorker {
     private final QuestionRepository questionRepository;
     private final QuestionService questionService;
     private final AiQuestionGeneratorService aiService;
+    private final Sleeper sleeper;
 
-    public QuestionRefillWorker(TechnologyRepository technologyRepository, QuestionRepository questionRepository, QuestionService questionService, AiQuestionGeneratorService aiService) {
+    public interface Sleeper {
+        void sleep(long millis) throws InterruptedException;
+    }
+
+    @Component
+    public static class DefaultSleeper implements Sleeper {
+        @Override
+        public void sleep(long millis) throws InterruptedException {
+            Thread.sleep(millis);
+        }
+    }
+
+    public QuestionRefillWorker(TechnologyRepository technologyRepository, QuestionRepository questionRepository, QuestionService questionService, AiQuestionGeneratorService aiService, Sleeper sleeper) {
         this.technologyRepository = technologyRepository;
         this.questionRepository = questionRepository;
         this.questionService = questionService;
         this.aiService = aiService;
+        this.sleeper = sleeper;
     }
 
     @EventListener(ApplicationReadyEvent.class)
@@ -43,6 +56,11 @@ public class QuestionRefillWorker {
         log.info("[WORKER] Starting Question Refill Job...");
 
         List<Technology> technologies = technologyRepository.findAll();
+
+        if (technologies.isEmpty()) {
+            log.info("[WORKER] No technologies found. Skipping job.");
+            return;
+        }
 
         List<QuestionRepository.StockProjection> stockReport = questionRepository.getQuestionStockReport();
 
@@ -74,13 +92,13 @@ public class QuestionRefillWorker {
 
                         questionService.saveAiGeneratedBatch(tech, difficulty, aiResponse);
 
-                        log.info("[WORKER] Successfully generated and saved {} questions for {} ({}).",
+                        log.info("[WORK-ER] Successfully generated and saved {} questions for {} ({}).",
                             BATCH_SIZE, tech.getName(), difficulty);
 
                         currentStock += BATCH_SIZE;
 
                         log.info("[WORKER] Sleeping for 5 seconds to respect API rate limits...");
-                        Thread.sleep(5000);
+                        sleeper.sleep(5000);
 
                     } catch (InterruptedException ie) {
                         log.warn("[WORKER] Sleep was interrupted!");
