@@ -1,14 +1,16 @@
 import { render, screen } from "@testing-library/react";
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { QuizQuestion } from "./QuizQuestion";
 import { Question } from "@/lib/types/quiz";
 
+// Mock do Next.js router
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({
+    push: vi.fn(),
+  }),
+}));
+
 describe("QuizQuestion", () => {
-  //   id: string;
-  //   technologyId: number;
-  //   statement: string;
-  //   difficulty: QuestionDifficulty;
-  //   options: QuestionOption[];
   const mockQuestion = {
     id: "1",
     technologyId: 1,
@@ -57,7 +59,8 @@ describe("QuizQuestion", () => {
       />,
     );
 
-    expect(screen.getByText("Anterior")).toBeDisabled();
+    const previousButton = screen.getByText("Anterior");
+    expect(previousButton).toBeDisabled();
   });
 
   it("changes 'Próxima' button text to 'Finalizar' on the last question", () => {
@@ -76,5 +79,6 @@ describe("QuizQuestion", () => {
     );
 
     expect(screen.getByText("Finalizar")).toBeInTheDocument();
+    expect(screen.queryByText("Próxima")).not.toBeInTheDocument();
   });
 });
