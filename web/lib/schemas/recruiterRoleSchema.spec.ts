@@ -6,11 +6,9 @@ describe("recruiterRoleSchema", () => {
     const result = recruiterRoleSchema.safeParse({
       documentType: "CNPJ",
       documentNumber: "00.000.000/0000-00",
-      companyName: "Gemstone Seekers",
+      companyId: "company-123",
       jobTitle: "Analista de RH",
       phone: "+55 11 99999-9999",
-      companyWebsite: "https://gemstoneseekers.com",
-      companySize: "11-50",
     });
 
     expect(result.success).toBe(true);
@@ -20,11 +18,9 @@ describe("recruiterRoleSchema", () => {
     const result = recruiterRoleSchema.safeParse({
       documentType: "",
       documentNumber: "",
-      companyName: "",
+      companyId: "",
       jobTitle: "",
       phone: "",
-      companyWebsite: "",
-      companySize: "",
     });
 
     expect(result.success).toBe(false);
@@ -36,11 +32,9 @@ describe("recruiterRoleSchema", () => {
       expect(fieldErrors.documentNumber).toContain(
         "Informe o número do documento",
       );
-      expect(fieldErrors.companyName).toContain("Informe o nome da empresa");
+      expect(fieldErrors.companyId).toContain("Selecione a empresa");
       expect(fieldErrors.jobTitle).toContain("Informe o cargo");
       expect(fieldErrors.phone).toContain("Informe o telefone");
-      expect(fieldErrors.companyWebsite).toContain("Informe o site da empresa");
-      expect(fieldErrors.companySize).toContain("Informe o tamanho da empresa");
     }
   });
 });
