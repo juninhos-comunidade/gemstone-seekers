@@ -9,7 +9,7 @@ import java.util.Objects;
 import java.util.Set;
 
 import com.gemstoneseekers.enums.QuestionDifficulty;
-import com.gemstoneseekers.enums.TestStatus;
+import com.gemstoneseekers.enums.AssessmentStatus;
 import com.gemstoneseekers.exceptions.BusinessRuleException;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
@@ -35,11 +35,11 @@ import lombok.Setter;
 import org.hibernate.type.SqlTypes;
 
 @Entity
-@Table(name = "tests")
+@Table(name = "assessments")
 @Getter
 @Setter
 @NoArgsConstructor
-public class Test extends BaseModel {
+public class Assessment extends BaseModel {
 
     private static final int MAX_SCORE = 10;
 
@@ -60,7 +60,7 @@ public class Test extends BaseModel {
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     @JdbcTypeCode(SqlTypes.NAMED_ENUM)
-    private TestStatus status = TestStatus.IN_PROGRESS;
+    private AssessmentStatus status = AssessmentStatus.IN_PROGRESS;
 
     @Column(name = "score", precision = 5, scale = 2)
     private BigDecimal score;
@@ -71,31 +71,31 @@ public class Test extends BaseModel {
     @Column(name = "completed_at")
     private Instant completedAt;
 
-    @OneToMany(mappedBy = "test", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "assessment", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("id ASC")
     private Set<CandidateAnswer> answers = new LinkedHashSet<>();
 
     public void addAnswer(CandidateAnswer answer) {
         answers.add(answer);
-        answer.setTest(this);
+        answer.setAssessment(this);
     }
 
     public void answerQuestion(Long questionId, QuestionOption option) {
         CandidateAnswer answer = this.answers.stream().filter(a -> a.getQuestion().getId().equals(questionId))
                 .findFirst().orElseThrow(() -> new BusinessRuleException(String.format(
-                        "Question ID %d does not belong to Test ID %s", questionId, getId())));
+                        "Question ID %d does not belong to Assessment ID %s", questionId, getId())));
 
         answer.setSelectedOption(option);
     }
 
     public void submit() {
 
-        if (this.status != TestStatus.IN_PROGRESS) {
-            throw new BusinessRuleException("Only tests in progress can be submitted");
+        if (this.status != AssessmentStatus.IN_PROGRESS) {
+            throw new BusinessRuleException("Only assessments in progress can be submitted");
         }
 
         this.score = calculateScore();
-        this.status = TestStatus.COMPLETED;
+        this.status = AssessmentStatus.COMPLETED;
         this.completedAt = Instant.now();
     }
 

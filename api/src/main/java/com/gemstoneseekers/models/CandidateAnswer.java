@@ -18,7 +18,7 @@ import lombok.Setter;
 
 @Entity
 @Table(name = "candidate_answers", uniqueConstraints = {@UniqueConstraint(name = "uq_candidate_answers", columnNames = {
-        "test_id", "question_id"})})
+        "assessment_id", "question_id"})})
 @AttributeOverride(name = "updatedAt", column = @Column(name = "created_at", insertable = false, updatable = false))
 @Getter
 @Setter
@@ -31,8 +31,8 @@ public class CandidateAnswer extends BaseModel {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "test_id", nullable = false)
-    private Test test;
+    @JoinColumn(name = "assessment_id", nullable = false)
+    private Assessment assessment;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "question_id", nullable = false)

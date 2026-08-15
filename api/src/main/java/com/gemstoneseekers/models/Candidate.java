@@ -64,7 +64,7 @@ public class Candidate extends BaseModel {
     private List<Project> projects = new ArrayList<>();
 
     @OneToMany(mappedBy = TABLE_NAME, cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Test> tests = new ArrayList<>();
+    private List<Assessment> assessments = new ArrayList<>();
 
     @Column(name = "summary")
     private String summary;

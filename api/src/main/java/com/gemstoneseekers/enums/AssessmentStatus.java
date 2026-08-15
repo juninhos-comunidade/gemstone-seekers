@@ -1,5 +1,5 @@
 package com.gemstoneseekers.enums;
 
-public enum TestStatus {
+public enum AssessmentStatus {
     IN_PROGRESS, COMPLETED, CANCELED
 }

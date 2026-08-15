@@ -31,7 +31,7 @@ public class Technology extends BaseModel {
     private String category;
 
     @OneToMany(mappedBy = "technology")
-    private List<Test> tests;
+    private List<Assessment> assessments;
 
     @OneToMany(mappedBy = "technology")
     private List<Question> questions;

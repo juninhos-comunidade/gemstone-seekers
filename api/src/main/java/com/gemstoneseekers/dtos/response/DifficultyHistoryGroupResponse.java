@@ -6,5 +6,5 @@ import java.math.BigDecimal;
 import java.util.List;
 
 public record DifficultyHistoryGroupResponse(QuestionDifficulty difficulty, int testsCount, BigDecimal averageScore,
-        List<TestSummaryResponse> tests) {
+        List<AssessmentSummaryResponse> assessments) {
 }
