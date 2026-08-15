@@ -18,9 +18,16 @@ if [ -n "$API_CHANGED" ]; then
     # Check if any Controller class was modified to regenerate OpenAPI specification
     CONTROLLER_FILES=$(echo "$API_CHANGED" | grep -E "Controller\.java$" || true)
 
-    if [ -n "$CONTROLLER_FILES" ]; then
+if [ -n "$CONTROLLER_FILES" ]; then
         echo "Generating OpenAPI documentation..."
-        ./mvnw pre-integration-test springdoc-openapi:generate post-integration-test -Popenapi -Dskip.git.hooks=true --no-transfer-progress -q
+        if ! ./mvnw pre-integration-test springdoc-openapi:generate post-integration-test \
+                -Popenapi \
+                -DskipTests \
+                -Dskip.git.hooks=true \
+                --no-transfer-progress -q; then
+            echo "ERROR: Failed to generate OpenAPI specification. Commit aborted."
+            exit 1
+        fi
         git add "src/main/resources/static/openapi.yml"
     fi
 
