@@ -42,7 +42,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-@SuppressWarnings("PMD.TestClassWithoutTestCases")
 @Service
 public class TestApplicationService {
     private static final String TEST_ENTITY_NAME = "Test";

@@ -28,7 +28,6 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/tests")
-@SuppressWarnings("PMD.TestClassWithoutTestCases")
 public class TestController {
 
 

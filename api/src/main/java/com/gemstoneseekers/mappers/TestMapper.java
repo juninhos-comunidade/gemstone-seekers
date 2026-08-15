@@ -17,7 +17,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-@SuppressWarnings("PMD.TestClassWithoutTestCases")
 @Component
 public class TestMapper {
 

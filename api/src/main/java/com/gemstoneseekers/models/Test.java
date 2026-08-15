@@ -39,7 +39,6 @@ import org.hibernate.type.SqlTypes;
 @Getter
 @Setter
 @NoArgsConstructor
-@SuppressWarnings("PMD.TestClassWithoutTestCases")
 public class Test extends BaseModel {
 
     private static final int MAX_SCORE = 10;
