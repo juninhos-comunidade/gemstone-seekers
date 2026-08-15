@@ -50,7 +50,7 @@ describe("Assessments API (lib/api/assessments)", () => {
 
       const result = await startAssessment("JavaScript");
       expect(httpClient.post).toHaveBeenCalledWith(
-        "/assessments/start/JavaScript"
+        "/assessments/start/JavaScript",
       );
       expect(result).toEqual(mockResponse);
     });
@@ -69,10 +69,10 @@ describe("Assessments API (lib/api/assessments)", () => {
 
       const result = await startAssessment(
         "JavaScript",
-        "BEGINNER" as AssessmentDifficulty
+        "BEGINNER" as AssessmentDifficulty,
       );
       expect(httpClient.post).toHaveBeenCalledWith(
-        "/assessments/start/JavaScript?difficulty=BEGINNER"
+        "/assessments/start/JavaScript?difficulty=BEGINNER",
       );
       expect(result).toEqual(mockResponse);
     });
@@ -88,7 +88,7 @@ describe("Assessments API (lib/api/assessments)", () => {
         {
           questionId: 1,
           selectedOptionId: 2,
-        }
+        },
       );
     });
   });
@@ -107,7 +107,7 @@ describe("Assessments API (lib/api/assessments)", () => {
 
       const result = await submitAssessment("assessment-1");
       expect(httpClient.post).toHaveBeenCalledWith(
-        "/assessments/assessment-1/submit"
+        "/assessments/assessment-1/submit",
       );
       expect(result).toEqual(mockResponse);
     });
@@ -119,7 +119,7 @@ describe("Assessments API (lib/api/assessments)", () => {
 
       await cancelAssessment("assessment-1");
       expect(httpClient.post).toHaveBeenCalledWith(
-        "/assessments/assessment-1/cancel"
+        "/assessments/assessment-1/cancel",
       );
     });
   });
@@ -139,7 +139,7 @@ describe("Assessments API (lib/api/assessments)", () => {
 
       const result = await getAssessmentResult("assessment-1");
       expect(httpClient.get).toHaveBeenCalledWith(
-        "/assessments/assessment-1/result"
+        "/assessments/assessment-1/result",
       );
       expect(result).toEqual(mockResponse);
     });
@@ -175,7 +175,7 @@ describe("Assessments API (lib/api/assessments)", () => {
 
       const result = await getAssessmentHistory({ technology: "JavaScript" });
       expect(httpClient.get).toHaveBeenCalledWith(
-        "/assessments/history?technology=JavaScript"
+        "/assessments/history?technology=JavaScript",
       );
       expect(result).toEqual(mockResponse);
     });
@@ -193,7 +193,7 @@ describe("Assessments API (lib/api/assessments)", () => {
 
       const result = await getAssessmentHistory({ status: "COMPLETED" });
       expect(httpClient.get).toHaveBeenCalledWith(
-        "/assessments/history?status=COMPLETED"
+        "/assessments/history?status=COMPLETED",
       );
       expect(result).toEqual(mockResponse);
     });
@@ -214,7 +214,7 @@ describe("Assessments API (lib/api/assessments)", () => {
         status: "COMPLETED",
       });
       expect(httpClient.get).toHaveBeenCalledWith(
-        "/assessments/history?technology=JavaScript&status=COMPLETED"
+        "/assessments/history?technology=JavaScript&status=COMPLETED",
       );
       expect(result).toEqual(mockResponse);
     });
@@ -250,7 +250,7 @@ describe("Assessments API (lib/api/assessments)", () => {
 
       const result = await startAssessment("JavaScript");
       expect(httpClient.post).toHaveBeenCalledWith(
-        "/assessments/start/JavaScript"
+        "/assessments/start/JavaScript",
       );
       expect(result).toEqual(mockResponse);
     });
@@ -269,10 +269,10 @@ describe("Assessments API (lib/api/assessments)", () => {
 
       const result = await startAssessment(
         "JavaScript",
-        "BEGINNER" as AssessmentDifficulty
+        "BEGINNER" as AssessmentDifficulty,
       );
       expect(httpClient.post).toHaveBeenCalledWith(
-        "/assessments/start/JavaScript?difficulty=BEGINNER"
+        "/assessments/start/JavaScript?difficulty=BEGINNER",
       );
       expect(result).toEqual(mockResponse);
     });
@@ -288,7 +288,7 @@ describe("Assessments API (lib/api/assessments)", () => {
         {
           questionId: 1,
           selectedOptionId: 2,
-        }
+        },
       );
     });
   });
@@ -307,7 +307,7 @@ describe("Assessments API (lib/api/assessments)", () => {
 
       const result = await submitAssessment("assessment-1");
       expect(httpClient.post).toHaveBeenCalledWith(
-        "/assessments/assessment-1/submit"
+        "/assessments/assessment-1/submit",
       );
       expect(result).toEqual(mockResponse);
     });
@@ -319,7 +319,7 @@ describe("Assessments API (lib/api/assessments)", () => {
 
       await cancelAssessment("assessment-1");
       expect(httpClient.post).toHaveBeenCalledWith(
-        "/assessments/assessment-1/cancel"
+        "/assessments/assessment-1/cancel",
       );
     });
   });
@@ -339,7 +339,7 @@ describe("Assessments API (lib/api/assessments)", () => {
 
       const result = await getAssessmentResult("assessment-1");
       expect(httpClient.get).toHaveBeenCalledWith(
-        "/assessments/assessment-1/result"
+        "/assessments/assessment-1/result",
       );
       expect(result).toEqual(mockResponse);
     });
@@ -375,7 +375,7 @@ describe("Assessments API (lib/api/assessments)", () => {
 
       const result = await getAssessmentHistory({ technology: "JavaScript" });
       expect(httpClient.get).toHaveBeenCalledWith(
-        "/assessments/history?technology=JavaScript"
+        "/assessments/history?technology=JavaScript",
       );
       expect(result).toEqual(mockResponse);
     });
@@ -393,7 +393,7 @@ describe("Assessments API (lib/api/assessments)", () => {
 
       const result = await getAssessmentHistory({ status: "COMPLETED" });
       expect(httpClient.get).toHaveBeenCalledWith(
-        "/assessments/history?status=COMPLETED"
+        "/assessments/history?status=COMPLETED",
       );
       expect(result).toEqual(mockResponse);
     });
@@ -414,7 +414,7 @@ describe("Assessments API (lib/api/assessments)", () => {
         status: "COMPLETED",
       });
       expect(httpClient.get).toHaveBeenCalledWith(
-        "/assessments/history?technology=JavaScript&status=COMPLETED"
+        "/assessments/history?technology=JavaScript&status=COMPLETED",
       );
       expect(result).toEqual(mockResponse);
     });

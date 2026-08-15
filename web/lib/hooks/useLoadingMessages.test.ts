@@ -17,9 +17,7 @@ describe("useLoadingMessages", () => {
   });
 
   it("should return empty string when messages array is empty", () => {
-    const { result } = renderHook(() =>
-      useLoadingMessages(true, [])
-    );
+    const { result } = renderHook(() => useLoadingMessages(true, []));
     expect(result.current).toBe("");
   });
 
@@ -52,7 +50,7 @@ describe("useLoadingMessages", () => {
     ];
 
     const { result } = renderHook(() =>
-      useLoadingMessages(true, customMessages)
+      useLoadingMessages(true, customMessages),
     );
     expect(result.current).toBe("Custom 1");
 
@@ -77,7 +75,7 @@ describe("useLoadingMessages", () => {
   it("should reset to first message when reactivated", () => {
     const { result, rerender } = renderHook(
       ({ isActive }) => useLoadingMessages(isActive),
-      { initialProps: { isActive: false } }
+      { initialProps: { isActive: false } },
     );
 
     expect(result.current).toBe("Entrando...");
