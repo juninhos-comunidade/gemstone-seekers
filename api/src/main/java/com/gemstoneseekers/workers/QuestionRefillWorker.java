@@ -2,6 +2,7 @@ package com.gemstoneseekers.workers;
 
 import com.gemstoneseekers.dtos.response.AiQuestionBatchResponse;
 import com.gemstoneseekers.enums.QuestionDifficulty;
+import com.gemstoneseekers.exceptions.AiGenerationException;
 import com.gemstoneseekers.models.Technology;
 import com.gemstoneseekers.projections.StockProjection;
 import com.gemstoneseekers.repositories.QuestionRepository;
@@ -13,6 +14,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.annotation.Profile;
 import org.springframework.context.event.EventListener;
+import org.springframework.dao.DataAccessException;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
@@ -57,47 +60,78 @@ public class QuestionRefillWorker {
         this.sleeper = sleeper;
     }
 
+    @Async
     @EventListener(ApplicationReadyEvent.class)
     public void executeRefillJob() {
         if (log.isInfoEnabled()) {
-            log.info("[WORKER] Starting Question Refill Job...");
+            log.info("[WORKER] Starting Asynchronous Question Refill Job...");
         }
 
-        List<Technology> technologies = technologyRepository.findAll();
+        List<Technology> technologies;
+        Map<Integer, Map<QuestionDifficulty, Long>> stockMatrix;
 
-        if (technologies.isEmpty()) {
-            if (log.isInfoEnabled()) {
+        try {
+            technologies = technologyRepository.findAll();
+            if (technologies.isEmpty()) {
                 log.info("[WORKER] No technologies found. Skipping job.");
+                return;
+            }
+
+            List<StockProjection> stockReport = questionRepository.getQuestionStockReport();
+            stockMatrix = stockReport.stream().collect(Collectors.groupingBy(StockProjection::getTechnologyId,
+                    Collectors.toMap(StockProjection::getDifficultyLevel, StockProjection::getStockCount)));
+
+        } catch (DataAccessException e) {
+            if (log.isErrorEnabled()) {
+                log.error("[WORKER] Fatal infrastructure failure fetching initial data. Job aborted.", e);
             }
             return;
         }
 
-        List<StockProjection> stockReport = questionRepository.getQuestionStockReport();
-
-        Map<Integer, Map<QuestionDifficulty, Long>> stockMatrix = stockReport.stream().collect(Collectors.groupingBy(
-                StockProjection::getTechnologyId, Collectors.toMap(StockProjection::getDifficultyLevel,
-                        StockProjection::getStockCount)));
+        boolean circuitOpen = false;
 
         for (Technology tech : technologies) {
-            for (QuestionDifficulty difficulty : QuestionDifficulty.values()) {
-                long currentStock = stockMatrix.getOrDefault(tech.getId(), Collections.emptyMap()).getOrDefault(
-                        difficulty, 0L);
-
-                refillDifficultyStock(tech, difficulty, currentStock);
-            }
-        }
-    }
-
-    private void refillDifficultyStock(Technology tech, QuestionDifficulty difficulty, long initialStock) {
-        long currentStock = initialStock;
-
-        while (currentStock < MINIMUM_STOCK_THRESHOLD) {
-            if (log.isWarnEnabled()) {
-                log.warn("[WORKER] Low stock for {} ({}). Current: {}. Target: {}. Triggering AI.", tech.getName(),
-                        difficulty, currentStock, MINIMUM_STOCK_THRESHOLD);
+            if (circuitOpen) {
+                if (log.isWarnEnabled()) {
+                    log.warn("[WORKER] Circuit is OPEN due to AI unavailability. Aborting refill (Skipping {}).", tech
+                            .getName());
+                }
+                break;
             }
 
             try {
+                processTechnologyRefill(tech, stockMatrix);
+
+            } catch (AiGenerationException e) {
+                if (log.isErrorEnabled()) {
+                    log.error("[WORKER] Systemic AI failure detected for {}. Opening circuit! Reason: {}", tech
+                            .getName(), e.getMessage());
+                }
+                circuitOpen = true;
+
+            } catch (DataAccessException e) {
+                if (log.isErrorEnabled()) {
+                    log.error("[WORKER] Unexpected infrastructure error processing {}. Skipping to next technology.", tech
+                            .getName(), e);
+                }
+            }
+        }
+
+        log.info("[WORKER] Question Refill Job finished execution.");
+    }
+
+    private void processTechnologyRefill(Technology tech, Map<Integer, Map<QuestionDifficulty, Long>> stockMatrix)
+            throws AiGenerationException {
+        for (QuestionDifficulty difficulty : QuestionDifficulty.values()) {
+            long currentStock = stockMatrix.getOrDefault(tech.getId(), Collections.emptyMap()).getOrDefault(difficulty,
+                    0L);
+
+            while (currentStock < MINIMUM_STOCK_THRESHOLD) {
+                if (log.isWarnEnabled()) {
+                    log.warn("[WORKER] Low stock for {} ({}). Current: {}. Target: {}. Triggering AI.", tech.getName(),
+                            difficulty, currentStock, MINIMUM_STOCK_THRESHOLD);
+                }
+
                 AiQuestionBatchResponse aiResponse = aiService.generateQuestions(tech.getName(), difficulty,
                         BATCH_SIZE);
 
@@ -110,27 +144,16 @@ public class QuestionRefillWorker {
 
                 currentStock += BATCH_SIZE;
 
-                if (log.isInfoEnabled()) {
-                    log.info("[WORKER] Sleeping to respect API rate limits...");
+                try {
+                    sleeper.sleep(RATE_LIMIT_DELAY_MS);
+                } catch (InterruptedException ie) {
+                    if (log.isWarnEnabled()) {
+                        log.warn("[WORKER] Sleep was interrupted! Halting execution for this technology.");
+                    }
+                    Thread.currentThread().interrupt();
+                    return;
                 }
-                sleeper.sleep(RATE_LIMIT_DELAY_MS);
-
-            } catch (InterruptedException ie) {
-                if (log.isWarnEnabled()) {
-                    log.warn("[WORKER] Sleep was interrupted!");
-                }
-                Thread.currentThread().interrupt();
-                break;
-            } catch (org.springframework.dao.DataAccessException | org.springframework.ai.retry.TransientAiException
-                    | org.springframework.ai.retry.NonTransientAiException e) {
-
-                if (log.isErrorEnabled()) {
-                    log.error("[WORKER] Failed to generate or save questions for {} ({})", tech.getName(), difficulty,
-                            e);
-                }
-                break;
             }
         }
     }
-
 }

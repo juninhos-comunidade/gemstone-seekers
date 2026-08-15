@@ -2,10 +2,13 @@ package com.gemstoneseekers.services;
 
 import com.gemstoneseekers.dtos.response.AiQuestionBatchResponse;
 import com.gemstoneseekers.enums.QuestionDifficulty;
+import com.gemstoneseekers.exceptions.AiGenerationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.converter.BeanOutputConverter;
+import org.springframework.ai.retry.NonTransientAiException;
+import org.springframework.ai.retry.TransientAiException;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -40,9 +43,28 @@ public class AiQuestionGeneratorService {
                 %s
                 """.formatted(amount, technologyName, difficulty.name(), formatInstructions);
 
-        String rawResponse = chatClient.prompt().user(prompt).call().content();
+        try {
+            String rawResponse = chatClient.prompt().user(prompt).call().content();
 
-        assert rawResponse != null;
-        return converter.convert(rawResponse);
+            if (rawResponse == null || rawResponse.isBlank()) {
+                throw new AiGenerationException("A API retornou um payload nulo ou vazio.");
+            }
+
+            return converter.convert(rawResponse);
+
+        } catch (AiGenerationException e) {
+
+            if (log.isErrorEnabled()) {
+                log.error("[AI_SERVICE] AI content generation for {} ({}) failed: {}", technologyName, difficulty, e.getMessage());
+            }
+            throw e;
+        } catch (TransientAiException | NonTransientAiException e) {
+            if (log.isErrorEnabled()) {
+                log.error("[AI_SERVICE] AI content generation failed for {} ({}). Root cause: {}", technologyName,
+                        difficulty, e.getMessage());
+            }
+            throw new AiGenerationException(
+                    "AI content generation failed. Check API quotas or upstream service status.", e);
+        }
     }
 }
