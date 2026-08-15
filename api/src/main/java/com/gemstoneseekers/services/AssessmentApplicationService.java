@@ -149,7 +149,7 @@ public class AssessmentApplicationService {
     }
 
     @Transactional(readOnly = true)
-    public CandidateAssessmentHistoryResponse getCandidateTestHistory(String email,
+    public CandidateAssessmentHistoryResponse getCandidateAssessmentHistory(String email,
             AssessmentHistoryFilterParams filters) {
         Candidate candidate = candidateService.getCandidateByEmailSession(email);
 

@@ -68,7 +68,7 @@ public class AssessmentController {
             @AuthenticationPrincipal UserDetails userDetails, AssessmentHistoryFilterParams filters) {
         String email = userDetails.getUsername();
 
-        CandidateAssessmentHistoryResponse response = assessmentApplicationService.getCandidateTestHistory(email,
+        CandidateAssessmentHistoryResponse response = assessmentApplicationService.getCandidateAssessmentHistory(email,
                 filters);
 
         return ResponseEntity.ok(new BaseResponse<>(true, "Assessment history retrieved successfully", response, null));
