@@ -17,19 +17,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(
-    name = "candidate_answers",
-    uniqueConstraints = {
-        @UniqueConstraint(
-            name = "uq_candidate_answers",
-            columnNames = {"test_id", "question_id"}
-        )
-    }
-)
-@AttributeOverride(
-    name = "updatedAt",
-    column = @Column(name = "created_at", insertable = false, updatable = false)
-)
+@Table(name = "candidate_answers", uniqueConstraints = {
+        @UniqueConstraint(name = "uq_candidate_answers", columnNames = {"test_id", "question_id"})})
+@AttributeOverride(name = "updatedAt", column = @Column(name = "created_at", insertable = false, updatable = false))
 @Getter
 @Setter
 @NoArgsConstructor

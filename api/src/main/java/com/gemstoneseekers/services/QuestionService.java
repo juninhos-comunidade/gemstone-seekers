@@ -24,11 +24,8 @@ public class QuestionService {
     }
 
     @Transactional
-    public void saveAiGeneratedBatch(
-        Technology technology,
-        QuestionDifficulty difficulty,
-        AiQuestionBatchResponse aiResponse
-    ) {
+    public void saveAiGeneratedBatch(Technology technology, QuestionDifficulty difficulty,
+            AiQuestionBatchResponse aiResponse) {
         List<Question> questionsToSave = aiResponse.questions().stream().map(aiQuestion -> {
             Question question = new Question();
             question.setTechnology(technology);

@@ -42,7 +42,8 @@ class QuestionRefillWorkerTest {
 
     @BeforeEach
     void setUp() {
-        worker = new QuestionRefillWorker(technologyRepository, questionRepository, questionService, aiService, sleeper);
+        worker = new QuestionRefillWorker(technologyRepository, questionRepository, questionService, aiService,
+                sleeper);
     }
 
     @Test
@@ -57,9 +58,8 @@ class QuestionRefillWorkerTest {
         StockProjection intermediateStock = createMockProjection(1, QuestionDifficulty.INTERMEDIATE, 15L);
         StockProjection advancedStock = createMockProjection(1, QuestionDifficulty.ADVANCED, 20L);
 
-        when(questionRepository.getQuestionStockReport()).thenReturn(
-            List.of(beginnerStock, intermediateStock, advancedStock)
-        );
+        when(questionRepository.getQuestionStockReport())
+                .thenReturn(List.of(beginnerStock, intermediateStock, advancedStock));
 
         worker.executeRefillJob();
 
@@ -87,20 +87,16 @@ class QuestionRefillWorkerTest {
         StockProjection intermediateStock = createMockProjection(1, QuestionDifficulty.INTERMEDIATE, 15L);
         StockProjection advancedStock = createMockProjection(1, QuestionDifficulty.ADVANCED, 20L);
 
-        when(questionRepository.getQuestionStockReport()).thenReturn(
-            List.of(beginnerStock, intermediateStock, advancedStock)
-        );
+        when(questionRepository.getQuestionStockReport())
+                .thenReturn(List.of(beginnerStock, intermediateStock, advancedStock));
 
         AiQuestionBatchResponse aiResponse = new AiQuestionBatchResponse(List.of());
-        when(aiService.generateQuestions("Java", QuestionDifficulty.BEGINNER, 10))
-            .thenReturn(aiResponse);
+        when(aiService.generateQuestions("Java", QuestionDifficulty.BEGINNER, 10)).thenReturn(aiResponse);
 
         worker.executeRefillJob();
 
-        verify(aiService, times(1))
-            .generateQuestions("Java", QuestionDifficulty.BEGINNER, 10);
-        verify(questionService, times(1))
-            .saveAiGeneratedBatch(javaTech, QuestionDifficulty.BEGINNER, aiResponse);
+        verify(aiService, times(1)).generateQuestions("Java", QuestionDifficulty.BEGINNER, 10);
+        verify(questionService, times(1)).saveAiGeneratedBatch(javaTech, QuestionDifficulty.BEGINNER, aiResponse);
 
         verify(sleeper, times(1)).sleep(5000);
     }
@@ -117,20 +113,16 @@ class QuestionRefillWorkerTest {
         StockProjection intermediateStock = createMockProjection(2, QuestionDifficulty.INTERMEDIATE, 15L);
         StockProjection advancedStock = createMockProjection(2, QuestionDifficulty.ADVANCED, 15L);
 
-        when(questionRepository.getQuestionStockReport()).thenReturn(
-            List.of(beginnerStock, intermediateStock, advancedStock)
-        );
+        when(questionRepository.getQuestionStockReport())
+                .thenReturn(List.of(beginnerStock, intermediateStock, advancedStock));
 
         AiQuestionBatchResponse aiResponse = new AiQuestionBatchResponse(List.of());
-        when(aiService.generateQuestions("Python", QuestionDifficulty.BEGINNER, 10))
-            .thenReturn(aiResponse);
+        when(aiService.generateQuestions("Python", QuestionDifficulty.BEGINNER, 10)).thenReturn(aiResponse);
 
         worker.executeRefillJob();
 
-        verify(aiService, times(2))
-            .generateQuestions("Python", QuestionDifficulty.BEGINNER, 10);
-        verify(questionService, times(2))
-            .saveAiGeneratedBatch(pythonTech, QuestionDifficulty.BEGINNER, aiResponse);
+        verify(aiService, times(2)).generateQuestions("Python", QuestionDifficulty.BEGINNER, 10);
+        verify(questionService, times(2)).saveAiGeneratedBatch(pythonTech, QuestionDifficulty.BEGINNER, aiResponse);
 
         verify(sleeper, times(2)).sleep(5000);
     }
@@ -147,15 +139,13 @@ class QuestionRefillWorkerTest {
         StockProjection intermediateStock = createMockProjection(1, QuestionDifficulty.INTERMEDIATE, 0L);
         StockProjection advancedStock = createMockProjection(1, QuestionDifficulty.ADVANCED, 15L);
 
-        when(questionRepository.getQuestionStockReport()).thenReturn(
-            List.of(beginnerStock, intermediateStock, advancedStock)
-        );
+        when(questionRepository.getQuestionStockReport())
+                .thenReturn(List.of(beginnerStock, intermediateStock, advancedStock));
 
         when(aiService.generateQuestions("Java", QuestionDifficulty.BEGINNER, 10))
-            .thenThrow(new org.springframework.ai.retry.TransientAiException("API Limit Exceeded"));
+                .thenThrow(new org.springframework.ai.retry.TransientAiException("API Limit Exceeded"));
         AiQuestionBatchResponse aiResponse = new AiQuestionBatchResponse(List.of());
-        when(aiService.generateQuestions("Java", QuestionDifficulty.INTERMEDIATE, 10))
-            .thenReturn(aiResponse);
+        when(aiService.generateQuestions("Java", QuestionDifficulty.INTERMEDIATE, 10)).thenReturn(aiResponse);
 
         worker.executeRefillJob();
 
@@ -180,13 +170,11 @@ class QuestionRefillWorkerTest {
         StockProjection intermediateStock = createMockProjection(1, QuestionDifficulty.INTERMEDIATE, 15L);
         StockProjection advancedStock = createMockProjection(1, QuestionDifficulty.ADVANCED, 15L);
 
-        when(questionRepository.getQuestionStockReport()).thenReturn(
-            List.of(beginnerStock, intermediateStock, advancedStock)
-        );
+        when(questionRepository.getQuestionStockReport())
+                .thenReturn(List.of(beginnerStock, intermediateStock, advancedStock));
 
         AiQuestionBatchResponse aiResponse = new AiQuestionBatchResponse(List.of());
-        when(aiService.generateQuestions("Java", QuestionDifficulty.BEGINNER, 10))
-            .thenReturn(aiResponse);
+        when(aiService.generateQuestions("Java", QuestionDifficulty.BEGINNER, 10)).thenReturn(aiResponse);
 
         doThrow(new InterruptedException()).when(sleeper).sleep(5000);
 
@@ -212,19 +200,16 @@ class QuestionRefillWorkerTest {
         StockProjection intermediateStock = createMockProjection(1, QuestionDifficulty.INTERMEDIATE, 0L);
         StockProjection advancedStock = createMockProjection(1, QuestionDifficulty.ADVANCED, 15L);
 
-        when(questionRepository.getQuestionStockReport()).thenReturn(
-            List.of(beginnerStock, intermediateStock, advancedStock)
-        );
+        when(questionRepository.getQuestionStockReport())
+                .thenReturn(List.of(beginnerStock, intermediateStock, advancedStock));
 
         AiQuestionBatchResponse aiResponse = new AiQuestionBatchResponse(List.of());
-        when(aiService.generateQuestions("Java", QuestionDifficulty.BEGINNER, 10))
-            .thenReturn(aiResponse);
-        when(aiService.generateQuestions("Java", QuestionDifficulty.INTERMEDIATE, 10))
-            .thenReturn(aiResponse);
+        when(aiService.generateQuestions("Java", QuestionDifficulty.BEGINNER, 10)).thenReturn(aiResponse);
+        when(aiService.generateQuestions("Java", QuestionDifficulty.INTERMEDIATE, 10)).thenReturn(aiResponse);
 
         // Ajustado para refletir o DataAccessException estrito
         doThrow(new org.springframework.dao.DataAccessResourceFailureException("Database connection lost"))
-            .when(questionService).saveAiGeneratedBatch(eq(javaTech), eq(QuestionDifficulty.BEGINNER), any());
+                .when(questionService).saveAiGeneratedBatch(eq(javaTech), eq(QuestionDifficulty.BEGINNER), any());
 
         worker.executeRefillJob();
 
@@ -258,8 +243,7 @@ class QuestionRefillWorkerTest {
         when(questionRepository.getQuestionStockReport()).thenReturn(List.of());
 
         AiQuestionBatchResponse aiResponse = new AiQuestionBatchResponse(List.of());
-        when(aiService.generateQuestions(anyString(), any(QuestionDifficulty.class), anyInt()))
-            .thenReturn(aiResponse);
+        when(aiService.generateQuestions(anyString(), any(QuestionDifficulty.class), anyInt())).thenReturn(aiResponse);
 
         worker.executeRefillJob();
 

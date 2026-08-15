@@ -6,12 +6,6 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.UUID;
 
-public record TestResultResponse(
-    UUID testId,
-    String technologyName,
-    TestStatus status,
-    BigDecimal score,
-    int totalQuestions,
-    long correctAnswers,
-    Instant completedAt
-) {}
+public record TestResultResponse(UUID testId, String technologyName, TestStatus status, BigDecimal score,
+        int totalQuestions, long correctAnswers, Instant completedAt) {
+}

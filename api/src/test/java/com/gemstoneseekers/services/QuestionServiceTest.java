@@ -71,9 +71,8 @@ class QuestionServiceTest {
         assertThat(savedQ1.getSource()).isEqualTo(QuestionSource.AI_GENERATED);
         assertThat(savedQ1.getOptions()).hasSize(2);
 
-        Optional<QuestionOption> savedQ1CorrectOption = savedQ1.getOptions().stream()
-            .filter(QuestionOption::isCorrect)
-            .findFirst();
+        Optional<QuestionOption> savedQ1CorrectOption = savedQ1.getOptions().stream().filter(QuestionOption::isCorrect)
+                .findFirst();
         assertThat(savedQ1CorrectOption).isPresent();
         assertThat(savedQ1CorrectOption.get().getOptionText()).isEqualTo("Option 1.2 (Correct)");
         assertThat(savedQ1CorrectOption.get().getQuestion()).isEqualTo(savedQ1);
@@ -105,7 +104,8 @@ class QuestionServiceTest {
         pythonTech.setId(2);
         pythonTech.setName("Python");
 
-        AiGeneratedQuestionDTO questionWithNoOptions = new AiGeneratedQuestionDTO("What is duck typing?", Collections.emptyList());
+        AiGeneratedQuestionDTO questionWithNoOptions = new AiGeneratedQuestionDTO("What is duck typing?",
+                Collections.emptyList());
         AiQuestionBatchResponse response = new AiQuestionBatchResponse(List.of(questionWithNoOptions));
 
         questionService.saveAiGeneratedBatch(pythonTech, QuestionDifficulty.INTERMEDIATE, response);

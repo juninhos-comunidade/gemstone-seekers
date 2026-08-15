@@ -177,7 +177,6 @@ public class UserProfileController {
                 .body(new BaseResponse<>(true, "Project added successfully", updatedUser, null));
     }
 
-
     @DeleteMapping("/links/{linkId}")
     @PreAuthorize(CANDIDATE_ROLE)
     public ResponseEntity<BaseResponse<CandidateProfileResponse>> deleteCandidateLink(

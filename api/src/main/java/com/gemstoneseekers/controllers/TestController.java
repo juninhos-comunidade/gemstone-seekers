@@ -23,13 +23,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-
 import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/tests")
 public class TestController {
-
 
     private final TestApplicationService testApplicationService;
 
@@ -37,36 +35,27 @@ public class TestController {
         this.testApplicationService = testApplicationService;
     }
     @PostMapping("/start/{technology}")
-    public ResponseEntity<BaseResponse<TestResponse>> startTest(
-        @AuthenticationPrincipal UserDetails userDetails,
-        @PathVariable String technology,
-        @RequestParam(defaultValue = "BEGINNER") QuestionDifficulty difficulty
-    ) {
+    public ResponseEntity<BaseResponse<TestResponse>> startTest(@AuthenticationPrincipal UserDetails userDetails,
+            @PathVariable String technology, @RequestParam(defaultValue = "BEGINNER") QuestionDifficulty difficulty) {
         String email = userDetails.getUsername();
 
         TestResponse testResponse = testApplicationService.startTest(email, technology, difficulty);
 
         return ResponseEntity.status(HttpStatus.CREATED)
-            .body(new BaseResponse<>(true, "Test initiated successfully", testResponse, null));
+                .body(new BaseResponse<>(true, "Test initiated successfully", testResponse, null));
     }
 
     @PutMapping("/{testId}/answers/{questionId}")
-    public ResponseEntity<BaseResponse<Void>> saveAnswer(
-        @PathVariable UUID testId,
-        @PathVariable Long questionId,
-        @Valid @RequestBody SaveAnswerRequest request,
-        @AuthenticationPrincipal UserDetails userDetails
-    ) {
+    public ResponseEntity<BaseResponse<Void>> saveAnswer(@PathVariable UUID testId, @PathVariable Long questionId,
+            @Valid @RequestBody SaveAnswerRequest request, @AuthenticationPrincipal UserDetails userDetails) {
         String email = userDetails.getUsername();
 
         testApplicationService.saveCandidateAnswer(testId, questionId, request, email);
         return ResponseEntity.ok(new BaseResponse<>(true, "Answer saved successfully", null, null));
     }
     @PostMapping("/{testId}/submit")
-    public ResponseEntity<BaseResponse<TestResultResponse>> submitTest(
-        @PathVariable UUID testId,
-        @AuthenticationPrincipal UserDetails userDetails
-    ) {
+    public ResponseEntity<BaseResponse<TestResultResponse>> submitTest(@PathVariable UUID testId,
+            @AuthenticationPrincipal UserDetails userDetails) {
         String email = userDetails.getUsername();
 
         TestResultResponse response = testApplicationService.submitTest(testId, email);
@@ -75,44 +64,32 @@ public class TestController {
     }
     @GetMapping("/history")
     public ResponseEntity<BaseResponse<CandidateTestHistoryResponse>> getTestHistory(
-        @AuthenticationPrincipal UserDetails userDetails,
-        TestHistoryFilterParams filters
-    ) {
+            @AuthenticationPrincipal UserDetails userDetails, TestHistoryFilterParams filters) {
         String email = userDetails.getUsername();
 
         CandidateTestHistoryResponse response = testApplicationService.getCandidateTestHistory(email, filters);
 
-        return ResponseEntity.ok(
-            new BaseResponse<>(true, "Test history retrieved successfully", response, null)
-        );
+        return ResponseEntity.ok(new BaseResponse<>(true, "Test history retrieved successfully", response, null));
     }
 
     @GetMapping("/{testId}/result")
-    public ResponseEntity<BaseResponse<TestDetailedResultResponse>> getTestResult(
-        @PathVariable UUID testId,
-        @AuthenticationPrincipal UserDetails userDetails
-    ) {
+    public ResponseEntity<BaseResponse<TestDetailedResultResponse>> getTestResult(@PathVariable UUID testId,
+            @AuthenticationPrincipal UserDetails userDetails) {
         String email = userDetails.getUsername();
 
         TestDetailedResultResponse response = testApplicationService.getTestResult(testId, email);
 
-        return ResponseEntity.ok(
-            new BaseResponse<>(true, "Test result retrieved successfully", response, null)
-        );
+        return ResponseEntity.ok(new BaseResponse<>(true, "Test result retrieved successfully", response, null));
     }
 
     @PostMapping("/{testId}/cancel")
-    public ResponseEntity<BaseResponse<Void>> cancelTest(
-        @PathVariable UUID testId,
-        @AuthenticationPrincipal UserDetails userDetails
-    ) {
+    public ResponseEntity<BaseResponse<Void>> cancelTest(@PathVariable UUID testId,
+            @AuthenticationPrincipal UserDetails userDetails) {
         String email = userDetails.getUsername();
 
         testApplicationService.cancelTest(testId, email);
 
-        return ResponseEntity.ok(
-            new BaseResponse<>(true, "Test canceled successfully", null, null)
-        );
+        return ResponseEntity.ok(new BaseResponse<>(true, "Test canceled successfully", null, null));
     }
 
 }

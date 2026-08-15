@@ -1,6 +1,5 @@
 package com.gemstoneseekers.enums;
 
 public enum QuestionSource {
-    INTERNAL,
-    AI_GENERATED
+    INTERNAL, AI_GENERATED
 }

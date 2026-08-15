@@ -48,14 +48,8 @@ public class QuestionRefillWorker {
         }
     }
 
-
-    public QuestionRefillWorker(
-        TechnologyRepository technologyRepository,
-        QuestionRepository questionRepository,
-        QuestionService questionService,
-        AiQuestionGeneratorService aiService,
-        Sleeper sleeper
-    ) {
+    public QuestionRefillWorker(TechnologyRepository technologyRepository, QuestionRepository questionRepository,
+            QuestionService questionService, AiQuestionGeneratorService aiService, Sleeper sleeper) {
         this.technologyRepository = technologyRepository;
         this.questionRepository = questionRepository;
         this.questionService = questionService;
@@ -81,45 +75,37 @@ public class QuestionRefillWorker {
         List<StockProjection> stockReport = questionRepository.getQuestionStockReport();
 
         Map<Integer, Map<QuestionDifficulty, Long>> stockMatrix = stockReport.stream()
-            .collect(Collectors.groupingBy(
-                StockProjection::getTechnologyId,
-                Collectors.toMap(
-                    StockProjection::getDifficultyLevel,
-                    StockProjection::getStockCount
-                )
-            ));
+                .collect(Collectors.groupingBy(StockProjection::getTechnologyId,
+                        Collectors.toMap(StockProjection::getDifficultyLevel, StockProjection::getStockCount)));
 
         for (Technology tech : technologies) {
             for (QuestionDifficulty difficulty : QuestionDifficulty.values()) {
-                long currentStock = stockMatrix
-                    .getOrDefault(tech.getId(), Collections.emptyMap())
-                    .getOrDefault(difficulty, 0L);
+                long currentStock = stockMatrix.getOrDefault(tech.getId(), Collections.emptyMap())
+                        .getOrDefault(difficulty, 0L);
 
                 refillDifficultyStock(tech, difficulty, currentStock);
             }
         }
     }
 
-
     private void refillDifficultyStock(Technology tech, QuestionDifficulty difficulty, long initialStock) {
         long currentStock = initialStock;
 
         while (currentStock < MINIMUM_STOCK_THRESHOLD) {
             if (log.isWarnEnabled()) {
-                log.warn("[WORKER] Low stock for {} ({}). Current: {}. Target: {}. Triggering AI.",
-                    tech.getName(), difficulty, currentStock, MINIMUM_STOCK_THRESHOLD);
+                log.warn("[WORKER] Low stock for {} ({}). Current: {}. Target: {}. Triggering AI.", tech.getName(),
+                        difficulty, currentStock, MINIMUM_STOCK_THRESHOLD);
             }
 
             try {
-                AiQuestionBatchResponse aiResponse = aiService.generateQuestions(
-                    tech.getName(), difficulty, BATCH_SIZE
-                );
+                AiQuestionBatchResponse aiResponse = aiService.generateQuestions(tech.getName(), difficulty,
+                        BATCH_SIZE);
 
                 questionService.saveAiGeneratedBatch(tech, difficulty, aiResponse);
 
                 if (log.isInfoEnabled()) {
-                    log.info("[WORKER] Successfully generated and saved {} questions for {} ({}).",
-                        BATCH_SIZE, tech.getName(), difficulty);
+                    log.info("[WORKER] Successfully generated and saved {} questions for {} ({}).", BATCH_SIZE,
+                            tech.getName(), difficulty);
                 }
 
                 currentStock += BATCH_SIZE;
@@ -135,13 +121,12 @@ public class QuestionRefillWorker {
                 }
                 Thread.currentThread().interrupt();
                 break;
-            } catch (org.springframework.dao.DataAccessException |
-                     org.springframework.ai.retry.TransientAiException |
-                     org.springframework.ai.retry.NonTransientAiException e) {
+            } catch (org.springframework.dao.DataAccessException | org.springframework.ai.retry.TransientAiException
+                    | org.springframework.ai.retry.NonTransientAiException e) {
 
                 if (log.isErrorEnabled()) {
-                    log.error("[WORKER] Failed to generate or save questions for {} ({})",
-                        tech.getName(), difficulty, e);
+                    log.error("[WORKER] Failed to generate or save questions for {} ({})", tech.getName(), difficulty,
+                            e);
                 }
                 break;
             }
@@ -149,5 +134,3 @@ public class QuestionRefillWorker {
     }
 
 }
-
-

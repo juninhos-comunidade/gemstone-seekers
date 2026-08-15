@@ -35,8 +35,7 @@ class UserProfileIntegrationTest {
     static void setup() {
         Assumptions.assumeTrue(DockerClientFactory.instance().isDockerAvailable(), "Docker is not available");
         postgres.start();
-        context = new SpringApplicationBuilder(GemstoneSeekersApplication.class).run(
-                "--spring.profiles.active=test",
+        context = new SpringApplicationBuilder(GemstoneSeekersApplication.class).run("--spring.profiles.active=test",
                 "--spring.datasource.url=" + postgres.getJdbcUrl(),
                 "--spring.datasource.username=" + postgres.getUsername(),
                 "--spring.datasource.password=" + postgres.getPassword(), "--server.port=0",

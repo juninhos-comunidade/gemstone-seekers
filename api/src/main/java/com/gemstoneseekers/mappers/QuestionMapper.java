@@ -8,15 +8,9 @@ import org.springframework.stereotype.Component;
 @Component
 public class QuestionMapper {
 
-    public QuestionResponse toResponse(Question question){
-        return new QuestionResponse(
-            question.getId(),
-            question.getStatement(),
-            question.getDifficultyLevel(),
-            question.getSource(),
-            question.getOptions().stream()
-                .map(option -> new QuestionOptionResponse(option.getId(), option.getOptionText()))
-                .toList()
-        );
+    public QuestionResponse toResponse(Question question) {
+        return new QuestionResponse(question.getId(), question.getStatement(), question.getDifficultyLevel(),
+                question.getSource(), question.getOptions().stream()
+                        .map(option -> new QuestionOptionResponse(option.getId(), option.getOptionText())).toList());
     }
 }

@@ -35,22 +35,17 @@ public class QuestionSelectionService {
     @Transactional
     public List<Question> generateTestQuestions(User user, Technology tech, QuestionDifficulty difficulty) {
 
-        List<Question> unseenQuestions = questionRepository.findRandomUnseenQuestions(
-            user.getId(),
-            tech.getId(),
-            difficulty.name(),
-            QUESTIONS_PER_TEST
-        );
+        List<Question> unseenQuestions = questionRepository.findRandomUnseenQuestions(user.getId(), tech.getId(),
+                difficulty.name(), QUESTIONS_PER_TEST);
 
         if (unseenQuestions.size() < MIN_UNSEEN_QUESTIONS) {
             if (log.isWarnEnabled()) {
-                log.warn("[QUIZ] User {} blocked. Only {} unseen questions for {}. Triggering AI.",
-                    user.getId(), unseenQuestions.size(), tech.getName());
+                log.warn("[QUIZ] User {} blocked. Only {} unseen questions for {}. Triggering AI.", user.getId(),
+                        unseenQuestions.size(), tech.getName());
             }
             eventPublisher.publishEvent(new LowQuestionStockEvent(tech, difficulty));
             throw new InsufficientQuestionsException(
-                "Estamos gerando questões inéditas para você! Aguarde alguns instantes e tente novamente."
-            );
+                    "Estamos gerando questões inéditas para você! Aguarde alguns instantes e tente novamente.");
         }
 
         List<Question> testQuestions = new ArrayList<>(unseenQuestions);
@@ -62,18 +57,12 @@ public class QuestionSelectionService {
         int missingQuestions = QUESTIONS_PER_TEST - testQuestions.size();
 
         if (missingQuestions > 0) {
-            List<Question> seenQuestions = questionRepository.findRandomSeenQuestions(
-                user.getId(),
-                tech.getId(),
-                difficulty.name(),
-                missingQuestions
-            );
+            List<Question> seenQuestions = questionRepository.findRandomSeenQuestions(user.getId(), tech.getId(),
+                    difficulty.name(), missingQuestions);
 
             if (seenQuestions.size() < missingQuestions) {
                 eventPublisher.publishEvent(new LowQuestionStockEvent(tech, difficulty));
-                throw new InsufficientQuestionsException(
-                    "O acervo global ainda está sendo populado. Tente em breve."
-                );
+                throw new InsufficientQuestionsException("O acervo global ainda está sendo populado. Tente em breve.");
             }
 
             testQuestions.addAll(seenQuestions);

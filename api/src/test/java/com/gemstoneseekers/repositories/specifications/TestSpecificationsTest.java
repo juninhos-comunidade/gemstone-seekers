@@ -54,7 +54,8 @@ class TestSpecificationsTest {
         doReturn(candidatePath).when(root).get("candidate");
         doReturn(candidateIdPath).when(candidatePath).get("id");
 
-        // Technology e Status são filtros opcionais, então devem ser declarados como lenient (permissivos)
+        // Technology e Status são filtros opcionais, então devem ser declarados como
+        // lenient (permissivos)
         lenient().doReturn(technologyPath).when(root).get("technology");
         lenient().doReturn(technologyNamePath).when(technologyPath).get("name");
         lenient().doReturn(statusPath).when(root).get("status");

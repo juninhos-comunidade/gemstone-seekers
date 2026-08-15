@@ -60,7 +60,6 @@ class DomainRepositoryTest {
         cfg.addAnnotatedClass(com.gemstoneseekers.models.Test.class);
         cfg.addAnnotatedClass(CandidateAnswer.class);
 
-
         sessionFactory = cfg.buildSessionFactory();
     }
 

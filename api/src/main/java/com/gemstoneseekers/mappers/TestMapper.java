@@ -28,19 +28,12 @@ public class TestMapper {
         this.questionMapper = questionMapper;
     }
 
-    public TestResponse toTestAndQuestionsResponse(Test test){
-        List<QuestionResponse> questions = Optional.ofNullable(test.getAnswers())
-            .orElseGet(Collections::emptySet)
-            .stream()
-            .map(CandidateAnswer::getQuestion)
-            .map(questionMapper::toResponse)
-            .toList();
+    public TestResponse toTestAndQuestionsResponse(Test test) {
+        List<QuestionResponse> questions = Optional.ofNullable(test.getAnswers()).orElseGet(Collections::emptySet)
+                .stream().map(CandidateAnswer::getQuestion).map(questionMapper::toResponse).toList();
 
-        return new TestResponse(
-            test.getId(),
-            technologyMapper.toTechnologyResponse(test.getTechnology()),
-            test.getStatus(),
-            questions
+        return new TestResponse(test.getId(), technologyMapper.toTechnologyResponse(test.getTechnology()),
+                test.getStatus(), questions
 
         );
     }
@@ -49,22 +42,15 @@ public class TestMapper {
             return null;
         }
 
-        long correctAnswers = test.getAnswers() == null ? 0 :
-            test.getAnswers().stream()
-                .filter(a -> a.getSelectedOption() != null && a.getSelectedOption().isCorrect())
-                .count();
+        long correctAnswers = test.getAnswers() == null
+                ? 0
+                : test.getAnswers().stream()
+                        .filter(a -> a.getSelectedOption() != null && a.getSelectedOption().isCorrect()).count();
 
         int totalCount = test.getAnswers() == null ? 0 : test.getAnswers().size();
 
-        return new TestResultResponse(
-            test.getId(),
-            test.getTechnology().getName(),
-            test.getStatus(),
-            test.getScore(),
-            totalCount,
-            correctAnswers,
-            test.getCompletedAt()
-        );
+        return new TestResultResponse(test.getId(), test.getTechnology().getName(), test.getStatus(), test.getScore(),
+                totalCount, correctAnswers, test.getCompletedAt());
     }
 
     public TestSummaryResponse toSummaryResponse(Test test) {
@@ -72,20 +58,11 @@ public class TestMapper {
             return null;
         }
 
-        QuestionDifficulty derivedDifficulty = test.getAnswers().stream()
-            .map(CandidateAnswer::getQuestion)
-            .map(Question::getDifficultyLevel)
-            .findFirst()
-            .orElse(null);
+        QuestionDifficulty derivedDifficulty = test.getAnswers().stream().map(CandidateAnswer::getQuestion)
+                .map(Question::getDifficultyLevel).findFirst().orElse(null);
 
-        return new TestSummaryResponse(
-            test.getId(),
-            test.getStatus(),
-            derivedDifficulty,
-            test.getScore(),
-            test.getCreatedAt(),
-            test.getCompletedAt()
-        );
+        return new TestSummaryResponse(test.getId(), test.getStatus(), derivedDifficulty, test.getScore(),
+                test.getCreatedAt(), test.getCompletedAt());
     }
 
     public TestDetailedResultResponse toDetailedResultResponse(Test test) {
@@ -93,45 +70,26 @@ public class TestMapper {
             return null;
         }
 
-        List<QuestionResultResponse> questions = test.getAnswers().stream()
-            .map(answer -> {
+        List<QuestionResultResponse> questions = test.getAnswers().stream().map(answer -> {
 
-                QuestionOption correctOption = answer.getQuestion().getOptions().stream()
-                    .filter(QuestionOption::isCorrect)
-                    .findFirst()
-                    .orElse(null);
+            QuestionOption correctOption = answer.getQuestion().getOptions().stream().filter(QuestionOption::isCorrect)
+                    .findFirst().orElse(null);
 
-                Long correctOptionId = correctOption != null ? correctOption.getId() : null;
-                Long selectedOptionId = answer.getSelectedOption() != null ? answer.getSelectedOption().getId() : null;
-                boolean isCorrect = selectedOptionId != null && selectedOptionId.equals(correctOptionId);
+            Long correctOptionId = correctOption != null ? correctOption.getId() : null;
+            Long selectedOptionId = answer.getSelectedOption() != null ? answer.getSelectedOption().getId() : null;
+            boolean isCorrect = selectedOptionId != null && selectedOptionId.equals(correctOptionId);
 
-                List<OptionResultResponse> mappedOptions = answer.getQuestion().getOptions().stream()
-                    .map(opt -> new OptionResultResponse(opt.getId(), opt.getOptionText(), opt.isCorrect()))
-                    .toList();
+            List<OptionResultResponse> mappedOptions = answer.getQuestion().getOptions().stream()
+                    .map(opt -> new OptionResultResponse(opt.getId(), opt.getOptionText(), opt.isCorrect())).toList();
 
-                return new QuestionResultResponse(
-                    answer.getQuestion().getId(),
-                    answer.getQuestion().getStatement(),
-                    selectedOptionId,
-                    correctOptionId,
-                    isCorrect,
-                    mappedOptions
-                );
-            })
-            .toList();
+            return new QuestionResultResponse(answer.getQuestion().getId(), answer.getQuestion().getStatement(),
+                    selectedOptionId, correctOptionId, isCorrect, mappedOptions);
+        }).toList();
 
         long correctAnswersCount = questions.stream().filter(QuestionResultResponse::isCorrect).count();
 
-        return new TestDetailedResultResponse(
-            test.getId(),
-            test.getTechnology().getName(),
-            test.getStatus(),
-            test.getDerivedDifficulty(),
-            test.getScore(),
-            questions.size(),
-            (int) correctAnswersCount,
-            test.getCompletedAt(),
-            questions
-        );
+        return new TestDetailedResultResponse(test.getId(), test.getTechnology().getName(), test.getStatus(),
+                test.getDerivedDifficulty(), test.getScore(), questions.size(), (int) correctAnswersCount,
+                test.getCompletedAt(), questions);
     }
 }

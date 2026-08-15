@@ -102,33 +102,28 @@ class TestApplicationServiceTest {
         QuestionDifficulty difficulty = QuestionDifficulty.BEGINNER;
         int requiredAmount = 10;
 
-        List<Question> mockQuestions = LongStream.rangeClosed(1, requiredAmount)
-                .mapToObj(id -> {
-                    Question q = new Question();
-                    q.setId(id);
-                    return q;
-                })
-                .collect(Collectors.toList());
+        List<Question> mockQuestions = LongStream.rangeClosed(1, requiredAmount).mapToObj(id -> {
+            Question q = new Question();
+            q.setId(id);
+            return q;
+        }).collect(Collectors.toList());
 
-        TestResponse expectedResponse = new TestResponse(
-            UUID.randomUUID(),
-            new TechnologyResponse(mockTechnology.getId(), mockTechnology.getName(), mockTechnology.getCategory()),
-            TestStatus.IN_PROGRESS,
-            Collections.emptyList()
-        );
+        TestResponse expectedResponse = new TestResponse(UUID.randomUUID(),
+                new TechnologyResponse(mockTechnology.getId(), mockTechnology.getName(), mockTechnology.getCategory()),
+                TestStatus.IN_PROGRESS, Collections.emptyList());
 
         when(candidateService.getCandidateByEmailSession(userEmail)).thenReturn(mockCandidate);
         when(technologyService.getTechnologyByName(technologyName)).thenReturn(mockTechnology);
-        when(testRepository.findByCandidateIdAndTechnologyNameAndStatus(mockCandidate.getId(), technologyName, TestStatus.IN_PROGRESS))
-                .thenReturn(Optional.empty());
-        when(questionRepository.findUnansweredRandomByTechnologyAndDifficulty(technologyName, difficulty, mockCandidate.getId(), requiredAmount))
-                .thenReturn(mockQuestions);
-        when(testRepository.save(any(com.gemstoneseekers.models.Test.class))).thenAnswer(invocation -> invocation.getArgument(0));
-        when(testMapper.toTestAndQuestionsResponse(any(com.gemstoneseekers.models.Test.class))).thenReturn(expectedResponse);
-
+        when(testRepository.findByCandidateIdAndTechnologyNameAndStatus(mockCandidate.getId(), technologyName,
+                TestStatus.IN_PROGRESS)).thenReturn(Optional.empty());
+        when(questionRepository.findUnansweredRandomByTechnologyAndDifficulty(technologyName, difficulty,
+                mockCandidate.getId(), requiredAmount)).thenReturn(mockQuestions);
+        when(testRepository.save(any(com.gemstoneseekers.models.Test.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+        when(testMapper.toTestAndQuestionsResponse(any(com.gemstoneseekers.models.Test.class)))
+                .thenReturn(expectedResponse);
 
         TestResponse actualResponse = testApplicationService.startTest(userEmail, technologyName, difficulty);
-
 
         assertThat(actualResponse).isEqualTo(expectedResponse);
 
@@ -140,7 +135,8 @@ class TestApplicationServiceTest {
         assertThat(savedTest.getStatus()).isEqualTo(TestStatus.IN_PROGRESS);
         assertThat(savedTest.getAnswers()).hasSize(requiredAmount);
         assertThat(savedTest.getAnswers().stream().map(ca -> ca.getQuestion().getId()))
-                .containsExactlyInAnyOrderElementsOf(mockQuestions.stream().map(Question::getId).collect(Collectors.toSet()));
+                .containsExactlyInAnyOrderElementsOf(
+                        mockQuestions.stream().map(Question::getId).collect(Collectors.toSet()));
     }
 
     @Test
@@ -157,25 +153,21 @@ class TestApplicationServiceTest {
         existingTest.setCandidate(mockCandidate);
         existingTest.setTechnology(mockTechnology);
 
-        TestResponse expectedResponse = new TestResponse(
-            existingTest.getId(),
-            new TechnologyResponse(mockTechnology.getId(), mockTechnology.getName(), mockTechnology.getCategory()),
-            TestStatus.IN_PROGRESS,
-            Collections.emptyList()
-        );
+        TestResponse expectedResponse = new TestResponse(existingTest.getId(),
+                new TechnologyResponse(mockTechnology.getId(), mockTechnology.getName(), mockTechnology.getCategory()),
+                TestStatus.IN_PROGRESS, Collections.emptyList());
 
         when(candidateService.getCandidateByEmailSession(userEmail)).thenReturn(mockCandidate);
         when(technologyService.getTechnologyByName(technologyName)).thenReturn(mockTechnology);
-        when(testRepository.findByCandidateIdAndTechnologyNameAndStatus(mockCandidate.getId(), technologyName, TestStatus.IN_PROGRESS))
-                .thenReturn(Optional.of(existingTest));
+        when(testRepository.findByCandidateIdAndTechnologyNameAndStatus(mockCandidate.getId(), technologyName,
+                TestStatus.IN_PROGRESS)).thenReturn(Optional.of(existingTest));
         when(testMapper.toTestAndQuestionsResponse(existingTest)).thenReturn(expectedResponse);
-
 
         TestResponse actualResponse = testApplicationService.startTest(userEmail, technologyName, difficulty);
 
-
         assertThat(actualResponse).isEqualTo(expectedResponse);
-        verify(questionRepository, never()).findUnansweredRandomByTechnologyAndDifficulty(anyString(), any(), any(UUID.class), anyInt());
+        verify(questionRepository, never()).findUnansweredRandomByTechnologyAndDifficulty(anyString(), any(),
+                any(UUID.class), anyInt());
         verify(testRepository, never()).save(any(com.gemstoneseekers.models.Test.class));
     }
 
@@ -190,11 +182,10 @@ class TestApplicationServiceTest {
 
         when(candidateService.getCandidateByEmailSession(userEmail)).thenReturn(mockCandidate);
         when(technologyService.getTechnologyByName(technologyName)).thenReturn(mockTechnology);
-        when(testRepository.findByCandidateIdAndTechnologyNameAndStatus(mockCandidate.getId(), technologyName, TestStatus.IN_PROGRESS))
-                .thenReturn(Optional.empty());
-        when(questionRepository.findUnansweredRandomByTechnologyAndDifficulty(technologyName, difficulty, mockCandidate.getId(), requiredAmount))
-                .thenReturn(Collections.emptyList());
-
+        when(testRepository.findByCandidateIdAndTechnologyNameAndStatus(mockCandidate.getId(), technologyName,
+                TestStatus.IN_PROGRESS)).thenReturn(Optional.empty());
+        when(questionRepository.findUnansweredRandomByTechnologyAndDifficulty(technologyName, difficulty,
+                mockCandidate.getId(), requiredAmount)).thenReturn(Collections.emptyList());
 
         assertThatThrownBy(() -> testApplicationService.startTest(userEmail, technologyName, difficulty))
                 .isInstanceOf(BusinessRuleException.class)
@@ -235,13 +226,10 @@ class TestApplicationServiceTest {
         when(testRepository.findById(testId)).thenReturn(Optional.of(test));
         when(questionOptionRepository.findById(selectedOptionId)).thenReturn(Optional.of(selectedOption));
 
-
         testApplicationService.saveCandidateAnswer(testId, questionId, request, userEmail);
 
-
         Optional<CandidateAnswer> answerOptional = test.getAnswers().stream()
-                .filter(a -> a.getQuestion().getId().equals(questionId))
-                .findFirst();
+                .filter(a -> a.getQuestion().getId().equals(questionId)).findFirst();
 
         assertThat(answerOptional).isPresent();
         assertThat(answerOptional.get().getSelectedOption()).isEqualTo(selectedOption);
@@ -260,8 +248,7 @@ class TestApplicationServiceTest {
         when(testRepository.findById(testId)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> testApplicationService.saveCandidateAnswer(testId, questionId, request, userEmail))
-                .isInstanceOf(EntityNotFoundException.class)
-                .hasMessage("Test with id " + testId + " not found");
+                .isInstanceOf(EntityNotFoundException.class).hasMessage("Test with id " + testId + " not found");
     }
 
     @Test
@@ -287,8 +274,7 @@ class TestApplicationServiceTest {
         when(testRepository.findById(testId)).thenReturn(Optional.of(test));
 
         assertThatThrownBy(() -> testApplicationService.saveCandidateAnswer(testId, questionId, request, userEmail))
-                .isInstanceOf(AccessDeniedException.class)
-                .hasMessage("You do not have permission to modify this test");
+                .isInstanceOf(AccessDeniedException.class).hasMessage("You do not have permission to modify this test");
     }
 
     @Test
@@ -318,8 +304,7 @@ class TestApplicationServiceTest {
         when(questionOptionRepository.findById(selectedOptionId)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> testApplicationService.saveCandidateAnswer(testId, questionId, request, userEmail))
-                .isInstanceOf(EntityNotFoundException.class)
-                .hasMessage("QuestionOption with id 101 not found");
+                .isInstanceOf(EntityNotFoundException.class).hasMessage("QuestionOption with id 101 not found");
     }
 
     @Test
@@ -377,8 +362,7 @@ class TestApplicationServiceTest {
         when(questionOptionRepository.findById(selectedOptionId)).thenReturn(Optional.of(selectedOption));
 
         assertThatThrownBy(() -> testApplicationService.saveCandidateAnswer(testId, questionId, request, userEmail))
-                .isInstanceOf(BusinessRuleException.class)
-                .hasMessage("Option ID 101 does not belong to Question ID 1");
+                .isInstanceOf(BusinessRuleException.class).hasMessage("Option ID 101 does not belong to Question ID 1");
     }
 
     @Test
@@ -416,15 +400,8 @@ class TestApplicationServiceTest {
         test.setStatus(TestStatus.IN_PROGRESS);
         test.setAnswers(new HashSet<>(Arrays.asList(answer1, answer2)));
 
-        TestResultResponse expectedResponse = new TestResultResponse(
-            testId,
-            mockTechnology.getName(),
-            TestStatus.COMPLETED,
-            new BigDecimal("5.00"),
-            2,
-            1L,
-            test.getCompletedAt()
-        );
+        TestResultResponse expectedResponse = new TestResultResponse(testId, mockTechnology.getName(),
+                TestStatus.COMPLETED, new BigDecimal("5.00"), 2, 1L, test.getCompletedAt());
 
         when(candidateService.getCandidateByEmailSession(userEmail)).thenReturn(mockCandidate);
         when(testRepository.findById(testId)).thenReturn(Optional.of(test));
@@ -460,8 +437,7 @@ class TestApplicationServiceTest {
         when(testRepository.findById(testId)).thenReturn(Optional.of(test));
 
         assertThatThrownBy(() -> testApplicationService.submitTest(testId, userEmail))
-                .isInstanceOf(AccessDeniedException.class)
-                .hasMessage("You do not have permission to submit this test");
+                .isInstanceOf(AccessDeniedException.class).hasMessage("You do not have permission to submit this test");
     }
 
     @Test
@@ -474,8 +450,7 @@ class TestApplicationServiceTest {
         when(testRepository.findById(testId)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> testApplicationService.submitTest(testId, userEmail))
-                .isInstanceOf(EntityNotFoundException.class)
-                .hasMessage("Test with id " + testId + " not found");
+                .isInstanceOf(EntityNotFoundException.class).hasMessage("Test with id " + testId + " not found");
     }
 
     @Test
@@ -517,13 +492,14 @@ class TestApplicationServiceTest {
         advancedTest.setAnswers(new HashSet<>(Collections.singletonList(advancedAnswer)));
 
         when(candidateService.getCandidateByEmailSession(userEmail)).thenReturn(mockCandidate);
-        when(testRepository.findAll(any(Specification.class), any(Sort.class))).thenReturn(Arrays.asList(beginnerTest, advancedTest));
+        when(testRepository.findAll(any(Specification.class), any(Sort.class)))
+                .thenReturn(Arrays.asList(beginnerTest, advancedTest));
         when(testMapper.toSummaryResponse(beginnerTest)).thenReturn(
-            new TestSummaryResponse(beginnerTest.getId(), beginnerTest.getStatus(), QuestionDifficulty.BEGINNER, beginnerTest.getScore(), createdAt, beginnerTest.getCompletedAt())
-        );
+                new TestSummaryResponse(beginnerTest.getId(), beginnerTest.getStatus(), QuestionDifficulty.BEGINNER,
+                        beginnerTest.getScore(), createdAt, beginnerTest.getCompletedAt()));
         when(testMapper.toSummaryResponse(advancedTest)).thenReturn(
-            new TestSummaryResponse(advancedTest.getId(), advancedTest.getStatus(), QuestionDifficulty.ADVANCED, advancedTest.getScore(), advancedTest.getCreatedAt(), advancedTest.getCompletedAt())
-        );
+                new TestSummaryResponse(advancedTest.getId(), advancedTest.getStatus(), QuestionDifficulty.ADVANCED,
+                        advancedTest.getScore(), advancedTest.getCreatedAt(), advancedTest.getCompletedAt()));
 
         CandidateTestHistoryResponse response = testApplicationService.getCandidateTestHistory(userEmail, null);
 
@@ -533,7 +509,7 @@ class TestApplicationServiceTest {
         TechnologyHistoryGroupResponse technologyGroup = response.historyByTechnology().get(0);
         assertThat(technologyGroup.technologyName()).isEqualTo("Java");
         assertThat(technologyGroup.difficulties()).extracting(DifficultyHistoryGroupResponse::difficulty)
-            .containsExactly(QuestionDifficulty.BEGINNER, QuestionDifficulty.ADVANCED);
+                .containsExactly(QuestionDifficulty.BEGINNER, QuestionDifficulty.ADVANCED);
         assertThat(technologyGroup.difficulties().get(0).averageScore()).isEqualByComparingTo("8.00");
         assertThat(technologyGroup.difficulties().get(1).averageScore()).isEqualByComparingTo("0.00");
     }
@@ -553,17 +529,9 @@ class TestApplicationServiceTest {
         when(candidateService.getCandidateByEmailSession(userEmail)).thenReturn(mockCandidate);
         when(testRepository.findById(testId)).thenReturn(Optional.of(test));
 
-        TestDetailedResultResponse expected = new TestDetailedResultResponse(
-            testId,
-            mockTechnology.getName(),
-            TestStatus.COMPLETED,
-            QuestionDifficulty.BEGINNER,
-            new BigDecimal("10.00"),
-            1,
-            1,
-            Instant.parse("2026-08-13T18:30:00Z"),
-            Collections.<QuestionResultResponse>emptyList()
-        );
+        TestDetailedResultResponse expected = new TestDetailedResultResponse(testId, mockTechnology.getName(),
+                TestStatus.COMPLETED, QuestionDifficulty.BEGINNER, new BigDecimal("10.00"), 1, 1,
+                Instant.parse("2026-08-13T18:30:00Z"), Collections.<QuestionResultResponse>emptyList());
         when(testMapper.toDetailedResultResponse(test)).thenReturn(expected);
 
         TestDetailedResultResponse response = testApplicationService.getTestResult(testId, userEmail);
@@ -611,8 +579,7 @@ class TestApplicationServiceTest {
         when(testRepository.findById(testId)).thenReturn(Optional.of(test));
 
         assertThatThrownBy(() -> testApplicationService.getTestResult(testId, userEmail))
-                .isInstanceOf(AccessDeniedException.class)
-                .hasMessage("You do not have permission to view this test");
+                .isInstanceOf(AccessDeniedException.class).hasMessage("You do not have permission to view this test");
     }
 
     @Test
@@ -625,8 +592,7 @@ class TestApplicationServiceTest {
         when(testRepository.findById(testId)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> testApplicationService.getTestResult(testId, userEmail))
-                .isInstanceOf(EntityNotFoundException.class)
-                .hasMessage("Test with id " + testId + " not found");
+                .isInstanceOf(EntityNotFoundException.class).hasMessage("Test with id " + testId + " not found");
     }
 
     @Test
@@ -690,8 +656,7 @@ class TestApplicationServiceTest {
         when(testRepository.findById(testId)).thenReturn(Optional.of(test));
 
         assertThatThrownBy(() -> testApplicationService.cancelTest(testId, userEmail))
-                .isInstanceOf(AccessDeniedException.class)
-                .hasMessage("You do not have permission to modify this test");
+                .isInstanceOf(AccessDeniedException.class).hasMessage("You do not have permission to modify this test");
     }
 
     @Test
@@ -704,7 +669,6 @@ class TestApplicationServiceTest {
         when(testRepository.findById(testId)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> testApplicationService.cancelTest(testId, userEmail))
-                .isInstanceOf(EntityNotFoundException.class)
-                .hasMessage("Test with id " + testId + " not found");
+                .isInstanceOf(EntityNotFoundException.class).hasMessage("Test with id " + testId + " not found");
     }
 }

@@ -21,7 +21,7 @@ public class TechnologyService {
         return technologyRepository.findAll();
     }
 
-    public Technology getTechnologyByName(String technologyName){
+    public Technology getTechnologyByName(String technologyName) {
         return technologyRepository.findByName(technologyName)
                 .orElseThrow(() -> new EntityNotFoundException("Technology", technologyName));
     }

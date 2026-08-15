@@ -54,11 +54,9 @@ public class TestApplicationService {
 
     private static final int REQUIRED_AMOUNT = 10;
 
-    public TestApplicationService(QuestionRepository questionRepository,
-                                  TestRepository testRepository,
-                                  CandidateService candidateService,
-                                  TechnologyService technologyService,
-                                  TestMapper testMapper, QuestionOptionRepository questionOptionRepository) {
+    public TestApplicationService(QuestionRepository questionRepository, TestRepository testRepository,
+            CandidateService candidateService, TechnologyService technologyService, TestMapper testMapper,
+            QuestionOptionRepository questionOptionRepository) {
         this.questionRepository = questionRepository;
         this.testRepository = testRepository;
         this.candidateService = candidateService;
@@ -73,36 +71,31 @@ public class TestApplicationService {
         Candidate candidate = candidateService.getCandidateByEmailSession(email);
         Technology technology = technologyService.getTechnologyByName(technologyName);
 
-        Optional<Test> activeTest = testRepository.findByCandidateIdAndTechnologyNameAndStatus(
-            candidate.getId(), technologyName, TestStatus.IN_PROGRESS
-        );
+        Optional<Test> activeTest = testRepository.findByCandidateIdAndTechnologyNameAndStatus(candidate.getId(),
+                technologyName, TestStatus.IN_PROGRESS);
 
         if (activeTest.isPresent()) {
             return testMapper.toTestAndQuestionsResponse(activeTest.get());
         }
 
-        List<Question> questions = questionRepository.findUnansweredRandomByTechnologyAndDifficulty(
-            technologyName, difficulty, candidate.getId(), REQUIRED_AMOUNT
-        );
+        List<Question> questions = questionRepository.findUnansweredRandomByTechnologyAndDifficulty(technologyName,
+                difficulty, candidate.getId(), REQUIRED_AMOUNT);
 
         if (questions.isEmpty()) {
-            throw new BusinessRuleException(
-                String.format("No questions found for technology '%s' with difficulty '%s'", technologyName, difficulty)
-            );
+            throw new BusinessRuleException(String.format("No questions found for technology '%s' with difficulty '%s'",
+                    technologyName, difficulty));
         }
         Test newTest = new Test();
         newTest.setCandidate(candidate);
         newTest.setTechnology(technology);
         newTest.setStatus(TestStatus.IN_PROGRESS);
 
-        Set<CandidateAnswer> candidateAnswers = questions.stream()
-            .map(question -> {
-                CandidateAnswer answer = new CandidateAnswer();
-                answer.setTest(newTest);
-                answer.setQuestion(question);
-                return answer;
-            })
-            .collect(Collectors.toSet());
+        Set<CandidateAnswer> candidateAnswers = questions.stream().map(question -> {
+            CandidateAnswer answer = new CandidateAnswer();
+            answer.setTest(newTest);
+            answer.setQuestion(question);
+            return answer;
+        }).collect(Collectors.toSet());
 
         newTest.setAnswers(candidateAnswers);
 
@@ -115,7 +108,7 @@ public class TestApplicationService {
         Candidate candidate = candidateService.getCandidateByEmailSession(email);
 
         Test test = testRepository.findById(testId)
-            .orElseThrow(() -> new EntityNotFoundException(TEST_ENTITY_NAME, testId));
+                .orElseThrow(() -> new EntityNotFoundException(TEST_ENTITY_NAME, testId));
 
         if (!test.getCandidate().getId().equals(candidate.getId())) {
             throw new AccessDeniedException("You do not have permission to modify this test");
@@ -126,12 +119,11 @@ public class TestApplicationService {
         }
 
         QuestionOption selectedOption = questionOptionRepository.findById(request.selectedOptionId())
-            .orElseThrow(() -> new EntityNotFoundException("QuestionOption", request.selectedOptionId()));
+                .orElseThrow(() -> new EntityNotFoundException("QuestionOption", request.selectedOptionId()));
 
         if (!selectedOption.getQuestion().getId().equals(questionId)) {
-            throw new BusinessRuleException(
-                String.format("Option ID %d does not belong to Question ID %d", request.selectedOptionId(), questionId)
-            );
+            throw new BusinessRuleException(String.format("Option ID %d does not belong to Question ID %d",
+                    request.selectedOptionId(), questionId));
         }
 
         test.answerQuestion(questionId, selectedOption);
@@ -142,7 +134,7 @@ public class TestApplicationService {
         Candidate candidate = candidateService.getCandidateByEmailSession(email);
 
         Test test = testRepository.findById(testId)
-            .orElseThrow(() -> new EntityNotFoundException(TEST_ENTITY_NAME, testId));
+                .orElseThrow(() -> new EntityNotFoundException(TEST_ENTITY_NAME, testId));
 
         if (!test.getCandidate().getId().equals(candidate.getId())) {
             throw new AccessDeniedException("You do not have permission to submit this test");
@@ -165,58 +157,38 @@ public class TestApplicationService {
 
         List<Test> filteredTests = testRepository.findAll(specification, sort);
 
-        Map<String, Map<QuestionDifficulty, List<Test>>> grouped = filteredTests.stream()
-            .collect(Collectors.groupingBy(
-                test -> test.getTechnology().getName(),
-                Collectors.groupingBy(Test::getDerivedDifficulty)
-            ));
+        Map<String, Map<QuestionDifficulty, List<Test>>> grouped = filteredTests.stream().collect(Collectors
+                .groupingBy(test -> test.getTechnology().getName(), Collectors.groupingBy(Test::getDerivedDifficulty)));
 
-        List<TechnologyHistoryGroupResponse> historyByTechnology = grouped.entrySet().stream()
-            .map(techEntry -> {
-                String techName = techEntry.getKey();
-                Map<QuestionDifficulty, List<Test>> difficultyMap = techEntry.getValue();
+        List<TechnologyHistoryGroupResponse> historyByTechnology = grouped.entrySet().stream().map(techEntry -> {
+            String techName = techEntry.getKey();
+            Map<QuestionDifficulty, List<Test>> difficultyMap = techEntry.getValue();
 
-                List<DifficultyHistoryGroupResponse> difficultyGroups = difficultyMap.entrySet().stream()
-                    .map(diffEntry -> {
-                        QuestionDifficulty difficulty = diffEntry.getKey();
-                        List<Test> diffTests = diffEntry.getValue();
+            List<DifficultyHistoryGroupResponse> difficultyGroups = difficultyMap.entrySet().stream().map(diffEntry -> {
+                QuestionDifficulty difficulty = diffEntry.getKey();
+                List<Test> diffTests = diffEntry.getValue();
 
-                        List<TestSummaryResponse> summaryList = diffTests.stream()
-                            .map(testMapper::toSummaryResponse)
-                            .toList();
+                List<TestSummaryResponse> summaryList = diffTests.stream().map(testMapper::toSummaryResponse).toList();
 
-                        BigDecimal avgScore = calculateAverageScore(diffTests);
+                BigDecimal avgScore = calculateAverageScore(diffTests);
 
-                        return new DifficultyHistoryGroupResponse(
-                            difficulty,
-                            diffTests.size(),
-                            avgScore,
-                            summaryList
-                        );
-                    })
-                    .sorted(Comparator.comparing(d -> d.difficulty().ordinal()))
-                    .toList();
+                return new DifficultyHistoryGroupResponse(difficulty, diffTests.size(), avgScore, summaryList);
+            }).sorted(Comparator.comparing(d -> d.difficulty().ordinal())).toList();
 
-                return new TechnologyHistoryGroupResponse(techName, difficultyGroups);
-            })
-            .toList();
+            return new TechnologyHistoryGroupResponse(techName, difficultyGroups);
+        }).toList();
 
         return new CandidateTestHistoryResponse(candidate.getId(), filteredTests.size(), historyByTechnology);
     }
 
-
     private BigDecimal calculateAverageScore(List<Test> tests) {
-        List<Test> completedTests = tests.stream()
-            .filter(t -> t.getScore() != null)
-            .toList();
+        List<Test> completedTests = tests.stream().filter(t -> t.getScore() != null).toList();
 
         if (completedTests.isEmpty()) {
             return BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP);
         }
 
-        BigDecimal sum = completedTests.stream()
-            .map(Test::getScore)
-            .reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal sum = completedTests.stream().map(Test::getScore).reduce(BigDecimal.ZERO, BigDecimal::add);
 
         return sum.divide(BigDecimal.valueOf(completedTests.size()), 2, RoundingMode.HALF_UP);
     }
@@ -226,7 +198,7 @@ public class TestApplicationService {
         Candidate candidate = candidateService.getCandidateByEmailSession(email);
 
         Test test = testRepository.findById(testId)
-            .orElseThrow(() -> new EntityNotFoundException(TEST_ENTITY_NAME, testId));
+                .orElseThrow(() -> new EntityNotFoundException(TEST_ENTITY_NAME, testId));
 
         if (!test.getCandidate().getId().equals(candidate.getId())) {
             throw new AccessDeniedException("You do not have permission to view this test");
@@ -244,7 +216,7 @@ public class TestApplicationService {
         Candidate candidate = candidateService.getCandidateByEmailSession(email);
 
         Test test = testRepository.findById(testId)
-            .orElseThrow(() -> new EntityNotFoundException(TEST_ENTITY_NAME, testId));
+                .orElseThrow(() -> new EntityNotFoundException(TEST_ENTITY_NAME, testId));
 
         if (!test.getCandidate().getId().equals(candidate.getId())) {
             throw new AccessDeniedException("You do not have permission to modify this test");
@@ -252,10 +224,8 @@ public class TestApplicationService {
 
         if (test.getStatus() != TestStatus.IN_PROGRESS) {
             throw new BusinessRuleException(
-                String.format("Cannot cancel test. Current status is %s, expected IN_PROGRESS", test.getStatus())
-            );
+                    String.format("Cannot cancel test. Current status is %s, expected IN_PROGRESS", test.getStatus()));
         }
-
 
         test.setStatus(TestStatus.CANCELED);
 
