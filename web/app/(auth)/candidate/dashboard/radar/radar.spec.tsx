@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import RadarPage from "./page";
 
-const mockUseJobs = vi.fn();
+const mockUseJobsQuery = vi.fn();
 const mockUseTechnologyDemand = vi.fn();
 
 vi.mock("next/navigation", () => ({
@@ -17,8 +17,11 @@ vi.mock("next/navigation", () => ({
   usePathname: () => "/candidate/dashboard/radar",
 }));
 
-vi.mock("@/lib/api/radar", () => ({
-  useJobs: () => mockUseJobs(),
+vi.mock("@/lib/api/jobs/getJobs", () => ({
+  useJobsQuery: () => mockUseJobsQuery(),
+}));
+
+vi.mock("@/lib/api/radar/radar", () => ({
   useTechnologyDemand: () => mockUseTechnologyDemand(),
 }));
 
@@ -48,7 +51,7 @@ describe("Radar Page", () => {
   });
 
   it("renders loading state", () => {
-    mockUseJobs.mockReturnValue({
+    mockUseJobsQuery.mockReturnValue({
       data: undefined,
       isLoading: true,
       error: null,
@@ -67,7 +70,7 @@ describe("Radar Page", () => {
   });
 
   it("renders error state when api fails", () => {
-    mockUseJobs.mockReturnValue({
+    mockUseJobsQuery.mockReturnValue({
       data: undefined,
       isLoading: false,
       error: new Error("jobs failed"),
@@ -86,8 +89,8 @@ describe("Radar Page", () => {
   });
 
   it("renders empty state when there is no technology demand data", () => {
-    mockUseJobs.mockReturnValue({
-      data: { success: true, result: [] },
+    mockUseJobsQuery.mockReturnValue({
+      data: [],
       isLoading: false,
       error: null,
     });
@@ -105,36 +108,33 @@ describe("Radar Page", () => {
   });
 
   it("renders metrics and charts with api data", () => {
-    mockUseJobs.mockReturnValue({
-      data: {
-        success: true,
-        result: [
-          {
-            id: "1",
-            title: "Frontend Engineer",
-            description: "desc",
-            seniorityLevel: "Pleno",
-            department: "Tecnologia",
-            salaryMin: 5000,
-            salaryMax: 8000,
-            status: "OPEN",
-            recruiterId: "r1",
-            companyId: "c1",
-          },
-          {
-            id: "2",
-            title: "Backend Engineer",
-            description: "desc",
-            seniorityLevel: "Senior",
-            department: "Tecnologia",
-            salaryMin: 7000,
-            salaryMax: 10000,
-            status: "OPEN",
-            recruiterId: "r2",
-            companyId: "c2",
-          },
-        ],
-      },
+    mockUseJobsQuery.mockReturnValue({
+      data: [
+        {
+          id: "1",
+          title: "Frontend Engineer",
+          description: "desc",
+          seniorityLevel: "Pleno",
+          department: "Tecnologia",
+          salaryMin: 5000,
+          salaryMax: 8000,
+          status: "OPEN",
+          recruiterId: "r1",
+          companyId: "c1",
+        },
+        {
+          id: "2",
+          title: "Backend Engineer",
+          description: "desc",
+          seniorityLevel: "Senior",
+          department: "Tecnologia",
+          salaryMin: 7000,
+          salaryMax: 10000,
+          status: "OPEN",
+          recruiterId: "r2",
+          companyId: "c2",
+        },
+      ],
       isLoading: false,
       error: null,
     });

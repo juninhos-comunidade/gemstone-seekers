@@ -14,7 +14,7 @@ vi.mock("next/navigation", () => ({
 }));
 
 describe("Public Home Page", () => {
-  it("should renders platform badge, main heading, description and CTA buttons", () => {
+  it("should renders platform badge, main heading, description and CTA buttons with functional links", () => {
     render(<Home />);
     expect(
       screen.getByText(/plataforma de recrutamento para tecnologia/i),
@@ -24,11 +24,17 @@ describe("Public Home Page", () => {
     expect(
       screen.getByText(/conecta recrutadores e profissionais de tecnologia/i),
     ).toBeInTheDocument();
+
+    const signupLink = screen.getByRole("link", { name: /começar agora/i });
+    expect(signupLink).toHaveAttribute("href", "/signup");
     expect(
       screen.getByRole("button", { name: /começar agora/i }),
     ).toBeInTheDocument();
+
+    const loginLink = screen.getByRole("link", { name: /acessar/i });
+    expect(loginLink).toHaveAttribute("href", "/login");
     expect(
-      screen.getByRole("button", { name: /saiba mais/i }),
+      screen.getByRole("button", { name: /acessar/i }),
     ).toBeInTheDocument();
   });
 });

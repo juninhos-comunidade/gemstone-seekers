@@ -7,7 +7,6 @@ export interface Job {
   id: string;
   recruiterId: string;
   companyId: string;
-  companyName?: string;
   title: string;
   description: string;
   seniorityLevel: SeniorityLevel;
@@ -16,8 +15,6 @@ export interface Job {
   salaryMax?: number;
   status: JobStatus;
   technologies?: JobTechnology[];
-  createdAt?: string;
-  updatedAt?: string;
 }
 
 export interface CreateJobInput {

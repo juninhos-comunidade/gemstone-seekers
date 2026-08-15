@@ -12,7 +12,7 @@ vi.mock("next/navigation", () => ({
 
 vi.mock("@/lib/api/auth/login", () => ({
   useLogin: () => ({
-    mutateAsync: mockLogin,
+    mutate: mockLogin,
     isPending: false,
   }),
 }));
@@ -37,7 +37,11 @@ describe("Login Page", () => {
   it("renders login form fields and signup link", () => {
     render(<Login />);
 
-    expect(screen.getByRole("heading", { name: "Entrar" })).toBeInTheDocument();
+    // Alterado: o heading principal é "Bem-vindo de volta"
+    expect(
+      screen.getByRole("heading", { name: "Bem-vindo de volta" }),
+    ).toBeInTheDocument();
+
     expect(screen.getByRole("textbox", { name: "E-mail" })).toBeInTheDocument();
     expect(screen.getByLabelText("Senha")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Entrar" })).toBeInTheDocument();
