@@ -121,8 +121,8 @@ class QuestionRefillWorkerTest {
         when(technologyRepository.findAll()).thenReturn(List.of(javaTech, pythonTech));
         StockProjection javaStock = createMockProjection(1, QuestionDifficulty.BEGINNER, 0L);
         when(questionRepository.getQuestionStockReport()).thenReturn(List.of(javaStock));
-        when(aiService.generateQuestions("Java", QuestionDifficulty.BEGINNER, 10))
-                .thenThrow(new AiGenerationException("AI quota exceeded"));
+        when(aiService.generateQuestions("Java", QuestionDifficulty.BEGINNER, 10)).thenThrow(new AiGenerationException(
+                "AI quota exceeded"));
 
         assertDoesNotThrow(() -> worker.executeRefillJob());
 
@@ -141,7 +141,8 @@ class QuestionRefillWorkerTest {
         when(questionRepository.getQuestionStockReport()).thenReturn(List.of(stock));
         AiQuestionBatchResponse aiResponse = new AiQuestionBatchResponse(List.of());
         when(aiService.generateQuestions("Java", QuestionDifficulty.BEGINNER, 10)).thenReturn(aiResponse);
-        doThrow(new DataAccessException("DB connection lost") {}).when(questionService).saveAiGeneratedBatch(any(), any(), any());
+        doThrow(new DataAccessException("DB connection lost") {
+        }).when(questionService).saveAiGeneratedBatch(any(), any(), any());
 
         assertDoesNotThrow(() -> worker.executeRefillJob());
 

@@ -51,11 +51,8 @@ public class QuestionRefillWorker {
         }
     }
 
-    public QuestionRefillWorker(TechnologyRepository technologyRepository,
-                                QuestionRepository questionRepository,
-                                QuestionService questionService,
-                                AiQuestionGeneratorService aiService,
-                                Sleeper sleeper) {
+    public QuestionRefillWorker(TechnologyRepository technologyRepository, QuestionRepository questionRepository,
+            QuestionService questionService, AiQuestionGeneratorService aiService, Sleeper sleeper) {
         this.technologyRepository = technologyRepository;
         this.questionRepository = questionRepository;
         this.questionService = questionService;
@@ -65,7 +62,6 @@ public class QuestionRefillWorker {
 
     @Async
     @EventListener(ApplicationReadyEvent.class)
-    @SuppressWarnings("PMD.AvoidCatchingGenericException")
     public void executeRefillJob() {
         if (log.isInfoEnabled()) {
             log.info("[WORKER] Starting Asynchronous Question Refill Job...");
@@ -82,9 +78,8 @@ public class QuestionRefillWorker {
             }
 
             List<StockProjection> stockReport = questionRepository.getQuestionStockReport();
-            stockMatrix = stockReport.stream().collect(Collectors.groupingBy(
-                StockProjection::getTechnologyId, Collectors.toMap(StockProjection::getDifficultyLevel,
-                    StockProjection::getStockCount)));
+            stockMatrix = stockReport.stream().collect(Collectors.groupingBy(StockProjection::getTechnologyId,
+                    Collectors.toMap(StockProjection::getDifficultyLevel, StockProjection::getStockCount)));
 
         } catch (DataAccessException e) {
             if (log.isErrorEnabled()) {
@@ -98,8 +93,8 @@ public class QuestionRefillWorker {
         for (Technology tech : technologies) {
             if (circuitOpen) {
                 if (log.isWarnEnabled()) {
-                    log.warn("[WORKER] Circuit is OPEN due to AI unavailability. Aborting refill (Skipping {}).",
-                        tech.getName());
+                    log.warn("[WORKER] Circuit is OPEN due to AI unavailability. Aborting refill (Skipping {}).", tech
+                            .getName());
                 }
                 break;
             }
@@ -109,17 +104,15 @@ public class QuestionRefillWorker {
 
             } catch (AiGenerationException e) {
                 if (log.isErrorEnabled()) {
-                    log.error("[WORKER] Systemic AI failure detected for {}. Opening circuit! Reason: {}",
-                        tech.getName(), e.getMessage());
+                    log.error("[WORKER] Systemic AI failure detected for {}. Opening circuit! Reason: {}", tech
+                            .getName(), e.getMessage());
                 }
                 circuitOpen = true;
 
-            } catch (Exception e) {
-                // Captura intencional para falhas não mapeadas (ex: NullPointer).
-                // Evita que o job inteiro pare, permitindo que a próxima tecnologia seja processada.
+            } catch (DataAccessException e) {
                 if (log.isErrorEnabled()) {
-                    log.error("[WORKER] Unexpected logical error processing {}. Skipping to next technology.",
-                        tech.getName(), e);
+                    log.error("[WORKER] Unexpected infrastructure error processing {}. Skipping to next technology.", tech
+                            .getName(), e);
                 }
             }
         }
@@ -127,28 +120,26 @@ public class QuestionRefillWorker {
         log.info("[WORKER] Question Refill Job finished execution.");
     }
 
-    private void processTechnologyRefill(
-        Technology tech, 
-        Map<Integer, Map<QuestionDifficulty, Long>> stockMatrix) throws AiGenerationException {
+    private void processTechnologyRefill(Technology tech, Map<Integer, Map<QuestionDifficulty, Long>> stockMatrix)
+            throws AiGenerationException {
         for (QuestionDifficulty difficulty : QuestionDifficulty.values()) {
-            long currentStock = stockMatrix.getOrDefault(tech.getId(), Collections.emptyMap()).getOrDefault(
-                difficulty, 0L);
+            long currentStock = stockMatrix.getOrDefault(tech.getId(), Collections.emptyMap()).getOrDefault(difficulty,
+                    0L);
 
             while (currentStock < MINIMUM_STOCK_THRESHOLD) {
                 if (log.isWarnEnabled()) {
                     log.warn("[WORKER] Low stock for {} ({}). Current: {}. Target: {}. Triggering AI.", tech.getName(),
-                        difficulty, currentStock, MINIMUM_STOCK_THRESHOLD);
+                            difficulty, currentStock, MINIMUM_STOCK_THRESHOLD);
                 }
 
-                AiQuestionBatchResponse aiResponse = aiService.generateQuestions(
-                    tech.getName(),
-                    difficulty,
-                    BATCH_SIZE);
+                AiQuestionBatchResponse aiResponse = aiService.generateQuestions(tech.getName(), difficulty,
+                        BATCH_SIZE);
 
                 questionService.saveAiGeneratedBatch(tech, difficulty, aiResponse);
 
                 if (log.isInfoEnabled()) {
-                    log.info("[WORKER] Successfully generated and saved {} questions for {} ({}).", BATCH_SIZE, tech.getName(), difficulty);
+                    log.info("[WORKER] Successfully generated and saved {} questions for {} ({}).", BATCH_SIZE, tech
+                            .getName(), difficulty);
                 }
 
                 currentStock += BATCH_SIZE;
