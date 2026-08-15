@@ -17,8 +17,16 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.List;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class QuestionRefillWorkerTest {
@@ -207,7 +215,6 @@ class QuestionRefillWorkerTest {
         when(aiService.generateQuestions("Java", QuestionDifficulty.BEGINNER, 10)).thenReturn(aiResponse);
         when(aiService.generateQuestions("Java", QuestionDifficulty.INTERMEDIATE, 10)).thenReturn(aiResponse);
 
-        // Ajustado para refletir o DataAccessException estrito
         doThrow(new org.springframework.dao.DataAccessResourceFailureException("Database connection lost")).when(
                 questionService).saveAiGeneratedBatch(eq(javaTech), eq(QuestionDifficulty.BEGINNER), any());
 
