@@ -28,6 +28,6 @@ describe("QuizNotFound", () => {
     render(<QuizNotFound />);
     const backButton = screen.getByText("Voltar aos testes");
     fireEvent.click(backButton);
-    expect(mockPush).toHaveBeenCalledWith("/dashboard/tests");
+    expect(mockPush).toHaveBeenCalledWith("/candidate/dashboard/tests");
   });
 });

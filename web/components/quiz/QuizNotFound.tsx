@@ -29,7 +29,7 @@ export function QuizNotFound() {
 
         {/* Botão de ação */}
         <Button
-          onClick={() => router.push("/dashboard/tests")}
+          onClick={() => router.push("/candidate/dashboard/tests")}
           variant="outline"
           className="w-full sm:w-auto"
         >

@@ -106,13 +106,13 @@ export function QuizResult({
         <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
           <Button
             variant="outline"
-            onClick={() => router.push("/dashboard/tests")}
+            onClick={() => router.push("/candidate/dashboard/tests")}
             className="w-full sm:w-auto"
           >
             Voltar aos testes
           </Button>
           <Button
-            onClick={() => router.push("/dashboard")}
+            onClick={() => router.push("/candidate/dashboard")}
             className="w-full sm:w-auto"
           >
             Ir para dashboard

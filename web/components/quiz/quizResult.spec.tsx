@@ -48,17 +48,17 @@ describe("QuizResult", () => {
     expect(screen.getByText("Ir para dashboard")).toBeInTheDocument();
   });
 
-  it("navigates to /dashboard/tests when back button is clicked", () => {
+  it("navigates to /candidate/dashboard/tests when back button is clicked", () => {
     render(<QuizResult score={5} totalQuestions={10} />);
     const backButton = screen.getByText("Voltar aos testes");
     fireEvent.click(backButton);
-    expect(mockPush).toHaveBeenCalledWith("/dashboard/tests");
+    expect(mockPush).toHaveBeenCalledWith("/candidate/dashboard/tests");
   });
 
-  it("navigates to /dashboard when dashboard button is clicked", () => {
+  it("navigates to /candidate/dashboard when dashboard button is clicked", () => {
     render(<QuizResult score={5} totalQuestions={10} />);
     const dashboardButton = screen.getByText("Ir para dashboard");
     fireEvent.click(dashboardButton);
-    expect(mockPush).toHaveBeenCalledWith("/dashboard");
+    expect(mockPush).toHaveBeenCalledWith("/candidate/dashboard");
   });
 });
