@@ -4,19 +4,35 @@ import TestsPage from "./page";
 
 const mockSelectFilter = vi.fn();
 
+// Mock da API de tecnologias
+vi.mock("@/lib/api/technologies/getTechnologies", () => ({
+  useTechnologiesQuery: () => ({
+    data: [
+      { id: 1, name: "JavaScript", category: "Programming" },
+      { id: 2, name: "TypeScript", category: "Programming" },
+      { id: 3, name: "Python", category: "Programming" },
+      { id: 4, name: "Java", category: "Programming" },
+    ],
+    isLoading: false,
+  }),
+}));
+
+// Mock do SelectFilter para incluir o disabled prop
 vi.mock("@/components/SelectFilter/SelectFilter", () => ({
   SelectFilter: ({
     items,
     value,
     onValueChange,
     placeholder,
+    disabled,
   }: {
     items: Array<{ value: string; label: string }>;
     value?: string;
     onValueChange?: (_value: string) => void;
     placeholder?: string;
+    disabled?: boolean;
   }) => {
-    mockSelectFilter({ items, value, onValueChange, placeholder });
+    mockSelectFilter({ items, value, onValueChange, placeholder, disabled });
 
     return (
       <label>
@@ -25,6 +41,7 @@ vi.mock("@/components/SelectFilter/SelectFilter", () => ({
           aria-label={placeholder}
           value={value}
           onChange={(event) => onValueChange?.(event.target.value)}
+          disabled={disabled}
         >
           {items.map((item) => (
             <option key={item.value || item.label} value={item.value}>
@@ -105,10 +122,8 @@ describe("Candidate Tests Page", () => {
     );
 
     expect(screen.getAllByTestId("test-card")).toHaveLength(1);
-    expect(screen.getByText(/javascript para iniciantes/i)).toBeInTheDocument();
-    expect(
-      screen.queryByText(/python para iniciantes/i),
-    ).not.toBeInTheDocument();
+    expect(screen.getByText(/javascript assessment/i)).toBeInTheDocument();
+    expect(screen.queryByText(/python assessment/i)).not.toBeInTheDocument();
   });
 
   it("filters cards by technology and level together", () => {
@@ -124,15 +139,13 @@ describe("Candidate Tests Page", () => {
     fireEvent.change(
       screen.getByRole("combobox", { name: /filtrar por nível/i }),
       {
-        target: { value: "iniciante" },
+        target: { value: "BEGINNER" },
       },
     );
 
     expect(screen.getAllByTestId("test-card")).toHaveLength(1);
-    expect(screen.getByText(/javascript para iniciantes/i)).toBeInTheDocument();
-    expect(
-      screen.queryByText(/python para iniciantes/i),
-    ).not.toBeInTheDocument();
+    expect(screen.getByText(/javascript assessment/i)).toBeInTheDocument();
+    expect(screen.queryByText(/python assessment/i)).not.toBeInTheDocument();
   });
 
   it("restores all cards when technology filter is cleared", () => {

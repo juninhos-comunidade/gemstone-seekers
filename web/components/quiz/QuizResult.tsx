@@ -7,9 +7,14 @@ import { Trophy, Target, TrendingUp, ArrowRight } from "lucide-react";
 export type QuizResultProps = {
   score: number;
   totalQuestions: number;
+  assessmentId?: string;
 };
 
-export function QuizResult({ score, totalQuestions }: QuizResultProps) {
+export function QuizResult({
+  score,
+  totalQuestions,
+  assessmentId: _assessmentId,
+}: QuizResultProps) {
   const router = useRouter();
   const percentage = Math.round((score / totalQuestions) * 100);
 

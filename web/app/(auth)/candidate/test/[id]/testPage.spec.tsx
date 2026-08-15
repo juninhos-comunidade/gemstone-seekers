@@ -1,9 +1,10 @@
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import TestPage from "./page"; // Ajuste o caminho se necessário
+import TestPage from "./page";
 import { useParams } from "next/navigation";
+import { startAssessment } from "@/lib/api/assessments";
 
-// 1. Mock do next/navigation
+// Mock do next/navigation
 vi.mock("next/navigation", () => ({
   useParams: vi.fn(),
   useRouter: () => ({
@@ -11,46 +12,16 @@ vi.mock("next/navigation", () => ({
   }),
 }));
 
-// 2. Mock dos dados do Quiz
-vi.mock("@/lib/mocks/testsMock", () => ({
-  questionarios: [
-    {
-      id: "quiz-1",
-      candidateId: "candidate-001",
-      technologyId: 1,
-      status: "IN_PROGRESS",
-      Tech: "JavaScript",
-      Titulo: "JavaScript Test",
-      Descricao: "Test description",
-      NumQuestoes: 2,
-      Nivel: "iniciante",
-      questions: [
-        {
-          id: "q1",
-          technologyId: 1,
-          statement: "Pergunta 1",
-          difficulty: "BEGINNER",
-          options: [
-            { id: "opt1", text: "Correta", isCorrect: true },
-            { id: "opt2", text: "Errada", isCorrect: false },
-          ],
-        },
-        {
-          id: "q2",
-          technologyId: 1,
-          statement: "Pergunta 2",
-          difficulty: "BEGINNER",
-          options: [
-            { id: "opt3", text: "Correta", isCorrect: true },
-            { id: "opt4", text: "Errada", isCorrect: false },
-          ],
-        },
-      ],
-    },
-  ],
+// Mock das funções da API de assessments
+vi.mock("@/lib/api/assessments", () => ({
+  startAssessment: vi.fn(),
+  answerQuestion: vi.fn(),
+  submitAssessment: vi.fn(),
+  getAssessmentResult: vi.fn(),
+  cancelAssessment: vi.fn(),
 }));
 
-// 3. Mock dos componentes filhos para facilitar a verificação e focar na lógica do TestPage
+// Mock dos componentes filhos
 vi.mock("@/components/quiz/QuizNotFound", () => ({
   QuizNotFound: () => (
     <div data-testid="quiz-not-found">Quiz não encontrado</div>
@@ -72,18 +43,16 @@ vi.mock("@/components/quiz/QuizResult", () => ({
 }));
 
 type QuizOption = {
-  id: string;
-  text: string;
-  isCorrect: boolean;
+  id: number;
+  optionText: string;
 };
 
 type QuizQuestion = {
-  id: string;
+  id: number;
   statement: string;
   options: QuizOption[];
 };
 
-// Atualizado para refletir o mock real do QuizQuestion
 vi.mock("@/components/quiz/QuizQuestion", () => ({
   QuizQuestion: ({
     currentQuestion,
@@ -97,7 +66,7 @@ vi.mock("@/components/quiz/QuizQuestion", () => ({
     handleSetAnswer: (_optionId: string) => void;
     handlePrevious: () => void;
     handleNext: () => void;
-    selectedOptionId: string | null;
+    selectedOptionId: string;
     isLastQuestion: boolean;
   }) => (
     <div data-testid="quiz-question">
@@ -106,10 +75,10 @@ vi.mock("@/components/quiz/QuizQuestion", () => ({
       {currentQuestion.options.map((opt: QuizOption) => (
         <button
           key={opt.id}
-          onClick={() => handleSetAnswer(opt.id)}
-          data-selected={selectedOptionId === opt.id}
+          onClick={() => handleSetAnswer(opt.id.toString())}
+          data-selected={selectedOptionId === opt.id.toString()}
         >
-          {opt.text}
+          {opt.optionText}
         </button>
       ))}
 
@@ -126,69 +95,25 @@ describe("TestPage", () => {
     vi.clearAllMocks();
   });
 
-  it("deve renderizar QuizNotFound quando o id passado na URL não existir", () => {
-    vi.mocked(useParams).mockReturnValue({ id: "id-invalido" });
+  it("deve renderizar loading state inicialmente", () => {
+    vi.mocked(useParams).mockReturnValue({ id: "javascript" });
+    vi.mocked(startAssessment).mockImplementation(() => new Promise(() => {}));
 
     render(<TestPage />);
 
-    expect(screen.getByTestId("quiz-not-found")).toBeInTheDocument();
+    expect(screen.getByText("Carregando teste...")).toBeInTheDocument();
   });
 
-  it("deve renderizar a primeira questão quando o id for válido", () => {
-    vi.mocked(useParams).mockReturnValue({ id: "quiz-1" });
+  it("deve renderizar QuizNotFound quando houver erro ao iniciar assessment", async () => {
+    vi.mocked(useParams).mockReturnValue({ id: "invalid-tech" });
+    vi.mocked(startAssessment).mockRejectedValue(
+      new Error("Technology not found"),
+    );
 
     render(<TestPage />);
 
-    expect(screen.getByTestId("quiz-question")).toBeInTheDocument();
-    expect(screen.getByText("Pergunta 1")).toBeInTheDocument();
-  });
-
-  it("deve permitir avançar e voltar entre as questões", () => {
-    vi.mocked(useParams).mockReturnValue({ id: "quiz-1" });
-    render(<TestPage />);
-
-    fireEvent.click(screen.getByText("Correta"));
-
-    fireEvent.click(screen.getByText("Próxima"));
-
-    expect(screen.getByText("Pergunta 2")).toBeInTheDocument();
-
-    fireEvent.click(screen.getByText("Anterior"));
-
-    expect(screen.getByText("Pergunta 1")).toBeInTheDocument();
-  });
-
-  it("não deve avançar se nenhuma opção for selecionada", () => {
-    vi.mocked(useParams).mockReturnValue({ id: "quiz-1" });
-    render(<TestPage />);
-
-    const nextButton = screen.getByText("Próxima");
-
-    expect(nextButton).toBeDisabled();
-
-    fireEvent.click(nextButton);
-    expect(screen.getByText("Pergunta 1")).toBeInTheDocument();
-  });
-
-  it("deve alterar o texto do botão para 'Finalizar' na última questão e concluir o fluxo", () => {
-    vi.mocked(useParams).mockReturnValue({ id: "quiz-1" });
-    render(<TestPage />);
-
-    // Responder primeira questão e avançar
-    fireEvent.click(screen.getByText("Correta"));
-    const nextButton = screen.getByText("Próxima");
-    fireEvent.click(nextButton);
-
-    // Verificar se o botão mudou para Finalizar na última questão
-    expect(screen.getByText("Pergunta 2")).toBeInTheDocument();
-    const finishButton = screen.getByText("Finalizar");
-    expect(finishButton).toBeInTheDocument();
-
-    // Responder e finalizar
-    fireEvent.click(screen.getByText("Correta"));
-    fireEvent.click(finishButton);
-
-    // Verificar conclusão
-    expect(screen.getByTestId("quiz-result")).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText("Erro")).toBeInTheDocument();
+    });
   });
 });

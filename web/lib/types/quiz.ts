@@ -1,16 +1,19 @@
 export type QuestionDifficulty = "BEGINNER" | "INTERMEDIATE" | "ADVANCED";
 
 export type QuestionOption = {
-  id: string;
+  id: string | number;
   text: string;
-  isCorrect: boolean;
+  optionText?: string;
+  isCorrect?: boolean;
 };
 
 export type Question = {
-  id: string;
-  technologyId: number;
+  id: string | number;
+  technologyId?: number;
   statement: string;
   difficulty: QuestionDifficulty;
+  difficultyLevel?: QuestionDifficulty;
+  source?: string;
   options: QuestionOption[];
 };
 

@@ -18,6 +18,7 @@ describe("TestCard", () => {
         Descricao="Teste sobre componentes e props."
         NumQuestoes={10}
         Nivel="iniciante"
+        difficulty="BEGINNER"
       />,
     );
 
@@ -31,7 +32,7 @@ describe("TestCard", () => {
     expect(startLink).toBeInTheDocument();
     expect(startLink).toHaveAttribute(
       "href",
-      "/candidate/test/react-iniciantes",
+      "/candidate/test/react-iniciantes?difficulty=BEGINNER",
     );
   });
 

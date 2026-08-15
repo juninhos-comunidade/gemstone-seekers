@@ -18,6 +18,8 @@ export function QuizQuestion({
   handlePrevious,
   handleNext,
   isLastQuestion,
+  onCancel,
+  submitting,
 }: {
   progressPercent: number;
   currentIndex: number;
@@ -28,6 +30,8 @@ export function QuizQuestion({
   handlePrevious: () => void;
   handleNext: () => void;
   isLastQuestion: boolean;
+  onCancel?: () => void;
+  submitting?: boolean;
 }) {
   return (
     <div className="mx-auto w-full max-w-3xl p-4 md:p-6">
@@ -42,7 +46,7 @@ export function QuizQuestion({
                 totalQuestions={totalQuestions}
               />
             </div>
-            <QuizCloseModal />
+            <QuizCloseModal onCancel={onCancel} />
           </div>
         </div>
 
@@ -65,11 +69,11 @@ export function QuizQuestion({
           className="space-y-3"
         >
           {currentQuestion.options.map((option, _index) => {
-            const isSelected = selectedOptionId === option.id;
+            const isSelected = selectedOptionId === option.id.toString();
             return (
               <div
                 key={option.id}
-                onClick={() => handleSetAnswer(option.id)}
+                onClick={() => handleSetAnswer(option.id.toString())}
                 className={`group relative flex cursor-pointer items-center rounded-xl border-2 p-4 transition-all duration-200 ${
                   isSelected
                     ? "border-primary bg-primary/5 shadow-md"
@@ -84,10 +88,10 @@ export function QuizQuestion({
                   )}
                 </div>
                 <Label
-                  htmlFor={option.id}
+                  htmlFor={option.id.toString()}
                   className="ml-4 flex-1 cursor-pointer text-base font-medium"
                 >
-                  {option.text}
+                  {option.text || option.optionText}
                 </Label>
                 {isSelected && (
                   <CheckCircle2 className="text-primary h-5 w-5 md:h-6 md:w-6" />
@@ -110,7 +114,7 @@ export function QuizQuestion({
           </Button>
           <Button
             onClick={handleNext}
-            disabled={!selectedOptionId}
+            disabled={!selectedOptionId || submitting}
             className="w-full sm:w-auto"
           >
             {isLastQuestion ? (

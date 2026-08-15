@@ -23,7 +23,7 @@ interface JobListProps {
 export function JobList({ jobs }: JobListProps) {
   const [search, setSearch] = useState("");
 
-  const filteredJobs = jobs.filter((job) => {
+  const filteredJobs = (jobs || []).filter((job) => {
     const term = search.toLowerCase();
     return (
       job.title.toLowerCase().includes(term) ||

@@ -2,30 +2,41 @@
 
 import { SelectFilter } from "@/components/SelectFilter/SelectFilter";
 import { TestCard } from "@/components/tests/TestCard/TestCard";
-import { questionarios } from "@/lib/mocks/testsMock";
-import { technologies } from "@/lib/mocks/technologies";
 import { useState, useMemo } from "react";
 import { SkeletonCard } from "@/components/SkeletonCard/SkeletonCard";
+import { useTechnologiesQuery } from "@/lib/api/technologies/getTechnologies";
 
 export default function Page() {
   const [selectedTechnology, setSelectedTechnology] = useState("");
   const [selectedLevel, setSelectedLevel] = useState("");
-  const [loading] = useState(false);
+  const { data: technologies, isLoading: loadingTech } = useTechnologiesQuery();
 
-  const questionariosFiltrados = useMemo(() => {
-    return questionarios.filter((q) => {
-      const matchTech = !selectedTechnology || q.Tech === selectedTechnology;
-      const matchLevel = !selectedLevel || q.Nivel === selectedLevel;
-      return matchTech && matchLevel;
-    });
-  }, [selectedTechnology, selectedLevel]);
+  const filteredTechnologies = useMemo(() => {
+    if (!technologies) return [];
+    if (!selectedTechnology) return technologies;
+    return technologies.filter((tech) => tech.name === selectedTechnology);
+  }, [technologies, selectedTechnology]);
 
   function handleFilterTech(value: string) {
     setSelectedTechnology(value);
   }
+
   function handleFilterLevel(value: string) {
     setSelectedLevel(value);
   }
+
+  const getDifficultyLabel = (level: string) => {
+    switch (level) {
+      case "BEGINNER":
+        return "Iniciante";
+      case "INTERMEDIATE":
+        return "Intermediário";
+      case "ADVANCED":
+        return "Avançado";
+      default:
+        return level;
+    }
+  };
 
   return (
     <section className="space-y-6">
@@ -43,22 +54,23 @@ export default function Page() {
           <SelectFilter
             items={[
               { value: "", label: "Todas as tecnologias" },
-              ...technologies.map((tech) => ({
-                value: tech,
-                label: tech,
-              })),
+              ...(technologies?.map((tech) => ({
+                value: tech.name,
+                label: tech.name,
+              })) || []),
             ]}
             value={selectedTechnology}
             onValueChange={handleFilterTech}
             placeholder="Filtrar por tecnologia"
+            disabled={loadingTech}
           />
           {/*filtro por nivel*/}
           <SelectFilter
             items={[
               { value: "", label: "Todos os níveis" },
-              { value: "iniciante", label: "Iniciante" },
-              { value: "intermediario", label: "Intermediário" },
-              { value: "avancado", label: "Avançado" },
+              { value: "BEGINNER", label: "Iniciante" },
+              { value: "INTERMEDIATE", label: "Intermediário" },
+              { value: "ADVANCED", label: "Avançado" },
             ]}
             value={selectedLevel}
             onValueChange={handleFilterLevel}
@@ -66,19 +78,33 @@ export default function Page() {
           />
         </div>
       </div>
-      {!loading && questionariosFiltrados.length === 0 && (
+
+      {!loadingTech && filteredTechnologies.length === 0 && (
         <p className="text-muted-foreground text-sm">
-          Nenhum questionário encontrado.
+          Nenhuma tecnologia encontrada.
         </p>
       )}
 
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
-        {loading
+        {loadingTech
           ? Array.from({ length: 6 }).map((_, index) => (
               <SkeletonCard key={index} />
             ))
-          : questionariosFiltrados.map((questionario) => (
-              <TestCard key={questionario.Titulo} {...questionario} />
+          : filteredTechnologies.map((technology) => (
+              <TestCard
+                key={technology.id}
+                id={technology.name}
+                Tech={technology.name}
+                Titulo={`${technology.name} Assessment`}
+                Descricao={`Teste seus conhecimentos em ${technology.name}`}
+                NumQuestoes={10}
+                Nivel={
+                  selectedLevel
+                    ? getDifficultyLabel(selectedLevel)
+                    : "Iniciante"
+                }
+                difficulty={selectedLevel || "BEGINNER"}
+              />
             ))}
       </div>
     </section>

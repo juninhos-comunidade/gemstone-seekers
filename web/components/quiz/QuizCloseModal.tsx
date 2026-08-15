@@ -10,12 +10,16 @@ import { LuX } from "react-icons/lu";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-export function QuizCloseModal() {
+export function QuizCloseModal({ onCancel }: { onCancel?: () => void }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
 
   const handleConfirmExit = () => {
-    router.push("/candidate/dashboard/tests");
+    if (onCancel) {
+      onCancel();
+    } else {
+      router.push("/candidate/dashboard/tests");
+    }
   };
 
   return (

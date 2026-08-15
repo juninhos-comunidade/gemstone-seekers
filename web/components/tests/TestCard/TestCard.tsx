@@ -2,13 +2,17 @@ import { Icon } from "@iconify/react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { techIcons, defaultIcon } from "@/lib/icons/techIcons";
-import type { Questionario } from "@/lib/mocks/testsMock";
 import Link from "next/link";
 
-type TestCardProps = Pick<
-  Questionario,
-  "id" | "Tech" | "Titulo" | "Descricao" | "NumQuestoes" | "Nivel"
->;
+type TestCardProps = {
+  id: string;
+  Tech: string;
+  Titulo: string;
+  Descricao: string;
+  NumQuestoes: number;
+  Nivel: string;
+  difficulty?: string;
+};
 
 export function TestCard({
   id,
@@ -17,6 +21,7 @@ export function TestCard({
   Descricao,
   NumQuestoes,
   Nivel,
+  difficulty = "BEGINNER",
 }: TestCardProps) {
   const icon = techIcons[Tech] || defaultIcon;
 
@@ -36,7 +41,7 @@ export function TestCard({
           <span>•</span>
           <span>{Nivel}</span>
         </div>
-        <Link href={`/candidate/test/${id}`}>
+        <Link href={`/candidate/test/${id}?difficulty=${difficulty}`}>
           <Button className="w-full">Começar</Button>
         </Link>
       </CardContent>
