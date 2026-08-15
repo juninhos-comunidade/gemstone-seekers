@@ -26,7 +26,7 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
               AND q.id NOT IN (
                   SELECT ca.question_id
                   FROM candidate_answers ca
-                  JOIN tests tst ON ca.test_id = tst.id
+                  JOIN assessments tst ON ca.assessment_id = tst.id
                   WHERE tst.candidate_id = :candidateId
               )
             ORDER BY RANDOM()
@@ -63,7 +63,7 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
                   AND CAST(q.difficulty_level AS TEXT) = :difficulty
                   AND q.id NOT IN (
                       SELECT ca.question_id FROM candidate_answers ca
-                      INNER JOIN tests t ON ca.test_id = t.id
+                      INNER JOIN assessments t ON ca.assessment_id = t.id
                       WHERE t.candidate_id = :candidateId
                   )
                 ORDER BY RANDOM()
@@ -79,7 +79,7 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
                   AND CAST(q.difficulty_level AS TEXT) = :difficulty
                   AND q.id IN (
                       SELECT ca.question_id FROM candidate_answers ca
-                      INNER JOIN tests t ON ca.test_id = t.id
+                      INNER JOIN assessments t ON ca.assessment_id = t.id
                       WHERE t.candidate_id = :candidateId
                   )
                 ORDER BY RANDOM()

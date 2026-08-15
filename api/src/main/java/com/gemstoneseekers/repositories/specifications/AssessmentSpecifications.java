@@ -1,7 +1,7 @@
 package com.gemstoneseekers.repositories.specifications;
 
-import com.gemstoneseekers.dtos.request.TestHistoryFilterParams;
-import com.gemstoneseekers.models.Test;
+import com.gemstoneseekers.dtos.request.AssessmentHistoryFilterParams;
+import com.gemstoneseekers.models.Assessment;
 import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.jpa.domain.Specification;
 
@@ -9,9 +9,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
-public class TestSpecifications {
+public class AssessmentSpecifications {
 
-    public static Specification<Test> withFilters(UUID candidateId, TestHistoryFilterParams filters) {
+    public static Specification<Assessment> withFilters(UUID candidateId, AssessmentHistoryFilterParams filters) {
         return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
 

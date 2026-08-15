@@ -16,37 +16,6 @@ servers:
 security:
 - bearer-jwt: []
 paths:
-  /api/v1/tests/{testId}/answers/{questionId}:
-    put:
-      tags:
-      - test-controller
-      operationId: saveAnswer
-      parameters:
-      - name: testId
-        in: path
-        required: true
-        schema:
-          type: string
-          format: uuid
-      - name: questionId
-        in: path
-        required: true
-        schema:
-          type: integer
-          format: int64
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/SaveAnswerRequest"
-        required: true
-      responses:
-        "200":
-          description: OK
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/BaseResponseVoid"
   /api/v1/jobs/{id}:
     get:
       tags:
@@ -169,53 +138,37 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/BaseResponseVoid"
-  /api/v1/tests/{testId}/submit:
-    post:
+  /api/v1/assessments/{assessmentId}/answers/{questionId}:
+    put:
       tags:
-      - test-controller
-      operationId: submitTest
+      - assessment-controller
+      operationId: saveAnswer
       parameters:
-      - name: testId
+      - name: assessmentId
         in: path
         required: true
         schema:
           type: string
           format: uuid
-      responses:
-        "200":
-          description: OK
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/BaseResponseTestResultResponse"
-  /api/v1/tests/start/{technology}:
-    post:
-      tags:
-      - test-controller
-      operationId: startTest
-      parameters:
-      - name: technology
+      - name: questionId
         in: path
         required: true
         schema:
-          type: string
-      - name: difficulty
-        in: query
-        required: false
-        schema:
-          type: string
-          default: BEGINNER
-          enum:
-          - BEGINNER
-          - INTERMEDIATE
-          - ADVANCED
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SaveAnswerRequest"
+        required: true
       responses:
         "200":
           description: OK
           content:
             '*/*':
               schema:
-                $ref: "#/components/schemas/BaseResponseTestResponse"
+                $ref: "#/components/schemas/BaseResponseVoid"
   /api/v1/profile/projects:
     post:
       tags:
@@ -522,6 +475,72 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/BaseResponseLoginResponse"
+  /api/v1/assessments/{assessmentId}/submit:
+    post:
+      tags:
+      - assessment-controller
+      operationId: submitAssessment
+      parameters:
+      - name: assessmentId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/BaseResponseAssessmentResultResponse"
+  /api/v1/assessments/{assessmentId}/cancel:
+    post:
+      tags:
+      - assessment-controller
+      operationId: cancelAssessment
+      parameters:
+      - name: assessmentId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/BaseResponseVoid"
+  /api/v1/assessments/start/{technology}:
+    post:
+      tags:
+      - assessment-controller
+      operationId: startAssessment
+      parameters:
+      - name: technology
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: difficulty
+        in: query
+        required: false
+        schema:
+          type: string
+          default: BEGINNER
+          enum:
+          - BEGINNER
+          - INTERMEDIATE
+          - ADVANCED
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/BaseResponseAssessmentResponse"
   /api/v1/profile/user:
     patch:
       tags:
@@ -576,43 +595,6 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/BaseResponseCompleteRegistrationResponse"
-  /api/v1/tests/{testId}/result:
-    get:
-      tags:
-      - test-controller
-      operationId: getTestResult
-      parameters:
-      - name: testId
-        in: path
-        required: true
-        schema:
-          type: string
-          format: uuid
-      responses:
-        "200":
-          description: OK
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/BaseResponseTestDetailedResultResponse"
-  /api/v1/tests/history:
-    get:
-      tags:
-      - test-controller
-      operationId: getTestHistory
-      parameters:
-      - name: filters
-        in: query
-        required: true
-        schema:
-          $ref: "#/components/schemas/TestHistoryFilterParams"
-      responses:
-        "200":
-          description: OK
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/BaseResponseCandidateTestHistoryResponse"
   /api/v1/technologies:
     get:
       tags:
@@ -754,6 +736,43 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/BaseResponseListCityResponse"
+  /api/v1/assessments/{assessmentId}/result:
+    get:
+      tags:
+      - assessment-controller
+      operationId: getAssessmentResult
+      parameters:
+      - name: assessmentId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/BaseResponseAssessmentDetailedResultResponse"
+  /api/v1/assessments/history:
+    get:
+      tags:
+      - assessment-controller
+      operationId: getAssessmentHistory
+      parameters:
+      - name: filters
+        in: query
+        required: true
+        schema:
+          $ref: "#/components/schemas/AssessmentHistoryFilterParams"
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/BaseResponseCandidateAssessmentHistoryResponse"
   /api/v1/profile/projects/{projectId}:
     delete:
       tags:
@@ -895,46 +914,6 @@ paths:
                 $ref: "#/components/schemas/BaseResponseVoid"
 components:
   schemas:
-    SaveAnswerRequest:
-      type: object
-      properties:
-        questionId:
-          type: integer
-          format: int64
-        selectedOptionId:
-          type: integer
-          format: int64
-      required:
-      - questionId
-      - selectedOptionId
-    BaseResponseVoid:
-      type: object
-      properties:
-        success:
-          type: boolean
-        message:
-          type: string
-        result: {}
-        error:
-          $ref: "#/components/schemas/ErrorResponse"
-    ErrorResponse:
-      type: object
-      properties:
-        code:
-          type: string
-        message:
-          type: string
-        validations:
-          type: array
-          items:
-            $ref: "#/components/schemas/ValidationError"
-    ValidationError:
-      type: object
-      properties:
-        field:
-          type: string
-        message:
-          type: string
     JobRequest:
       type: object
       properties:
@@ -974,6 +953,17 @@ components:
           $ref: "#/components/schemas/JobResponse"
         error:
           $ref: "#/components/schemas/ErrorResponse"
+    ErrorResponse:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        validations:
+          type: array
+          items:
+            $ref: "#/components/schemas/ValidationError"
     JobResponse:
       type: object
       properties:
@@ -1004,6 +994,13 @@ components:
         companyId:
           type: string
           format: uuid
+    ValidationError:
+      type: object
+      properties:
+        field:
+          type: string
+        message:
+          type: string
     CompanyRequest:
       type: object
       properties:
@@ -1035,112 +1032,28 @@ components:
           type: string
         cnpj:
           type: string
-    BaseResponseTestResultResponse:
+    SaveAnswerRequest:
+      type: object
+      properties:
+        questionId:
+          type: integer
+          format: int64
+        selectedOptionId:
+          type: integer
+          format: int64
+      required:
+      - questionId
+      - selectedOptionId
+    BaseResponseVoid:
       type: object
       properties:
         success:
           type: boolean
         message:
           type: string
-        result:
-          $ref: "#/components/schemas/TestResultResponse"
+        result: {}
         error:
           $ref: "#/components/schemas/ErrorResponse"
-    TestResultResponse:
-      type: object
-      properties:
-        testId:
-          type: string
-          format: uuid
-        technologyName:
-          type: string
-        status:
-          type: string
-          enum:
-          - IN_PROGRESS
-          - COMPLETED
-          - CANCELED
-        score:
-          type: number
-        totalQuestions:
-          type: integer
-          format: int32
-        correctAnswers:
-          type: integer
-          format: int64
-        completedAt:
-          type: string
-          format: date-time
-    BaseResponseTestResponse:
-      type: object
-      properties:
-        success:
-          type: boolean
-        message:
-          type: string
-        result:
-          $ref: "#/components/schemas/TestResponse"
-        error:
-          $ref: "#/components/schemas/ErrorResponse"
-    QuestionOptionResponse:
-      type: object
-      properties:
-        id:
-          type: integer
-          format: int64
-        optionText:
-          type: string
-    QuestionResponse:
-      type: object
-      properties:
-        id:
-          type: integer
-          format: int64
-        statement:
-          type: string
-        difficultyLevel:
-          type: string
-          enum:
-          - BEGINNER
-          - INTERMEDIATE
-          - ADVANCED
-        source:
-          type: string
-          enum:
-          - INTERNAL
-          - AI_GENERATED
-        options:
-          type: array
-          items:
-            $ref: "#/components/schemas/QuestionOptionResponse"
-    TechnologyResponse:
-      type: object
-      properties:
-        id:
-          type: integer
-          format: int32
-        name:
-          type: string
-        category:
-          type: string
-    TestResponse:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-        technologyResponse:
-          $ref: "#/components/schemas/TechnologyResponse"
-        status:
-          type: string
-          enum:
-          - IN_PROGRESS
-          - COMPLETED
-          - CANCELED
-        questions:
-          type: array
-          items:
-            $ref: "#/components/schemas/QuestionResponse"
     ProjectRequest:
       type: object
       properties:
@@ -1566,6 +1479,112 @@ components:
       required:
       - email
       - password
+    AssessmentResultResponse:
+      type: object
+      properties:
+        assessmentId:
+          type: string
+          format: uuid
+        technologyName:
+          type: string
+        status:
+          type: string
+          enum:
+          - IN_PROGRESS
+          - COMPLETED
+          - CANCELED
+        score:
+          type: number
+        totalQuestions:
+          type: integer
+          format: int32
+        correctAnswers:
+          type: integer
+          format: int64
+        completedAt:
+          type: string
+          format: date-time
+    BaseResponseAssessmentResultResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        result:
+          $ref: "#/components/schemas/AssessmentResultResponse"
+        error:
+          $ref: "#/components/schemas/ErrorResponse"
+    AssessmentResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        technologyResponse:
+          $ref: "#/components/schemas/TechnologyResponse"
+        status:
+          type: string
+          enum:
+          - IN_PROGRESS
+          - COMPLETED
+          - CANCELED
+        questions:
+          type: array
+          items:
+            $ref: "#/components/schemas/QuestionResponse"
+    BaseResponseAssessmentResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        result:
+          $ref: "#/components/schemas/AssessmentResponse"
+        error:
+          $ref: "#/components/schemas/ErrorResponse"
+    QuestionOptionResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        optionText:
+          type: string
+    QuestionResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        statement:
+          type: string
+        difficultyLevel:
+          type: string
+          enum:
+          - BEGINNER
+          - INTERMEDIATE
+          - ADVANCED
+        source:
+          type: string
+          enum:
+          - INTERNAL
+          - AI_GENERATED
+        options:
+          type: array
+          items:
+            $ref: "#/components/schemas/QuestionOptionResponse"
+    TechnologyResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+        name:
+          type: string
+        category:
+          type: string
     UserRequest:
       type: object
       properties:
@@ -1658,170 +1677,6 @@ components:
           type: string
         documentNumber:
           type: string
-    BaseResponseTestDetailedResultResponse:
-      type: object
-      properties:
-        success:
-          type: boolean
-        message:
-          type: string
-        result:
-          $ref: "#/components/schemas/TestDetailedResultResponse"
-        error:
-          $ref: "#/components/schemas/ErrorResponse"
-    OptionResultResponse:
-      type: object
-      properties:
-        id:
-          type: integer
-          format: int64
-        optionText:
-          type: string
-        isCorrect:
-          type: boolean
-    QuestionResultResponse:
-      type: object
-      properties:
-        questionId:
-          type: integer
-          format: int64
-        statement:
-          type: string
-        selectedOptionId:
-          type: integer
-          format: int64
-        correctOptionId:
-          type: integer
-          format: int64
-        isCorrect:
-          type: boolean
-        options:
-          type: array
-          items:
-            $ref: "#/components/schemas/OptionResultResponse"
-    TestDetailedResultResponse:
-      type: object
-      properties:
-        testId:
-          type: string
-          format: uuid
-        technologyName:
-          type: string
-        status:
-          type: string
-          enum:
-          - IN_PROGRESS
-          - COMPLETED
-          - CANCELED
-        difficulty:
-          type: string
-          enum:
-          - BEGINNER
-          - INTERMEDIATE
-          - ADVANCED
-        score:
-          type: number
-        totalQuestions:
-          type: integer
-          format: int32
-        correctAnswers:
-          type: integer
-          format: int32
-        completedAt:
-          type: string
-          format: date-time
-        questions:
-          type: array
-          items:
-            $ref: "#/components/schemas/QuestionResultResponse"
-    TestHistoryFilterParams:
-      type: object
-      properties:
-        technology:
-          type: string
-        status:
-          type: string
-          enum:
-          - IN_PROGRESS
-          - COMPLETED
-          - CANCELED
-    BaseResponseCandidateTestHistoryResponse:
-      type: object
-      properties:
-        success:
-          type: boolean
-        message:
-          type: string
-        result:
-          $ref: "#/components/schemas/CandidateTestHistoryResponse"
-        error:
-          $ref: "#/components/schemas/ErrorResponse"
-    CandidateTestHistoryResponse:
-      type: object
-      properties:
-        candidateId:
-          type: string
-          format: uuid
-        totalExecutedTests:
-          type: integer
-          format: int32
-        historyByTechnology:
-          type: array
-          items:
-            $ref: "#/components/schemas/TechnologyHistoryGroupResponse"
-    DifficultyHistoryGroupResponse:
-      type: object
-      properties:
-        difficulty:
-          type: string
-          enum:
-          - BEGINNER
-          - INTERMEDIATE
-          - ADVANCED
-        testsCount:
-          type: integer
-          format: int32
-        averageScore:
-          type: number
-        tests:
-          type: array
-          items:
-            $ref: "#/components/schemas/TestSummaryResponse"
-    TechnologyHistoryGroupResponse:
-      type: object
-      properties:
-        technologyName:
-          type: string
-        difficulties:
-          type: array
-          items:
-            $ref: "#/components/schemas/DifficultyHistoryGroupResponse"
-    TestSummaryResponse:
-      type: object
-      properties:
-        testId:
-          type: string
-          format: uuid
-        status:
-          type: string
-          enum:
-          - IN_PROGRESS
-          - COMPLETED
-          - CANCELED
-        difficulty:
-          type: string
-          enum:
-          - BEGINNER
-          - INTERMEDIATE
-          - ADVANCED
-        score:
-          type: number
-        createdAt:
-          type: string
-          format: date-time
-        completedAt:
-          type: string
-          format: date-time
     BaseResponseListTechnologyResponse:
       type: object
       properties:
@@ -1997,6 +1852,170 @@ components:
             $ref: "#/components/schemas/RecruiterResponse"
         error:
           $ref: "#/components/schemas/ErrorResponse"
+    AssessmentDetailedResultResponse:
+      type: object
+      properties:
+        assessmentId:
+          type: string
+          format: uuid
+        technologyName:
+          type: string
+        status:
+          type: string
+          enum:
+          - IN_PROGRESS
+          - COMPLETED
+          - CANCELED
+        difficulty:
+          type: string
+          enum:
+          - BEGINNER
+          - INTERMEDIATE
+          - ADVANCED
+        score:
+          type: number
+        totalQuestions:
+          type: integer
+          format: int32
+        correctAnswers:
+          type: integer
+          format: int32
+        completedAt:
+          type: string
+          format: date-time
+        questions:
+          type: array
+          items:
+            $ref: "#/components/schemas/QuestionResultResponse"
+    BaseResponseAssessmentDetailedResultResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        result:
+          $ref: "#/components/schemas/AssessmentDetailedResultResponse"
+        error:
+          $ref: "#/components/schemas/ErrorResponse"
+    OptionResultResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        optionText:
+          type: string
+        isCorrect:
+          type: boolean
+    QuestionResultResponse:
+      type: object
+      properties:
+        questionId:
+          type: integer
+          format: int64
+        statement:
+          type: string
+        selectedOptionId:
+          type: integer
+          format: int64
+        correctOptionId:
+          type: integer
+          format: int64
+        isCorrect:
+          type: boolean
+        options:
+          type: array
+          items:
+            $ref: "#/components/schemas/OptionResultResponse"
+    AssessmentHistoryFilterParams:
+      type: object
+      properties:
+        technology:
+          type: string
+        status:
+          type: string
+          enum:
+          - IN_PROGRESS
+          - COMPLETED
+          - CANCELED
+    AssessmentSummaryResponse:
+      type: object
+      properties:
+        assessmentId:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum:
+          - IN_PROGRESS
+          - COMPLETED
+          - CANCELED
+        difficulty:
+          type: string
+          enum:
+          - BEGINNER
+          - INTERMEDIATE
+          - ADVANCED
+        score:
+          type: number
+        createdAt:
+          type: string
+          format: date-time
+        completedAt:
+          type: string
+          format: date-time
+    BaseResponseCandidateAssessmentHistoryResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        result:
+          $ref: "#/components/schemas/CandidateAssessmentHistoryResponse"
+        error:
+          $ref: "#/components/schemas/ErrorResponse"
+    CandidateAssessmentHistoryResponse:
+      type: object
+      properties:
+        candidateId:
+          type: string
+          format: uuid
+        totalExecutedTests:
+          type: integer
+          format: int32
+        historyByTechnology:
+          type: array
+          items:
+            $ref: "#/components/schemas/TechnologyHistoryGroupResponse"
+    DifficultyHistoryGroupResponse:
+      type: object
+      properties:
+        difficulty:
+          type: string
+          enum:
+          - BEGINNER
+          - INTERMEDIATE
+          - ADVANCED
+        testsCount:
+          type: integer
+          format: int32
+        averageScore:
+          type: number
+        assessments:
+          type: array
+          items:
+            $ref: "#/components/schemas/AssessmentSummaryResponse"
+    TechnologyHistoryGroupResponse:
+      type: object
+      properties:
+        technologyName:
+          type: string
+        difficulties:
+          type: array
+          items:
+            $ref: "#/components/schemas/DifficultyHistoryGroupResponse"
   securitySchemes:
     bearer-jwt:
       type: http
