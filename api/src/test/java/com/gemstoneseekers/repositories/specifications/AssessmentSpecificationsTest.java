@@ -6,6 +6,7 @@ import com.gemstoneseekers.models.Assessment;
 import jakarta.persistence.criteria.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -37,6 +38,8 @@ class AssessmentSpecificationsTest {
     private Path<Object> technologyPath;
     @Mock
     private Path<String> technologyNamePath;
+    @Mock
+    private Expression<String> lowerTechNamePath;
 
     @Mock
     private Path<AssessmentStatus> statusPath;
@@ -50,12 +53,9 @@ class AssessmentSpecificationsTest {
 
     @BeforeEach
     void setUp() {
-        // O Candidate sempre é utilizado, então permanece rigoroso
         doReturn(candidatePath).when(root).get("candidate");
         doReturn(candidateIdPath).when(candidatePath).get("id");
 
-        // Technology e Status são filtros opcionais, então devem ser declarados como
-        // lenient (permissivos)
         lenient().doReturn(technologyPath).when(root).get("technology");
         lenient().doReturn(technologyNamePath).when(technologyPath).get("name");
         lenient().doReturn(statusPath).when(root).get("status");
@@ -64,7 +64,7 @@ class AssessmentSpecificationsTest {
         lenient().when(cb.lower(any())).thenReturn(mock(Expression.class));
     }
 
-    @org.junit.jupiter.api.Test
+    @Test
     @DisplayName("Should create only candidate predicate when filters are null")
     void shouldCreateOnlyCandidatePredicateWhenFiltersAreNull() {
         UUID candidateId = UUID.randomUUID();
@@ -78,15 +78,12 @@ class AssessmentSpecificationsTest {
         verify(cb, never()).equal(eq(statusPath), any(AssessmentStatus.class));
     }
 
-    @org.junit.jupiter.api.Test
+    @Test
     @DisplayName("Should create candidate and technology predicates when technology filter is provided")
     void shouldCreateCandidateAndTechnologyPredicates() {
         UUID candidateId = UUID.randomUUID();
         String technologyName = "java";
         AssessmentHistoryFilterParams filters = new AssessmentHistoryFilterParams(technologyName, null);
-
-        @SuppressWarnings("unchecked")
-        Expression<String> lowerTechNamePath = mock(Expression.class);
 
         when(cb.lower(technologyNamePath)).thenReturn(lowerTechNamePath);
         when(cb.equal(candidateIdPath, candidateId)).thenReturn(candidatePredicate);
@@ -101,7 +98,7 @@ class AssessmentSpecificationsTest {
         verify(cb, never()).equal(eq(statusPath), any(AssessmentStatus.class));
     }
 
-    @org.junit.jupiter.api.Test
+    @Test
     @DisplayName("Should not create technology predicate for blank technology name")
     void shouldNotCreateTechnologyPredicateForBlankTechnologyName() {
         UUID candidateId = UUID.randomUUID();
@@ -115,7 +112,7 @@ class AssessmentSpecificationsTest {
         verify(cb, never()).lower(technologyNamePath);
     }
 
-    @org.junit.jupiter.api.Test
+    @Test
     @DisplayName("Should create candidate and status predicates when status filter is provided")
     void shouldCreateCandidateAndStatusPredicates() {
         UUID candidateId = UUID.randomUUID();
@@ -133,16 +130,13 @@ class AssessmentSpecificationsTest {
         verify(cb, times(1)).equal(statusPath, status);
     }
 
-    @org.junit.jupiter.api.Test
+    @Test
     @DisplayName("Should create all predicates when all filters are provided")
     void shouldCreateAllPredicatesWhenAllFiltersAreProvided() {
         UUID candidateId = UUID.randomUUID();
         String technologyName = "python";
         AssessmentStatus status = AssessmentStatus.IN_PROGRESS;
         AssessmentHistoryFilterParams filters = new AssessmentHistoryFilterParams(technologyName, status);
-
-        @SuppressWarnings("unchecked")
-        Expression<String> lowerTechNamePath = mock(Expression.class);
 
         when(cb.lower(technologyNamePath)).thenReturn(lowerTechNamePath);
         when(cb.equal(candidateIdPath, candidateId)).thenReturn(candidatePredicate);
