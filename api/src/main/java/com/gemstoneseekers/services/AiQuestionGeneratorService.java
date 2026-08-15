@@ -2,6 +2,7 @@ package com.gemstoneseekers.services;
 
 import com.gemstoneseekers.dtos.response.AiQuestionBatchResponse;
 import com.gemstoneseekers.enums.QuestionDifficulty;
+import com.gemstoneseekers.exceptions.AiGenerationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient;
@@ -19,6 +20,7 @@ public class AiQuestionGeneratorService {
         this.chatClient = chatClientBuilder.build();
     }
 
+    @SuppressWarnings("PMD.AvoidCatchingGenericException")
     public AiQuestionBatchResponse generateQuestions(String technologyName, QuestionDifficulty difficulty, int amount) {
         log.info("[AI_SERVICE] Generating {} new questions for {} ({})", amount, technologyName, difficulty);
 
@@ -40,9 +42,27 @@ public class AiQuestionGeneratorService {
                 %s
                 """.formatted(amount, technologyName, difficulty.name(), formatInstructions);
 
-        String rawResponse = chatClient.prompt().user(prompt).call().content();
+        try {
+            String rawResponse = chatClient.prompt().user(prompt).call().content();
 
-        assert rawResponse != null;
-        return converter.convert(rawResponse);
+            if (rawResponse == null || rawResponse.isBlank()) {
+                if (log.isErrorEnabled()) {
+                    log.error("[AI_SERVICE] AI content generation for {} ({}) returned a null or empty payload.", technologyName, difficulty);
+                }
+                throw new AiGenerationException("A API retornou um payload nulo ou vazio.");
+            }
+
+            return converter.convert(rawResponse);
+
+        } catch (AiGenerationException e) {
+            throw e;
+        } catch (Exception e) {
+            // Captura intencional de qualquer exceção da biblioteca da API (rede, cota, formato)
+            // para garantir a resiliência do worker e evitar que a aplicação pare.
+            if (log.isErrorEnabled()) {
+                log.error("[AI_SERVICE] AI content generation failed for {} ({}). Root cause: {}", technologyName, difficulty, e.getMessage());
+            }
+            throw new AiGenerationException("AI content generation failed. Check API quotas or upstream service status.", e);
+        }
     }
 }
