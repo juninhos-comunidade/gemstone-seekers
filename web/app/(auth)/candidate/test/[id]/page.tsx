@@ -70,6 +70,19 @@ export default function TestPage() {
   const progressPercent =
     totalQuestions > 0 ? ((currentIndex + 1) / totalQuestions) * 100 : 0;
 
+  // Transform AssessmentQuestion to Question type for QuizQuestion component
+  const transformedQuestion = currentQuestion
+    ? {
+        ...currentQuestion,
+        difficulty: currentQuestion.difficultyLevel,
+        options: currentQuestion.options.map((opt) => ({
+          id: opt.id,
+          text: opt.optionText,
+          optionText: opt.optionText,
+        })),
+      }
+    : null;
+
   const handleSetAnswer = async (optionId: number) => {
     if (!currentQuestion || !assessment) return;
 
@@ -167,7 +180,7 @@ export default function TestPage() {
     );
   }
 
-  if (!currentQuestion) {
+  if (!currentQuestion || !transformedQuestion) {
     return (
       <div className="mx-auto w-full max-w-2xl p-4 md:p-6">
         <div className="bg-card rounded-2xl border p-6 text-center shadow-lg md:p-8">
@@ -197,7 +210,7 @@ export default function TestPage() {
           progressPercent={progressPercent}
           currentIndex={currentIndex}
           totalQuestions={totalQuestions}
-          currentQuestion={currentQuestion}
+          currentQuestion={transformedQuestion}
           selectedOptionId={selectedOptionId.toString()}
           handleSetAnswer={(id) => handleSetAnswer(parseInt(id))}
           handlePrevious={handlePrevious}
