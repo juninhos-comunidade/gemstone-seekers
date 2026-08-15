@@ -51,8 +51,11 @@ public class QuestionRefillWorker {
         }
     }
 
-    public QuestionRefillWorker(TechnologyRepository technologyRepository, QuestionRepository questionRepository,
-                                QuestionService questionService, AiQuestionGeneratorService aiService, Sleeper sleeper) {
+    public QuestionRefillWorker(TechnologyRepository technologyRepository,
+                                QuestionRepository questionRepository,
+                                QuestionService questionService,
+                                AiQuestionGeneratorService aiService,
+                                Sleeper sleeper) {
         this.technologyRepository = technologyRepository;
         this.questionRepository = questionRepository;
         this.questionService = questionService;
@@ -95,7 +98,8 @@ public class QuestionRefillWorker {
         for (Technology tech : technologies) {
             if (circuitOpen) {
                 if (log.isWarnEnabled()) {
-                    log.warn("[WORKER] Circuit is OPEN due to AI unavailability. Aborting refill (Skipping {}).", tech.getName());
+                    log.warn("[WORKER] Circuit is OPEN due to AI unavailability. Aborting refill (Skipping {}).",
+                        tech.getName());
                 }
                 break;
             }
@@ -105,7 +109,8 @@ public class QuestionRefillWorker {
 
             } catch (AiGenerationException e) {
                 if (log.isErrorEnabled()) {
-                    log.error("[WORKER] Systemic AI failure detected for {}. Opening circuit! Reason: {}", tech.getName(), e.getMessage());
+                    log.error("[WORKER] Systemic AI failure detected for {}. Opening circuit! Reason: {}",
+                        tech.getName(), e.getMessage());
                 }
                 circuitOpen = true;
 
@@ -113,7 +118,8 @@ public class QuestionRefillWorker {
                 // Captura intencional para falhas não mapeadas (ex: NullPointer).
                 // Evita que o job inteiro pare, permitindo que a próxima tecnologia seja processada.
                 if (log.isErrorEnabled()) {
-                    log.error("[WORKER] Unexpected logical error processing {}. Skipping to next technology.", tech.getName(), e);
+                    log.error("[WORKER] Unexpected logical error processing {}. Skipping to next technology.",
+                        tech.getName(), e);
                 }
             }
         }
@@ -121,7 +127,9 @@ public class QuestionRefillWorker {
         log.info("[WORKER] Question Refill Job finished execution.");
     }
 
-    private void processTechnologyRefill(Technology tech, Map<Integer, Map<QuestionDifficulty, Long>> stockMatrix) throws AiGenerationException {
+    private void processTechnologyRefill(
+        Technology tech, 
+        Map<Integer, Map<QuestionDifficulty, Long>> stockMatrix) throws AiGenerationException {
         for (QuestionDifficulty difficulty : QuestionDifficulty.values()) {
             long currentStock = stockMatrix.getOrDefault(tech.getId(), Collections.emptyMap()).getOrDefault(
                 difficulty, 0L);
@@ -132,7 +140,10 @@ public class QuestionRefillWorker {
                         difficulty, currentStock, MINIMUM_STOCK_THRESHOLD);
                 }
 
-                AiQuestionBatchResponse aiResponse = aiService.generateQuestions(tech.getName(), difficulty, BATCH_SIZE);
+                AiQuestionBatchResponse aiResponse = aiService.generateQuestions(
+                    tech.getName(),
+                    difficulty,
+                    BATCH_SIZE);
 
                 questionService.saveAiGeneratedBatch(tech, difficulty, aiResponse);
 
