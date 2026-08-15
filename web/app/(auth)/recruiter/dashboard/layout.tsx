@@ -1,4 +1,3 @@
-import { DashboardHeader } from "@/components/DashboardHeader/DashboardHeader";
 import { SideMenu } from "@/components/SideMenu/SideMenu";
 
 export default function Layout({
@@ -26,11 +25,10 @@ export default function Layout({
 
   return (
     <main className="bg-background min-h-screen">
-      <DashboardHeader role="recruiter" menuItems={menuItems} />
       <SideMenu items={menuItems} />
 
       <div className="pt-16 md:ml-72">
-        <div className="p-4 md:p-6">{children}</div>
+        <div className="mx-auto w-full max-w-7xl p-4 md:p-6">{children}</div>
       </div>
     </main>
   );

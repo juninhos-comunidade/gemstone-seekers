@@ -87,7 +87,13 @@ export function JobBasicInfoSection() {
               disabled={isLoadingCompanies}
             >
               <SelectTrigger id="companyId">
-                <SelectValue placeholder="Selecione a empresa..." />
+                <SelectValue
+                  placeholder={
+                    isLoadingCompanies
+                      ? "Carregando empresas..."
+                      : "Selecione a empresa..."
+                  }
+                />
               </SelectTrigger>
               <SelectContent alignItemWithTrigger={false}>
                 {isLoadingCompanies ? (
@@ -124,9 +130,11 @@ export function JobBasicInfoSection() {
               <SelectTrigger id="recruiterId">
                 <SelectValue
                   placeholder={
-                    !companyId
-                      ? "Selecione uma empresa primeiro..."
-                      : "Selecione o recrutador..."
+                    isLoadingRecruiters
+                      ? "Carregando recrutadores..."
+                      : !companyId
+                        ? "Selecione uma empresa primeiro..."
+                        : "Selecione o recrutador..."
                   }
                 />
               </SelectTrigger>
