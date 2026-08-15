@@ -86,4 +86,38 @@ describe("QuizCloseModal", () => {
 
     expect(mockPush).toHaveBeenCalledWith("/candidate/dashboard/tests");
   });
+
+  it("calls onCancel callback when Sim button is clicked", async () => {
+    const onCancel = vi.fn();
+    render(<QuizCloseModal onCancel={onCancel} />);
+
+    const closeButton = screen.getByLabelText("Fechar quiz");
+    fireEvent.click(closeButton);
+
+    await waitFor(() => {
+      expect(screen.getByText("Fechar Quiz")).toBeInTheDocument();
+    });
+
+    const simButton = screen.getByText("Sim");
+    fireEvent.click(simButton);
+
+    expect(onCancel).toHaveBeenCalled();
+  });
+
+  it("does not call onCancel when Não button is clicked", async () => {
+    const onCancel = vi.fn();
+    render(<QuizCloseModal onCancel={onCancel} />);
+
+    const closeButton = screen.getByLabelText("Fechar quiz");
+    fireEvent.click(closeButton);
+
+    await waitFor(() => {
+      expect(screen.getByText("Fechar Quiz")).toBeInTheDocument();
+    });
+
+    const naoButton = screen.getByText("Não");
+    fireEvent.click(naoButton);
+
+    expect(onCancel).not.toHaveBeenCalled();
+  });
 });

@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, fireEvent } from "@testing-library/react";
 import { describe, it, expect, vi } from "vitest";
 import { QuizQuestion } from "./QuizQuestion";
 import { Question } from "@/lib/types/quiz";
@@ -80,5 +80,86 @@ describe("QuizQuestion", () => {
 
     expect(screen.getByText("Finalizar")).toBeInTheDocument();
     expect(screen.queryByText("Próxima")).not.toBeInTheDocument();
+  });
+
+  it("calls handleSetAnswer when an option is selected", () => {
+    const handleSetAnswer = vi.fn();
+    render(
+      <QuizQuestion
+        progressPercent={25}
+        currentIndex={0}
+        totalQuestions={4}
+        currentQuestion={mockQuestion}
+        selectedOptionId=""
+        handleSetAnswer={handleSetAnswer}
+        handlePrevious={() => {}}
+        handleNext={() => {}}
+        isLastQuestion={false}
+      />,
+    );
+
+    const option = screen.getByText("Paris");
+    fireEvent.click(option);
+    expect(handleSetAnswer).toHaveBeenCalledWith("c");
+  });
+
+  it("calls handlePrevious when previous button is clicked", () => {
+    const handlePrevious = vi.fn();
+    render(
+      <QuizQuestion
+        progressPercent={50}
+        currentIndex={1}
+        totalQuestions={4}
+        currentQuestion={mockQuestion}
+        selectedOptionId="a"
+        handleSetAnswer={() => {}}
+        handlePrevious={handlePrevious}
+        handleNext={() => {}}
+        isLastQuestion={false}
+      />,
+    );
+
+    const previousButton = screen.getByText("Anterior");
+    fireEvent.click(previousButton);
+    expect(handlePrevious).toHaveBeenCalled();
+  });
+
+  it("calls handleNext when next button is clicked", () => {
+    const handleNext = vi.fn();
+    render(
+      <QuizQuestion
+        progressPercent={25}
+        currentIndex={0}
+        totalQuestions={4}
+        currentQuestion={mockQuestion}
+        selectedOptionId="a"
+        handleSetAnswer={() => {}}
+        handlePrevious={() => {}}
+        handleNext={handleNext}
+        isLastQuestion={false}
+      />,
+    );
+
+    const nextButton = screen.getByText("Próxima");
+    fireEvent.click(nextButton);
+    expect(handleNext).toHaveBeenCalled();
+  });
+
+  it("displays progress percentage correctly", () => {
+    render(
+      <QuizQuestion
+        progressPercent={75}
+        currentIndex={2}
+        totalQuestions={4}
+        currentQuestion={mockQuestion}
+        selectedOptionId="a"
+        handleSetAnswer={() => {}}
+        handlePrevious={() => {}}
+        handleNext={() => {}}
+        isLastQuestion={false}
+      />,
+    );
+
+    expect(screen.getByText("75%")).toBeInTheDocument();
   });
 });

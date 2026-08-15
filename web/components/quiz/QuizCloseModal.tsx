@@ -24,7 +24,7 @@ export function QuizCloseModal({ onCancel }: { onCancel?: () => void }) {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger>
+      <DialogTrigger asChild>
         <button
           className="hover:text-destructive hover:border-destructive hover:bg-destructive/10 flex h-7 w-7 items-center justify-center rounded-lg border-2 border-white bg-transparent p-0 transition-all duration-200"
           aria-label="Fechar quiz"
