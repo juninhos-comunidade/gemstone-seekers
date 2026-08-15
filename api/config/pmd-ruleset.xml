@@ -11,8 +11,15 @@
     <rule ref="category/java/performance.xml"/>
     <rule ref="category/java/security.xml"/>
 
+    <rule ref="category/java/errorprone.xml">
+        <exclude name="MissingSerialVersionUID"/>
+    </rule>
+
     <rule ref="category/java/errorprone.xml/MissingSerialVersionUID">
-        <exclude-pattern>.*[/\\]com[/\\]gemstoneseekers[/\\]exceptions[/\\].*</exclude-pattern>
+        <properties>
+            <property name="violationSuppressXPath"
+                      value="//PackageDeclaration[@Name='com.gemstoneseekers.exceptions']"/>
+        </properties>
     </rule>
 
 </ruleset>
