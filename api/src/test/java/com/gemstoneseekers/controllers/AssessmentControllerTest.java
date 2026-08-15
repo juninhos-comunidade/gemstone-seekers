@@ -32,7 +32,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class TestControllerTest {
+class AssessmentControllerTest {
 
     @Mock
     private AssessmentApplicationService assessmentApplicationService;
@@ -69,7 +69,7 @@ class TestControllerTest {
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.CREATED);
         assertThat(responseEntity.getBody()).isNotNull();
         assertThat(responseEntity.getBody().success()).isTrue();
-        assertThat(responseEntity.getBody().message()).isEqualTo("Test initiated successfully");
+        assertThat(responseEntity.getBody().message()).isEqualTo("Assessment initiated successfully");
         assertThat(responseEntity.getBody().result()).isEqualTo(mockAssessmentResponse);
         verify(assessmentApplicationService).startAssessment(userEmail, technologyName, QuestionDifficulty.BEGINNER);
     }
@@ -88,7 +88,7 @@ class TestControllerTest {
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.CREATED);
         assertThat(responseEntity.getBody()).isNotNull();
         assertThat(responseEntity.getBody().success()).isTrue();
-        assertThat(responseEntity.getBody().message()).isEqualTo("Test initiated successfully");
+        assertThat(responseEntity.getBody().message()).isEqualTo("Assessment initiated successfully");
         assertThat(responseEntity.getBody().result()).isEqualTo(mockAssessmentResponse);
         verify(assessmentApplicationService).startAssessment(userEmail, technologyName, QuestionDifficulty.ADVANCED);
     }
@@ -120,7 +120,7 @@ class TestControllerTest {
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(responseEntity.getBody()).isNotNull();
         assertThat(responseEntity.getBody().success()).isTrue();
-        assertThat(responseEntity.getBody().message()).isEqualTo("Test submitted successfully");
+        assertThat(responseEntity.getBody().message()).isEqualTo("Assessment submitted successfully");
         assertThat(responseEntity.getBody().result()).isEqualTo(mockResultResponse);
         verify(assessmentApplicationService).submitAssessment(assessmentId, userEmail);
     }
@@ -130,7 +130,8 @@ class TestControllerTest {
         CandidateAssessmentHistoryResponse mockHistoryResponse = new CandidateAssessmentHistoryResponse(candidateId, 0,
                 Collections.emptyList());
         AssessmentHistoryFilterParams filters = new AssessmentHistoryFilterParams(null, null);
-        when(assessmentApplicationService.getCandidateTestHistory(userEmail, filters)).thenReturn(mockHistoryResponse);
+        when(assessmentApplicationService.getCandidateAssessmentHistory(userEmail, filters)).thenReturn(
+                mockHistoryResponse);
 
         ResponseEntity<BaseResponse<CandidateAssessmentHistoryResponse>> responseEntity = assessmentController
                 .getAssessmentHistory(userDetails, filters);
@@ -138,9 +139,9 @@ class TestControllerTest {
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(responseEntity.getBody()).isNotNull();
         assertThat(responseEntity.getBody().success()).isTrue();
-        assertThat(responseEntity.getBody().message()).isEqualTo("Test history retrieved successfully");
+        assertThat(responseEntity.getBody().message()).isEqualTo("Assessment history retrieved successfully");
         assertThat(responseEntity.getBody().result()).isEqualTo(mockHistoryResponse);
-        verify(assessmentApplicationService).getCandidateTestHistory(userEmail, filters);
+        verify(assessmentApplicationService).getCandidateAssessmentHistory(userEmail, filters);
     }
 
     @Test
@@ -157,7 +158,7 @@ class TestControllerTest {
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(responseEntity.getBody()).isNotNull();
         assertThat(responseEntity.getBody().success()).isTrue();
-        assertThat(responseEntity.getBody().message()).isEqualTo("Test result retrieved successfully");
+        assertThat(responseEntity.getBody().message()).isEqualTo("Assessment result retrieved successfully");
         assertThat(responseEntity.getBody().result()).isEqualTo(mockDetailedResultResponse);
         verify(assessmentApplicationService).getAssessmentResult(assessmentId, userEmail);
     }
@@ -170,7 +171,7 @@ class TestControllerTest {
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(responseEntity.getBody()).isNotNull();
         assertThat(responseEntity.getBody().success()).isTrue();
-        assertThat(responseEntity.getBody().message()).isEqualTo("Test canceled successfully");
+        assertThat(responseEntity.getBody().message()).isEqualTo("Assessment canceled successfully");
         assertThat(responseEntity.getBody().result()).isNull();
         verify(assessmentApplicationService).cancelAssessment(assessmentId, userEmail);
     }

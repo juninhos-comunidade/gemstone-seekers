@@ -57,7 +57,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class TestApplicationServiceTest {
+class AssessmentApplicationServiceTest {
 
     @InjectMocks
     private AssessmentApplicationService assessmentApplicationService;
@@ -250,7 +250,7 @@ class TestApplicationServiceTest {
         when(assessmentRepository.findById(assessmentId)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> assessmentApplicationService.saveCandidateAnswer(assessmentId, questionId, request,
-                userEmail)).isInstanceOf(EntityNotFoundException.class).hasMessage("Test with id " + assessmentId
+                userEmail)).isInstanceOf(EntityNotFoundException.class).hasMessage("Assessment with id " + assessmentId
                         + " not found");
     }
 
@@ -278,7 +278,7 @@ class TestApplicationServiceTest {
 
         assertThatThrownBy(() -> assessmentApplicationService.saveCandidateAnswer(assessmentId, questionId, request,
                 userEmail)).isInstanceOf(AccessDeniedException.class).hasMessage(
-                        "You do not have permission to modify this test");
+                        "You do not have permission to modify this assessment");
     }
 
     @Test
@@ -330,7 +330,7 @@ class TestApplicationServiceTest {
 
         assertThatThrownBy(() -> assessmentApplicationService.saveCandidateAnswer(assessmentId, questionId, request,
                 userEmail)).isInstanceOf(BusinessRuleException.class).hasMessage(
-                        "Cannot save answers for a test that is not IN_PROGRESS");
+                        "Cannot save answers for a assessment that is not IN_PROGRESS");
     }
 
     @Test
@@ -444,7 +444,7 @@ class TestApplicationServiceTest {
         when(assessmentRepository.findById(assessmentId)).thenReturn(Optional.of(test));
 
         assertThatThrownBy(() -> assessmentApplicationService.submitAssessment(assessmentId, userEmail)).isInstanceOf(
-                AccessDeniedException.class).hasMessage("You do not have permission to submit this test");
+                AccessDeniedException.class).hasMessage("You do not have permission to submit this assessment");
     }
 
     @Test
@@ -457,11 +457,11 @@ class TestApplicationServiceTest {
         when(assessmentRepository.findById(assessmentId)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> assessmentApplicationService.submitAssessment(assessmentId, userEmail)).isInstanceOf(
-                EntityNotFoundException.class).hasMessage("Test with id " + assessmentId + " not found");
+                EntityNotFoundException.class).hasMessage("Assessment with id " + assessmentId + " not found");
     }
 
     @Test
-    @DisplayName("getCandidateTestHistory should group tests and calculate averages")
+    @DisplayName("getCandidateAssessmentHistory should group tests and calculate averages")
     void getCandidateTestHistory_shouldGroupTestsAndCalculateAverages() {
         String userEmail = "candidate@test.com";
         Instant createdAt = Instant.parse("2026-08-13T18:00:00Z");
@@ -508,8 +508,8 @@ class TestApplicationServiceTest {
                 .getId(), advancedTest.getStatus(), QuestionDifficulty.ADVANCED, advancedTest.getScore(), advancedTest
                         .getCreatedAt(), advancedTest.getCompletedAt()));
 
-        CandidateAssessmentHistoryResponse response = assessmentApplicationService.getCandidateTestHistory(userEmail,
-                null);
+        CandidateAssessmentHistoryResponse response = assessmentApplicationService.getCandidateAssessmentHistory(
+                userEmail, null);
 
         assertThat(response.candidateId()).isEqualTo(mockCandidate.getId());
         assertThat(response.totalExecutedTests()).isEqualTo(2);
@@ -564,7 +564,7 @@ class TestApplicationServiceTest {
 
         assertThatThrownBy(() -> assessmentApplicationService.getAssessmentResult(assessmentId, userEmail))
                 .isInstanceOf(BusinessRuleException.class).hasMessage(
-                        "Cannot view detailed results for a test that is currently IN_PROGRESS");
+                        "Cannot view detailed results for a assessment that is currently IN_PROGRESS");
     }
 
     @Test
@@ -588,7 +588,8 @@ class TestApplicationServiceTest {
         when(assessmentRepository.findById(assessmentId)).thenReturn(Optional.of(test));
 
         assertThatThrownBy(() -> assessmentApplicationService.getAssessmentResult(assessmentId, userEmail))
-                .isInstanceOf(AccessDeniedException.class).hasMessage("You do not have permission to view this test");
+                .isInstanceOf(AccessDeniedException.class).hasMessage(
+                        "You do not have permission to view this assessment");
     }
 
     @Test
@@ -601,7 +602,8 @@ class TestApplicationServiceTest {
         when(assessmentRepository.findById(assessmentId)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> assessmentApplicationService.getAssessmentResult(assessmentId, userEmail))
-                .isInstanceOf(EntityNotFoundException.class).hasMessage("Test with id " + assessmentId + " not found");
+                .isInstanceOf(EntityNotFoundException.class).hasMessage("Assessment with id " + assessmentId
+                        + " not found");
     }
 
     @Test
@@ -641,7 +643,7 @@ class TestApplicationServiceTest {
 
         assertThatThrownBy(() -> assessmentApplicationService.cancelAssessment(assessmentId, userEmail)).isInstanceOf(
                 BusinessRuleException.class).hasMessage(
-                        "Cannot cancel test. Current status is COMPLETED, expected IN_PROGRESS");
+                        "Cannot cancel assessment. Current status is COMPLETED, expected IN_PROGRESS");
     }
 
     @Test
@@ -665,7 +667,7 @@ class TestApplicationServiceTest {
         when(assessmentRepository.findById(assessmentId)).thenReturn(Optional.of(test));
 
         assertThatThrownBy(() -> assessmentApplicationService.cancelAssessment(assessmentId, userEmail)).isInstanceOf(
-                AccessDeniedException.class).hasMessage("You do not have permission to modify this test");
+                AccessDeniedException.class).hasMessage("You do not have permission to modify this assessment");
     }
 
     @Test
@@ -678,6 +680,6 @@ class TestApplicationServiceTest {
         when(assessmentRepository.findById(assessmentId)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> assessmentApplicationService.cancelAssessment(assessmentId, userEmail)).isInstanceOf(
-                EntityNotFoundException.class).hasMessage("Test with id " + assessmentId + " not found");
+                EntityNotFoundException.class).hasMessage("Assessment with id " + assessmentId + " not found");
     }
 }
