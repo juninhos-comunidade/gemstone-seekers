@@ -1,8 +1,8 @@
 package com.gemstoneseekers.repositories.specifications;
 
-import com.gemstoneseekers.dtos.request.TestHistoryFilterParams;
-import com.gemstoneseekers.enums.TestStatus;
-import com.gemstoneseekers.models.Test;
+import com.gemstoneseekers.dtos.request.AssessmentHistoryFilterParams;
+import com.gemstoneseekers.enums.AssessmentStatus;
+import com.gemstoneseekers.models.Assessment;
 import jakarta.persistence.criteria.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -19,10 +19,10 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class TestSpecificationsTest {
+class AssessmentSpecificationsTest {
 
     @Mock
-    private Root<Test> root;
+    private Root<Assessment> root;
     @Mock
     private CriteriaQuery<?> query;
     @Mock
@@ -39,7 +39,7 @@ class TestSpecificationsTest {
     private Path<String> technologyNamePath;
 
     @Mock
-    private Path<TestStatus> statusPath;
+    private Path<AssessmentStatus> statusPath;
 
     @Mock
     private Predicate candidatePredicate;
@@ -70,12 +70,12 @@ class TestSpecificationsTest {
         UUID candidateId = UUID.randomUUID();
         when(cb.equal(candidateIdPath, candidateId)).thenReturn(candidatePredicate);
 
-        Specification<Test> spec = TestSpecifications.withFilters(candidateId, null);
+        Specification<Assessment> spec = AssessmentSpecifications.withFilters(candidateId, null);
         spec.toPredicate(root, query, cb);
 
         verify(cb, times(1)).equal(candidateIdPath, candidateId);
         verify(cb, never()).equal(eq(technologyNamePath), anyString());
-        verify(cb, never()).equal(eq(statusPath), any(TestStatus.class));
+        verify(cb, never()).equal(eq(statusPath), any(AssessmentStatus.class));
     }
 
     @org.junit.jupiter.api.Test
@@ -83,7 +83,7 @@ class TestSpecificationsTest {
     void shouldCreateCandidateAndTechnologyPredicates() {
         UUID candidateId = UUID.randomUUID();
         String technologyName = "java";
-        TestHistoryFilterParams filters = new TestHistoryFilterParams(technologyName, null);
+        AssessmentHistoryFilterParams filters = new AssessmentHistoryFilterParams(technologyName, null);
 
         @SuppressWarnings("unchecked")
         Expression<String> lowerTechNamePath = mock(Expression.class);
@@ -92,23 +92,23 @@ class TestSpecificationsTest {
         when(cb.equal(candidateIdPath, candidateId)).thenReturn(candidatePredicate);
         when(cb.equal(lowerTechNamePath, technologyName.toLowerCase())).thenReturn(technologyPredicate);
 
-        Specification<Test> spec = TestSpecifications.withFilters(candidateId, filters);
+        Specification<Assessment> spec = AssessmentSpecifications.withFilters(candidateId, filters);
         spec.toPredicate(root, query, cb);
 
         verify(cb, times(1)).equal(candidateIdPath, candidateId);
         verify(cb, times(1)).lower(technologyNamePath);
         verify(cb, times(1)).equal(lowerTechNamePath, technologyName.toLowerCase());
-        verify(cb, never()).equal(eq(statusPath), any(TestStatus.class));
+        verify(cb, never()).equal(eq(statusPath), any(AssessmentStatus.class));
     }
 
     @org.junit.jupiter.api.Test
     @DisplayName("Should not create technology predicate for blank technology name")
     void shouldNotCreateTechnologyPredicateForBlankTechnologyName() {
         UUID candidateId = UUID.randomUUID();
-        TestHistoryFilterParams filters = new TestHistoryFilterParams(" ", null);
+        AssessmentHistoryFilterParams filters = new AssessmentHistoryFilterParams(" ", null);
         when(cb.equal(candidateIdPath, candidateId)).thenReturn(candidatePredicate);
 
-        Specification<Test> spec = TestSpecifications.withFilters(candidateId, filters);
+        Specification<Assessment> spec = AssessmentSpecifications.withFilters(candidateId, filters);
         spec.toPredicate(root, query, cb);
 
         verify(cb, times(1)).equal(candidateIdPath, candidateId);
@@ -119,13 +119,13 @@ class TestSpecificationsTest {
     @DisplayName("Should create candidate and status predicates when status filter is provided")
     void shouldCreateCandidateAndStatusPredicates() {
         UUID candidateId = UUID.randomUUID();
-        TestStatus status = TestStatus.COMPLETED;
-        TestHistoryFilterParams filters = new TestHistoryFilterParams(null, status);
+        AssessmentStatus status = AssessmentStatus.COMPLETED;
+        AssessmentHistoryFilterParams filters = new AssessmentHistoryFilterParams(null, status);
 
         when(cb.equal(candidateIdPath, candidateId)).thenReturn(candidatePredicate);
         when(cb.equal(statusPath, status)).thenReturn(statusPredicate);
 
-        Specification<Test> spec = TestSpecifications.withFilters(candidateId, filters);
+        Specification<Assessment> spec = AssessmentSpecifications.withFilters(candidateId, filters);
         spec.toPredicate(root, query, cb);
 
         verify(cb, times(1)).equal(candidateIdPath, candidateId);
@@ -138,8 +138,8 @@ class TestSpecificationsTest {
     void shouldCreateAllPredicatesWhenAllFiltersAreProvided() {
         UUID candidateId = UUID.randomUUID();
         String technologyName = "python";
-        TestStatus status = TestStatus.IN_PROGRESS;
-        TestHistoryFilterParams filters = new TestHistoryFilterParams(technologyName, status);
+        AssessmentStatus status = AssessmentStatus.IN_PROGRESS;
+        AssessmentHistoryFilterParams filters = new AssessmentHistoryFilterParams(technologyName, status);
 
         @SuppressWarnings("unchecked")
         Expression<String> lowerTechNamePath = mock(Expression.class);
@@ -149,7 +149,7 @@ class TestSpecificationsTest {
         when(cb.equal(lowerTechNamePath, technologyName.toLowerCase())).thenReturn(technologyPredicate);
         when(cb.equal(statusPath, status)).thenReturn(statusPredicate);
 
-        Specification<Test> spec = TestSpecifications.withFilters(candidateId, filters);
+        Specification<Assessment> spec = AssessmentSpecifications.withFilters(candidateId, filters);
         spec.toPredicate(root, query, cb);
 
         verify(cb, times(1)).equal(candidateIdPath, candidateId);

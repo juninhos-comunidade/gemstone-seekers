@@ -1,14 +1,14 @@
 package com.gemstoneseekers.mappers;
 
 import com.gemstoneseekers.dtos.response.QuestionResponse;
-import com.gemstoneseekers.dtos.response.TestDetailedResultResponse;
-import com.gemstoneseekers.dtos.response.TestResponse;
-import com.gemstoneseekers.dtos.response.TestResultResponse;
-import com.gemstoneseekers.dtos.response.TestSummaryResponse;
+import com.gemstoneseekers.dtos.response.AssessmentDetailedResultResponse;
+import com.gemstoneseekers.dtos.response.AssessmentResponse;
+import com.gemstoneseekers.dtos.response.AssessmentResultResponse;
+import com.gemstoneseekers.dtos.response.AssessmentSummaryResponse;
 import com.gemstoneseekers.dtos.response.TechnologyResponse;
 import com.gemstoneseekers.enums.QuestionDifficulty;
 import com.gemstoneseekers.enums.QuestionSource;
-import com.gemstoneseekers.enums.TestStatus;
+import com.gemstoneseekers.enums.AssessmentStatus;
 import com.gemstoneseekers.models.CandidateAnswer;
 import com.gemstoneseekers.models.Question;
 import com.gemstoneseekers.models.QuestionOption;
@@ -42,10 +42,10 @@ class TestMapperTest {
     private QuestionMapper questionMapper;
 
     @InjectMocks
-    private TestMapper testMapper;
+    private AssessmentMapper assessmentMapper;
 
     @Test
-    void toTestAndQuestionsResponseShouldMapTechnologyStatusAndQuestionsWhenAnswersArePresent() {
+    void toAssessmentAndQuestionsResponseShouldMapTechnologyStatusAndQuestionsWhenAnswersArePresent() {
         Technology technology = technology(7, "Java", "Backend");
         Question question1 = question(1L, "Question 1", QuestionDifficulty.BEGINNER, QuestionSource.INTERNAL);
         Question question2 = question(2L, "Question 2", QuestionDifficulty.INTERMEDIATE, QuestionSource.AI_GENERATED);
@@ -53,19 +53,19 @@ class TestMapperTest {
                 QuestionSource.INTERNAL, List.of());
         QuestionResponse response2 = new QuestionResponse(2L, "Question 2", QuestionDifficulty.INTERMEDIATE,
                 QuestionSource.AI_GENERATED, List.of());
-        com.gemstoneseekers.models.Test test = testWithAnswers(technology, TestStatus.IN_PROGRESS, linkedAnswers(answer(
-                question1), answer(question2)));
+        com.gemstoneseekers.models.Assessment test = assessmentWithAnswers(technology, AssessmentStatus.IN_PROGRESS,
+                linkedAnswers(answer(question1), answer(question2)));
         TechnologyResponse technologyResponse = new TechnologyResponse(7, "Java", "Backend");
 
         when(technologyMapper.toTechnologyResponse(technology)).thenReturn(technologyResponse);
         when(questionMapper.toResponse(question1)).thenReturn(response1);
         when(questionMapper.toResponse(question2)).thenReturn(response2);
 
-        TestResponse result = testMapper.toTestAndQuestionsResponse(test);
+        AssessmentResponse result = assessmentMapper.toAssessmentAndQuestionsResponse(test);
 
         assertThat(result.id()).isEqualTo(test.getId());
         assertThat(result.technologyResponse()).isEqualTo(technologyResponse);
-        assertThat(result.status()).isEqualTo(TestStatus.IN_PROGRESS);
+        assertThat(result.status()).isEqualTo(AssessmentStatus.IN_PROGRESS);
         assertThat(result.questions()).containsExactly(response1, response2);
         verify(technologyMapper).toTechnologyResponse(technology);
         verify(questionMapper).toResponse(question1);
@@ -73,30 +73,31 @@ class TestMapperTest {
     }
 
     @Test
-    void toTestAndQuestionsResponseShouldReturnEmptyQuestionsWhenAnswersAreNull() {
+    void toAssessmentAndQuestionsResponseShouldReturnEmptyQuestionsWhenAnswersAreNull() {
         Technology technology = technology(7, "Java", "Backend");
-        com.gemstoneseekers.models.Test test = testWithAnswers(technology, TestStatus.IN_PROGRESS, null);
+        com.gemstoneseekers.models.Assessment test = assessmentWithAnswers(technology, AssessmentStatus.IN_PROGRESS,
+                null);
         TechnologyResponse technologyResponse = new TechnologyResponse(7, "Java", "Backend");
 
         when(technologyMapper.toTechnologyResponse(technology)).thenReturn(technologyResponse);
 
-        TestResponse result = testMapper.toTestAndQuestionsResponse(test);
+        AssessmentResponse result = assessmentMapper.toAssessmentAndQuestionsResponse(test);
 
         assertThat(result.id()).isEqualTo(test.getId());
         assertThat(result.technologyResponse()).isEqualTo(technologyResponse);
-        assertThat(result.status()).isEqualTo(TestStatus.IN_PROGRESS);
+        assertThat(result.status()).isEqualTo(AssessmentStatus.IN_PROGRESS);
         assertThat(result.questions()).isEmpty();
         verify(technologyMapper).toTechnologyResponse(technology);
         verify(questionMapper, never()).toResponse(any(Question.class));
     }
 
     @Test
-    void toTestResultResponseShouldReturnNullWhenTestIsNull() {
-        assertThat(testMapper.toTestResultResponse(null)).isNull();
+    void toAssessmentResultResponseShouldReturnNullWhenTestIsNull() {
+        assertThat(assessmentMapper.toAssessmentResultResponse(null)).isNull();
     }
 
     @Test
-    void toTestResultResponseShouldCountCorrectAnswersAndIgnoreNullSelections() {
+    void toAssessmentResultResponseShouldCountCorrectAnswersAndIgnoreNullSelections() {
         Technology technology = technology(7, "Java", "Backend");
         Question question = question(1L, "Question 1", QuestionDifficulty.BEGINNER, QuestionSource.INTERNAL);
         QuestionOption correctOption = option(11L, "Correct", true);
@@ -114,16 +115,16 @@ class TestMapperTest {
 
         CandidateAnswer unanswered = answer(question);
 
-        com.gemstoneseekers.models.Test test = testWithAnswers(technology, TestStatus.COMPLETED, linkedAnswers(
-                correctAnswer, wrongAnswer, unanswered));
+        com.gemstoneseekers.models.Assessment test = assessmentWithAnswers(technology, AssessmentStatus.COMPLETED,
+                linkedAnswers(correctAnswer, wrongAnswer, unanswered));
         test.setScore(new BigDecimal("6.50"));
         test.setCompletedAt(Instant.parse("2026-08-13T21:00:00Z"));
 
-        TestResultResponse result = testMapper.toTestResultResponse(test);
+        AssessmentResultResponse result = assessmentMapper.toAssessmentResultResponse(test);
 
-        assertThat(result.testId()).isEqualTo(test.getId());
+        assertThat(result.assessmentId()).isEqualTo(test.getId());
         assertThat(result.technologyName()).isEqualTo("Java");
-        assertThat(result.status()).isEqualTo(TestStatus.COMPLETED);
+        assertThat(result.status()).isEqualTo(AssessmentStatus.COMPLETED);
         assertThat(result.score()).isEqualTo(new BigDecimal("6.50"));
         assertThat(result.totalQuestions()).isEqualTo(3);
         assertThat(result.correctAnswers()).isEqualTo(1);
@@ -132,7 +133,7 @@ class TestMapperTest {
 
     @Test
     void toSummaryResponseShouldReturnNullWhenTestIsNull() {
-        assertThat(testMapper.toSummaryResponse(null)).isNull();
+        assertThat(assessmentMapper.toSummaryResponse(null)).isNull();
     }
 
     @Test
@@ -140,16 +141,16 @@ class TestMapperTest {
         Technology technology = technology(7, "Java", "Backend");
         Question firstQuestion = question(1L, "Question 1", QuestionDifficulty.INTERMEDIATE, QuestionSource.INTERNAL);
         Question secondQuestion = question(2L, "Question 2", QuestionDifficulty.ADVANCED, QuestionSource.AI_GENERATED);
-        com.gemstoneseekers.models.Test test = testWithAnswers(technology, TestStatus.IN_PROGRESS, linkedAnswers(answer(
-                firstQuestion), answer(secondQuestion)));
+        com.gemstoneseekers.models.Assessment test = assessmentWithAnswers(technology, AssessmentStatus.IN_PROGRESS,
+                linkedAnswers(answer(firstQuestion), answer(secondQuestion)));
         test.setScore(new BigDecimal("7.50"));
         test.setCreatedAt(Instant.parse("2026-08-13T20:00:00Z"));
         test.setCompletedAt(Instant.parse("2026-08-13T21:00:00Z"));
 
-        TestSummaryResponse result = testMapper.toSummaryResponse(test);
+        AssessmentSummaryResponse result = assessmentMapper.toSummaryResponse(test);
 
-        assertThat(result.testId()).isEqualTo(test.getId());
-        assertThat(result.status()).isEqualTo(TestStatus.IN_PROGRESS);
+        assertThat(result.assessmentId()).isEqualTo(test.getId());
+        assertThat(result.status()).isEqualTo(AssessmentStatus.IN_PROGRESS);
         assertThat(result.difficulty()).isEqualTo(QuestionDifficulty.INTERMEDIATE);
         assertThat(result.score()).isEqualTo(new BigDecimal("7.50"));
         assertThat(result.createdAt()).isEqualTo(test.getCreatedAt());
@@ -158,7 +159,7 @@ class TestMapperTest {
 
     @Test
     void toDetailedResultResponseShouldReturnNullWhenTestIsNull() {
-        assertThat(testMapper.toDetailedResultResponse(null)).isNull();
+        assertThat(assessmentMapper.toDetailedResultResponse(null)).isNull();
     }
 
     @Test
@@ -188,16 +189,16 @@ class TestMapperTest {
 
         CandidateAnswer unanswered = answer(question3);
 
-        com.gemstoneseekers.models.Test test = testWithAnswers(technology, TestStatus.COMPLETED, linkedAnswers(
-                correctAnswer, wrongAnswer, unanswered));
+        com.gemstoneseekers.models.Assessment test = assessmentWithAnswers(technology, AssessmentStatus.COMPLETED,
+                linkedAnswers(correctAnswer, wrongAnswer, unanswered));
         test.setScore(new BigDecimal("8.00"));
         test.setCompletedAt(Instant.parse("2026-08-13T21:00:00Z"));
 
-        TestDetailedResultResponse result = testMapper.toDetailedResultResponse(test);
+        AssessmentDetailedResultResponse result = assessmentMapper.toDetailedResultResponse(test);
 
-        assertThat(result.testId()).isEqualTo(test.getId());
+        assertThat(result.assessmentId()).isEqualTo(test.getId());
         assertThat(result.technologyName()).isEqualTo("Java");
-        assertThat(result.status()).isEqualTo(TestStatus.COMPLETED);
+        assertThat(result.status()).isEqualTo(AssessmentStatus.COMPLETED);
         assertThat(result.difficulty()).isEqualTo(QuestionDifficulty.BEGINNER);
         assertThat(result.score()).isEqualTo(new BigDecimal("8.00"));
         assertThat(result.totalQuestions()).isEqualTo(3);
@@ -212,9 +213,9 @@ class TestMapperTest {
                 new com.gemstoneseekers.dtos.response.OptionResultResponse(12L, "Q1 Wrong", false));
     }
 
-    private com.gemstoneseekers.models.Test testWithAnswers(Technology technology, TestStatus status,
+    private com.gemstoneseekers.models.Assessment assessmentWithAnswers(Technology technology, AssessmentStatus status,
             Set<CandidateAnswer> answers) {
-        com.gemstoneseekers.models.Test test = new com.gemstoneseekers.models.Test();
+        com.gemstoneseekers.models.Assessment test = new com.gemstoneseekers.models.Assessment();
         test.setId(UUID.fromString("00000000-0000-0000-0000-000000000001"));
         test.setTechnology(technology);
         test.setStatus(status);
