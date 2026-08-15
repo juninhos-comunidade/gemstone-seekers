@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -15,11 +14,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { useLoadingMessages } from "@/lib/hooks/useLoadingMessages";
 
 export default function Page() {
-  const [apiError, setApiError] = useState<string | null>(null);
-
-  const { mutate: login, isPending } = useLogin({
-    onErrorMessage: setApiError,
-  });
+  const { mutate: login, isPending, error } = useLogin();
 
   type FormValues = z.infer<typeof schema>;
 
@@ -38,7 +33,6 @@ export default function Page() {
   const isLoading = isSubmitting || isPending;
 
   const handleLogin = handleSubmit((data) => {
-    setApiError(null);
     login(data);
   });
 
@@ -95,12 +89,12 @@ export default function Page() {
               </p>
             </div>
 
-            {apiError && (
+            {error && (
               <div
                 role="alert"
                 className="mb-4 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-600"
               >
-                {apiError}
+                {error.message}
               </div>
             )}
 

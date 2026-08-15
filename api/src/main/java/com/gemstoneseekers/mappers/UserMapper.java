@@ -29,8 +29,8 @@ public class UserMapper {
     }
 
     public CompleteRegistrationResponse toCompleteRegistrationResponse(User user) {
-        return new CompleteRegistrationResponse(user.getId(), user.getName(), user.getEmail(), user.getRole(),
-                user.getDocumentType(), user.getDocumentNumber());
+        return new CompleteRegistrationResponse(user.getId(), user.getName(), user.getEmail(), user.getRole(), user
+                .getDocumentType(), user.getDocumentNumber());
     }
 
     public void updateEntityFromRequest(UserRequest request, User user) {
@@ -46,7 +46,7 @@ public class UserMapper {
             user.setDocumentType(request.documentType());
             if (request.documentNumber() == null || request.documentNumber().isBlank()) {
                 throw new IllegalArgumentException(
-                    "Inconsistência: Ao alterar o tipo de documento, você deve fornecer o novo número correspondente.");
+                        "Inconsistência: Ao alterar o tipo de documento, você deve fornecer o novo número correspondente.");
             }
             user.setDocumentNumber(request.documentNumber());
         } else if (request.documentNumber() != null && !request.documentNumber().isBlank()) {

@@ -1,34 +1,36 @@
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { Dispatch, SetStateAction } from "react";
-import { setAuthToken } from "@/lib/api/auth";
+import { setAuthToken, setUserRole } from "@/lib/api/auth";
+import { getCandidateProfile } from "@/lib/api/candidate/getCandidateProfile";
 import { httpClient } from "@/lib/api/client";
+import { ApiError } from "@/lib/api/errors";
 
-interface LoginData {
+export interface LoginData {
   email: string;
   password: string;
 }
 
-interface LoginResponse {
-  success: boolean;
+export interface LoginResponse {
   message?: string;
-  token?: string;
-  accessToken?: string;
+  success: boolean;
   result?: {
-    token?: string;
+    refreshToken?: string;
     accessToken?: string;
-    role?: "CANDIDATE" | "RECRUITER";
-    registrationCompleted?: boolean;
   };
 }
 
-async function loginRequest(data: LoginData): Promise<LoginResponse> {
+export async function loginRequest(data: LoginData): Promise<LoginResponse> {
   return httpClient.post<LoginResponse>("/auth/login", data);
 }
 
-function isTimeoutOrNetworkError(error: unknown): boolean {
-  const message = (error as Error)?.message?.toLowerCase() ?? "";
+function isTimeoutOrNetworkError(error?: Error | unknown): boolean {
+  if (!error || typeof error !== "object") return false;
+  const message =
+    "message" in error &&
+    typeof (error as { message?: unknown }).message === "string"
+      ? (error as { message: string }).message.toLowerCase()
+      : "";
   return (
     message.includes("timeout") ||
     message.includes("network") ||
@@ -36,34 +38,18 @@ function isTimeoutOrNetworkError(error: unknown): boolean {
   );
 }
 
-interface UseLoginOptions {
-  onErrorMessage?: Dispatch<SetStateAction<string | null>>;
-}
-
-export function useLogin(_options?: UseLoginOptions) {
-  const { onErrorMessage } = _options ?? {};
+export function useLogin() {
   const router = useRouter();
 
   return useMutation({
     mutationFn: loginRequest,
-    retry: (failureCount, error) => {
-      if (isTimeoutOrNetworkError(error) && failureCount < 2) {
-        return true;
-      }
-      return false;
-    },
-    retryDelay: 2000,
-    onSuccess: (result) => {
-      if (!result.success) {
-        toast.error(result.message ?? "Erro ao fazer login");
+    onSuccess: async (data) => {
+      if (!data || data.success === false) {
+        toast.error(data?.message ?? "Erro ao fazer login");
         return;
       }
 
-      const token =
-        result?.result?.token ??
-        result?.token ??
-        result?.accessToken ??
-        result?.result?.accessToken;
+      const token = data.result?.accessToken;
 
       if (!token) {
         toast.error("Não foi possível autenticar. Tente novamente.");
@@ -72,31 +58,43 @@ export function useLogin(_options?: UseLoginOptions) {
 
       setAuthToken(token);
 
-      const role = result?.result?.role;
-      const registrationCompleted = result?.result?.registrationCompleted;
-      toast.success("Login realizado com sucesso!");
+      try {
+        const profile = await getCandidateProfile();
+        const role = profile?.candidate?.user?.role;
+        const registrationCompleted = Boolean(profile?.candidate?.id);
 
-      if (!registrationCompleted) {
+        if (role === "CANDIDATE" || role === "RECRUITER") {
+          setUserRole(role);
+        }
+
+        toast.success(data.message || "Login realizado com sucesso!");
+        if (!registrationCompleted) {
+          router.push("/role");
+          return;
+        }
+
         router.push(
-          role === "RECRUITER" ? "/role/recruiter" : "/role/candidate",
+          role === "RECRUITER"
+            ? "/recruiter/dashboard"
+            : "/candidate/dashboard",
         );
-        return;
+      } catch {
+        toast.success(data.message || "Login realizado com sucesso!");
+        router.push("/role");
       }
-      router.push(
-        role === "RECRUITER" ? "/recruiter/dashboard" : "/candidate/dashboard",
-      );
     },
     onError: (error: Error) => {
       if (isTimeoutOrNetworkError(error)) {
         const msg =
           "O servidor está iniciando, isso pode levar até 1 minuto. Tente novamente.";
-        onErrorMessage?.(msg);
         toast.error(msg);
         return;
       }
-      const msg = error.message ?? "Erro ao fazer login";
-      onErrorMessage?.(msg);
-      toast.error(msg);
+      if (error instanceof ApiError) {
+        toast.error(error.message);
+      } else {
+        toast.error(error?.message || "Ocorreu um erro ao realizar o login.");
+      }
     },
   });
 }

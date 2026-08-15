@@ -63,8 +63,8 @@ class CandidateLanguageServiceTest {
 
         when(candidateRepository.findByUserEmail(email)).thenReturn(Optional.of(candidate));
         when(languageRepository.findByNameIgnoreCase("English")).thenReturn(Optional.of(language));
-        when(candidateLanguageMapper.toCandidateLanguage(request, candidate, language))
-                .thenReturn(newCandidateLanguage);
+        when(candidateLanguageMapper.toCandidateLanguage(request, candidate, language)).thenReturn(
+                newCandidateLanguage);
         when(candidateRepository.save(candidate)).thenReturn(candidate);
 
         candidateLanguageService.addCandidateLanguage(email, request);
@@ -83,8 +83,8 @@ class CandidateLanguageServiceTest {
 
         when(candidateRepository.findByUserEmail(email)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> candidateLanguageService.addCandidateLanguage(email, request))
-                .isInstanceOf(EntityNotFoundException.class).hasMessage("Candidate with id " + email + " not found");
+        assertThatThrownBy(() -> candidateLanguageService.addCandidateLanguage(email, request)).isInstanceOf(
+                EntityNotFoundException.class).hasMessage("Candidate with id " + email + " not found");
 
         verify(candidateRepository).findByUserEmail(email);
         verify(languageRepository, never()).findByNameIgnoreCase(anyString());
@@ -104,8 +104,8 @@ class CandidateLanguageServiceTest {
         when(candidateRepository.findByUserEmail(email)).thenReturn(Optional.of(candidate));
         when(languageRepository.findByNameIgnoreCase("Klingon")).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> candidateLanguageService.addCandidateLanguage(email, request))
-                .isInstanceOf(EntityNotFoundException.class).hasMessage("Language with id Klingon not found");
+        assertThatThrownBy(() -> candidateLanguageService.addCandidateLanguage(email, request)).isInstanceOf(
+                EntityNotFoundException.class).hasMessage("Language with id Klingon not found");
 
         verify(candidateRepository).findByUserEmail(email);
         verify(languageRepository).findByNameIgnoreCase("Klingon");
@@ -149,8 +149,8 @@ class CandidateLanguageServiceTest {
 
         when(candidateRepository.findByUserEmail(email)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> candidateLanguageService.deleteCandidateLanguage(email, languageId))
-                .isInstanceOf(EntityNotFoundException.class).hasMessage("Candidate with id " + email + " not found");
+        assertThatThrownBy(() -> candidateLanguageService.deleteCandidateLanguage(email, languageId)).isInstanceOf(
+                EntityNotFoundException.class).hasMessage("Candidate with id " + email + " not found");
 
         verify(candidateRepository).findByUserEmail(email);
         verify(candidateLanguagesRepository, never()).findById(any());
@@ -170,9 +170,9 @@ class CandidateLanguageServiceTest {
         when(candidateRepository.findByUserEmail(email)).thenReturn(Optional.of(candidate));
         when(candidateLanguagesRepository.findById(id)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> candidateLanguageService.deleteCandidateLanguage(email, languageId))
-                .isInstanceOf(EntityNotFoundException.class)
-                .hasMessage("Language link not found for this candidate with id " + languageId + " not found");
+        assertThatThrownBy(() -> candidateLanguageService.deleteCandidateLanguage(email, languageId)).isInstanceOf(
+                EntityNotFoundException.class).hasMessage("Language link not found for this candidate with id "
+                        + languageId + " not found");
 
         verify(candidateRepository).findByUserEmail(email);
         verify(candidateLanguagesRepository).findById(id);
@@ -199,8 +199,8 @@ class CandidateLanguageServiceTest {
 
         when(candidateRepository.findByUserEmail(email)).thenReturn(Optional.of(candidate));
         when(languageRepository.findByNameIgnoreCase("ENGLISH")).thenReturn(Optional.of(language));
-        when(candidateLanguageMapper.toCandidateLanguage(request, candidate, language))
-                .thenReturn(newCandidateLanguage);
+        when(candidateLanguageMapper.toCandidateLanguage(request, candidate, language)).thenReturn(
+                newCandidateLanguage);
         when(candidateRepository.save(candidate)).thenReturn(candidate);
 
         candidateLanguageService.addCandidateLanguage(email, request);

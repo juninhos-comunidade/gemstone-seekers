@@ -25,8 +25,8 @@ public class EducationService {
         this.educationMapper = educationMapper;
     }
     public void addEducation(String email, EducationRequest request) {
-        Candidate candidate = candidateRepository.findByUserEmail(email)
-                .orElseThrow(() -> new EntityNotFoundException("Candidate", email));
+        Candidate candidate = candidateRepository.findByUserEmail(email).orElseThrow(() -> new EntityNotFoundException(
+                "Candidate", email));
 
         Education newEducation = educationMapper.toEducation(request, candidate);
         candidate.getEducations().add(newEducation);
@@ -34,8 +34,8 @@ public class EducationService {
     }
     public void deleteEducation(String email, UUID educationId) {
 
-        Education education = educationRepository.findById(educationId)
-                .orElseThrow(() -> new EntityNotFoundException("Education", educationId));
+        Education education = educationRepository.findById(educationId).orElseThrow(() -> new EntityNotFoundException(
+                "Education", educationId));
         Candidate candidate = education.getCandidate();
 
         if (!candidate.getUser().getEmail().equalsIgnoreCase(email)) {

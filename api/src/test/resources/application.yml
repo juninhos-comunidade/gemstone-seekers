@@ -1,0 +1,13 @@
+gemstoneseekers:
+  question-refill:
+    enabled: false
+
+spring:
+  ai:
+    google:
+      genai:
+        api-key: test-key
+  flyway:
+    locations:
+      - classpath:db/migration
+      - classpath:db/seed

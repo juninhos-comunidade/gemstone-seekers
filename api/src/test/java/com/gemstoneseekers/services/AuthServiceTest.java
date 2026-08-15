@@ -88,8 +88,8 @@ class AuthServiceTest {
         var request = new RegisterRequest("Jane Doe", "jane.doe@example.com", "password123");
         when(userRepository.existsByEmail(request.email())).thenReturn(true);
 
-        assertThatThrownBy(() -> authService.register(request)).isInstanceOf(ConflictException.class)
-                .hasMessage("Email already in use");
+        assertThatThrownBy(() -> authService.register(request)).isInstanceOf(ConflictException.class).hasMessage(
+                "Email already in use");
 
         verify(userRepository).existsByEmail(request.email());
         verify(passwordEncoder, never()).encode(anyString());

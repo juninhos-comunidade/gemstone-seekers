@@ -26,9 +26,8 @@ class DomainRepositoryTest {
 
     @BeforeAll
     static void setup() {
-        Flyway flyway = Flyway.configure()
-                .dataSource(postgres.getJdbcUrl(), postgres.getUsername(), postgres.getPassword())
-                .locations("classpath:db/migration").load();
+        Flyway flyway = Flyway.configure().dataSource(postgres.getJdbcUrl(), postgres.getUsername(), postgres
+                .getPassword()).locations("classpath:db/migration").load();
         flyway.migrate();
 
         Configuration cfg = new Configuration();
@@ -55,6 +54,10 @@ class DomainRepositoryTest {
         cfg.addAnnotatedClass(Project.class);
         cfg.addAnnotatedClass(CandidateLanguage.class);
         cfg.addAnnotatedClass(CandidateLink.class);
+        cfg.addAnnotatedClass(Question.class);
+        cfg.addAnnotatedClass(QuestionOption.class);
+        cfg.addAnnotatedClass(com.gemstoneseekers.models.Assessment.class);
+        cfg.addAnnotatedClass(CandidateAnswer.class);
 
         sessionFactory = cfg.buildSessionFactory();
     }

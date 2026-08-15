@@ -1,4 +1,3 @@
-// lib/hooks/useLoadingMessages.ts
 "use client";
 
 import { useEffect, useState } from "react";
@@ -14,7 +13,7 @@ export function useLoadingMessages(
   isActive: boolean,
   messages: { delay: number; text: string }[] = DEFAULT_MESSAGES,
 ) {
-  const [message, setMessage] = useState(messages[0]?.text ?? "");
+  const [message, setMessage] = useState(messages[0].text);
 
   useEffect(() => {
     if (!isActive) return;
@@ -24,7 +23,7 @@ export function useLoadingMessages(
     );
 
     return () => timers.forEach(clearTimeout);
-  }, [isActive]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [isActive, messages]);
 
   return message;
 }

@@ -1,6 +1,7 @@
 import axios, { type AxiosRequestConfig, isAxiosError } from "axios";
 import { ApiError, type ApiErrorResponse } from "./errors";
 import { getAuthToken, removeAuthToken } from "./auth";
+import { translateErrorMessage, translateSuccessMessage } from "./translations";
 
 const getBaseUrl = (): string => {
   if (typeof window !== "undefined") {
@@ -36,24 +37,54 @@ api.interceptors.request.use(
 );
 
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    if (
+      response?.data &&
+      typeof response.data === "object" &&
+      "message" in response.data &&
+      typeof response.data.message === "string"
+    ) {
+      response.data.message = translateSuccessMessage(response.data.message);
+    }
+    return response;
+  },
   (error) => {
-    if (isAxiosError(error) && error.response) {
-      const status = error.response.status;
-      const data = error.response.data as ApiErrorResponse;
+    if (isAxiosError(error)) {
+      if (error.response) {
+        const status = error.response.status;
+        const data = error.response.data as ApiErrorResponse;
 
-      if (status === 401 && typeof window !== "undefined") {
-        removeAuthToken();
-        if (!window.location.pathname.startsWith("/login")) {
-          window.location.href = "/login";
+        if (status === 401 && typeof window !== "undefined") {
+          removeAuthToken();
+          if (!window.location.pathname.startsWith("/login")) {
+            window.location.href = "/login";
+          }
         }
+
+        const rawMessage =
+          data?.error?.message ||
+          data?.message ||
+          error.response.statusText ||
+          "An error occurred during the request.";
+        const errorCode = data?.error?.code;
+        const message = translateErrorMessage(rawMessage, errorCode);
+
+        return Promise.reject(new ApiError(status, message, data));
       }
 
-      const message =
-        data?.message ||
-        error.response.statusText ||
-        "An error occurred during the request.";
-      return Promise.reject(new ApiError(status, message, data));
+      if (error.code === "ECONNABORTED" || /timeout/i.test(error.message)) {
+        const rawMessage = error.message || "timeout of 10000ms exceeded";
+        const message = translateErrorMessage(rawMessage, "ECONNABORTED");
+        const data: ApiErrorResponse = {
+          success: false,
+          message,
+          error: {
+            code: "ECONNABORTED",
+            message,
+          },
+        };
+        return Promise.reject(new ApiError(408, message, data));
+      }
     }
     return Promise.reject(error);
   },

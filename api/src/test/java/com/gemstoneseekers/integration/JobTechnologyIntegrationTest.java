@@ -34,10 +34,9 @@ class JobTechnologyIntegrationTest {
 
     @BeforeAll
     static void setup() {
-        context = new SpringApplicationBuilder(GemstoneSeekersApplication.class).run(
-                "--spring.datasource.url=" + postgres.getJdbcUrl(),
-                "--spring.datasource.username=" + postgres.getUsername(),
-                "--spring.datasource.password=" + postgres.getPassword(), "--server.port=0",
+        context = new SpringApplicationBuilder(GemstoneSeekersApplication.class).run("--spring.profiles.active=test",
+                "--spring.datasource.url=" + postgres.getJdbcUrl(), "--spring.datasource.username=" + postgres
+                        .getUsername(), "--spring.datasource.password=" + postgres.getPassword(), "--server.port=0",
                 "--jwt.secret=e93afb5d9ffc2f656b9039f768011829be9a88b539671e8aab8d347949a4da67",
                 "--jwt.access-token.expiration=86400000", "--jwt.refresh-token.expiration=604800000");
         Integer resolvedPort = context.getEnvironment().getProperty("local.server.port", Integer.class);
@@ -71,8 +70,8 @@ class JobTechnologyIntegrationTest {
                     "email": "john@example.com",
                     "password": "plainPassword123"
                 }""";
-        given().contentType(ContentType.JSON).body(registerBody).when().post("/api/v1/auth/register").then()
-                .statusCode(201);
+        given().contentType(ContentType.JSON).body(registerBody).when().post("/api/v1/auth/register").then().statusCode(
+                201);
         String loginBody = """
                 {
                     "email": "john@example.com",
@@ -97,8 +96,8 @@ class JobTechnologyIntegrationTest {
             }
 
             int technologyId;
-            try (ResultSet rs = stmt
-                    .executeQuery("SELECT id FROM technologies WHERE deleted_at IS NULL ORDER BY id LIMIT 1")) {
+            try (ResultSet rs = stmt.executeQuery(
+                    "SELECT id FROM technologies WHERE deleted_at IS NULL ORDER BY id LIMIT 1")) {
                 if (!rs.next()) {
                     throw new IllegalStateException("No technologies found in seed data");
                 }
@@ -115,14 +114,12 @@ class JobTechnologyIntegrationTest {
                     + "VALUES ('%s', '%s', '%s', 'Engineering')", recruiterId, userId, companyId));
 
             UUID jobId = UUID.randomUUID();
-            stmt.execute(String.format(
-                    "INSERT INTO jobs (id, recruiter_id, company_id, title, description, status) "
-                            + "VALUES ('%s', '%s', '%s', 'Java Developer', 'Backend role', 'OPEN')",
-                    jobId, recruiterId, companyId));
+            stmt.execute(String.format("INSERT INTO jobs (id, recruiter_id, company_id, title, description, status) "
+                    + "VALUES ('%s', '%s', '%s', 'Java Developer', 'Backend role', 'OPEN')", jobId, recruiterId,
+                    companyId));
 
-            stmt.execute(String.format(
-                    "INSERT INTO job_technologies (job_id, technology_id, is_mandatory) " + "VALUES ('%s', %d, true)",
-                    jobId, technologyId));
+            stmt.execute(String.format("INSERT INTO job_technologies (job_id, technology_id, is_mandatory) "
+                    + "VALUES ('%s', %d, true)", jobId, technologyId));
 
             return new SeedData(jobId, technologyId);
         }
@@ -133,10 +130,10 @@ class JobTechnologyIntegrationTest {
         String accessToken = getAccessToken();
         SeedData seed = seedJobWithTechnology();
 
-        given().contentType(ContentType.JSON).header("Authorization", "Bearer " + accessToken)
-                .pathParam("jobId", seed.jobId()).pathParam("technologyId", seed.technologyId()).when()
-                .delete("/api/v1/jobs/{jobId}/technologies/{technologyId}").then().statusCode(200)
-                .body("success", equalTo(true)).body("message", equalTo("Technology unlinked from job successfully"))
+        given().contentType(ContentType.JSON).header("Authorization", "Bearer " + accessToken).pathParam("jobId", seed
+                .jobId()).pathParam("technologyId", seed.technologyId()).when().delete(
+                        "/api/v1/jobs/{jobId}/technologies/{technologyId}").then().statusCode(200).body("success",
+                                equalTo(true)).body("message", equalTo("Technology unlinked from job successfully"))
                 .body("result", equalTo(null));
     }
 
@@ -144,9 +141,9 @@ class JobTechnologyIntegrationTest {
     void shouldReturnNotFoundWhenRemovingNonexistentLink() throws SQLException {
         String accessToken = getAccessToken();
 
-        given().contentType(ContentType.JSON).header("Authorization", "Bearer " + accessToken)
-                .pathParam("jobId", UUID.randomUUID()).pathParam("technologyId", 999).when()
-                .delete("/api/v1/jobs/{jobId}/technologies/{technologyId}").then().statusCode(404)
-                .body("success", equalTo(false)).body("error.code", equalTo("NOT_FOUND"));
+        given().contentType(ContentType.JSON).header("Authorization", "Bearer " + accessToken).pathParam("jobId", UUID
+                .randomUUID()).pathParam("technologyId", 999).when().delete(
+                        "/api/v1/jobs/{jobId}/technologies/{technologyId}").then().statusCode(404).body("success",
+                                equalTo(false)).body("error.code", equalTo("NOT_FOUND"));
     }
 }

@@ -78,8 +78,8 @@ class ExperienceServiceTest {
 
         when(candidateRepository.findByUserEmail(email)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> experienceService.addExperience(email, request))
-                .isInstanceOf(EntityNotFoundException.class).hasMessage("Candidate with id " + email + " not found");
+        assertThatThrownBy(() -> experienceService.addExperience(email, request)).isInstanceOf(
+                EntityNotFoundException.class).hasMessage("Candidate with id " + email + " not found");
 
         verify(candidateRepository).findByUserEmail(email);
         verify(experienceMapper, never()).toExperience(any(), any());
@@ -122,8 +122,8 @@ class ExperienceServiceTest {
 
         when(experienceRepository.findById(experienceId)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> experienceService.deleteExperience(email, experienceId))
-                .isInstanceOf(EntityNotFoundException.class).hasMessage("Link with id " + experienceId + " not found");
+        assertThatThrownBy(() -> experienceService.deleteExperience(email, experienceId)).isInstanceOf(
+                EntityNotFoundException.class).hasMessage("Link with id " + experienceId + " not found");
 
         verify(experienceRepository).findById(experienceId);
         verify(experienceRepository, never()).delete(any());
@@ -149,9 +149,8 @@ class ExperienceServiceTest {
 
         when(experienceRepository.findById(experienceId)).thenReturn(Optional.of(experience));
 
-        assertThatThrownBy(() -> experienceService.deleteExperience(requesterEmail, experienceId))
-                .isInstanceOf(AccessDeniedException.class)
-                .hasMessage("Operação inválida. Você não é o proprietário deste registro.");
+        assertThatThrownBy(() -> experienceService.deleteExperience(requesterEmail, experienceId)).isInstanceOf(
+                AccessDeniedException.class).hasMessage("Operação inválida. Você não é o proprietário deste registro.");
 
         verify(experienceRepository).findById(experienceId);
         verify(experienceRepository, never()).delete(any());

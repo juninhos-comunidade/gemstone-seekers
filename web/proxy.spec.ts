@@ -38,7 +38,7 @@ describe("proxy", () => {
     );
   });
 
-  it("allows access to protected route when auth token cookie exists", async () => {
+  it("allows access to protected route when auth token cookie exists and no role is set", async () => {
     const { proxy } = await import("./proxy");
     const request = new NextRequest(
       "http://localhost:3000/candidate/dashboard",
@@ -55,7 +55,93 @@ describe("proxy", () => {
     expect(mockPost).not.toHaveBeenCalled();
   });
 
-  it("tries to refresh token and sets a new auth cookie when refresh succeeds", async () => {
+  it("allows access when CANDIDATE accesses candidate routes", async () => {
+    const { proxy } = await import("./proxy");
+    const request = new NextRequest(
+      "http://localhost:3000/candidate/dashboard",
+      {
+        headers: {
+          cookie: "auth_token=test-token; user_role=CANDIDATE",
+        },
+      },
+    );
+
+    const response = await proxy(request);
+
+    expect(response.status).toBe(200);
+    expect(mockPost).not.toHaveBeenCalled();
+  });
+
+  it("allows access when RECRUITER accesses recruiter routes", async () => {
+    const { proxy } = await import("./proxy");
+    const request = new NextRequest(
+      "http://localhost:3000/recruiter/dashboard",
+      {
+        headers: {
+          cookie: "auth_token=test-token; user_role=RECRUITER",
+        },
+      },
+    );
+
+    const response = await proxy(request);
+
+    expect(response.status).toBe(200);
+    expect(mockPost).not.toHaveBeenCalled();
+  });
+
+  it("redirects RECRUITER to recruiter dashboard when accessing candidate route", async () => {
+    const { proxy } = await import("./proxy");
+    const request = new NextRequest(
+      "http://localhost:3000/candidate/dashboard",
+      {
+        headers: {
+          cookie: "auth_token=test-token; user_role=RECRUITER",
+        },
+      },
+    );
+
+    const response = await proxy(request);
+
+    expect(response.status).toBe(307);
+    expect(response.headers.get("location")).toBe(
+      "http://localhost:3000/recruiter/dashboard",
+    );
+  });
+
+  it("redirects CANDIDATE to candidate dashboard when accessing recruiter route", async () => {
+    const { proxy } = await import("./proxy");
+    const request = new NextRequest(
+      "http://localhost:3000/recruiter/dashboard",
+      {
+        headers: {
+          cookie: "auth_token=test-token; user_role=CANDIDATE",
+        },
+      },
+    );
+
+    const response = await proxy(request);
+
+    expect(response.status).toBe(307);
+    expect(response.headers.get("location")).toBe(
+      "http://localhost:3000/candidate/dashboard",
+    );
+  });
+
+  it("allows access to /role route for any role with auth token", async () => {
+    const { proxy } = await import("./proxy");
+    const request = new NextRequest("http://localhost:3000/role", {
+      headers: {
+        cookie: "auth_token=test-token; user_role=CANDIDATE",
+      },
+    });
+
+    const response = await proxy(request);
+
+    expect(response.status).toBe(200);
+    expect(mockPost).not.toHaveBeenCalled();
+  });
+
+  it("tries to refresh token and sets a new auth cookie when refresh succeeds for authorized role", async () => {
     mockPost.mockResolvedValue({
       success: true,
       result: {
@@ -68,7 +154,7 @@ describe("proxy", () => {
       "http://localhost:3000/recruiter/dashboard",
       {
         headers: {
-          cookie: "refresh_token=valid-refresh-token",
+          cookie: "refresh_token=valid-refresh-token; user_role=RECRUITER",
         },
       },
     );
@@ -79,6 +165,60 @@ describe("proxy", () => {
       data: { refreshToken: "valid-refresh-token" },
     });
     expect(response.status).toBe(200);
+    expect(response.cookies.get("auth_token")?.value).toBe("new-access-token");
+  });
+
+  it("refreshes token and redirects RECRUITER when accessing candidate route", async () => {
+    mockPost.mockResolvedValue({
+      success: true,
+      result: {
+        accessToken: "new-access-token",
+      },
+    });
+
+    const { proxy } = await import("./proxy");
+    const request = new NextRequest(
+      "http://localhost:3000/candidate/dashboard",
+      {
+        headers: {
+          cookie: "refresh_token=valid-refresh-token; user_role=RECRUITER",
+        },
+      },
+    );
+
+    const response = await proxy(request);
+
+    expect(response.status).toBe(307);
+    expect(response.headers.get("location")).toBe(
+      "http://localhost:3000/recruiter/dashboard",
+    );
+    expect(response.cookies.get("auth_token")?.value).toBe("new-access-token");
+  });
+
+  it("refreshes token and redirects CANDIDATE when accessing recruiter route", async () => {
+    mockPost.mockResolvedValue({
+      success: true,
+      result: {
+        accessToken: "new-access-token",
+      },
+    });
+
+    const { proxy } = await import("./proxy");
+    const request = new NextRequest(
+      "http://localhost:3000/recruiter/dashboard",
+      {
+        headers: {
+          cookie: "refresh_token=valid-refresh-token; user_role=CANDIDATE",
+        },
+      },
+    );
+
+    const response = await proxy(request);
+
+    expect(response.status).toBe(307);
+    expect(response.headers.get("location")).toBe(
+      "http://localhost:3000/candidate/dashboard",
+    );
     expect(response.cookies.get("auth_token")?.value).toBe("new-access-token");
   });
 

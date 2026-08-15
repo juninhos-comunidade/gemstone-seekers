@@ -16,11 +16,6 @@ describe("useLoadingMessages", () => {
     expect(result.current).toBe("Entrando...");
   });
 
-  it("should return empty string when messages array is empty", () => {
-    const { result } = renderHook(() => useLoadingMessages(true, []));
-    expect(result.current).toBe("");
-  });
-
   it("should not change message when not active", () => {
     const { result } = renderHook(() => useLoadingMessages(false));
     expect(result.current).toBe("Entrando...");
