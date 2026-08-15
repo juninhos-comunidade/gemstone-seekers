@@ -152,8 +152,7 @@ class QuestionRefillWorkerTest {
         );
 
         when(aiService.generateQuestions("Java", QuestionDifficulty.BEGINNER, 10))
-            .thenThrow(new RuntimeException("API Limit Exceeded"));
-
+            .thenThrow(new org.springframework.ai.retry.TransientAiException("API Limit Exceeded"));
         AiQuestionBatchResponse aiResponse = new AiQuestionBatchResponse(List.of());
         when(aiService.generateQuestions("Java", QuestionDifficulty.INTERMEDIATE, 10))
             .thenReturn(aiResponse);
@@ -223,7 +222,8 @@ class QuestionRefillWorkerTest {
         when(aiService.generateQuestions("Java", QuestionDifficulty.INTERMEDIATE, 10))
             .thenReturn(aiResponse);
 
-        doThrow(new RuntimeException("Database connection lost"))
+        // Ajustado para refletir o DataAccessException estrito
+        doThrow(new org.springframework.dao.DataAccessResourceFailureException("Database connection lost"))
             .when(questionService).saveAiGeneratedBatch(eq(javaTech), eq(QuestionDifficulty.BEGINNER), any());
 
         worker.executeRefillJob();
