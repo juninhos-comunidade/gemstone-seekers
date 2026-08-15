@@ -437,18 +437,19 @@
                     <failOnViolation>true</failOnViolation>
                     <printFailingErrors>true</printFailingErrors>
                     <outputDirectory>${project.build.directory}/pmd</outputDirectory>
+
                     <rulesets>
-                        <ruleset>category/java/bestpractices.xml</ruleset>
-                        <ruleset>category/java/errorprone.xml</ruleset>
-                        <ruleset>category/java/performance.xml</ruleset>
-                        <ruleset>category/java/security.xml</ruleset>
+                        <ruleset>${project.basedir}/config/pmd-ruleset.xml</ruleset>
                     </rulesets>
+
                     <excludeRoots>
                         <excludeRoot>target/generated-sources</excludeRoot>
                     </excludeRoots>
                     <excludes>
                         <exclude>**/config/**</exclude>
-                        <exclude>**/dto/**</exclude>
+                        <exclude>**/dtos/**</exclude>
+                        <exclude>**/exceptions/**</exclude>
+                        <exclude>**/mappers/**</exclude>
                         <exclude>**/GemstoneSeekersApplication.java</exclude>
                     </excludes>
                     <includeTests>false</includeTests>
