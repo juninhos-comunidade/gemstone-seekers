@@ -78,8 +78,8 @@ class ProjectServiceTest {
 
         when(candidateRepository.findByUserEmail(email)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> projectService.addCandidateProject(email, request))
-                .isInstanceOf(EntityNotFoundException.class).hasMessage("Candidate with id " + email + " not found");
+        assertThatThrownBy(() -> projectService.addCandidateProject(email, request)).isInstanceOf(
+                EntityNotFoundException.class).hasMessage("Candidate with id " + email + " not found");
 
         verify(candidateRepository).findByUserEmail(email);
         verify(projectMapper, never()).toProject(any(), any());
@@ -122,8 +122,8 @@ class ProjectServiceTest {
 
         when(projectRepository.findById(projectId)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> projectService.deleteCandidateProject(email, projectId))
-                .isInstanceOf(EntityNotFoundException.class).hasMessage("project with id " + projectId + " not found");
+        assertThatThrownBy(() -> projectService.deleteCandidateProject(email, projectId)).isInstanceOf(
+                EntityNotFoundException.class).hasMessage("project with id " + projectId + " not found");
 
         verify(projectRepository).findById(projectId);
         verify(projectRepository, never()).delete(any());
@@ -149,9 +149,8 @@ class ProjectServiceTest {
 
         when(projectRepository.findById(projectId)).thenReturn(Optional.of(project));
 
-        assertThatThrownBy(() -> projectService.deleteCandidateProject(requesterEmail, projectId))
-                .isInstanceOf(AccessDeniedException.class)
-                .hasMessage("Operação inválida. Você não é o proprietário deste registro.");
+        assertThatThrownBy(() -> projectService.deleteCandidateProject(requesterEmail, projectId)).isInstanceOf(
+                AccessDeniedException.class).hasMessage("Operação inválida. Você não é o proprietário deste registro.");
 
         verify(projectRepository).findById(projectId);
         verify(projectRepository, never()).delete(any());

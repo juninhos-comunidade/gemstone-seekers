@@ -28,8 +28,8 @@ public class ProjectService {
 
     public void addCandidateProject(String email, ProjectRequest request) {
 
-        Candidate candidate = candidateRepository.findByUserEmail(email)
-                .orElseThrow(() -> new EntityNotFoundException("Candidate", email));
+        Candidate candidate = candidateRepository.findByUserEmail(email).orElseThrow(() -> new EntityNotFoundException(
+                "Candidate", email));
 
         Project newProject = projectMapper.toProject(request, candidate);
         candidate.getProjects().add(newProject);
@@ -38,8 +38,8 @@ public class ProjectService {
     }
     public void deleteCandidateProject(String email, UUID educationId) {
 
-        Project project = projectRepository.findById(educationId)
-                .orElseThrow(() -> new EntityNotFoundException("project", educationId));
+        Project project = projectRepository.findById(educationId).orElseThrow(() -> new EntityNotFoundException(
+                "project", educationId));
         Candidate candidate = project.getCandidate();
 
         if (!candidate.getUser().getEmail().equalsIgnoreCase(email)) {

@@ -29,8 +29,8 @@ public class ExperienceService {
     }
 
     public void addExperience(String email, ExperienceRequest request) {
-        Candidate candidate = candidateRepository.findByUserEmail(email)
-                .orElseThrow(() -> new EntityNotFoundException("Candidate", email));
+        Candidate candidate = candidateRepository.findByUserEmail(email).orElseThrow(() -> new EntityNotFoundException(
+                "Candidate", email));
 
         Experience newExperience = experienceMapper.toExperience(request, candidate);
         candidate.getExperiences().add(newExperience);
@@ -39,8 +39,8 @@ public class ExperienceService {
 
     public void deleteExperience(String email, UUID linkId) {
 
-        Experience experience = experienceRepository.findById(linkId)
-                .orElseThrow(() -> new EntityNotFoundException("Link", linkId));
+        Experience experience = experienceRepository.findById(linkId).orElseThrow(() -> new EntityNotFoundException(
+                "Link", linkId));
         Candidate candidate = experience.getCandidate();
 
         if (!candidate.getUser().getEmail().equalsIgnoreCase(email)) {

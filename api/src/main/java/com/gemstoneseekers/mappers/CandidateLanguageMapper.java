@@ -17,8 +17,8 @@ public class CandidateLanguageMapper {
 
     public CandidateLanguageResponse toResponse(CandidateLanguage candidateLanguage) {
 
-        return new CandidateLanguageResponse(candidateLanguage.getId().getLanguageId(),
-                candidateLanguage.getLanguage().getName(), candidateLanguage.getProficiency());
+        return new CandidateLanguageResponse(candidateLanguage.getId().getLanguageId(), candidateLanguage.getLanguage()
+                .getName(), candidateLanguage.getProficiency());
     }
 
     public List<CandidateLanguageResponse> toResponseList(List<CandidateLanguage> candidateLanguages) {

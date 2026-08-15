@@ -108,8 +108,8 @@ class UserServiceTest {
 
         when(userRepository.findByEmail(email)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> userService.updateUserByEmail(email, request))
-                .isInstanceOf(EntityNotFoundException.class).hasMessage("User with id " + email + " not found");
+        assertThatThrownBy(() -> userService.updateUserByEmail(email, request)).isInstanceOf(
+                EntityNotFoundException.class).hasMessage("User with id " + email + " not found");
 
         verify(userRepository).findByEmail(email);
         verify(userMapper, never()).updateEntityFromRequest(any(), any());
@@ -120,8 +120,8 @@ class UserServiceTest {
     void shouldThrowIllegalArgumentExceptionWhenUpdateUserByEmailWithNullEmail() {
         UserRequest request = new UserRequest("Jane Doe", "newPassword123", null, null, null, null);
 
-        assertThatThrownBy(() -> userService.updateUserByEmail(null, request))
-                .isInstanceOf(IllegalArgumentException.class).hasMessage("Email não pode ser nulo ou vazio");
+        assertThatThrownBy(() -> userService.updateUserByEmail(null, request)).isInstanceOf(
+                IllegalArgumentException.class).hasMessage("Email não pode ser nulo ou vazio");
 
         verify(userRepository, never()).findByEmail(anyString());
     }
@@ -130,8 +130,8 @@ class UserServiceTest {
     void shouldThrowIllegalArgumentExceptionWhenUpdateUserByEmailWithBlankEmail() {
         UserRequest request = new UserRequest("Jane Doe", "newPassword123", null, null, null, null);
 
-        assertThatThrownBy(() -> userService.updateUserByEmail("   ", request))
-                .isInstanceOf(IllegalArgumentException.class).hasMessage("Email não pode ser nulo ou vazio");
+        assertThatThrownBy(() -> userService.updateUserByEmail("   ", request)).isInstanceOf(
+                IllegalArgumentException.class).hasMessage("Email não pode ser nulo ou vazio");
 
         verify(userRepository, never()).findByEmail(anyString());
     }
@@ -140,8 +140,8 @@ class UserServiceTest {
     void shouldThrowIllegalArgumentExceptionWhenUpdateUserByEmailWithNullRequest() {
         String email = "john@example.com";
 
-        assertThatThrownBy(() -> userService.updateUserByEmail(email, null))
-                .isInstanceOf(IllegalArgumentException.class).hasMessage("Requisição do usuário não pode ser nula");
+        assertThatThrownBy(() -> userService.updateUserByEmail(email, null)).isInstanceOf(
+                IllegalArgumentException.class).hasMessage("Requisição do usuário não pode ser nula");
 
         verify(userRepository, never()).findByEmail(email);
     }
@@ -161,8 +161,8 @@ class UserServiceTest {
                 "Inconsistência: Ao alterar o tipo de documento, você deve fornecer o novo número correspondente."))
                 .when(userMapper).updateEntityFromRequest(request, user);
 
-        assertThatThrownBy(() -> userService.updateUserByEmail(email, request))
-                .isInstanceOf(IllegalArgumentException.class).hasMessage(
+        assertThatThrownBy(() -> userService.updateUserByEmail(email, request)).isInstanceOf(
+                IllegalArgumentException.class).hasMessage(
                         "Inconsistência: Ao alterar o tipo de documento, você deve fornecer o novo número correspondente.");
 
         verify(userRepository).findByEmail(email);

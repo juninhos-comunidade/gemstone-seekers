@@ -39,24 +39,24 @@ public class JobController {
     public ResponseEntity<BaseResponse<JobResponse>> create(@Valid @RequestBody JobRequest request) {
         Job job = jobService.create(request);
         JobResponse response = jobMapper.toJobResponse(job);
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(new BaseResponse<>(true, "Job created successfully", response, null));
+        return ResponseEntity.status(HttpStatus.CREATED).body(new BaseResponse<>(true, "Job created successfully",
+                response, null));
     }
 
     @GetMapping
     public ResponseEntity<BaseResponse<List<JobResponse>>> findAll() {
         List<Job> jobs = jobService.findAll();
         List<JobResponse> responses = jobs.stream().map(jobMapper::toJobResponse).toList();
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(new BaseResponse<>(true, "Jobs retrieved successfully", responses, null));
+        return ResponseEntity.status(HttpStatus.OK).body(new BaseResponse<>(true, "Jobs retrieved successfully",
+                responses, null));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<BaseResponse<JobResponse>> findById(@PathVariable UUID id) {
         Job job = jobService.findById(id);
         JobResponse response = jobMapper.toJobResponse(job);
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(new BaseResponse<>(true, "Job retrieved successfully", response, null));
+        return ResponseEntity.status(HttpStatus.OK).body(new BaseResponse<>(true, "Job retrieved successfully",
+                response, null));
     }
 
     @PutMapping("/{id}")
@@ -64,14 +64,14 @@ public class JobController {
             @Valid @RequestBody JobRequest request) {
         Job job = jobService.update(id, request);
         JobResponse response = jobMapper.toJobResponse(job);
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(new BaseResponse<>(true, "Job updated successfully", response, null));
+        return ResponseEntity.status(HttpStatus.OK).body(new BaseResponse<>(true, "Job updated successfully", response,
+                null));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<BaseResponse<Void>> delete(@PathVariable UUID id) {
         jobService.delete(id);
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(new BaseResponse<>(true, "Job deleted successfully", null, null));
+        return ResponseEntity.status(HttpStatus.OK).body(new BaseResponse<>(true, "Job deleted successfully", null,
+                null));
     }
 }

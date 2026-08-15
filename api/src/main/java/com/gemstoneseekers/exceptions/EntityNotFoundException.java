@@ -1,6 +1,5 @@
 package com.gemstoneseekers.exceptions;
 
-@SuppressWarnings("PMD.MissingSerialVersionUID")
 public class EntityNotFoundException extends RuntimeException {
     private final String entityName;
     private final Object id;

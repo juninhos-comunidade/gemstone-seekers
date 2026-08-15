@@ -5,21 +5,22 @@ import com.gemstoneseekers.exceptions.AccessDeniedException;
 import com.gemstoneseekers.exceptions.ConflictException;
 import com.gemstoneseekers.exceptions.EntityNotFoundException;
 import org.junit.jupiter.api.Test;
+import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.core.MethodParameter;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.FieldError;
-import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.context.request.WebRequest;
-import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.lang.reflect.Method;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -37,12 +38,11 @@ class GlobalExceptionHandlerTest {
         HttpHeaders headers = new HttpHeaders();
 
         ResponseEntity<Object> response = handler.handleMethodArgumentNotValid(ex, headers, HttpStatus.BAD_REQUEST,
-                request);
+            request);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
         assertThat(response.getBody()).isNotNull();
-        @SuppressWarnings("unchecked")
-        BaseResponse<Void> body = (BaseResponse<Void>) response.getBody();
+        BaseResponse<?> body = (BaseResponse<?>) response.getBody();
         assertThat(body.success()).isFalse();
         assertThat(body.message()).isEqualTo("Validation failed");
         assertThat(body.error().code()).isEqualTo("VALIDATION_ERROR");
@@ -123,12 +123,11 @@ class GlobalExceptionHandlerTest {
         HttpHeaders headers = new HttpHeaders();
 
         ResponseEntity<Object> response = handler.handleHttpMessageNotReadable(ex, headers, HttpStatus.BAD_REQUEST,
-                request);
+            request);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
         assertThat(response.getBody()).isNotNull();
-        @SuppressWarnings("unchecked")
-        BaseResponse<Void> body = (BaseResponse<Void>) response.getBody();
+        BaseResponse<?> body = (BaseResponse<?>) response.getBody();
         assertThat(body.success()).isFalse();
         assertThat(body.error().code()).isEqualTo("MALFORMED_JSON");
     }
@@ -136,17 +135,16 @@ class GlobalExceptionHandlerTest {
     @Test
     void shouldHandleHttpRequestMethodNotSupported() {
         org.springframework.web.HttpRequestMethodNotSupportedException ex = new org.springframework.web.HttpRequestMethodNotSupportedException(
-                "POST");
+            "POST");
         WebRequest request = mock(WebRequest.class);
         HttpHeaders headers = new HttpHeaders();
 
         ResponseEntity<Object> response = handler.handleHttpRequestMethodNotSupported(ex, headers,
-                HttpStatus.METHOD_NOT_ALLOWED, request);
+            HttpStatus.METHOD_NOT_ALLOWED, request);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.METHOD_NOT_ALLOWED);
         assertThat(response.getBody()).isNotNull();
-        @SuppressWarnings("unchecked")
-        BaseResponse<Void> body = (BaseResponse<Void>) response.getBody();
+        BaseResponse<?> body = (BaseResponse<?>) response.getBody();
         assertThat(body.success()).isFalse();
         assertThat(body.error().code()).isEqualTo("METHOD_NOT_ALLOWED");
     }
@@ -155,7 +153,7 @@ class GlobalExceptionHandlerTest {
     void shouldHandleTypeMismatch() {
         MethodArgumentTypeMismatchException ex = mock(MethodArgumentTypeMismatchException.class);
         when(ex.getName()).thenReturn("id");
-        when(ex.getRequiredType()).thenReturn((Class) UUID.class);
+        doReturn(UUID.class).when(ex).getRequiredType();
 
         ResponseEntity<BaseResponse<Void>> response = handler.handleTypeMismatch(ex);
 
@@ -184,7 +182,7 @@ class GlobalExceptionHandlerTest {
     @Test
     void shouldHandleDataIntegrityViolation() {
         org.springframework.dao.DataIntegrityViolationException ex = new org.springframework.dao.DataIntegrityViolationException(
-                "FK constraint fail");
+            "FK constraint fail");
 
         ResponseEntity<BaseResponse<Void>> response = handler.handleDataIntegrityViolation(ex);
 
@@ -196,14 +194,10 @@ class GlobalExceptionHandlerTest {
 
     private static MethodParameter methodParameter() {
         try {
-            Method method = GlobalExceptionHandlerTest.class.getDeclaredMethod("invalidPayload", String.class);
+            Method method = String.class.getMethod("equals", Object.class);
             return new MethodParameter(method, 0);
         } catch (NoSuchMethodException e) {
             throw new IllegalStateException(e);
         }
-    }
-
-    @SuppressWarnings("unused")
-    private void invalidPayload(String email) {
     }
 }

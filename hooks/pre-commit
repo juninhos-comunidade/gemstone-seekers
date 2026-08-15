@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# Identifies changed files by directory
+# Identify staged files separated by directory
 API_CHANGED=$(git diff --cached --name-only --diff-filter=ACM | grep "^api/" || true)
 WEB_CHANGED=$(git diff --cached --name-only --diff-filter=ACM | grep "^web/" || true)
 
@@ -10,24 +10,37 @@ WEB_CHANGED=$(git diff --cached --name-only --diff-filter=ACM | grep "^web/" || 
 if [ -n "$API_CHANGED" ]; then
     echo "Running back-end pre-commit checks..."
 
+    # Format the list of staged files as comma-separated values for Spotless
     API_FILES=$(echo "$API_CHANGED" | sed 's|^api/||' | tr '\n' ',' | sed 's/,$//')
 
     cd api || exit 1
 
-    # Checks if any Controller was modified to generate OpenAPI
+    # Check if any Controller class was modified to regenerate OpenAPI specification
     CONTROLLER_FILES=$(echo "$API_CHANGED" | grep -E "Controller\.java$" || true)
 
-    if [ -n "$CONTROLLER_FILES" ]; then
+if [ -n "$CONTROLLER_FILES" ]; then
         echo "Generating OpenAPI documentation..."
-        ./mvnw pre-integration-test springdoc-openapi:generate post-integration-test -Popenapi
+        if ! ./mvnw pre-integration-test springdoc-openapi:generate post-integration-test \
+                -Popenapi \
+                -DskipTests \
+                -Dskip.git.hooks=true \
+                --no-transfer-progress -q; then
+            echo "ERROR: Failed to generate OpenAPI specification. Commit aborted."
+            exit 1
+        fi
         git add "src/main/resources/static/openapi.yml"
     fi
 
-    # Runs Spotless formatting check ONLY on staged files
-    if ! ./mvnw spotless:check -q -Dskip.git.hooks=true -DspotlessFiles="$API_FILES"; then
-        echo "ERROR: API Spotless check failed."
-        exit 1
-    fi
+    # Automatically apply Spotless code formatting to staged files
+    echo "Applying Spotless formatting to staged files..."
+    ./mvnw spotless:apply -q -Dskip.git.hooks=true -DspotlessFiles="$API_FILES"
+
+    # Re-stage formatted files before completing the commit
+    for file in $(echo "$API_CHANGED" | sed 's|^api/||'); do
+        if [ -f "$file" ]; then
+            git add "$file"
+        fi
+    done
 
     cd ..
 fi
@@ -43,11 +56,13 @@ if [ -n "$WEB_CHANGED" ]; then
 
     cd web || exit 1
 
+    # Check code formatting via Prettier
     if ! pnpm exec prettier --check --ignore-unknown $WEB_FILES; then
         echo "ERROR: Web Prettier check failed."
         exit 1
     fi
 
+    # Validate linting rules via ESLint
     if [ -n "$ESLINT_FILES" ]; then
         if ! pnpm exec eslint $ESLINT_FILES --max-warnings 0; then
             echo "ERROR: Web ESLint check failed."

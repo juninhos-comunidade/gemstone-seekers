@@ -27,8 +27,8 @@ public class StateService {
     }
 
     public State getCanonicalState(String name, Country country) {
-        return stateRepository.findByNameIgnoreCaseAndCountryId(name, country.getId())
-                .orElseThrow(() -> new EntityNotFoundException("State", name));
+        return stateRepository.findByNameIgnoreCaseAndCountryId(name, country.getId()).orElseThrow(
+                () -> new EntityNotFoundException("State", name));
     }
 
 }

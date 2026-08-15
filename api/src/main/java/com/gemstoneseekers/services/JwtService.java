@@ -49,7 +49,7 @@ public class JwtService {
 
     private String buildToken(User user, long expiration) {
         Instant now = Instant.now();
-        return Jwts.builder().subject(user.getEmail()).issuedAt(Date.from(now))
-                .expiration(Date.from(now.plusMillis(expiration))).signWith(key).compact();
+        return Jwts.builder().subject(user.getEmail()).issuedAt(Date.from(now)).expiration(Date.from(now.plusMillis(
+                expiration))).signWith(key).compact();
     }
 }

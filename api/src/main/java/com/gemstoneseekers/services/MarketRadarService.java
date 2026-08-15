@@ -21,7 +21,7 @@ public class MarketRadarService {
     }
 
     public List<TechnologyDemandResponse> getTechnologyDemand() {
-        return marketRadarMapper
-                .toResponseList(jobTechnologyRepository.findTechnologyDemandByJobStatus(JobStatus.OPEN));
+        return marketRadarMapper.toResponseList(jobTechnologyRepository.findTechnologyDemandByJobStatus(
+                JobStatus.OPEN));
     }
 }

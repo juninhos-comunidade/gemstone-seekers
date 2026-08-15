@@ -40,8 +40,8 @@ public class UserProfileService {
     @Transactional()
     public CandidateProfileResponse getCandidateProfileByUserEmail(String email) {
 
-        Candidate candidateEntity = candidateRepository.findByUserEmail(email)
-                .orElseThrow(() -> new EntityNotFoundException("Candidate for User", email));
+        Candidate candidateEntity = candidateRepository.findByUserEmail(email).orElseThrow(
+                () -> new EntityNotFoundException("Candidate for User", email));
 
         AddressResponse address = null;
         if (candidateEntity.getAddress() != null) {

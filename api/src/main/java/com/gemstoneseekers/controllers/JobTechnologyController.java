@@ -39,24 +39,24 @@ public class JobTechnologyController {
             @Valid @RequestBody JobTechnologyRequest request) {
         JobTechnology jobTechnology = jobTechnologyService.addTechnology(jobId, request);
         JobTechnologyResponse response = jobTechnologyMapper.toJobTechnologyResponse(jobTechnology);
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(new BaseResponse<>(true, "Technology linked to job successfully", response, null));
+        return ResponseEntity.status(HttpStatus.CREATED).body(new BaseResponse<>(true,
+                "Technology linked to job successfully", response, null));
     }
 
     @GetMapping
     public ResponseEntity<BaseResponse<List<JobTechnologyResponse>>> findByJobId(@PathVariable UUID jobId) {
         List<JobTechnology> jobTechnologies = jobTechnologyService.findByJobId(jobId);
-        List<JobTechnologyResponse> responses = jobTechnologies.stream()
-                .map(jobTechnologyMapper::toJobTechnologyResponse).toList();
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(new BaseResponse<>(true, "Job technologies retrieved successfully", responses, null));
+        List<JobTechnologyResponse> responses = jobTechnologies.stream().map(
+                jobTechnologyMapper::toJobTechnologyResponse).toList();
+        return ResponseEntity.status(HttpStatus.OK).body(new BaseResponse<>(true,
+                "Job technologies retrieved successfully", responses, null));
     }
 
     @DeleteMapping("/{technologyId}")
     public ResponseEntity<BaseResponse<Void>> removeTechnology(@PathVariable UUID jobId,
             @PathVariable Integer technologyId) {
         jobTechnologyService.removeTechnology(jobId, technologyId);
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(new BaseResponse<>(true, "Technology unlinked from job successfully", null, null));
+        return ResponseEntity.status(HttpStatus.OK).body(new BaseResponse<>(true,
+                "Technology unlinked from job successfully", null, null));
     }
 }
