@@ -16,8 +16,8 @@ public class ProjectMapper {
         if (project == null) {
             return null;
         }
-        return new ProjectResponse(project.getId(), project.getName(), project.getDescription(),
-                project.getProjectUrl(), project.getStartDate(), project.getEndDate());
+        return new ProjectResponse(project.getId(), project.getName(), project.getDescription(), project
+                .getProjectUrl(), project.getStartDate(), project.getEndDate());
     }
 
     public List<ProjectResponse> toResponseList(List<Project> projects) {

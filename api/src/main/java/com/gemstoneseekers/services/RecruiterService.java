@@ -30,11 +30,11 @@ public class RecruiterService {
     }
 
     public Recruiter linkToCompany(UUID companyId, RecruiterRequest request) {
-        Company company = companyRepository.findByIdAndDeletedAtIsNull(companyId)
-                .orElseThrow(() -> new EntityNotFoundException("Company", companyId));
+        Company company = companyRepository.findByIdAndDeletedAtIsNull(companyId).orElseThrow(
+                () -> new EntityNotFoundException("Company", companyId));
 
-        User user = userRepository.findById(request.userId())
-                .orElseThrow(() -> new EntityNotFoundException("User", request.userId()));
+        User user = userRepository.findById(request.userId()).orElseThrow(() -> new EntityNotFoundException("User",
+                request.userId()));
 
         if (recruiterRepository.existsByUserIdAndDeletedAtIsNull(request.userId())) {
             throw new ConflictException("User is already linked as a recruiter");
@@ -52,7 +52,7 @@ public class RecruiterService {
     }
 
     public Recruiter findById(UUID id) {
-        return recruiterRepository.findByIdAndDeletedAtIsNull(id)
-                .orElseThrow(() -> new EntityNotFoundException("Recruiter", id));
+        return recruiterRepository.findByIdAndDeletedAtIsNull(id).orElseThrow(() -> new EntityNotFoundException(
+                "Recruiter", id));
     }
 }

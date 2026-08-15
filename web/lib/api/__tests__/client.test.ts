@@ -153,10 +153,13 @@ describe("api interceptors", () => {
   });
 
   describe("response interceptor", () => {
-    it("should return response on success", async () => {
-      const mockResponse = { status: 200, data: { ok: true } } as AxiosResponse;
+    it("should return response on success and translate message in response.data", async () => {
+      const mockResponse = {
+        status: 200,
+        data: { success: true, message: "Login successful" },
+      } as AxiosResponse;
       const result = await responseInterceptor.fulfilled(mockResponse);
-      expect(result).toBe(mockResponse);
+      expect(result.data.message).toBe("Login realizado com sucesso!");
     });
 
     it("should handle 401 error and redirect to /login when not on /login page", async () => {
@@ -247,7 +250,28 @@ describe("api interceptors", () => {
       }
     });
 
-    it("should reject non-Axios error or error without response directly", async () => {
+    it("should handle ECONNABORTED timeout Axios error and return ApiError with status 408", async () => {
+      const timeoutAxiosError = {
+        name: "AxiosError",
+        isAxiosError: true,
+        code: "ECONNABORTED",
+        message: "timeout of 10000ms exceeded",
+        response: undefined,
+      };
+
+      try {
+        await responseInterceptor.rejected!(timeoutAxiosError);
+      } catch (err) {
+        expect(err).toBeInstanceOf(ApiError);
+        const apiErr = err as ApiError;
+        expect(apiErr.status).toBe(408);
+        expect(apiErr.message).toBe(
+          "O servidor demorou muito para responder. Tente novamente em instantes.",
+        );
+      }
+    });
+
+    it("should reject non-Axios error or non-timeout error without response directly", async () => {
       const genericError = new Error("Network Error");
       await expect(responseInterceptor.rejected!(genericError)).rejects.toThrow(
         genericError,
@@ -256,6 +280,7 @@ describe("api interceptors", () => {
       const axiosErrorNoResponse = {
         name: "AxiosError",
         isAxiosError: true,
+        code: "ERR_NETWORK",
         response: undefined,
       };
       await expect(

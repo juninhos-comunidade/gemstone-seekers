@@ -36,8 +36,8 @@ class JobServiceTest {
     void shouldCreateJobSuccessfully() {
         UUID recruiterId = UUID.randomUUID();
         UUID companyId = UUID.randomUUID();
-        JobRequest request = new JobRequest("Java Developer", "Backend role", "Senior", "Engineering",
-                new BigDecimal("5000"), new BigDecimal("8000"), recruiterId, companyId);
+        JobRequest request = new JobRequest("Java Developer", "Backend role", "Senior", "Engineering", new BigDecimal(
+                "5000"), new BigDecimal("8000"), recruiterId, companyId);
         Recruiter recruiter = new Recruiter();
         recruiter.setId(recruiterId);
         Company company = new Company();
@@ -136,8 +136,8 @@ class JobServiceTest {
         existing.setId(id);
         existing.setTitle("Old Title");
         existing.setDescription("Old Description");
-        JobRequest request = new JobRequest("New Title", "New Description", "Senior", "Engineering",
-                new BigDecimal("5000"), new BigDecimal("8000"), UUID.randomUUID(), UUID.randomUUID());
+        JobRequest request = new JobRequest("New Title", "New Description", "Senior", "Engineering", new BigDecimal(
+                "5000"), new BigDecimal("8000"), UUID.randomUUID(), UUID.randomUUID());
         when(jobRepository.findByIdAndDeletedAtIsNull(id)).thenReturn(Optional.of(existing));
         when(jobRepository.save(any(Job.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
@@ -153,8 +153,8 @@ class JobServiceTest {
     @Test
     void shouldThrowEntityNotFoundExceptionWhenUpdatingNonexistentJob() {
         UUID id = UUID.randomUUID();
-        JobRequest request = new JobRequest("Title", "Description", null, null, null, null, UUID.randomUUID(),
-                UUID.randomUUID());
+        JobRequest request = new JobRequest("Title", "Description", null, null, null, null, UUID.randomUUID(), UUID
+                .randomUUID());
         when(jobRepository.findByIdAndDeletedAtIsNull(id)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> jobService.update(id, request)).isInstanceOf(EntityNotFoundException.class);

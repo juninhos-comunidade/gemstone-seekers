@@ -36,17 +36,14 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http.csrf(AbstractHttpConfigurer::disable).httpBasic(AbstractHttpConfigurer::disable)
-                .formLogin(AbstractHttpConfigurer::disable).logout(AbstractHttpConfigurer::disable)
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/v1/auth/register", "/api/v1/auth/login", "/api/v1/auth/refresh")
-                        .permitAll()
-                        .requestMatchers("/v3/api-docs", "/v3/api-docs/**", "/v3/api-docs.yaml", "/swagger-ui/**",
-                                "/swagger-ui.html")
-                        .permitAll().anyRequest().authenticated())
-                .exceptionHandling(ex -> ex.authenticationEntryPoint(customAuthenticationEntryPoint)
-                        .accessDeniedHandler(customAccessDeniedHandler))
+        http.csrf(AbstractHttpConfigurer::disable).httpBasic(AbstractHttpConfigurer::disable).formLogin(
+                AbstractHttpConfigurer::disable).logout(AbstractHttpConfigurer::disable).sessionManagement(
+                        session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(auth -> auth.requestMatchers("/api/v1/auth/register", "/api/v1/auth/login",
+                        "/api/v1/auth/refresh").permitAll().requestMatchers("/v3/api-docs", "/v3/api-docs/**",
+                                "/v3/api-docs.yaml", "/swagger-ui/**", "/swagger-ui.html").permitAll().anyRequest()
+                        .authenticated()).exceptionHandling(ex -> ex.authenticationEntryPoint(
+                                customAuthenticationEntryPoint).accessDeniedHandler(customAccessDeniedHandler))
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }

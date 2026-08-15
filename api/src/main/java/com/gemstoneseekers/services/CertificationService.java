@@ -26,8 +26,8 @@ public class CertificationService {
     }
 
     public void addCertification(String email, CertificationRequest request) {
-        Candidate candidate = candidateRepository.findByUserEmail(email)
-                .orElseThrow(() -> new EntityNotFoundException("Candidate", email));
+        Candidate candidate = candidateRepository.findByUserEmail(email).orElseThrow(() -> new EntityNotFoundException(
+                "Candidate", email));
 
         Certification newCertification = certificationMapper.toCertification(request, candidate);
         candidate.getCertifications().add(newCertification);
@@ -36,8 +36,8 @@ public class CertificationService {
 
     public void deleteCertification(String email, UUID certificationId) {
 
-        Certification certification = certificationRepository.findById(certificationId)
-                .orElseThrow(() -> new EntityNotFoundException("Certification", certificationId));
+        Certification certification = certificationRepository.findById(certificationId).orElseThrow(
+                () -> new EntityNotFoundException("Certification", certificationId));
         Candidate candidate = certification.getCandidate();
 
         if (!candidate.getUser().getEmail().equalsIgnoreCase(email)) {

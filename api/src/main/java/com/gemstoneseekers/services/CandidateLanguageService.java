@@ -32,11 +32,11 @@ public class CandidateLanguageService {
 
     @Transactional
     public void addCandidateLanguage(String email, CandidateLanguageRequest request) {
-        Candidate candidate = candidateRepository.findByUserEmail(email)
-                .orElseThrow(() -> new EntityNotFoundException("Candidate", email));
+        Candidate candidate = candidateRepository.findByUserEmail(email).orElseThrow(() -> new EntityNotFoundException(
+                "Candidate", email));
 
-        Language language = languageRepository.findByNameIgnoreCase(request.languageName())
-                .orElseThrow(() -> new EntityNotFoundException("Language", request.languageName()));
+        Language language = languageRepository.findByNameIgnoreCase(request.languageName()).orElseThrow(
+                () -> new EntityNotFoundException("Language", request.languageName()));
 
         CandidateLanguage newLanguage = candidateLanguageMapper.toCandidateLanguage(request, candidate, language);
 
@@ -47,8 +47,8 @@ public class CandidateLanguageService {
 
     @Transactional
     public void deleteCandidateLanguage(String email, Integer languageId) {
-        Candidate candidate = candidateRepository.findByUserEmail(email)
-                .orElseThrow(() -> new EntityNotFoundException("Candidate", email));
+        Candidate candidate = candidateRepository.findByUserEmail(email).orElseThrow(() -> new EntityNotFoundException(
+                "Candidate", email));
 
         CandidateLanguageId idComposta = new CandidateLanguageId(candidate.getId(), languageId);
 

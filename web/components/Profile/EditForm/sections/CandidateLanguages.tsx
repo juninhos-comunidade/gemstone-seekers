@@ -35,40 +35,15 @@ import {
 import { useLanguagesQuery } from "@/lib/api/languages/languages";
 import { ConfirmDeleteDialog } from "@/components/ConfirmDeleteDialog/ConfirmDeleteDialog";
 
+import {
+  proficiencyLevels,
+  getLanguageLabel,
+  getProficiencyLabel,
+} from "@/lib/utils/languages";
+
 interface CandidateLanguagesProps {
   initialData?: CandidateProfileResponse | null;
 }
-
-const proficiencyLevels: { value: ProficiencyLevel; label: string }[] = [
-  { value: "BASIC", label: "Básico" },
-  { value: "INTERMEDIATE", label: "Intermediário" },
-  { value: "ADVANCED", label: "Avançado" },
-  { value: "FLUENT", label: "Fluente" },
-  { value: "NATIVE", label: "Nativo" },
-];
-
-const languagesLabels = [
-  {
-    name: "Portuguese",
-    label: "Português",
-  },
-  {
-    name: "English",
-    label: "Inglês",
-  },
-  {
-    name: "Spanish",
-    label: "Espanhol",
-  },
-  {
-    name: "French",
-    label: "Francês",
-  },
-  {
-    name: "German",
-    label: "Alemão",
-  },
-];
 
 export function CandidateLanguages({ initialData }: CandidateLanguagesProps) {
   const languages = initialData?.candidate?.languages || [];
@@ -138,7 +113,6 @@ export function CandidateLanguages({ initialData }: CandidateLanguagesProps) {
               Adicionar Idioma
             </span>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              {/* Seleção do Idioma via Shadcn UI Select */}
               <div className="space-y-1">
                 <Label className="text-xs" htmlFor="languageNameSelect">
                   Idioma
@@ -148,13 +122,7 @@ export function CandidateLanguages({ initialData }: CandidateLanguagesProps) {
                   name="languageName"
                   render={({ field }) => (
                     <Select
-                      value={
-                        field.value
-                          ? languagesLabels.find(
-                              (lang) => lang.name === field.value,
-                            )?.label
-                          : ""
-                      }
+                      value={field.value ? getLanguageLabel(field.value) : ""}
                       onValueChange={(val) => field.onChange(val)}
                       disabled={isLoadingLanguages}
                     >
@@ -170,8 +138,7 @@ export function CandidateLanguages({ initialData }: CandidateLanguagesProps) {
                       <SelectContent>
                         {catalogLanguages.map((lang) => (
                           <SelectItem key={lang.id} value={lang.name}>
-                            {languagesLabels.find((l) => l.name === lang.name)
-                              ?.label || lang.name}
+                            {getLanguageLabel(lang.name)}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -194,11 +161,7 @@ export function CandidateLanguages({ initialData }: CandidateLanguagesProps) {
                   render={({ field }) => (
                     <Select
                       value={
-                        field.value
-                          ? proficiencyLevels.find(
-                              (level) => level.value === field.value,
-                            )?.label
-                          : ""
+                        field.value ? getProficiencyLabel(field.value) : ""
                       }
                       onValueChange={(val) =>
                         field.onChange(val as ProficiencyLevel)
@@ -256,17 +219,10 @@ export function CandidateLanguages({ initialData }: CandidateLanguagesProps) {
               >
                 <div className="text-xs">
                   <span className="text-foreground font-semibold">
-                    {languagesLabels.find(
-                      (lang) => lang.name === item.languageName,
-                    )?.label || item.languageName}
-                    :{" "}
+                    {getLanguageLabel(item.languageName)}:{" "}
                   </span>
                   <span className="text-muted-foreground">
-                    {
-                      proficiencyLevels.find(
-                        (level) => level.value === item.proficiency,
-                      )?.label
-                    }
+                    {getProficiencyLabel(item.proficiency)}
                   </span>
                 </div>
                 <Button

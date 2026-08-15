@@ -15,13 +15,24 @@ vi.mock("next/navigation", () => ({
 }));
 
 describe("Recruiter Dashboard Page", () => {
-  it("should render the main heading and welcome paragraph", () => {
+  it("should render welcome header and explanation about side menu", () => {
     render(<Dashboard />);
     expect(
-      screen.getByRole("heading", { name: /dashboard do recrutador/i }),
+      screen.getByRole("heading", { name: /bem-vindo ao gemstone seekers/i }),
     ).toBeInTheDocument();
     expect(
-      screen.getByText(/bem-vindo! em breve você poderá acompanhar/i),
+      screen.getByText(/navegue pelas opções no menu lateral/i),
     ).toBeInTheDocument();
+  });
+
+  it("should render quick action cards with links to jobs and new job", () => {
+    render(<Dashboard />);
+    const allJobsLink = screen.getByRole("link", { name: /todas as vagas/i });
+    expect(allJobsLink).toHaveAttribute("href", "/recruiter/dashboard/jobs");
+
+    const newJobLink = screen.getByRole("link", {
+      name: /publicar nova vaga/i,
+    });
+    expect(newJobLink).toHaveAttribute("href", "/recruiter/dashboard/jobs/new");
   });
 });

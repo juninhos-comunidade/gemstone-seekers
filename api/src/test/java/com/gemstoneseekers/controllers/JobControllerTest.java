@@ -34,8 +34,8 @@ class JobControllerTest {
         UUID recruiterId = UUID.randomUUID();
         UUID companyId = UUID.randomUUID();
         UUID jobId = UUID.randomUUID();
-        JobRequest request = new JobRequest("Java Developer", "Backend role", "Senior", "Engineering",
-                new BigDecimal("5000"), new BigDecimal("8000"), recruiterId, companyId);
+        JobRequest request = new JobRequest("Java Developer", "Backend role", "Senior", "Engineering", new BigDecimal(
+                "5000"), new BigDecimal("8000"), recruiterId, companyId);
         Recruiter recruiter = new Recruiter();
         recruiter.setId(recruiterId);
         Company company = new Company();

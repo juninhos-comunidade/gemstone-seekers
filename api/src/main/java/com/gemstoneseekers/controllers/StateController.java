@@ -37,15 +37,15 @@ public class StateController {
     @GetMapping
     public ResponseEntity<BaseResponse<List<StateResponse>>> getStates() {
         List<StateResponse> states = stateService.getStates().stream().map(stateMapper::toStateResponse).toList();
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(new BaseResponse<>(true, "States retrieved successfully", states, null));
+        return ResponseEntity.status(HttpStatus.OK).body(new BaseResponse<>(true, "States retrieved successfully",
+                states, null));
     }
 
     @GetMapping("/{stateId}/cities")
     public ResponseEntity<BaseResponse<List<CityResponse>>> getCitiesByState(@PathVariable Integer stateId) {
         List<CityResponse> cities = cityService.getCitiesByStateId(stateId).stream().map(cityMapper::toCityResponse)
                 .toList();
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(new BaseResponse<>(true, "Cities retrieved successfully", cities, null));
+        return ResponseEntity.status(HttpStatus.OK).body(new BaseResponse<>(true, "Cities retrieved successfully",
+                cities, null));
     }
 }

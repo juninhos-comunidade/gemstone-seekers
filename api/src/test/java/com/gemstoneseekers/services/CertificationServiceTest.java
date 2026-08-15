@@ -80,8 +80,8 @@ class CertificationServiceTest {
 
         when(candidateRepository.findByUserEmail(email)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> certificationService.addCertification(email, request))
-                .isInstanceOf(EntityNotFoundException.class).hasMessage("Candidate with id " + email + " not found");
+        assertThatThrownBy(() -> certificationService.addCertification(email, request)).isInstanceOf(
+                EntityNotFoundException.class).hasMessage("Candidate with id " + email + " not found");
 
         verify(candidateRepository).findByUserEmail(email);
         verify(certificationMapper, never()).toCertification(any(), any());
@@ -124,9 +124,8 @@ class CertificationServiceTest {
 
         when(certificationRepository.findById(certificationId)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> certificationService.deleteCertification(email, certificationId))
-                .isInstanceOf(EntityNotFoundException.class)
-                .hasMessage("Certification with id " + certificationId + " not found");
+        assertThatThrownBy(() -> certificationService.deleteCertification(email, certificationId)).isInstanceOf(
+                EntityNotFoundException.class).hasMessage("Certification with id " + certificationId + " not found");
 
         verify(certificationRepository).findById(certificationId);
         verify(certificationRepository, never()).delete(any());
@@ -153,8 +152,8 @@ class CertificationServiceTest {
         when(certificationRepository.findById(certificationId)).thenReturn(Optional.of(certification));
 
         assertThatThrownBy(() -> certificationService.deleteCertification(requesterEmail, certificationId))
-                .isInstanceOf(AccessDeniedException.class)
-                .hasMessage("Operação inválida. Você não é o proprietário deste registro.");
+                .isInstanceOf(AccessDeniedException.class).hasMessage(
+                        "Operação inválida. Você não é o proprietário deste registro.");
 
         verify(certificationRepository).findById(certificationId);
         verify(certificationRepository, never()).delete(any());

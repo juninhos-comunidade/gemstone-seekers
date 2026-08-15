@@ -39,24 +39,24 @@ public class CompanyController {
     public ResponseEntity<BaseResponse<CompanyResponse>> create(@Valid @RequestBody CompanyRequest request) {
         Company company = companyService.create(request);
         CompanyResponse response = companyMapper.toCompanyResponse(company);
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(new BaseResponse<>(true, "Company created successfully", response, null));
+        return ResponseEntity.status(HttpStatus.CREATED).body(new BaseResponse<>(true, "Company created successfully",
+                response, null));
     }
 
     @GetMapping
     public ResponseEntity<BaseResponse<List<CompanyResponse>>> findAll() {
         List<Company> companies = companyService.findAll();
         List<CompanyResponse> responses = companies.stream().map(companyMapper::toCompanyResponse).toList();
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(new BaseResponse<>(true, "Companies retrieved successfully", responses, null));
+        return ResponseEntity.status(HttpStatus.OK).body(new BaseResponse<>(true, "Companies retrieved successfully",
+                responses, null));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<BaseResponse<CompanyResponse>> findById(@PathVariable UUID id) {
         Company company = companyService.findById(id);
         CompanyResponse response = companyMapper.toCompanyResponse(company);
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(new BaseResponse<>(true, "Company retrieved successfully", response, null));
+        return ResponseEntity.status(HttpStatus.OK).body(new BaseResponse<>(true, "Company retrieved successfully",
+                response, null));
     }
 
     @PutMapping("/{id}")
@@ -64,14 +64,14 @@ public class CompanyController {
             @Valid @RequestBody CompanyRequest request) {
         Company company = companyService.update(id, request);
         CompanyResponse response = companyMapper.toCompanyResponse(company);
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(new BaseResponse<>(true, "Company updated successfully", response, null));
+        return ResponseEntity.status(HttpStatus.OK).body(new BaseResponse<>(true, "Company updated successfully",
+                response, null));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<BaseResponse<Void>> delete(@PathVariable UUID id) {
         companyService.delete(id);
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(new BaseResponse<>(true, "Company deleted successfully", null, null));
+        return ResponseEntity.status(HttpStatus.OK).body(new BaseResponse<>(true, "Company deleted successfully", null,
+                null));
     }
 }
