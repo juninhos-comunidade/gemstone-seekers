@@ -26,9 +26,8 @@ class DomainRepositoryTest {
 
     @BeforeAll
     static void setup() {
-        Flyway flyway = Flyway.configure()
-                .dataSource(postgres.getJdbcUrl(), postgres.getUsername(), postgres.getPassword())
-                .locations("classpath:db/migration").load();
+        Flyway flyway = Flyway.configure().dataSource(postgres.getJdbcUrl(), postgres.getUsername(), postgres
+                .getPassword()).locations("classpath:db/migration").load();
         flyway.migrate();
 
         Configuration cfg = new Configuration();

@@ -18,8 +18,8 @@ public class TestSpecifications {
             predicates.add(cb.equal(root.get("candidate").get("id"), candidateId));
 
             if (filters != null && filters.technology() != null && !filters.technology().isBlank()) {
-                predicates.add(cb.equal(cb.lower(root.get("technology").get("name")),
-                        filters.technology().toLowerCase(Locale.ROOT)));
+                predicates.add(cb.equal(cb.lower(root.get("technology").get("name")), filters.technology().toLowerCase(
+                        Locale.ROOT)));
             }
 
             if (filters != null && filters.status() != null) {

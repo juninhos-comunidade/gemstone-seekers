@@ -31,11 +31,11 @@ public class JobService {
     }
 
     public Job create(JobRequest request) {
-        Recruiter recruiter = recruiterRepository.findByIdAndDeletedAtIsNull(request.recruiterId())
-                .orElseThrow(() -> new EntityNotFoundException("Recruiter", request.recruiterId()));
+        Recruiter recruiter = recruiterRepository.findByIdAndDeletedAtIsNull(request.recruiterId()).orElseThrow(
+                () -> new EntityNotFoundException("Recruiter", request.recruiterId()));
 
-        Company company = companyRepository.findByIdAndDeletedAtIsNull(request.companyId())
-                .orElseThrow(() -> new EntityNotFoundException("Company", request.companyId()));
+        Company company = companyRepository.findByIdAndDeletedAtIsNull(request.companyId()).orElseThrow(
+                () -> new EntityNotFoundException("Company", request.companyId()));
 
         Job job = new Job();
         job.setRecruiter(recruiter);

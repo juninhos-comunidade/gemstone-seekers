@@ -104,8 +104,8 @@ class QuestionServiceTest {
         pythonTech.setId(2);
         pythonTech.setName("Python");
 
-        AiGeneratedQuestionDTO questionWithNoOptions = new AiGeneratedQuestionDTO("What is duck typing?",
-                Collections.emptyList());
+        AiGeneratedQuestionDTO questionWithNoOptions = new AiGeneratedQuestionDTO("What is duck typing?", Collections
+                .emptyList());
         AiQuestionBatchResponse response = new AiQuestionBatchResponse(List.of(questionWithNoOptions));
 
         questionService.saveAiGeneratedBatch(pythonTech, QuestionDifficulty.INTERMEDIATE, response);

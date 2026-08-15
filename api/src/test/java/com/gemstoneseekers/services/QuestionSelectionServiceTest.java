@@ -78,12 +78,12 @@ class QuestionSelectionServiceTest {
     @Test
     void shouldThrowExceptionAndPublishEventWhenUnseenQuestionsAreLessThanThree() {
         List<Question> mockQuestions = generateMockQuestions(2);
-        when(questionRepository.findRandomUnseenQuestions(user.getId(), technology.getId(),
-                QuestionDifficulty.ADVANCED.name(), 10)).thenReturn(mockQuestions);
+        when(questionRepository.findRandomUnseenQuestions(user.getId(), technology.getId(), QuestionDifficulty.ADVANCED
+                .name(), 10)).thenReturn(mockQuestions);
 
         assertThatThrownBy(() -> service.generateTestQuestions(user, technology, QuestionDifficulty.ADVANCED))
-                .isInstanceOf(InsufficientQuestionsException.class)
-                .hasMessage("Estamos gerando questões inéditas para você! Aguarde alguns instantes e tente novamente.");
+                .isInstanceOf(InsufficientQuestionsException.class).hasMessage(
+                        "Estamos gerando questões inéditas para você! Aguarde alguns instantes e tente novamente.");
 
         ArgumentCaptor<LowQuestionStockEvent> eventCaptor = ArgumentCaptor.forClass(LowQuestionStockEvent.class);
         verify(eventPublisher).publishEvent(eventCaptor.capture());
@@ -105,10 +105,10 @@ class QuestionSelectionServiceTest {
             seenMockQuestions.add(question);
         }
 
-        when(questionRepository.findRandomUnseenQuestions(user.getId(), technology.getId(),
-                QuestionDifficulty.BEGINNER.name(), 10)).thenReturn(unseenMockQuestions);
-        when(questionRepository.findRandomSeenQuestions(user.getId(), technology.getId(),
-                QuestionDifficulty.BEGINNER.name(), 6)).thenReturn(seenMockQuestions);
+        when(questionRepository.findRandomUnseenQuestions(user.getId(), technology.getId(), QuestionDifficulty.BEGINNER
+                .name(), 10)).thenReturn(unseenMockQuestions);
+        when(questionRepository.findRandomSeenQuestions(user.getId(), technology.getId(), QuestionDifficulty.BEGINNER
+                .name(), 6)).thenReturn(seenMockQuestions);
 
         List<Question> result = service.generateTestQuestions(user, technology, QuestionDifficulty.BEGINNER);
 
@@ -134,8 +134,8 @@ class QuestionSelectionServiceTest {
                 QuestionDifficulty.INTERMEDIATE.name(), 6)).thenReturn(seenMockQuestions);
 
         assertThatThrownBy(() -> service.generateTestQuestions(user, technology, QuestionDifficulty.INTERMEDIATE))
-                .isInstanceOf(InsufficientQuestionsException.class)
-                .hasMessage("O acervo global ainda está sendo populado. Tente em breve.");
+                .isInstanceOf(InsufficientQuestionsException.class).hasMessage(
+                        "O acervo global ainda está sendo populado. Tente em breve.");
 
         verify(eventPublisher, times(2)).publishEvent(any(LowQuestionStockEvent.class));
     }
@@ -150,10 +150,10 @@ class QuestionSelectionServiceTest {
             seenMockQuestions.add(question);
         }
 
-        when(questionRepository.findRandomUnseenQuestions(user.getId(), technology.getId(),
-                QuestionDifficulty.ADVANCED.name(), 10)).thenReturn(unseenMockQuestions);
-        when(questionRepository.findRandomSeenQuestions(user.getId(), technology.getId(),
-                QuestionDifficulty.ADVANCED.name(), 2)).thenReturn(seenMockQuestions);
+        when(questionRepository.findRandomUnseenQuestions(user.getId(), technology.getId(), QuestionDifficulty.ADVANCED
+                .name(), 10)).thenReturn(unseenMockQuestions);
+        when(questionRepository.findRandomSeenQuestions(user.getId(), technology.getId(), QuestionDifficulty.ADVANCED
+                .name(), 2)).thenReturn(seenMockQuestions);
 
         List<Question> result = service.generateTestQuestions(user, technology, QuestionDifficulty.ADVANCED);
 

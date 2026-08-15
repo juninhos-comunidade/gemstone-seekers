@@ -16,9 +16,8 @@ public class ExperienceMapper {
         if (experience == null) {
             return null;
         }
-        return new ExperienceResponse(experience.getId(), experience.getTitle(), experience.getCompanyName(),
-                experience.getStartDate(), experience.getEndDate(), experience.getIsCurrent(),
-                experience.getDescription());
+        return new ExperienceResponse(experience.getId(), experience.getTitle(), experience.getCompanyName(), experience
+                .getStartDate(), experience.getEndDate(), experience.getIsCurrent(), experience.getDescription());
     }
     public List<ExperienceResponse> toResponseList(List<Experience> experiences) {
         if (experiences == null) {

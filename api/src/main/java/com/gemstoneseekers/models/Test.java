@@ -82,8 +82,8 @@ public class Test extends BaseModel {
 
     public void answerQuestion(Long questionId, QuestionOption option) {
         CandidateAnswer answer = this.answers.stream().filter(a -> a.getQuestion().getId().equals(questionId))
-                .findFirst().orElseThrow(() -> new BusinessRuleException(
-                        String.format("Question ID %d does not belong to Test ID %s", questionId, getId())));
+                .findFirst().orElseThrow(() -> new BusinessRuleException(String.format(
+                        "Question ID %d does not belong to Test ID %s", questionId, getId())));
 
         answer.setSelectedOption(option);
     }
@@ -107,11 +107,11 @@ public class Test extends BaseModel {
             return BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP);
         }
 
-        long correctAnswersCount = this.answers.stream().map(CandidateAnswer::getSelectedOption)
-                .filter(Objects::nonNull).filter(QuestionOption::isCorrect).count();
+        long correctAnswersCount = this.answers.stream().map(CandidateAnswer::getSelectedOption).filter(
+                Objects::nonNull).filter(QuestionOption::isCorrect).count();
 
-        return BigDecimal.valueOf(correctAnswersCount).multiply(BigDecimal.valueOf(MAX_SCORE))
-                .divide(BigDecimal.valueOf(totalQuestions), 2, RoundingMode.HALF_UP);
+        return BigDecimal.valueOf(correctAnswersCount).multiply(BigDecimal.valueOf(MAX_SCORE)).divide(BigDecimal
+                .valueOf(totalQuestions), 2, RoundingMode.HALF_UP);
     }
 
     @Transient
@@ -119,7 +119,7 @@ public class Test extends BaseModel {
         if (this.answers == null || this.answers.isEmpty()) {
             return QuestionDifficulty.BEGINNER;
         }
-        return this.answers.stream().map(answer -> answer.getQuestion().getDifficultyLevel()).findFirst()
-                .orElse(QuestionDifficulty.BEGINNER);
+        return this.answers.stream().map(answer -> answer.getQuestion().getDifficultyLevel()).findFirst().orElse(
+                QuestionDifficulty.BEGINNER);
     }
 }

@@ -58,10 +58,10 @@ class TestControllerTest {
     @Test
     void startTest_shouldReturnCreatedStatusAndTestResponse_whenTestStartsSuccessfully() {
         TechnologyResponse technologyResponse = new TechnologyResponse(1, technologyName, "Programming Language");
-        TestResponse mockTestResponse = new TestResponse(testId, technologyResponse, TestStatus.IN_PROGRESS,
-                Collections.emptyList());
-        when(testApplicationService.startTest(userEmail, technologyName, QuestionDifficulty.BEGINNER))
-                .thenReturn(mockTestResponse);
+        TestResponse mockTestResponse = new TestResponse(testId, technologyResponse, TestStatus.IN_PROGRESS, Collections
+                .emptyList());
+        when(testApplicationService.startTest(userEmail, technologyName, QuestionDifficulty.BEGINNER)).thenReturn(
+                mockTestResponse);
 
         ResponseEntity<BaseResponse<TestResponse>> responseEntity = testController.startTest(userDetails,
                 technologyName, QuestionDifficulty.BEGINNER);
@@ -77,10 +77,10 @@ class TestControllerTest {
     @Test
     void startTest_shouldReturnCreatedStatusAndTestResponse_whenTestStartsSuccessfullyWithSpecificDifficulty() {
         TechnologyResponse technologyResponse = new TechnologyResponse(1, technologyName, "Programming Language");
-        TestResponse mockTestResponse = new TestResponse(testId, technologyResponse, TestStatus.IN_PROGRESS,
-                Collections.emptyList());
-        when(testApplicationService.startTest(userEmail, technologyName, QuestionDifficulty.ADVANCED))
-                .thenReturn(mockTestResponse);
+        TestResponse mockTestResponse = new TestResponse(testId, technologyResponse, TestStatus.IN_PROGRESS, Collections
+                .emptyList());
+        when(testApplicationService.startTest(userEmail, technologyName, QuestionDifficulty.ADVANCED)).thenReturn(
+                mockTestResponse);
 
         ResponseEntity<BaseResponse<TestResponse>> responseEntity = testController.startTest(userDetails,
                 technologyName, QuestionDifficulty.ADVANCED);
@@ -127,13 +127,13 @@ class TestControllerTest {
 
     @Test
     void getTestHistory_shouldReturnOkStatusAndHistoryResponse_whenHistoryIsRetrievedSuccessfully() {
-        CandidateTestHistoryResponse mockHistoryResponse = new CandidateTestHistoryResponse(candidateId, 0,
-                Collections.emptyList());
+        CandidateTestHistoryResponse mockHistoryResponse = new CandidateTestHistoryResponse(candidateId, 0, Collections
+                .emptyList());
         TestHistoryFilterParams filters = new TestHistoryFilterParams(null, null);
         when(testApplicationService.getCandidateTestHistory(userEmail, filters)).thenReturn(mockHistoryResponse);
 
-        ResponseEntity<BaseResponse<CandidateTestHistoryResponse>> responseEntity = testController
-                .getTestHistory(userDetails, filters);
+        ResponseEntity<BaseResponse<CandidateTestHistoryResponse>> responseEntity = testController.getTestHistory(
+                userDetails, filters);
 
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(responseEntity.getBody()).isNotNull();
@@ -146,8 +146,8 @@ class TestControllerTest {
     @Test
     void getTestResult_shouldReturnOkStatusAndDetailedResultResponse_whenResultIsRetrievedSuccessfully() {
         TestDetailedResultResponse mockDetailedResultResponse = new TestDetailedResultResponse(testId, "Java",
-                TestStatus.COMPLETED, QuestionDifficulty.BEGINNER, BigDecimal.valueOf(80.0), 10, 8, Instant.now(),
-                List.of());
+                TestStatus.COMPLETED, QuestionDifficulty.BEGINNER, BigDecimal.valueOf(80.0), 10, 8, Instant.now(), List
+                        .of());
         when(testApplicationService.getTestResult(testId, userEmail)).thenReturn(mockDetailedResultResponse);
 
         ResponseEntity<BaseResponse<TestDetailedResultResponse>> responseEntity = testController.getTestResult(testId,

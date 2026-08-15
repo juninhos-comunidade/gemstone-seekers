@@ -113,9 +113,8 @@ class UserProfileServiceTest {
         String email = "candidate@example.com";
         when(candidateRepository.findByUserEmail(email)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> userProfileService.getCandidateProfileByUserEmail(email))
-                .isInstanceOf(EntityNotFoundException.class)
-                .hasMessage("Candidate for User with id " + email + " not found");
+        assertThatThrownBy(() -> userProfileService.getCandidateProfileByUserEmail(email)).isInstanceOf(
+                EntityNotFoundException.class).hasMessage("Candidate for User with id " + email + " not found");
         verifyNoInteractions(addressService, candidateMapper, candidateProfileMapper);
     }
 
@@ -173,8 +172,8 @@ class UserProfileServiceTest {
                 "Updated summary");
         when(userRepository.findByEmail(email)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> userProfileService.updatePersonalInfoByEmail(email, request))
-                .isInstanceOf(EntityNotFoundException.class).hasMessage("User with id " + email + " not found");
+        assertThatThrownBy(() -> userProfileService.updatePersonalInfoByEmail(email, request)).isInstanceOf(
+                EntityNotFoundException.class).hasMessage("User with id " + email + " not found");
         verify(userRepository, never()).save(any());
         verifyNoInteractions(candidateService, userMapper, candidateMapper, candidateRepository);
     }

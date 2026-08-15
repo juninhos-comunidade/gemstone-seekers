@@ -85,8 +85,8 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     protected ResponseEntity<Object> handleHttpRequestMethodNotSupported(
             org.springframework.web.HttpRequestMethodNotSupportedException ex, @NonNull HttpHeaders headers,
             @NonNull HttpStatusCode status, @NonNull WebRequest request) {
-        ErrorResponse error = new ErrorResponse("METHOD_NOT_ALLOWED",
-                "HTTP method " + ex.getMethod() + " is not supported for this endpoint", null);
+        ErrorResponse error = new ErrorResponse("METHOD_NOT_ALLOWED", "HTTP method " + ex.getMethod()
+                + " is not supported for this endpoint", null);
         BaseResponse<Void> response = new BaseResponse<>(false, "Method not allowed", null, error);
         return new ResponseEntity<>(response, HttpStatus.METHOD_NOT_ALLOWED);
     }

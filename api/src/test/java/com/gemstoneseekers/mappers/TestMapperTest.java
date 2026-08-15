@@ -53,8 +53,8 @@ class TestMapperTest {
                 QuestionSource.INTERNAL, List.of());
         QuestionResponse response2 = new QuestionResponse(2L, "Question 2", QuestionDifficulty.INTERMEDIATE,
                 QuestionSource.AI_GENERATED, List.of());
-        com.gemstoneseekers.models.Test test = testWithAnswers(technology, TestStatus.IN_PROGRESS,
-                linkedAnswers(answer(question1), answer(question2)));
+        com.gemstoneseekers.models.Test test = testWithAnswers(technology, TestStatus.IN_PROGRESS, linkedAnswers(answer(
+                question1), answer(question2)));
         TechnologyResponse technologyResponse = new TechnologyResponse(7, "Java", "Backend");
 
         when(technologyMapper.toTechnologyResponse(technology)).thenReturn(technologyResponse);
@@ -114,8 +114,8 @@ class TestMapperTest {
 
         CandidateAnswer unanswered = answer(question);
 
-        com.gemstoneseekers.models.Test test = testWithAnswers(technology, TestStatus.COMPLETED,
-                linkedAnswers(correctAnswer, wrongAnswer, unanswered));
+        com.gemstoneseekers.models.Test test = testWithAnswers(technology, TestStatus.COMPLETED, linkedAnswers(
+                correctAnswer, wrongAnswer, unanswered));
         test.setScore(new BigDecimal("6.50"));
         test.setCompletedAt(Instant.parse("2026-08-13T21:00:00Z"));
 
@@ -140,8 +140,8 @@ class TestMapperTest {
         Technology technology = technology(7, "Java", "Backend");
         Question firstQuestion = question(1L, "Question 1", QuestionDifficulty.INTERMEDIATE, QuestionSource.INTERNAL);
         Question secondQuestion = question(2L, "Question 2", QuestionDifficulty.ADVANCED, QuestionSource.AI_GENERATED);
-        com.gemstoneseekers.models.Test test = testWithAnswers(technology, TestStatus.IN_PROGRESS,
-                linkedAnswers(answer(firstQuestion), answer(secondQuestion)));
+        com.gemstoneseekers.models.Test test = testWithAnswers(technology, TestStatus.IN_PROGRESS, linkedAnswers(answer(
+                firstQuestion), answer(secondQuestion)));
         test.setScore(new BigDecimal("7.50"));
         test.setCreatedAt(Instant.parse("2026-08-13T20:00:00Z"));
         test.setCompletedAt(Instant.parse("2026-08-13T21:00:00Z"));
@@ -188,8 +188,8 @@ class TestMapperTest {
 
         CandidateAnswer unanswered = answer(question3);
 
-        com.gemstoneseekers.models.Test test = testWithAnswers(technology, TestStatus.COMPLETED,
-                linkedAnswers(correctAnswer, wrongAnswer, unanswered));
+        com.gemstoneseekers.models.Test test = testWithAnswers(technology, TestStatus.COMPLETED, linkedAnswers(
+                correctAnswer, wrongAnswer, unanswered));
         test.setScore(new BigDecimal("8.00"));
         test.setCompletedAt(Instant.parse("2026-08-13T21:00:00Z"));
 
@@ -203,10 +203,9 @@ class TestMapperTest {
         assertThat(result.totalQuestions()).isEqualTo(3);
         assertThat(result.correctAnswers()).isEqualTo(1);
         assertThat(result.completedAt()).isEqualTo(test.getCompletedAt());
-        assertThat(result.questions()).extracting(q -> q.questionId(), q -> q.selectedOptionId(),
-                q -> q.correctOptionId(), q -> q.isCorrect())
-                .containsExactly(org.assertj.core.groups.Tuple.tuple(1L, 11L, 11L, true),
-                        org.assertj.core.groups.Tuple.tuple(2L, 22L, 21L, false),
+        assertThat(result.questions()).extracting(q -> q.questionId(), q -> q.selectedOptionId(), q -> q
+                .correctOptionId(), q -> q.isCorrect()).containsExactly(org.assertj.core.groups.Tuple.tuple(1L, 11L,
+                        11L, true), org.assertj.core.groups.Tuple.tuple(2L, 22L, 21L, false),
                         org.assertj.core.groups.Tuple.tuple(3L, null, 31L, false));
         assertThat(result.questions().get(0).options()).containsExactly(
                 new com.gemstoneseekers.dtos.response.OptionResultResponse(11L, "Q1 Correct", true),

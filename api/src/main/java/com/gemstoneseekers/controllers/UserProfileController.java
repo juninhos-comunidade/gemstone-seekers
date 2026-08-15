@@ -67,8 +67,8 @@ public class UserProfileController {
         String email = userDetails.getUsername();
         CandidateProfileResponse candidateProfile = userProfileService.getCandidateProfileByUserEmail(email);
 
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(new BaseResponse<>(true, "Candidate profile retrieved successfully", candidateProfile, null));
+        return ResponseEntity.status(HttpStatus.OK).body(new BaseResponse<>(true,
+                "Candidate profile retrieved successfully", candidateProfile, null));
     }
 
     @PatchMapping("/user")
@@ -78,8 +78,8 @@ public class UserProfileController {
         String email = userDetails.getUsername();
         CandidateProfileResponse updatedUser = userProfileService.updatePersonalInfoByEmail(email, request);
 
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(new BaseResponse<>(true, "User info updated successfully", updatedUser, null));
+        return ResponseEntity.status(HttpStatus.OK).body(new BaseResponse<>(true, "User info updated successfully",
+                updatedUser, null));
     }
 
     @PatchMapping("/address")
@@ -91,8 +91,8 @@ public class UserProfileController {
         addressService.updateAddressInfoByEmail(email, request);
         CandidateProfileResponse candidateProfile = userProfileService.getCandidateProfileByUserEmail(email);
 
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(new BaseResponse<>(true, "Candidate address updated successfully", candidateProfile, null));
+        return ResponseEntity.status(HttpStatus.OK).body(new BaseResponse<>(true,
+                "Candidate address updated successfully", candidateProfile, null));
     }
 
     @PostMapping("/links")
@@ -105,8 +105,8 @@ public class UserProfileController {
 
         CandidateProfileResponse updatedUser = userProfileService.getCandidateProfileByUserEmail(email);
 
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(new BaseResponse<>(true, "Link added successfully", updatedUser, null));
+        return ResponseEntity.status(HttpStatus.OK).body(new BaseResponse<>(true, "Link added successfully",
+                updatedUser, null));
 
     }
 
@@ -119,8 +119,8 @@ public class UserProfileController {
         experienceService.addExperience(email, request);
         CandidateProfileResponse updatedUser = userProfileService.getCandidateProfileByUserEmail(email);
 
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(new BaseResponse<>(true, "Experience added successfully", updatedUser, null));
+        return ResponseEntity.status(HttpStatus.OK).body(new BaseResponse<>(true, "Experience added successfully",
+                updatedUser, null));
 
     }
 
@@ -133,8 +133,8 @@ public class UserProfileController {
         educationService.addEducation(email, request);
         CandidateProfileResponse updatedUser = userProfileService.getCandidateProfileByUserEmail(email);
 
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(new BaseResponse<>(true, "Education added successfully", updatedUser, null));
+        return ResponseEntity.status(HttpStatus.OK).body(new BaseResponse<>(true, "Education added successfully",
+                updatedUser, null));
 
     }
     @PostMapping("/certifications")
@@ -146,8 +146,8 @@ public class UserProfileController {
         certificationService.addCertification(email, request);
         CandidateProfileResponse updatedUser = userProfileService.getCandidateProfileByUserEmail(email);
 
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(new BaseResponse<>(true, "Certification added successfully", updatedUser, null));
+        return ResponseEntity.status(HttpStatus.OK).body(new BaseResponse<>(true, "Certification added successfully",
+                updatedUser, null));
     }
 
     @PostMapping("/languages")
@@ -160,8 +160,8 @@ public class UserProfileController {
         candidateLanguageService.addCandidateLanguage(email, request);
         CandidateProfileResponse updatedUser = userProfileService.getCandidateProfileByUserEmail(email);
 
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(new BaseResponse<>(true, "Language added successfully", updatedUser, null));
+        return ResponseEntity.status(HttpStatus.OK).body(new BaseResponse<>(true, "Language added successfully",
+                updatedUser, null));
     }
     @PostMapping("/projects")
     @PreAuthorize(CANDIDATE_ROLE)
@@ -173,8 +173,8 @@ public class UserProfileController {
         projectService.addCandidateProject(email, request);
         CandidateProfileResponse updatedUser = userProfileService.getCandidateProfileByUserEmail(email);
 
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(new BaseResponse<>(true, "Project added successfully", updatedUser, null));
+        return ResponseEntity.status(HttpStatus.OK).body(new BaseResponse<>(true, "Project added successfully",
+                updatedUser, null));
     }
 
     @DeleteMapping("/links/{linkId}")
@@ -186,8 +186,8 @@ public class UserProfileController {
         candidateLinkService.deleteLink(email, linkId);
         CandidateProfileResponse updatedUser = userProfileService.getCandidateProfileByUserEmail(email);
 
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(new BaseResponse<>(true, "Link deleted successfully", updatedUser, null));
+        return ResponseEntity.status(HttpStatus.OK).body(new BaseResponse<>(true, "Link deleted successfully",
+                updatedUser, null));
 
     }
 
@@ -199,8 +199,8 @@ public class UserProfileController {
         String email = userDetails.getUsername();
         experienceService.deleteExperience(email, experienceId);
         CandidateProfileResponse updatedUser = userProfileService.getCandidateProfileByUserEmail(email);
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(new BaseResponse<>(true, "Experience deleted successfully", updatedUser, null));
+        return ResponseEntity.status(HttpStatus.OK).body(new BaseResponse<>(true, "Experience deleted successfully",
+                updatedUser, null));
 
     }
 
@@ -212,8 +212,8 @@ public class UserProfileController {
         String email = userDetails.getUsername();
         educationService.deleteEducation(email, educationId);
         CandidateProfileResponse updatedUser = userProfileService.getCandidateProfileByUserEmail(email);
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(new BaseResponse<>(true, "Education deleted successfully", updatedUser, null));
+        return ResponseEntity.status(HttpStatus.OK).body(new BaseResponse<>(true, "Education deleted successfully",
+                updatedUser, null));
 
     }
     @DeleteMapping("/certifications/{certificationId}")
@@ -224,8 +224,8 @@ public class UserProfileController {
         String email = userDetails.getUsername();
         certificationService.deleteCertification(email, certificationId);
         CandidateProfileResponse updatedUser = userProfileService.getCandidateProfileByUserEmail(email);
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(new BaseResponse<>(true, "Certification deleted successfully", updatedUser, null));
+        return ResponseEntity.status(HttpStatus.OK).body(new BaseResponse<>(true, "Certification deleted successfully",
+                updatedUser, null));
 
     }
     @DeleteMapping("/languages/{languageId}")
@@ -236,8 +236,8 @@ public class UserProfileController {
         String email = userDetails.getUsername();
         candidateLanguageService.deleteCandidateLanguage(email, languageId);
         CandidateProfileResponse updatedUser = userProfileService.getCandidateProfileByUserEmail(email);
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(new BaseResponse<>(true, "Language deleted successfully", updatedUser, null));
+        return ResponseEntity.status(HttpStatus.OK).body(new BaseResponse<>(true, "Language deleted successfully",
+                updatedUser, null));
 
     }
     @DeleteMapping("/projects/{projectId}")
@@ -248,8 +248,8 @@ public class UserProfileController {
         String email = userDetails.getUsername();
         projectService.deleteCandidateProject(email, projectId);
         CandidateProfileResponse updatedUser = userProfileService.getCandidateProfileByUserEmail(email);
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(new BaseResponse<>(true, "Project deleted successfully", updatedUser, null));
+        return ResponseEntity.status(HttpStatus.OK).body(new BaseResponse<>(true, "Project deleted successfully",
+                updatedUser, null));
 
     }
 }

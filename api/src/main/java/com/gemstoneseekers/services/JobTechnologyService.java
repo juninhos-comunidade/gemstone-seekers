@@ -30,11 +30,11 @@ public class JobTechnologyService {
     }
 
     public JobTechnology addTechnology(UUID jobId, JobTechnologyRequest request) {
-        Job job = jobRepository.findByIdAndDeletedAtIsNull(jobId)
-                .orElseThrow(() -> new EntityNotFoundException("Job", jobId));
+        Job job = jobRepository.findByIdAndDeletedAtIsNull(jobId).orElseThrow(() -> new EntityNotFoundException("Job",
+                jobId));
 
-        Technology technology = technologyRepository.findById(request.technologyId())
-                .orElseThrow(() -> new EntityNotFoundException("Technology", request.technologyId()));
+        Technology technology = technologyRepository.findById(request.technologyId()).orElseThrow(
+                () -> new EntityNotFoundException("Technology", request.technologyId()));
 
         if (jobTechnologyRepository.existsByJobIdAndTechnologyId(jobId, request.technologyId())) {
             throw new ConflictException("Technology is already linked to this job");

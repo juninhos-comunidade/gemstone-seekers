@@ -107,8 +107,8 @@ public class TestApplicationService {
     public void saveCandidateAnswer(UUID testId, Long questionId, SaveAnswerRequest request, String email) {
         Candidate candidate = candidateService.getCandidateByEmailSession(email);
 
-        Test test = testRepository.findById(testId)
-                .orElseThrow(() -> new EntityNotFoundException(TEST_ENTITY_NAME, testId));
+        Test test = testRepository.findById(testId).orElseThrow(() -> new EntityNotFoundException(TEST_ENTITY_NAME,
+                testId));
 
         if (!test.getCandidate().getId().equals(candidate.getId())) {
             throw new AccessDeniedException("You do not have permission to modify this test");
@@ -118,12 +118,12 @@ public class TestApplicationService {
             throw new BusinessRuleException("Cannot save answers for a test that is not IN_PROGRESS");
         }
 
-        QuestionOption selectedOption = questionOptionRepository.findById(request.selectedOptionId())
-                .orElseThrow(() -> new EntityNotFoundException("QuestionOption", request.selectedOptionId()));
+        QuestionOption selectedOption = questionOptionRepository.findById(request.selectedOptionId()).orElseThrow(
+                () -> new EntityNotFoundException("QuestionOption", request.selectedOptionId()));
 
         if (!selectedOption.getQuestion().getId().equals(questionId)) {
-            throw new BusinessRuleException(String.format("Option ID %d does not belong to Question ID %d",
-                    request.selectedOptionId(), questionId));
+            throw new BusinessRuleException(String.format("Option ID %d does not belong to Question ID %d", request
+                    .selectedOptionId(), questionId));
         }
 
         test.answerQuestion(questionId, selectedOption);
@@ -133,8 +133,8 @@ public class TestApplicationService {
     public TestResultResponse submitTest(UUID testId, String email) {
         Candidate candidate = candidateService.getCandidateByEmailSession(email);
 
-        Test test = testRepository.findById(testId)
-                .orElseThrow(() -> new EntityNotFoundException(TEST_ENTITY_NAME, testId));
+        Test test = testRepository.findById(testId).orElseThrow(() -> new EntityNotFoundException(TEST_ENTITY_NAME,
+                testId));
 
         if (!test.getCandidate().getId().equals(candidate.getId())) {
             throw new AccessDeniedException("You do not have permission to submit this test");
@@ -157,8 +157,8 @@ public class TestApplicationService {
 
         List<Test> filteredTests = testRepository.findAll(specification, sort);
 
-        Map<String, Map<QuestionDifficulty, List<Test>>> grouped = filteredTests.stream().collect(Collectors
-                .groupingBy(test -> test.getTechnology().getName(), Collectors.groupingBy(Test::getDerivedDifficulty)));
+        Map<String, Map<QuestionDifficulty, List<Test>>> grouped = filteredTests.stream().collect(Collectors.groupingBy(
+                test -> test.getTechnology().getName(), Collectors.groupingBy(Test::getDerivedDifficulty)));
 
         List<TechnologyHistoryGroupResponse> historyByTechnology = grouped.entrySet().stream().map(techEntry -> {
             String techName = techEntry.getKey();
@@ -197,8 +197,8 @@ public class TestApplicationService {
     public TestDetailedResultResponse getTestResult(UUID testId, String email) {
         Candidate candidate = candidateService.getCandidateByEmailSession(email);
 
-        Test test = testRepository.findById(testId)
-                .orElseThrow(() -> new EntityNotFoundException(TEST_ENTITY_NAME, testId));
+        Test test = testRepository.findById(testId).orElseThrow(() -> new EntityNotFoundException(TEST_ENTITY_NAME,
+                testId));
 
         if (!test.getCandidate().getId().equals(candidate.getId())) {
             throw new AccessDeniedException("You do not have permission to view this test");
@@ -215,16 +215,16 @@ public class TestApplicationService {
     public void cancelTest(UUID testId, String email) {
         Candidate candidate = candidateService.getCandidateByEmailSession(email);
 
-        Test test = testRepository.findById(testId)
-                .orElseThrow(() -> new EntityNotFoundException(TEST_ENTITY_NAME, testId));
+        Test test = testRepository.findById(testId).orElseThrow(() -> new EntityNotFoundException(TEST_ENTITY_NAME,
+                testId));
 
         if (!test.getCandidate().getId().equals(candidate.getId())) {
             throw new AccessDeniedException("You do not have permission to modify this test");
         }
 
         if (test.getStatus() != TestStatus.IN_PROGRESS) {
-            throw new BusinessRuleException(
-                    String.format("Cannot cancel test. Current status is %s, expected IN_PROGRESS", test.getStatus()));
+            throw new BusinessRuleException(String.format(
+                    "Cannot cancel test. Current status is %s, expected IN_PROGRESS", test.getStatus()));
         }
 
         test.setStatus(TestStatus.CANCELED);

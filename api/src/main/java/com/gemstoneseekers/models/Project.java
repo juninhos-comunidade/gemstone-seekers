@@ -54,7 +54,8 @@ public class Project extends BaseModel {
     private LocalDate endDate;
 
     @ManyToMany
-    @JoinTable(name = "project_technologies", joinColumns = @JoinColumn(name = "project_id"), inverseJoinColumns = @JoinColumn(name = "technology_id"))
+    @JoinTable(name = "project_technologies", joinColumns = @JoinColumn(name = "project_id"),
+            inverseJoinColumns = @JoinColumn(name = "technology_id"))
     private Set<Technology> technologies;
 
 }

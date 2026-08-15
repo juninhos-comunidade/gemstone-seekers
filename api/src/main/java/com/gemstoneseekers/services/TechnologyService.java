@@ -22,7 +22,7 @@ public class TechnologyService {
     }
 
     public Technology getTechnologyByName(String technologyName) {
-        return technologyRepository.findByName(technologyName)
-                .orElseThrow(() -> new EntityNotFoundException("Technology", technologyName));
+        return technologyRepository.findByName(technologyName).orElseThrow(() -> new EntityNotFoundException(
+                "Technology", technologyName));
     }
 }

@@ -54,7 +54,8 @@ public class Education extends BaseModel {
     private LocalDate completionDate;
 
     @ManyToMany
-    @JoinTable(name = "education_technologies", joinColumns = @JoinColumn(name = "education_id"), inverseJoinColumns = @JoinColumn(name = "technology_id"))
+    @JoinTable(name = "education_technologies", joinColumns = @JoinColumn(name = "education_id"),
+            inverseJoinColumns = @JoinColumn(name = "technology_id"))
     private Set<Technology> technologies;
 
 }

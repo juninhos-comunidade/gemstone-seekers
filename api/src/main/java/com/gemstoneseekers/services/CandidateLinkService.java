@@ -28,8 +28,8 @@ public class CandidateLinkService {
 
     @Transactional
     public void addLink(String email, LinkItemRequest request) {
-        Candidate candidate = candidateRepository.findByUserEmail(email)
-                .orElseThrow(() -> new EntityNotFoundException("Candidate", email));
+        Candidate candidate = candidateRepository.findByUserEmail(email).orElseThrow(() -> new EntityNotFoundException(
+                "Candidate", email));
 
         CandidateLink newLink = candidateLinkMapper.toCandidateLink(request, candidate);
         candidate.getLinks().add(newLink);
@@ -39,8 +39,8 @@ public class CandidateLinkService {
     @Transactional
     public void deleteLink(String email, UUID linkId) {
 
-        CandidateLink link = candidateLinkRepository.findById(linkId)
-                .orElseThrow(() -> new EntityNotFoundException("Link", linkId));
+        CandidateLink link = candidateLinkRepository.findById(linkId).orElseThrow(() -> new EntityNotFoundException(
+                "Link", linkId));
         Candidate candidate = link.getCandidate();
 
         if (!candidate.getUser().getEmail().equalsIgnoreCase(email)) {

@@ -58,8 +58,8 @@ public class AuthService {
 
         Company company = null;
         if (request.role() == UserRole.RECRUITER) {
-            company = companyRepository.findById(request.companyId())
-                    .orElseThrow(() -> new EntityNotFoundException("Company", request.companyId().toString()));
+            company = companyRepository.findById(request.companyId()).orElseThrow(() -> new EntityNotFoundException(
+                    "Company", request.companyId().toString()));
         }
 
         user.setRole(request.role());
@@ -85,8 +85,8 @@ public class AuthService {
     }
 
     public LoginResponse login(LoginRequest request) {
-        User user = userRepository.findByEmail(request.email())
-                .orElseThrow(() -> new AccessDeniedException("Invalid email or password"));
+        User user = userRepository.findByEmail(request.email()).orElseThrow(() -> new AccessDeniedException(
+                "Invalid email or password"));
         if (!passwordEncoder.matches(request.password(), user.getPassword())) {
             throw new AccessDeniedException("Invalid email or password");
         }
@@ -100,8 +100,8 @@ public class AuthService {
             throw new AccessDeniedException("Invalid refresh token");
         }
         String email = jwtService.extractEmail(refreshToken);
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new AccessDeniedException("Invalid refresh token"));
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new AccessDeniedException(
+                "Invalid refresh token"));
         String newAccessToken = jwtService.generateAccessToken(user);
         String newRefreshToken = jwtService.generateRefreshToken(user);
         return new LoginResponse(newAccessToken, newRefreshToken, user.getRole() != null);

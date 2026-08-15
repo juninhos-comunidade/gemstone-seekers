@@ -36,9 +36,8 @@ class UserProfileIntegrationTest {
         Assumptions.assumeTrue(DockerClientFactory.instance().isDockerAvailable(), "Docker is not available");
         postgres.start();
         context = new SpringApplicationBuilder(GemstoneSeekersApplication.class).run("--spring.profiles.active=test",
-                "--spring.datasource.url=" + postgres.getJdbcUrl(),
-                "--spring.datasource.username=" + postgres.getUsername(),
-                "--spring.datasource.password=" + postgres.getPassword(), "--server.port=0",
+                "--spring.datasource.url=" + postgres.getJdbcUrl(), "--spring.datasource.username=" + postgres
+                        .getUsername(), "--spring.datasource.password=" + postgres.getPassword(), "--server.port=0",
                 "--jwt.secret=e93afb5d9ffc2f656b9039f768011829be9a88b539671e8aab8d347949a4da67",
                 "--jwt.access-token.expiration=86400000", "--jwt.refresh-token.expiration=604800000");
 
@@ -83,11 +82,11 @@ class UserProfileIntegrationTest {
         AuthenticatedCandidate authenticatedCandidate = registerCompleteAndLoginCandidate();
 
         given().contentType(ContentType.JSON).header("Authorization", "Bearer " + authenticatedCandidate.token()).when()
-                .get("/api/v1/profile").then().statusCode(200).body("success", equalTo(true))
-                .body("message", equalTo("Candidate profile retrieved successfully"))
-                .body("result.candidate.user.email", equalTo(authenticatedCandidate.email()))
-                .body("result.candidate.phone", equalTo("+5511999999999"))
-                .body("result.candidate.summary", equalTo("Java Developer")).body("result.address", nullValue());
+                .get("/api/v1/profile").then().statusCode(200).body("success", equalTo(true)).body("message", equalTo(
+                        "Candidate profile retrieved successfully")).body("result.candidate.user.email", equalTo(
+                                authenticatedCandidate.email())).body("result.candidate.phone", equalTo(
+                                        "+5511999999999")).body("result.candidate.summary", equalTo("Java Developer"))
+                .body("result.address", nullValue());
     }
 
     @Test
@@ -104,11 +103,10 @@ class UserProfileIntegrationTest {
                     "summary": "Updated summary"
                 }""";
 
-        given().contentType(ContentType.JSON).header("Authorization", "Bearer " + authenticatedCandidate.token())
-                .body(updateBody).when().patch("/api/v1/profile/user").then().statusCode(200)
-                .body("success", equalTo(true)).body("message", equalTo("User info updated successfully"))
-                .body("result.candidate.phone", equalTo("+5511888888888"))
-                .body("result.candidate.summary", equalTo("Updated summary"));
+        given().contentType(ContentType.JSON).header("Authorization", "Bearer " + authenticatedCandidate.token()).body(
+                updateBody).when().patch("/api/v1/profile/user").then().statusCode(200).body("success", equalTo(true))
+                .body("message", equalTo("User info updated successfully")).body("result.candidate.phone", equalTo(
+                        "+5511888888888")).body("result.candidate.summary", equalTo("Updated summary"));
     }
 
     @Test
@@ -129,15 +127,15 @@ class UserProfileIntegrationTest {
                     }
                 }""";
 
-        given().contentType(ContentType.JSON).header("Authorization", "Bearer " + authenticatedCandidate.token())
-                .body(addressBody).when().patch("/api/v1/profile/address").then().statusCode(200)
-                .body("success", equalTo(true)).body("message", equalTo("Candidate address updated successfully"))
-                .body("result.address.zipCode", equalTo("01000-000"))
-                .body("result.address.street", equalTo("Paulista Avenue"))
-                .body("result.address.number", equalTo("1000"))
-                .body("result.address.neighborhood", equalTo("Bela Vista"))
-                .body("result.address.complement", equalTo("10th floor"))
-                .body("result.address.city.name", equalTo("São Paulo")).body("result.address.city.stateId", equalTo(1));
+        given().contentType(ContentType.JSON).header("Authorization", "Bearer " + authenticatedCandidate.token()).body(
+                addressBody).when().patch("/api/v1/profile/address").then().statusCode(200).body("success", equalTo(
+                        true)).body("message", equalTo("Candidate address updated successfully")).body(
+                                "result.address.zipCode", equalTo("01000-000")).body("result.address.street", equalTo(
+                                        "Paulista Avenue")).body("result.address.number", equalTo("1000")).body(
+                                                "result.address.neighborhood", equalTo("Bela Vista")).body(
+                                                        "result.address.complement", equalTo("10th floor")).body(
+                                                                "result.address.city.name", equalTo("São Paulo")).body(
+                                                                        "result.address.city.stateId", equalTo(1));
     }
 
     @Test
@@ -150,16 +148,16 @@ class UserProfileIntegrationTest {
                     "url": "https://github.com/john"
                 }""";
 
-        UUID linkId = UUID.fromString(given().contentType(ContentType.JSON)
-                .header("Authorization", "Bearer " + authenticatedCandidate.token()).body(addBody).when()
-                .post("/api/v1/profile/links").then().statusCode(200).body("success", equalTo(true))
-                .body("message", equalTo("Link added successfully")).body("result.candidate.links", notNullValue())
-                .body("result.candidate.links.size()", equalTo(1)).extract().path("result.candidate.links[0].id"));
+        UUID linkId = UUID.fromString(given().contentType(ContentType.JSON).header("Authorization", "Bearer "
+                + authenticatedCandidate.token()).body(addBody).when().post("/api/v1/profile/links").then().statusCode(
+                        200).body("success", equalTo(true)).body("message", equalTo("Link added successfully")).body(
+                                "result.candidate.links", notNullValue()).body("result.candidate.links.size()", equalTo(
+                                        1)).extract().path("result.candidate.links[0].id"));
 
         given().contentType(ContentType.JSON).header("Authorization", "Bearer " + authenticatedCandidate.token()).when()
-                .delete("/api/v1/profile/links/" + linkId).then().statusCode(200).body("success", equalTo(true))
-                .body("message", equalTo("Link deleted successfully"))
-                .body("result.candidate.links.size()", equalTo(0));
+                .delete("/api/v1/profile/links/" + linkId).then().statusCode(200).body("success", equalTo(true)).body(
+                        "message", equalTo("Link deleted successfully")).body("result.candidate.links.size()", equalTo(
+                                0));
     }
 
     private AuthenticatedCandidate registerCompleteAndLoginCandidate() {
@@ -172,8 +170,8 @@ class UserProfileIntegrationTest {
                     "password": "plainPassword123"
                 }""".formatted(email);
 
-        given().contentType(ContentType.JSON).body(registerBody).when().post("/api/v1/auth/register").then()
-                .statusCode(201);
+        given().contentType(ContentType.JSON).body(registerBody).when().post("/api/v1/auth/register").then().statusCode(
+                201);
 
         String loginBody = """
                 {

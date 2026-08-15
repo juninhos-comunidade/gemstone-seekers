@@ -41,8 +41,8 @@ public class TestController {
 
         TestResponse testResponse = testApplicationService.startTest(email, technology, difficulty);
 
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(new BaseResponse<>(true, "Test initiated successfully", testResponse, null));
+        return ResponseEntity.status(HttpStatus.CREATED).body(new BaseResponse<>(true, "Test initiated successfully",
+                testResponse, null));
     }
 
     @PutMapping("/{testId}/answers/{questionId}")

@@ -29,8 +29,8 @@ public class UserMapper {
     }
 
     public CompleteRegistrationResponse toCompleteRegistrationResponse(User user) {
-        return new CompleteRegistrationResponse(user.getId(), user.getName(), user.getEmail(), user.getRole(),
-                user.getDocumentType(), user.getDocumentNumber());
+        return new CompleteRegistrationResponse(user.getId(), user.getName(), user.getEmail(), user.getRole(), user
+                .getDocumentType(), user.getDocumentNumber());
     }
 
     public void updateEntityFromRequest(UserRequest request, User user) {

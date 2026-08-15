@@ -82,8 +82,8 @@ class RecruiterServiceTest {
         RecruiterRequest request = new RecruiterRequest(UUID.randomUUID(), "Engineering");
         when(companyRepository.findByIdAndDeletedAtIsNull(companyId)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> recruiterService.linkToCompany(companyId, request))
-                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("Company");
+        assertThatThrownBy(() -> recruiterService.linkToCompany(companyId, request)).isInstanceOf(
+                EntityNotFoundException.class).hasMessageContaining("Company");
         verify(recruiterRepository, never()).save(any());
     }
 
@@ -97,8 +97,8 @@ class RecruiterServiceTest {
         when(companyRepository.findByIdAndDeletedAtIsNull(companyId)).thenReturn(Optional.of(company));
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> recruiterService.linkToCompany(companyId, request))
-                .isInstanceOf(EntityNotFoundException.class).hasMessageContaining("User");
+        assertThatThrownBy(() -> recruiterService.linkToCompany(companyId, request)).isInstanceOf(
+                EntityNotFoundException.class).hasMessageContaining("User");
         verify(recruiterRepository, never()).save(any());
     }
 
@@ -115,8 +115,8 @@ class RecruiterServiceTest {
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         when(recruiterRepository.existsByUserIdAndDeletedAtIsNull(userId)).thenReturn(true);
 
-        assertThatThrownBy(() -> recruiterService.linkToCompany(companyId, request))
-                .isInstanceOf(ConflictException.class).hasMessage("User is already linked as a recruiter");
+        assertThatThrownBy(() -> recruiterService.linkToCompany(companyId, request)).isInstanceOf(
+                ConflictException.class).hasMessage("User is already linked as a recruiter");
         verify(recruiterRepository, never()).save(any());
     }
 
@@ -129,8 +129,8 @@ class RecruiterServiceTest {
         Recruiter recruiter2 = new Recruiter();
         recruiter2.setId(UUID.randomUUID());
         recruiter2.setDepartment("Marketing");
-        when(recruiterRepository.findByCompanyIdAndDeletedAtIsNull(companyId))
-                .thenReturn(List.of(recruiter1, recruiter2));
+        when(recruiterRepository.findByCompanyIdAndDeletedAtIsNull(companyId)).thenReturn(List.of(recruiter1,
+                recruiter2));
 
         List<Recruiter> result = recruiterService.findByCompanyId(companyId);
 

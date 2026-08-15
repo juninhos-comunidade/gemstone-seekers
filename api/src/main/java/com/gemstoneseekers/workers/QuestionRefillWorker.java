@@ -74,14 +74,14 @@ public class QuestionRefillWorker {
 
         List<StockProjection> stockReport = questionRepository.getQuestionStockReport();
 
-        Map<Integer, Map<QuestionDifficulty, Long>> stockMatrix = stockReport.stream()
-                .collect(Collectors.groupingBy(StockProjection::getTechnologyId,
-                        Collectors.toMap(StockProjection::getDifficultyLevel, StockProjection::getStockCount)));
+        Map<Integer, Map<QuestionDifficulty, Long>> stockMatrix = stockReport.stream().collect(Collectors.groupingBy(
+                StockProjection::getTechnologyId, Collectors.toMap(StockProjection::getDifficultyLevel,
+                        StockProjection::getStockCount)));
 
         for (Technology tech : technologies) {
             for (QuestionDifficulty difficulty : QuestionDifficulty.values()) {
-                long currentStock = stockMatrix.getOrDefault(tech.getId(), Collections.emptyMap())
-                        .getOrDefault(difficulty, 0L);
+                long currentStock = stockMatrix.getOrDefault(tech.getId(), Collections.emptyMap()).getOrDefault(
+                        difficulty, 0L);
 
                 refillDifficultyStock(tech, difficulty, currentStock);
             }
@@ -104,8 +104,8 @@ public class QuestionRefillWorker {
                 questionService.saveAiGeneratedBatch(tech, difficulty, aiResponse);
 
                 if (log.isInfoEnabled()) {
-                    log.info("[WORKER] Successfully generated and saved {} questions for {} ({}).", BATCH_SIZE,
-                            tech.getName(), difficulty);
+                    log.info("[WORKER] Successfully generated and saved {} questions for {} ({}).", BATCH_SIZE, tech
+                            .getName(), difficulty);
                 }
 
                 currentStock += BATCH_SIZE;
