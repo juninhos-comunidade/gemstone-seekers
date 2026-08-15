@@ -135,7 +135,10 @@ public class QuestionRefillWorker {
                 }
                 Thread.currentThread().interrupt();
                 break;
-            } catch (RuntimeException e) {
+            } catch (org.springframework.dao.DataAccessException |
+                     org.springframework.ai.retry.TransientAiException |
+                     org.springframework.ai.retry.NonTransientAiException e) {
+
                 if (log.isErrorEnabled()) {
                     log.error("[WORKER] Failed to generate or save questions for {} ({})",
                         tech.getName(), difficulty, e);
@@ -144,4 +147,7 @@ public class QuestionRefillWorker {
             }
         }
     }
+
 }
+
+

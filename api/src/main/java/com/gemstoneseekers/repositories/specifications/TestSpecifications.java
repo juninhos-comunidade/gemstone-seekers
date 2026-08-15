@@ -7,8 +7,8 @@ import org.springframework.data.jpa.domain.Specification;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
-@SuppressWarnings("PMD.TestClassWithoutTestCases")
 public class TestSpecifications {
 
     public static Specification<Test> withFilters(UUID candidateId, TestHistoryFilterParams filters) {
@@ -20,7 +20,7 @@ public class TestSpecifications {
             if (filters != null && filters.technology() != null && !filters.technology().isBlank()) {
                 predicates.add(cb.equal(
                     cb.lower(root.get("technology").get("name")),
-                    filters.technology().toLowerCase()
+                    filters.technology().toLowerCase(Locale.ROOT)
                 ));
             }
 
