@@ -2,6 +2,7 @@ package com.gemstoneseekers.services;
 
 import com.gemstoneseekers.dtos.response.AvailableBadgeResponse;
 import com.gemstoneseekers.dtos.response.CandidateBadgeResponse;
+import com.gemstoneseekers.enums.QuestionDifficulty;
 import com.gemstoneseekers.exceptions.AccessDeniedException;
 import com.gemstoneseekers.mappers.BadgeMapper;
 import com.gemstoneseekers.models.Assessment;
@@ -46,8 +47,8 @@ public class BadgeApplicationService {
 
     @Transactional
     public void evaluateAndAssignBadge(UUID candidateId, Integer technologyId, UUID assesmentId,
-            BigDecimal finalScore) {
-        Badge badge = badgeRepository.findByTechnologyId(technologyId).orElse(null);
+            BigDecimal finalScore, QuestionDifficulty difficulty) {
+        Badge badge = badgeRepository.findByTechnologyIdAndDifficultyLevel(technologyId, difficulty).orElse(null);
 
         if (badge == null || finalScore.compareTo(badge.getMinimumScore()) < 0) {
             if (log.isDebugEnabled()) {

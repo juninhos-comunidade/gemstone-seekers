@@ -150,7 +150,7 @@ public class AssessmentApplicationService {
         Assessment savedAssessment = assessmentRepository.save(assessment);
 
         AssessmentCompletedEvent event = new AssessmentCompletedEvent(candidate.getId(), assessment.getTechnology()
-                .getId(), assessment.getId(), assessment.getScore());
+                .getId(), assessment.getId(), assessment.getScore(), assessment.getDerivedDifficulty());
         eventPublisher.publishEvent(event);
 
         return assessmentMapper.toAssessmentResultResponse(savedAssessment);
