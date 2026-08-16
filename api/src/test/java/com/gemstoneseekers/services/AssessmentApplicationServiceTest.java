@@ -34,6 +34,7 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 
@@ -74,6 +75,8 @@ class AssessmentApplicationServiceTest {
     private AssessmentMapper assessmentMapper;
     @Mock
     private QuestionOptionRepository questionOptionRepository;
+    @Mock
+    private ApplicationEventPublisher eventPublisher;
 
     @Captor
     private ArgumentCaptor<com.gemstoneseekers.models.Assessment> testArgumentCaptor;
@@ -83,6 +86,15 @@ class AssessmentApplicationServiceTest {
 
     @BeforeEach
     void setUp() {
+        assessmentApplicationService = new AssessmentApplicationService(
+            questionRepository,
+            assessmentRepository,
+            candidateService,
+            technologyService,
+            assessmentMapper,
+            questionOptionRepository,
+            eventPublisher
+        );
         mockCandidate = new Candidate();
         mockCandidate.setId(UUID.randomUUID());
         User user = new User();
