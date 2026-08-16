@@ -135,7 +135,7 @@ class AuthControllerTest {
     void shouldReturnOkWithTokensOnSuccessfulLogin() {
         LoginRequest request = new LoginRequest("john@example.com", "plainPassword123");
 
-        LoginResponse expectedResponse = new LoginResponse("access-token", "refresh-token", true);
+        LoginResponse expectedResponse = new LoginResponse("access-token", "refresh-token", true, "CANDIDATE");
 
         when(authService.login(request)).thenReturn(expectedResponse);
 
@@ -161,7 +161,7 @@ class AuthControllerTest {
     void shouldReturnOkWithNewTokensOnSuccessfulRefresh() {
         RefreshTokenRequest request = new RefreshTokenRequest("valid.refresh.token");
 
-        LoginResponse expectedResponse = new LoginResponse("new-access-token", "new-refresh-token", true);
+        LoginResponse expectedResponse = new LoginResponse("new-access-token", "new-refresh-token", true, "CANDIDATE");
 
         when(authService.refreshToken("valid.refresh.token")).thenReturn(expectedResponse);
 
