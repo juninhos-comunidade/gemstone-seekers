@@ -7,8 +7,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.converter.BeanOutputConverter;
-import org.springframework.ai.retry.NonTransientAiException;
-import org.springframework.ai.retry.TransientAiException;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -53,18 +51,20 @@ public class AiQuestionGeneratorService {
             return converter.convert(rawResponse);
 
         } catch (AiGenerationException e) {
-
             if (log.isErrorEnabled()) {
-                log.error("[AI_SERVICE] AI content generation for {} ({}) failed: {}", technologyName, difficulty, e.getMessage());
+                log.error("[AI_SERVICE] AI content validation failed for {} ({}): {}", technologyName, difficulty, e
+                        .getMessage());
             }
             throw e;
-        } catch (TransientAiException | NonTransientAiException e) {
+        } catch (org.springframework.ai.retry.TransientAiException
+                | org.springframework.ai.retry.NonTransientAiException | IllegalArgumentException
+                | IllegalStateException e) {
+
             if (log.isErrorEnabled()) {
-                log.error("[AI_SERVICE] AI content generation failed for {} ({}). Root cause: {}", technologyName,
+                log.error("[AI_SERVICE] AI communication failed for {} ({}). Root cause: {}", technologyName,
                         difficulty, e.getMessage());
             }
-            throw new AiGenerationException(
-                    "AI content generation failed. Check API quotas or upstream service status.", e);
+            throw new AiGenerationException("AI content generation failed due to upstream error.", e);
         }
     }
 }

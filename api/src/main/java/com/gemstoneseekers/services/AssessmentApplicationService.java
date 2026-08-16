@@ -11,6 +11,7 @@ import com.gemstoneseekers.dtos.response.AssessmentResponse;
 import com.gemstoneseekers.dtos.response.AssessmentResultResponse;
 import com.gemstoneseekers.dtos.response.AssessmentSummaryResponse;
 import com.gemstoneseekers.enums.AssessmentStatus;
+import com.gemstoneseekers.events.AssessmentCompletedEvent;
 import com.gemstoneseekers.exceptions.AccessDeniedException;
 import com.gemstoneseekers.exceptions.BusinessRuleException;
 import com.gemstoneseekers.exceptions.EntityNotFoundException;
@@ -26,6 +27,7 @@ import com.gemstoneseekers.repositories.QuestionRepository;
 import com.gemstoneseekers.repositories.AssessmentRepository;
 
 import com.gemstoneseekers.repositories.specifications.AssessmentSpecifications;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -51,19 +53,21 @@ public class AssessmentApplicationService {
     private final TechnologyService technologyService;
     private final AssessmentMapper assessmentMapper;
     private final QuestionOptionRepository questionOptionRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     private static final int REQUIRED_AMOUNT = 10;
 
     public AssessmentApplicationService(QuestionRepository questionRepository,
             AssessmentRepository assessmentRepository, CandidateService candidateService,
             TechnologyService technologyService, AssessmentMapper assessmentMapper,
-            QuestionOptionRepository questionOptionRepository) {
+            QuestionOptionRepository questionOptionRepository, ApplicationEventPublisher eventPublisher) {
         this.questionRepository = questionRepository;
         this.assessmentRepository = assessmentRepository;
         this.candidateService = candidateService;
         this.technologyService = technologyService;
         this.assessmentMapper = assessmentMapper;
         this.questionOptionRepository = questionOptionRepository;
+        this.eventPublisher = eventPublisher;
     }
 
     @Transactional
@@ -144,6 +148,10 @@ public class AssessmentApplicationService {
         assessment.submit();
 
         Assessment savedAssessment = assessmentRepository.save(assessment);
+
+        AssessmentCompletedEvent event = new AssessmentCompletedEvent(candidate.getId(), assessment.getTechnology()
+                .getId(), assessment.getId(), assessment.getScore());
+        eventPublisher.publishEvent(event);
 
         return assessmentMapper.toAssessmentResultResponse(savedAssessment);
     }
