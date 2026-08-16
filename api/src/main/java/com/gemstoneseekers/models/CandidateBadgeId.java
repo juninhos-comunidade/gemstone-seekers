@@ -23,7 +23,6 @@ public class CandidateBadgeId implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 
-
     @Column(name = "candidate_id")
     private UUID candidateId;
 

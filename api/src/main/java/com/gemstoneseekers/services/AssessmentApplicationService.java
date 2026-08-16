@@ -58,9 +58,9 @@ public class AssessmentApplicationService {
     private static final int REQUIRED_AMOUNT = 10;
 
     public AssessmentApplicationService(QuestionRepository questionRepository,
-                                        AssessmentRepository assessmentRepository, CandidateService candidateService,
-                                        TechnologyService technologyService, AssessmentMapper assessmentMapper,
-                                        QuestionOptionRepository questionOptionRepository, ApplicationEventPublisher eventPublisher) {
+            AssessmentRepository assessmentRepository, CandidateService candidateService,
+            TechnologyService technologyService, AssessmentMapper assessmentMapper,
+            QuestionOptionRepository questionOptionRepository, ApplicationEventPublisher eventPublisher) {
         this.questionRepository = questionRepository;
         this.assessmentRepository = assessmentRepository;
         this.candidateService = candidateService;
@@ -149,12 +149,8 @@ public class AssessmentApplicationService {
 
         Assessment savedAssessment = assessmentRepository.save(assessment);
 
-        AssessmentCompletedEvent event = new AssessmentCompletedEvent(
-            candidate.getId(),
-            assessment.getTechnology().getId(),
-            assessment.getId(),
-            assessment.getScore()
-        );
+        AssessmentCompletedEvent event = new AssessmentCompletedEvent(candidate.getId(), assessment.getTechnology()
+                .getId(), assessment.getId(), assessment.getScore());
         eventPublisher.publishEvent(event);
 
         return assessmentMapper.toAssessmentResultResponse(savedAssessment);

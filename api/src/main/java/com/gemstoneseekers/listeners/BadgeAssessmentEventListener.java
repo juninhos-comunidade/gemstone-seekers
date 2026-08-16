@@ -27,16 +27,12 @@ public class BadgeAssessmentEventListener {
         }
 
         try {
-            badgeApplicationService.evaluateAndAssignBadge(
-                event.candidateId(),
-                event.technologyId(),
-                event.assessmentId(),
-                event.finalScore()
-            );
+            badgeApplicationService.evaluateAndAssignBadge(event.candidateId(), event.technologyId(), event
+                    .assessmentId(), event.finalScore());
         } catch (org.springframework.dao.DataAccessException | IllegalArgumentException | IllegalStateException e) {
             if (log.isErrorEnabled()) {
-                log.error("[EVENT] Failed to process badge assignment for candidate {}. Reason: {}",
-                    event.candidateId(), e.getMessage(), e);
+                log.error("[EVENT] Failed to process badge assignment for candidate {}. Reason: {}", event
+                        .candidateId(), e.getMessage(), e);
             }
         }
     }

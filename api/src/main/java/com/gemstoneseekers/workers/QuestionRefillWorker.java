@@ -111,8 +111,8 @@ public class QuestionRefillWorker {
 
             } catch (DataAccessException e) {
                 if (log.isErrorEnabled()) {
-                    log.error("[WORKER] Unexpected infrastructure error processing {}. Skipping to next technology.", tech
-                            .getName(), e);
+                    log.error("[WORKER] Unexpected infrastructure error processing {}. Skipping to next technology.",
+                            tech.getName(), e);
                 }
             }
         }

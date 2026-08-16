@@ -33,7 +33,9 @@ public class BadgeApplicationService {
     private final CandidateService candidateService;
     private final BadgeMapper badgeMapper;
 
-    public BadgeApplicationService(BadgeRepository badgeRepository, AssessmentRepository assessmentRepository, CandidateRepository candidateRepository, CandidateBadgeRepository candidateBadgeRepository, CandidateService candidateService, BadgeMapper badgeMapper) {
+    public BadgeApplicationService(BadgeRepository badgeRepository, AssessmentRepository assessmentRepository,
+            CandidateRepository candidateRepository, CandidateBadgeRepository candidateBadgeRepository,
+            CandidateService candidateService, BadgeMapper badgeMapper) {
         this.badgeRepository = badgeRepository;
         this.assessmentRepository = assessmentRepository;
         this.candidateRepository = candidateRepository;
@@ -42,21 +44,23 @@ public class BadgeApplicationService {
         this.badgeMapper = badgeMapper;
     }
 
-
     @Transactional
-    public void evaluateAndAssignBadge(UUID candidateId, Integer technologyId, UUID assesmentId, BigDecimal finalScore) {
+    public void evaluateAndAssignBadge(UUID candidateId, Integer technologyId, UUID assesmentId,
+            BigDecimal finalScore) {
         Badge badge = badgeRepository.findByTechnologyId(technologyId).orElse(null);
 
         if (badge == null || finalScore.compareTo(badge.getMinimumScore()) < 0) {
             if (log.isDebugEnabled()) {
-                log.debug("[BADGE] Candidate {} did not reach the minimum score or no badge exists for technology {}", candidateId, technologyId);
+                log.debug("[BADGE] Candidate {} did not reach the minimum score or no badge exists for technology {}",
+                        candidateId, technologyId);
             }
             return;
         }
 
         if (candidateBadgeRepository.existsByCandidateIdAndBadgeId(candidateId, badge.getId())) {
             if (log.isInfoEnabled()) {
-                log.info("[BADGE] Candidate {} already owns the badge {}. Skipping assignment.", candidateId, badge.getName());
+                log.info("[BADGE] Candidate {} already owns the badge {}. Skipping assignment.", candidateId, badge
+                        .getName());
             }
             return;
         }
@@ -74,15 +78,14 @@ public class BadgeApplicationService {
 
     @Transactional(readOnly = true)
     public List<CandidateBadgeResponse> getCandidateBadges(String email) {
-            Candidate candidate = candidateService.getCandidateByEmailSession(email);
+        Candidate candidate = candidateService.getCandidateByEmailSession(email);
 
-            if (!candidate.getUser().getEmail().equalsIgnoreCase(email)) {
-                throw new AccessDeniedException("Operação inválida. Você não é o proprietário deste registro.");
-            }
-            List<CandidateBadge> badges = candidateBadgeRepository.findAllByCandidateIdWithDetails(candidate.getId());
+        if (!candidate.getUser().getEmail().equalsIgnoreCase(email)) {
+            throw new AccessDeniedException("Operação inválida. Você não é o proprietário deste registro.");
+        }
+        List<CandidateBadge> badges = candidateBadgeRepository.findAllByCandidateIdWithDetails(candidate.getId());
 
-
-            return badgeMapper.toCandidateBadgeListResponse(badges);
+        return badgeMapper.toCandidateBadgeListResponse(badges);
     }
 
     @Transactional(readOnly = true)

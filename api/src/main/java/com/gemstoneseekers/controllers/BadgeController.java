@@ -30,17 +30,12 @@ public class BadgeController {
     @GetMapping("/me")
     @PreAuthorize(CANDIDATE_ROLE)
     public ResponseEntity<BaseResponse<List<CandidateBadgeResponse>>> getMyBadges(
-        @AuthenticationPrincipal UserDetails userDetails) {
+            @AuthenticationPrincipal UserDetails userDetails) {
 
         String email = userDetails.getUsername();
         List<CandidateBadgeResponse> response = badgeApplicationService.getCandidateBadges(email);
 
-        return ResponseEntity.ok(new BaseResponse<>(
-            true,
-            "Candidate badges retrieved successfully",
-            response,
-            null
-        ));
+        return ResponseEntity.ok(new BaseResponse<>(true, "Candidate badges retrieved successfully", response, null));
     }
 
     @GetMapping("/available")
@@ -49,11 +44,6 @@ public class BadgeController {
 
         List<AvailableBadgeResponse> response = badgeApplicationService.getAvailableBadges();
 
-        return ResponseEntity.ok(new BaseResponse<>(
-            true,
-            "Badge catalog retrieved successfully",
-            response,
-            null
-        ));
+        return ResponseEntity.ok(new BaseResponse<>(true, "Badge catalog retrieved successfully", response, null));
     }
 }
