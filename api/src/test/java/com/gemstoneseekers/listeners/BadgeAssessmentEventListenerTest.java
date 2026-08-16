@@ -1,5 +1,6 @@
 package com.gemstoneseekers.listeners;
 
+import com.gemstoneseekers.enums.QuestionDifficulty;
 import com.gemstoneseekers.events.AssessmentCompletedEvent;
 import com.gemstoneseekers.services.BadgeApplicationService;
 import org.junit.jupiter.api.BeforeEach;
@@ -39,21 +40,21 @@ class BadgeAssessmentEventListenerTest {
         Integer technologyId = 1;
         UUID assessmentId = UUID.randomUUID();
         BigDecimal finalScore = new BigDecimal("85.50");
-        event = new AssessmentCompletedEvent(candidateId, technologyId, assessmentId, finalScore);
+        QuestionDifficulty difficulty = QuestionDifficulty.BEGINNER;
+        event = new AssessmentCompletedEvent(candidateId, technologyId, assessmentId, finalScore, difficulty);
     }
 
     @Test
     @DisplayName("Should call badge application service when assessment is completed")
     void handleAssessmentCompleted_shouldCallBadgeApplicationService() {
-        // when
         listener.handleAssessmentCompleted(event);
 
-        // then
         verify(badgeApplicationService).evaluateAndAssignBadge(
                 event.candidateId(),
                 event.technologyId(),
                 event.assessmentId(),
-                event.finalScore()
+                event.finalScore(),
+                event.difficulty()
         );
     }
 
@@ -61,12 +62,10 @@ class BadgeAssessmentEventListenerTest {
     @MethodSource("exceptionProvider")
     @DisplayName("Should handle exceptions from badge service and not propagate them")
     void handleAssessmentCompleted_shouldHandleExceptions(RuntimeException exception) {
-        // given
         doThrow(exception).when(badgeApplicationService).evaluateAndAssignBadge(
-                any(UUID.class), any(Integer.class), any(UUID.class), any(BigDecimal.class)
-        );
+                any(UUID.class), any(Integer.class), any(UUID.class), any(BigDecimal.class),
+            any(QuestionDifficulty.class));
 
-        // when & then
         assertThatCode(() -> listener.handleAssessmentCompleted(event))
                 .doesNotThrowAnyException();
     }
