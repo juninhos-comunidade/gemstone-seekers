@@ -1,6 +1,7 @@
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import { TestCard } from "./TestCard";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { startAssessment } from "@/lib/api/assessments";
 
 vi.mock("@iconify/react", () => ({
@@ -19,6 +20,16 @@ vi.mock("@/lib/api/assessments", () => ({
   startAssessment: vi.fn(),
 }));
 
+function createWrapper() {
+  const queryClient = new QueryClient({
+    defaultOptions: { mutations: { retry: false } },
+  });
+  const Wrapper = ({ children }: { children: React.ReactNode }) => (
+    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+  );
+  return Wrapper;
+}
+
 describe("TestCard", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -35,6 +46,7 @@ describe("TestCard", () => {
         Nivel="iniciante"
         difficulty="BEGINNER"
       />,
+      { wrapper: createWrapper() },
     );
 
     expect(screen.getByText(/react para iniciantes/i)).toBeInTheDocument();
@@ -58,6 +70,7 @@ describe("TestCard", () => {
         NumQuestoes={15}
         Nivel="intermediario"
       />,
+      { wrapper: createWrapper() },
     );
 
     expect(screen.getByTestId("tech-icon")).toHaveAttribute(
@@ -76,6 +89,7 @@ describe("TestCard", () => {
         NumQuestoes={8}
         Nivel="iniciante"
       />,
+      { wrapper: createWrapper() },
     );
 
     expect(screen.getByTestId("tech-icon")).toHaveAttribute(
@@ -97,6 +111,7 @@ describe("TestCard", () => {
         Nivel="iniciante"
         difficulty="BEGINNER"
       />,
+      { wrapper: createWrapper() },
     );
 
     const startButton = screen.getByRole("button", { name: /começar/i });
@@ -122,6 +137,7 @@ describe("TestCard", () => {
         Nivel="iniciante"
         difficulty="BEGINNER"
       />,
+      { wrapper: createWrapper() },
     );
 
     const startButton = screen.getByRole("button", { name: /começar/i });
