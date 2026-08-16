@@ -92,7 +92,8 @@ public class AuthService {
         }
         String accessToken = jwtService.generateAccessToken(user);
         String refreshToken = jwtService.generateRefreshToken(user);
-        return new LoginResponse(accessToken, refreshToken, user.getRole() != null);
+        String role = user.getRole() != null ? user.getRole().name() : null;
+        return new LoginResponse(accessToken, refreshToken, user.getRole() != null, role);
     }
 
     public LoginResponse refreshToken(String refreshToken) {
@@ -104,6 +105,7 @@ public class AuthService {
                 "Invalid refresh token"));
         String newAccessToken = jwtService.generateAccessToken(user);
         String newRefreshToken = jwtService.generateRefreshToken(user);
-        return new LoginResponse(newAccessToken, newRefreshToken, user.getRole() != null);
+        String role = user.getRole() != null ? user.getRole().name() : null;
+        return new LoginResponse(newAccessToken, newRefreshToken, user.getRole() != null,role);
     }
 }
