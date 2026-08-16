@@ -17,7 +17,7 @@ public class BadgeMapper {
             return null;
         }
         return new CandidateBadgeResponse(candidateBadge.getBadge().getName(), candidateBadge.getBadge().getTechnology()
-                .getName(), candidateBadge.getBadge().getDescription(), candidateBadge.getAssesment().getScore(),
+                .getName(), candidateBadge.getBadge().getDescription(), candidateBadge.getAssessment().getScore(),
                 candidateBadge.getEarnedAt());
     }
 

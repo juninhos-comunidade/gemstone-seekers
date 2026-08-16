@@ -36,8 +36,8 @@ public class CandidateBadge {
     private Badge badge;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "test_id")
-    private Assessment assesment;
+    @JoinColumn(name = "assessment_id")
+    private Assessment assessment;
 
     @CreationTimestamp
     @Column(name = "earned_at", nullable = false, updatable = false)
@@ -46,7 +46,7 @@ public class CandidateBadge {
     public CandidateBadge(Candidate candidate, Badge badge, Assessment assesment) {
         this.candidate = candidate;
         this.badge = badge;
-        this.assesment = assesment;
+        this.assessment = assesment;
         this.id = new CandidateBadgeId(candidate.getId(), badge.getId());
     }
 }
