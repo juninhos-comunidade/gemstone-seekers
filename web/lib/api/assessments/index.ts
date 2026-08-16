@@ -1,4 +1,4 @@
-export { startAssessment } from "./startAssessment";
+export { startAssessment, useStartAssessmentMutation } from "./startAssessment";
 export { answerQuestion } from "./answerQuestion";
 export { submitAssessment } from "./submitAssessment";
 export { getAssessmentResult } from "./getAssessmentResult";

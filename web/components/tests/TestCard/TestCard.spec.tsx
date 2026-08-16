@@ -1,8 +1,8 @@
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import { TestCard } from "./TestCard";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { startAssessment } from "@/lib/api/assessments";
+import { useStartAssessmentMutation } from "@/lib/api/assessments";
 
 vi.mock("@iconify/react", () => ({
   Icon: ({ icon, className }: { icon: string; className?: string }) => (
@@ -17,7 +17,7 @@ vi.mock("next/navigation", () => ({
 }));
 
 vi.mock("@/lib/api/assessments", () => ({
-  startAssessment: vi.fn(),
+  useStartAssessmentMutation: vi.fn(),
 }));
 
 function createWrapper() {
@@ -33,6 +33,12 @@ function createWrapper() {
 describe("TestCard", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    // Mock padrão para os testes básicos
+    vi.mocked(useStartAssessmentMutation).mockReturnValue({
+      mutate: vi.fn(),
+      isPending: false,
+      error: null,
+    } as ReturnType<typeof useStartAssessmentMutation>);
   });
 
   it("renders test title, description, metadata and action", () => {
@@ -99,7 +105,11 @@ describe("TestCard", () => {
   });
 
   it("shows loading state when starting test", async () => {
-    vi.mocked(startAssessment).mockImplementation(() => new Promise(() => {}));
+    vi.mocked(useStartAssessmentMutation).mockReturnValue({
+      mutate: vi.fn(),
+      isPending: true,
+      error: null,
+    } as ReturnType<typeof useStartAssessmentMutation>);
 
     render(
       <TestCard
@@ -114,18 +124,15 @@ describe("TestCard", () => {
       { wrapper: createWrapper() },
     );
 
-    const startButton = screen.getByRole("button", { name: /começar/i });
-    fireEvent.click(startButton);
-
-    await waitFor(() => {
-      expect(screen.getByText(/verificando\.\.\./i)).toBeInTheDocument();
-    });
+    expect(screen.getByText(/verificando\.\.\./i)).toBeInTheDocument();
   });
 
   it("shows error message when technology has no tests", async () => {
-    vi.mocked(startAssessment).mockRejectedValue(
-      new Error("No tests available"),
-    );
+    vi.mocked(useStartAssessmentMutation).mockReturnValue({
+      mutate: vi.fn(),
+      isPending: false,
+      error: new Error("No tests available"),
+    } as ReturnType<typeof useStartAssessmentMutation>);
 
     render(
       <TestCard
@@ -140,15 +147,10 @@ describe("TestCard", () => {
       { wrapper: createWrapper() },
     );
 
-    const startButton = screen.getByRole("button", { name: /começar/i });
-    fireEvent.click(startButton);
-
-    await waitFor(() => {
-      expect(
-        screen.getByText(
-          /esta tecnologia não possui testes disponíveis no momento\./i,
-        ),
-      ).toBeInTheDocument();
-    });
+    expect(
+      screen.getByText(
+        /esta tecnologia não possui testes disponíveis no momento\./i,
+      ),
+    ).toBeInTheDocument();
   });
 });

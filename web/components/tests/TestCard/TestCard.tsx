@@ -5,8 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { techIcons, defaultIcon } from "@/lib/icons/techIcons";
 import { useRouter } from "next/navigation";
-import { useMutation } from "@tanstack/react-query";
-import { startAssessment } from "@/lib/api/assessments";
+import { useStartAssessmentMutation } from "@/lib/api/assessments";
 import type { AssessmentDifficulty } from "@/lib/types/assessment";
 
 type TestCardProps = {
@@ -31,19 +30,18 @@ export function TestCard({
   const icon = techIcons[Tech] || defaultIcon;
   const router = useRouter();
 
-  const {
-    mutate: startTest,
-    isPending,
-    error,
-  } = useMutation({
-    mutationFn: () => startAssessment(Tech, difficulty as AssessmentDifficulty),
-    onSuccess: () => {
-      router.push(`/candidate/test/${id}?difficulty=${difficulty}`);
-    },
-    onError: () => {
-      // Error será tratado no UI
-    },
-  });
+  const { mutate: startTest, isPending, error } = useStartAssessmentMutation();
+
+  const handleStartTest = () => {
+    startTest(
+      { technology: Tech, difficulty: difficulty as AssessmentDifficulty },
+      {
+        onSuccess: () => {
+          router.push(`/candidate/test/${id}?difficulty=${difficulty}`);
+        },
+      },
+    );
+  };
 
   return (
     <Card className="max-w-sm">
@@ -70,7 +68,7 @@ export function TestCard({
 
         <Button
           className="w-full"
-          onClick={() => startTest()}
+          onClick={handleStartTest}
           disabled={isPending}
         >
           {isPending ? "Verificando..." : "Começar"}
