@@ -6,9 +6,13 @@ import { CandidateAddress } from "./CandidateAddress";
 import { CandidateProfileResponse } from "@/lib/types/candidate";
 
 const mockMutate = vi.fn();
+let mockIsPending = false;
 
 vi.mock("@/lib/api/candidate/userProfileMutations", () => ({
-  useUpdateAddressMutation: () => ({ mutate: mockMutate, isPending: false }),
+  useUpdateAddressMutation: () => ({
+    mutate: mockMutate,
+    isPending: mockIsPending,
+  }),
 }));
 
 vi.mock("@/lib/api/location/location", () => ({
@@ -54,6 +58,7 @@ function renderWithClient(ui: React.ReactNode) {
 describe("CandidateAddress Component", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockIsPending = false;
   });
 
   const mockProfileWithAddress: CandidateProfileResponse = {
@@ -163,5 +168,102 @@ describe("CandidateAddress Component", () => {
         }),
       );
     });
+  });
+
+  it("falls back to matching the country by partial name when the exact name is not found", () => {
+    const profileWithPartialCountryName: CandidateProfileResponse = {
+      ...mockProfileWithAddress,
+      address: {
+        ...mockProfileWithAddress.address!,
+        city: {
+          name: "Campinas",
+          stateName: "São Paulo",
+          countryName: "Brasil",
+        },
+      },
+    };
+
+    renderWithClient(
+      <CandidateAddress initialData={profileWithPartialCountryName} />,
+    );
+    expect(screen.getByText(/Endereço Residencial/i)).toBeInTheDocument();
+  });
+
+  it("matches the initial city by name when its id is not present in the loaded cities", () => {
+    const profileWithUnknownCityId: CandidateProfileResponse = {
+      ...mockProfileWithAddress,
+      address: {
+        ...mockProfileWithAddress.address!,
+        city: {
+          id: 999,
+          name: "Campinas",
+          stateId: 10,
+          stateName: "São Paulo",
+          countryName: "Brazil",
+        },
+      },
+    };
+
+    renderWithClient(
+      <CandidateAddress initialData={profileWithUnknownCityId} />,
+    );
+    expect(screen.getByText(/Endereço Residencial/i)).toBeInTheDocument();
+  });
+
+  it("updates country, state and city selects and submits the new location", async () => {
+    renderWithClient(<CandidateAddress initialData={null} />);
+
+    // País -> Argentina
+    fireEvent.click(screen.getByLabelText(/País/i));
+    const argentinaOption = await screen.findByRole("option", {
+      name: "Argentina",
+    });
+    fireEvent.pointerDown(argentinaOption);
+    fireEvent.click(argentinaOption);
+
+    // Estado -> Rio de Janeiro
+    await waitFor(() => {
+      expect(screen.getByLabelText(/Estado/i)).toBeEnabled();
+    });
+    fireEvent.click(screen.getByLabelText(/Estado/i));
+    const rioOption = await screen.findByRole("option", {
+      name: "Rio de Janeiro",
+    });
+    fireEvent.pointerDown(rioOption);
+    fireEvent.click(rioOption);
+
+    // Cidade -> Campinas
+    await waitFor(() => {
+      expect(screen.getByLabelText(/Cidade/i)).toBeEnabled();
+    });
+    fireEvent.click(screen.getByLabelText(/Cidade/i));
+    const campinasOption = await screen.findByRole("option", {
+      name: "Campinas",
+    });
+    fireEvent.pointerDown(campinasOption);
+    fireEvent.click(campinasOption);
+
+    fireEvent.click(screen.getByRole("button", { name: /Salvar Endereço/i }));
+
+    await waitFor(() => {
+      expect(mockMutate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          location: expect.objectContaining({
+            country: "Argentina",
+            state: "Rio de Janeiro",
+            city: "Campinas",
+          }),
+        }),
+      );
+    });
+  });
+
+  it("shows loading state on the save button while saving", () => {
+    mockIsPending = true;
+
+    renderWithClient(<CandidateAddress initialData={null} />);
+
+    const saveBtn = screen.getByRole("button", { name: /Salvando/i });
+    expect(saveBtn).toBeDisabled();
   });
 });
