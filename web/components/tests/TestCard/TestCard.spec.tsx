@@ -43,7 +43,9 @@ describe("TestCard", () => {
     ).toBeInTheDocument();
     expect(screen.getByText(/10 questões/i)).toBeInTheDocument();
     expect(screen.getByText(/^iniciante$/i)).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /começar/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /começar/i }),
+    ).toBeInTheDocument();
   });
 
   it("uses mapped technology icon when available", () => {
@@ -106,7 +108,9 @@ describe("TestCard", () => {
   });
 
   it("shows error message when technology has no tests", async () => {
-    vi.mocked(startAssessment).mockRejectedValue(new Error("No tests available"));
+    vi.mocked(startAssessment).mockRejectedValue(
+      new Error("No tests available"),
+    );
 
     render(
       <TestCard
@@ -125,7 +129,9 @@ describe("TestCard", () => {
 
     await waitFor(() => {
       expect(
-        screen.getByText(/esta tecnologia não possui testes disponíveis no momento\./i),
+        screen.getByText(
+          /esta tecnologia não possui testes disponíveis no momento\./i,
+        ),
       ).toBeInTheDocument();
     });
   });
