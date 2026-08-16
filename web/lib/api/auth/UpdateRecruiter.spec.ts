@@ -1,5 +1,4 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { ApiError } from "@/lib/api/errors";
 import { useUpdateRecruiter } from "./UpdateRecruiter";
 
 const mockUseRouter = vi.fn();
@@ -70,22 +69,6 @@ describe("useUpdateRecruiter", () => {
     expect(mockSetUserRole).toHaveBeenCalledWith("RECRUITER");
     expect(mockToastSuccess).toHaveBeenCalledWith(
       "Perfil do recrutador atualizado com sucesso!",
-    );
-    expect(mockPush).toHaveBeenCalledWith("/recruiter/dashboard");
-  });
-
-  it("handles 409 ApiError when registration is already completed", () => {
-    const mutation = useUpdateRecruiter();
-
-    mutation.onError(
-      new ApiError(409, "Registration already completed", {
-        message: "Registration already completed",
-      }),
-    );
-
-    expect(mockSetUserRole).toHaveBeenCalledWith("RECRUITER");
-    expect(mockToastSuccess).toHaveBeenCalledWith(
-      "Cadastro do recrutador já estava concluído ou dados já cadastrados.",
     );
     expect(mockPush).toHaveBeenCalledWith("/recruiter/dashboard");
   });

@@ -14,6 +14,7 @@ const mockUpdateRecruiter = vi.fn();
 
 vi.mock("@/lib/api/auth/UpdateRecruiter", () => ({
   useUpdateRecruiter: () => ({
+    mutate: mockUpdateRecruiter,
     mutateAsync: mockUpdateRecruiter,
     isPending: false,
   }),
