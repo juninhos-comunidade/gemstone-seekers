@@ -4,6 +4,7 @@ import {
   AssessmentStartResponse,
   AssessmentDifficulty,
 } from "@/lib/types/assessment";
+import { useMutation } from "@tanstack/react-query";
 
 export async function startAssessment(
   technology: string,
@@ -18,4 +19,16 @@ export async function startAssessment(
   const response =
     await httpClient.post<ApiResponse<AssessmentStartResponse>>(url);
   return response.result;
+}
+
+export function useStartAssessmentMutation() {
+  return useMutation({
+    mutationFn: ({
+      technology,
+      difficulty,
+    }: {
+      technology: string;
+      difficulty?: AssessmentDifficulty;
+    }) => startAssessment(technology, difficulty),
+  });
 }
