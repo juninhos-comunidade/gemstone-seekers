@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { useRouter } from "next/navigation";
-import { getAuthToken, getUserRole } from "@/lib/api/auth";
+import { setUserRole } from "@/lib/api/auth";
 import { toast } from "sonner";
 import Role from "./page";
 
@@ -30,8 +30,6 @@ vi.mock("react-hook-form", () => ({
 }));
 
 vi.mock("@/lib/api/auth", () => ({
-  getAuthToken: vi.fn(),
-  getUserRole: vi.fn(),
   setUserRole: vi.fn(),
 }));
 
@@ -42,8 +40,7 @@ vi.mock("sonner", () => ({
 }));
 
 const mockUseRouter = vi.mocked(useRouter);
-const mockGetAuthToken = vi.mocked(getAuthToken);
-const mockGetUserRole = vi.mocked(getUserRole);
+const mockSetUserRole = vi.mocked(setUserRole);
 const mockToastError = vi.mocked(toast.error);
 
 const mockRouter = {
@@ -63,9 +60,6 @@ describe("Role Selection Page - form interactions", () => {
     mockHandleSubmit.mockImplementation(
       (callback) => () => callback({ role: "candidate" }),
     );
-    // Seed a valid auth state with no role so the form renders.
-    mockGetAuthToken.mockReturnValue("valid-token");
-    mockGetUserRole.mockReturnValue(null);
   });
 
   it("should renders role selection cards for recruiter and candidate", async () => {
@@ -116,6 +110,7 @@ describe("Role Selection Page - form interactions", () => {
     fireEvent.submit(buttons[0].closest("form")!);
 
     expect(mockPush).toHaveBeenCalledWith("/role/recruiter");
+    expect(mockSetUserRole).toHaveBeenCalledWith("RECRUITER");
 
     const spySetItem = vi
       .spyOn(Storage.prototype, "setItem")
@@ -143,6 +138,7 @@ describe("Role Selection Page - form interactions", () => {
     fireEvent.submit(buttons[1].closest("form")!);
 
     expect(mockPush).toHaveBeenCalledWith("/role/candidate");
+    expect(mockSetUserRole).toHaveBeenCalledWith("CANDIDATE");
   });
 
   it("shows a toast error and does not navigate when setItem throws", async () => {
@@ -183,63 +179,5 @@ describe("Role Selection Page - form interactions", () => {
       .getAllByRole("button")
       .forEach((button) => expect(button).toBeDisabled());
     expect(screen.queryByText("Selecionar")).not.toBeInTheDocument();
-  });
-});
-
-describe("Role Selection Page - auth check effect", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-    isSubmittingMock = false;
-    mockUseRouter.mockReturnValue(mockRouter);
-    mockHandleSubmit.mockImplementation(
-      (callback) => () => callback({ role: "candidate" }),
-    );
-  });
-
-  it("redirects to /login when there is no token", async () => {
-    mockGetAuthToken.mockReturnValue(null);
-    mockGetUserRole.mockReturnValue(null);
-
-    render(<Role />);
-
-    await waitFor(() =>
-      expect(mockRouter.replace).toHaveBeenCalledWith("/login"),
-    );
-  });
-
-  it("redirects to /recruiter/dashboard when user has role RECRUITER", async () => {
-    mockGetAuthToken.mockReturnValue("valid-token");
-    mockGetUserRole.mockReturnValue("RECRUITER");
-
-    render(<Role />);
-
-    await waitFor(() =>
-      expect(mockRouter.replace).toHaveBeenCalledWith("/recruiter/dashboard"),
-    );
-  });
-
-  it("redirects to /candidate/dashboard when user has role CANDIDATE", async () => {
-    mockGetAuthToken.mockReturnValue("valid-token");
-    mockGetUserRole.mockReturnValue("CANDIDATE");
-
-    render(<Role />);
-
-    await waitFor(() =>
-      expect(mockRouter.replace).toHaveBeenCalledWith("/candidate/dashboard"),
-    );
-  });
-
-  it("stops checking and shows the form when user has no role", async () => {
-    mockGetAuthToken.mockReturnValue("valid-token");
-    mockGetUserRole.mockReturnValue(null);
-
-    render(<Role />);
-
-    await waitFor(() =>
-      expect(
-        screen.getByRole("heading", { name: "Recrutador" }),
-      ).toBeInTheDocument(),
-    );
-    expect(mockRouter.replace).not.toHaveBeenCalled();
   });
 });

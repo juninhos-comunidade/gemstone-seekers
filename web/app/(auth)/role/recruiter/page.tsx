@@ -26,7 +26,7 @@ import { useRouter } from "next/navigation";
 
 export default function RecruiterRegistrationPage() {
   const router = useRouter();
-  const { mutateAsync: updateRecruiter, isPending } = useUpdateRecruiter();
+  const { mutate: updateRecruiter, isPending } = useUpdateRecruiter();
   const { data: companies, isLoading: isLoadingCompanies } =
     useCompaniesQuery();
 
@@ -56,8 +56,8 @@ export default function RecruiterRegistrationPage() {
 
   const isLoading = isSubmitting || isPending;
 
-  const onSubmit = async (data: RecruiterRoleFormData) => {
-    await updateRecruiter(data);
+  const onSubmit = (data: RecruiterRoleFormData) => {
+    updateRecruiter(data);
   };
 
   return (

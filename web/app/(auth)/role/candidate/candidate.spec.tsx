@@ -57,6 +57,7 @@ describe("Candidate Signup Page", () => {
   it("renders completion form fields and submits candidate registration data", async () => {
     const mockMutate = vi.fn().mockResolvedValue(undefined);
     vi.mocked(useUpdateCandidate).mockReturnValue({
+      mutate: mockMutate,
       mutateAsync: mockMutate,
       isPending: false,
     } as unknown as UseUpdateCandidateReturn);
@@ -125,6 +126,7 @@ describe("Candidate Signup Page", () => {
 
   it("shows loading state when submitting", () => {
     vi.mocked(useUpdateCandidate).mockReturnValue({
+      mutate: vi.fn(),
       mutateAsync: vi.fn(),
       isPending: true,
     } as unknown as UseUpdateCandidateReturn);

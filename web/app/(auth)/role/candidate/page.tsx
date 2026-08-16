@@ -19,7 +19,7 @@ import { useRouter } from "next/navigation";
 
 export default function CandidateRegistrationPage() {
   const router = useRouter();
-  const { mutateAsync: updateCandidate, isPending } = useUpdateCandidate();
+  const { mutate: updateCandidate, isPending } = useUpdateCandidate();
 
   const {
     register,
@@ -50,8 +50,8 @@ export default function CandidateRegistrationPage() {
 
   const isLoading = isSubmitting || isPending;
 
-  const onSubmit = async (data: CandidateRoleFormData) => {
-    await updateCandidate(data);
+  const onSubmit = (data: CandidateRoleFormData) => {
+    updateCandidate(data);
   };
 
   return (

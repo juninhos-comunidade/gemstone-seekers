@@ -1,9 +1,8 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { getAuthToken, getUserRole, setUserRole } from "@/lib/api/auth";
+import { setUserRole } from "@/lib/api/auth";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { toast } from "sonner";
@@ -14,22 +13,6 @@ type RoleFormData = {
 
 export default function Page() {
   const router = useRouter();
-
-  useEffect(() => {
-    const token = getAuthToken();
-
-    if (!token) {
-      router.replace("/login");
-      return;
-    }
-
-    const role = getUserRole();
-    if (role) {
-      router.replace(
-        role === "RECRUITER" ? "/recruiter/dashboard" : "/candidate/dashboard",
-      );
-    }
-  }, [router]);
 
   const {
     handleSubmit,

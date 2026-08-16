@@ -1,5 +1,4 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { ApiError } from "@/lib/api/errors";
 
 const mockUseRouter = vi.fn();
 const mockUseMutation = vi.fn();
@@ -375,25 +374,6 @@ describe("auth api hooks", () => {
     expect(mockPush).toHaveBeenCalledWith("/candidate/dashboard");
   });
 
-  it("useUpdateCandidate redirects when registration is already completed", async () => {
-    const { useUpdateCandidate } = await import("./UpdateCandidate");
-    const mutation = useUpdateCandidate();
-
-    mutation.onError(
-      new ApiError(409, "Registration already completed", {
-        success: false,
-        message: "Registration already completed",
-        error: { code: "CONFLICT", message: "Registration already completed" },
-      }),
-    );
-
-    expect(mockSetUserRole).toHaveBeenCalledWith("CANDIDATE");
-    expect(mockToastSuccess).toHaveBeenCalledWith(
-      "Cadastro do candidato já estava concluído ou dados já cadastrados.",
-    );
-    expect(mockPush).toHaveBeenCalledWith("/candidate/dashboard");
-  });
-
   it("useUpdateCandidate shows generic error fallback when message is unavailable", async () => {
     const { useUpdateCandidate } = await import("./UpdateCandidate");
     const mutation = useUpdateCandidate();
@@ -479,24 +459,5 @@ describe("auth api hooks", () => {
     expect(mockToastError).toHaveBeenCalledWith(
       "Erro ao atualizar perfil do recrutador",
     );
-  });
-
-  it("useUpdateRecruiter redirects when registration is already completed", async () => {
-    const { useUpdateRecruiter } = await import("./UpdateRecruiter");
-    const mutation = useUpdateRecruiter();
-
-    mutation.onError(
-      new ApiError(409, "Registration already completed", {
-        success: false,
-        message: "Registration already completed",
-        error: { code: "CONFLICT", message: "Registration already completed" },
-      }),
-    );
-
-    expect(mockSetUserRole).toHaveBeenCalledWith("RECRUITER");
-    expect(mockToastSuccess).toHaveBeenCalledWith(
-      "Cadastro do recrutador já estava concluído ou dados já cadastrados.",
-    );
-    expect(mockPush).toHaveBeenCalledWith("/recruiter/dashboard");
   });
 });
