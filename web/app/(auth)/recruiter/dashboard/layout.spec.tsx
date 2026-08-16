@@ -33,7 +33,7 @@ describe("Recruiter Dashboard Layout", () => {
     );
 
     expect(screen.getByTestId("side-menu")).toHaveTextContent(
-      "Dashboard,Vagas,Radar",
+      "Dashboard,Vagas",
     );
     expect(
       screen.getByText(/conteúdo do dashboard recrutador/i),
