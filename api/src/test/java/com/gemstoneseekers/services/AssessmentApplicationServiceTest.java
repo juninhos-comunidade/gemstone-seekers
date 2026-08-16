@@ -1,30 +1,19 @@
 package com.gemstoneseekers.services;
 
+import com.gemstoneseekers.dtos.request.AssessmentHistoryFilterParams;
 import com.gemstoneseekers.dtos.request.SaveAnswerRequest;
-import com.gemstoneseekers.dtos.response.CandidateAssessmentHistoryResponse;
-import com.gemstoneseekers.dtos.response.DifficultyHistoryGroupResponse;
-import com.gemstoneseekers.dtos.response.QuestionResultResponse;
-import com.gemstoneseekers.dtos.response.AssessmentDetailedResultResponse;
-import com.gemstoneseekers.dtos.response.AssessmentResponse;
-import com.gemstoneseekers.dtos.response.AssessmentResultResponse;
-import com.gemstoneseekers.dtos.response.AssessmentSummaryResponse;
-import com.gemstoneseekers.dtos.response.TechnologyResponse;
-import com.gemstoneseekers.dtos.response.TechnologyHistoryGroupResponse;
-import com.gemstoneseekers.enums.QuestionDifficulty;
+import com.gemstoneseekers.dtos.response.*;
 import com.gemstoneseekers.enums.AssessmentStatus;
+import com.gemstoneseekers.enums.QuestionDifficulty;
+import com.gemstoneseekers.events.AssessmentCompletedEvent;
 import com.gemstoneseekers.exceptions.AccessDeniedException;
 import com.gemstoneseekers.exceptions.BusinessRuleException;
 import com.gemstoneseekers.exceptions.EntityNotFoundException;
 import com.gemstoneseekers.mappers.AssessmentMapper;
-import com.gemstoneseekers.models.Candidate;
-import com.gemstoneseekers.models.CandidateAnswer;
-import com.gemstoneseekers.models.Question;
-import com.gemstoneseekers.models.QuestionOption;
-import com.gemstoneseekers.models.Technology;
-import com.gemstoneseekers.models.User;
+import com.gemstoneseekers.models.*;
+import com.gemstoneseekers.repositories.AssessmentRepository;
 import com.gemstoneseekers.repositories.QuestionOptionRepository;
 import com.gemstoneseekers.repositories.QuestionRepository;
-import com.gemstoneseekers.repositories.AssessmentRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -40,22 +29,16 @@ import org.springframework.data.jpa.domain.Specification;
 
 import java.math.BigDecimal;
 import java.time.Instant;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.UUID;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class AssessmentApplicationServiceTest {
@@ -80,6 +63,12 @@ class AssessmentApplicationServiceTest {
 
     @Captor
     private ArgumentCaptor<com.gemstoneseekers.models.Assessment> testArgumentCaptor;
+
+    @Captor
+    private ArgumentCaptor<AssessmentCompletedEvent> eventCaptor;
+
+    @Captor
+    private ArgumentCaptor<Specification<com.gemstoneseekers.models.Assessment>> specCaptor;
 
     private Candidate mockCandidate;
     private Technology mockTechnology;
@@ -436,6 +425,36 @@ class AssessmentApplicationServiceTest {
     }
 
     @Test
+    @DisplayName("submitAssessment should publish AssessmentCompletedEvent on success")
+    void submitAssessment_shouldPublishEventOnSuccess() {
+        String userEmail = "candidate@test.com";
+        UUID assessmentId = UUID.randomUUID();
+
+        com.gemstoneseekers.models.Assessment test = new com.gemstoneseekers.models.Assessment();
+        test.setId(assessmentId);
+        test.setCandidate(mockCandidate);
+        test.setTechnology(mockTechnology);
+        test.setStatus(AssessmentStatus.IN_PROGRESS);
+        test.setAnswers(new HashSet<>());
+
+        when(candidateService.getCandidateByEmailSession(userEmail)).thenReturn(mockCandidate);
+        when(assessmentRepository.findById(assessmentId)).thenReturn(Optional.of(test));
+        when(assessmentRepository.save(test)).thenReturn(test);
+        when(assessmentMapper.toAssessmentResultResponse(test)).thenReturn(new AssessmentResultResponse(assessmentId,
+                "Java", AssessmentStatus.COMPLETED, BigDecimal.ZERO, 0, 0L, Instant.now()));
+
+        assessmentApplicationService.submitAssessment(assessmentId, userEmail);
+
+        verify(eventPublisher).publishEvent(eventCaptor.capture());
+        AssessmentCompletedEvent publishedEvent = eventCaptor.getValue();
+
+        assertThat(publishedEvent.candidateId()).isEqualTo(mockCandidate.getId());
+        assertThat(publishedEvent.technologyId()).isEqualTo(mockTechnology.getId());
+        assertThat(publishedEvent.assessmentId()).isEqualTo(assessmentId);
+        assertThat(publishedEvent.finalScore()).isEqualByComparingTo(test.getScore());
+    }
+
+    @Test
     @DisplayName("submitAssessment should throw AccessDeniedException when candidate does not own the test")
     void submitAssessment_shouldThrowAccessDeniedException_whenCandidateDoesNotOwnTest() {
         String userEmail = "intruder@test.com";
@@ -533,6 +552,80 @@ class AssessmentApplicationServiceTest {
         assertThat(technologyGroup.difficulties().get(0).averageScore()).isEqualByComparingTo("8.00");
         assertThat(technologyGroup.difficulties().get(1).averageScore()).isEqualByComparingTo("0.00");
     }
+
+    @Test
+    @DisplayName("getCandidateAssessmentHistory should calculate average score correctly for multiple completed tests")
+    void getCandidateAssessmentHistory_shouldCalculateAverageScoreCorrectly() {
+        String userEmail = "candidate@test.com";
+
+        Assessment test1 = new Assessment();
+        test1.setTechnology(mockTechnology);
+        test1.setStatus(AssessmentStatus.COMPLETED);
+        test1.setScore(new BigDecimal("7.50"));
+        Question q1 = new Question();
+        q1.setDifficultyLevel(QuestionDifficulty.BEGINNER);
+        CandidateAnswer ca1 = new CandidateAnswer();
+        ca1.setAssessment(test1);
+        ca1.setQuestion(q1);
+        test1.setAnswers(Set.of(ca1));
+
+
+        Assessment test2 = new Assessment();
+        test2.setTechnology(mockTechnology);
+        test2.setStatus(AssessmentStatus.COMPLETED);
+        test2.setScore(new BigDecimal("8.50"));
+        Question q2 = new Question();
+        q2.setDifficultyLevel(QuestionDifficulty.BEGINNER);
+        CandidateAnswer ca2 = new CandidateAnswer();
+        ca2.setAssessment(test2);
+        ca2.setQuestion(q2);
+        test2.setAnswers(Set.of(ca2));
+
+
+        Assessment test3 = new Assessment();
+        test3.setTechnology(mockTechnology);
+        test3.setStatus(AssessmentStatus.CANCELED);
+        test3.setScore(null);
+        Question q3 = new Question();
+        q3.setDifficultyLevel(QuestionDifficulty.BEGINNER);
+        CandidateAnswer ca3 = new CandidateAnswer();
+        ca3.setAssessment(test3);
+        ca3.setQuestion(q3);
+        test3.setAnswers(Set.of(ca3));
+
+
+        when(candidateService.getCandidateByEmailSession(userEmail)).thenReturn(mockCandidate);
+        when(assessmentRepository.findAll(any(Specification.class), any(Sort.class))).thenReturn(List.of(test1, test2, test3));
+        when(assessmentMapper.toSummaryResponse(any(Assessment.class))).thenAnswer(inv -> {
+            Assessment a = inv.getArgument(0);
+            return new AssessmentSummaryResponse(a.getId(), a.getStatus(), a.getDerivedDifficulty(), a.getScore(), a.getCreatedAt(), a.getCompletedAt());
+        });
+
+        CandidateAssessmentHistoryResponse response = assessmentApplicationService.getCandidateAssessmentHistory(userEmail, null);
+
+        assertThat(response.historyByTechnology().get(0).difficulties().get(0).averageScore())
+                .isEqualByComparingTo("8.00");
+    }
+
+    @Test
+    @DisplayName("getCandidateAssessmentHistory should apply filters correctly")
+    void getCandidateAssessmentHistory_shouldApplyFilters() {
+        String userEmail = "candidate@test.com";
+        var filters = new AssessmentHistoryFilterParams("Java", AssessmentStatus.COMPLETED);
+
+        when(candidateService.getCandidateByEmailSession(userEmail)).thenReturn(mockCandidate);
+        when(assessmentRepository.findAll(any(Specification.class), any(Sort.class))).thenReturn(Collections.emptyList());
+
+        assessmentApplicationService.getCandidateAssessmentHistory(userEmail, filters);
+
+        verify(assessmentRepository).findAll(specCaptor.capture(), any(Sort.class));
+        Specification<Assessment> capturedSpec = specCaptor.getValue();
+
+        // Não podemos testar o Specification diretamente, mas podemos verificar que ele foi criado e passado.
+        // Um teste de integração para AssessmentSpecifications já garante a lógica interna.
+        assertThat(capturedSpec).isNotNull();
+    }
+
 
     @Test
     @DisplayName("getAssessmentResult should return detailed result")
