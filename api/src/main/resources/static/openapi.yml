@@ -736,6 +736,30 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/BaseResponseListCityResponse"
+  /api/v1/badges/me:
+    get:
+      tags:
+      - badge-controller
+      operationId: getMyBadges
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/BaseResponseListCandidateBadgeResponse"
+  /api/v1/badges/available:
+    get:
+      tags:
+      - badge-controller
+      operationId: getAvailableBadges
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/BaseResponseListAvailableBadgeResponse"
   /api/v1/assessments/{assessmentId}/result:
     get:
       tags:
@@ -1850,6 +1874,60 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/RecruiterResponse"
+        error:
+          $ref: "#/components/schemas/ErrorResponse"
+    BaseResponseListCandidateBadgeResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        result:
+          type: array
+          items:
+            $ref: "#/components/schemas/CandidateBadgeResponse"
+        error:
+          $ref: "#/components/schemas/ErrorResponse"
+    CandidateBadgeResponse:
+      type: object
+      properties:
+        badgeName:
+          type: string
+        technologyName:
+          type: string
+        description:
+          type: string
+        scoreAchieved:
+          type: number
+        earnedAt:
+          type: string
+          format: date-time
+    AvailableBadgeResponse:
+      type: object
+      properties:
+        badgeId:
+          type: integer
+          format: int32
+        badgeName:
+          type: string
+        technologyName:
+          type: string
+        description:
+          type: string
+        minimumScoreRequired:
+          type: number
+    BaseResponseListAvailableBadgeResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        result:
+          type: array
+          items:
+            $ref: "#/components/schemas/AvailableBadgeResponse"
         error:
           $ref: "#/components/schemas/ErrorResponse"
     AssessmentDetailedResultResponse:

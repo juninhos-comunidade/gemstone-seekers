@@ -17,15 +17,12 @@ import {
 import { SideMenu, type MenuItem } from "@/components/SideMenu/SideMenu";
 import { logout } from "@/lib/api/auth";
 
-type DashboardHeaderProps = {
+type userHeaderProps = {
   role: "candidate" | "recruiter";
   menuItems?: MenuItem[];
 };
 
-export function DashboardHeader({
-  role,
-  menuItems = [],
-}: DashboardHeaderProps) {
+export function UserHeader({ role, menuItems = [] }: userHeaderProps) {
   const roleLabel = role === "candidate" ? "Candidato" : "Recrutador";
   const router = useRouter();
 
@@ -40,7 +37,7 @@ export function DashboardHeader({
   };
 
   return (
-    <header className="bg-background/95 fixed top-0 right-0 left-0 z-50 h-16 border-b backdrop-blur">
+    <header className="bg-background/95 sticky top-0 z-50 h-16 w-full border-b backdrop-blur">
       <div className="mx-auto flex h-full max-w-screen-2xl items-center justify-between gap-3 px-3 sm:px-6">
         <div className="flex min-w-0 items-center gap-2 sm:gap-5">
           {menuItems.length > 0 && (

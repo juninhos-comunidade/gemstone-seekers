@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
-import { DashboardHeader } from "./DashboardHeader";
+import { UserHeader } from "./UserHeader";
 
 vi.mock("@/components/SettingsModal/SettingsModal", () => ({
   SettingsModal: () => <div>Settings</div>,
@@ -47,14 +47,14 @@ const mockLogout = vi.fn();
 vi.mock("@/lib/api/auth", () => ({
   logout: () => mockLogout(),
 }));
-
-describe("DashboardHeader", () => {
+describe("UserHeader", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
   it("renders candidate layout, initials, logo link and handles profile redirect", () => {
-    render(<DashboardHeader role="candidate" />);
+    render(<UserHeader role="candidate" />);
+    expect(screen.getByRole("banner")).toHaveClass("sticky");
     expect(screen.getByText(/painel do candidato/i)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /perfil/i })).toHaveTextContent(
       /CA/,
@@ -68,7 +68,7 @@ describe("DashboardHeader", () => {
   });
 
   it("renders recruiter layout and hides avatar button", () => {
-    render(<DashboardHeader role="recruiter" />);
+    render(<UserHeader role="recruiter" />);
     expect(screen.getByText(/painel do recrutador/i)).toBeInTheDocument();
     expect(
       screen.queryByRole("button", { name: /perfil/i }),
@@ -79,7 +79,7 @@ describe("DashboardHeader", () => {
   });
 
   it("handles logout when clicking the logout button", () => {
-    render(<DashboardHeader role="candidate" />);
+    render(<UserHeader role="candidate" />);
     const logoutBtn = screen.getByRole("button", { name: /sair da conta/i });
     expect(logoutBtn).toBeInTheDocument();
 
@@ -89,7 +89,7 @@ describe("DashboardHeader", () => {
 
   it("renders mobile menu trigger content when menu items are provided", () => {
     render(
-      <DashboardHeader
+      <UserHeader
         role="candidate"
         menuItems={[
           { label: "Dashboard", href: "/candidate/dashboard", icon: "home" },

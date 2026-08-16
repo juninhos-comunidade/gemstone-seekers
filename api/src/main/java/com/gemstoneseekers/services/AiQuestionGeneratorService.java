@@ -2,6 +2,7 @@ package com.gemstoneseekers.services;
 
 import com.gemstoneseekers.dtos.response.AiQuestionBatchResponse;
 import com.gemstoneseekers.enums.QuestionDifficulty;
+import com.gemstoneseekers.exceptions.AiGenerationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient;
@@ -40,9 +41,30 @@ public class AiQuestionGeneratorService {
                 %s
                 """.formatted(amount, technologyName, difficulty.name(), formatInstructions);
 
-        String rawResponse = chatClient.prompt().user(prompt).call().content();
+        try {
+            String rawResponse = chatClient.prompt().user(prompt).call().content();
 
-        assert rawResponse != null;
-        return converter.convert(rawResponse);
+            if (rawResponse == null || rawResponse.isBlank()) {
+                throw new AiGenerationException("A API retornou um payload nulo ou vazio.");
+            }
+
+            return converter.convert(rawResponse);
+
+        } catch (AiGenerationException e) {
+            if (log.isErrorEnabled()) {
+                log.error("[AI_SERVICE] AI content validation failed for {} ({}): {}", technologyName, difficulty, e
+                        .getMessage());
+            }
+            throw e;
+        } catch (org.springframework.ai.retry.TransientAiException
+                | org.springframework.ai.retry.NonTransientAiException | IllegalArgumentException
+                | IllegalStateException e) {
+
+            if (log.isErrorEnabled()) {
+                log.error("[AI_SERVICE] AI communication failed for {} ({}). Root cause: {}", technologyName,
+                        difficulty, e.getMessage());
+            }
+            throw new AiGenerationException("AI content generation failed due to upstream error.", e);
+        }
     }
 }

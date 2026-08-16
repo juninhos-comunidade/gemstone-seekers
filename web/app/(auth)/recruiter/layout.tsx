@@ -1,4 +1,4 @@
-import { DashboardHeader } from "@/components/DashboardHeader/DashboardHeader";
+import { UserHeader } from "@/components/userHeader/UserHeader";
 
 export default function RecruiterLayout({
   children,
@@ -7,7 +7,7 @@ export default function RecruiterLayout({
 }>) {
   return (
     <div className="bg-background min-h-screen">
-      <DashboardHeader role="recruiter" />
+      <UserHeader role="recruiter" />
       <div>{children}</div>
     </div>
   );
