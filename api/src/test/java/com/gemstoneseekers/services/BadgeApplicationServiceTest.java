@@ -2,6 +2,7 @@ package com.gemstoneseekers.services;
 
 import com.gemstoneseekers.dtos.response.AvailableBadgeResponse;
 import com.gemstoneseekers.dtos.response.CandidateBadgeResponse;
+import com.gemstoneseekers.enums.QuestionDifficulty;
 import com.gemstoneseekers.exceptions.AccessDeniedException;
 import com.gemstoneseekers.mappers.BadgeMapper;
 import com.gemstoneseekers.models.*;
@@ -56,19 +57,19 @@ class BadgeApplicationServiceTest {
     class EvaluateAndAssignBadge {
 
         @Test
-        @DisplayName("should do nothing if no badge is found for the technology")
+        @DisplayName("should do nothing if no badge is found for the technology and difficulty")
         void whenNoBadgeFound_shouldDoNothing() {
             // given
             UUID candidateId = UUID.randomUUID();
             Integer technologyId = 1;
+            QuestionDifficulty difficulty = QuestionDifficulty.BEGINNER;
             UUID assessmentId = UUID.randomUUID();
             BigDecimal finalScore = new BigDecimal("90.00");
 
-            when(badgeRepository.findByTechnologyId(technologyId)).thenReturn(Optional.empty());
+            when(badgeRepository.findByTechnologyIdAndDifficultyLevel(technologyId, difficulty)).thenReturn(Optional.empty());
 
             // when
-            badgeApplicationService.evaluateAndAssignBadge(candidateId, technologyId, assessmentId, finalScore);
-
+            badgeApplicationService.evaluateAndAssignBadge(candidateId, technologyId, assessmentId, finalScore, difficulty);
             // then
             verify(candidateBadgeRepository, never()).existsByCandidateIdAndBadgeId(any(), any());
             verify(candidateBadgeRepository, never()).save(any());
@@ -80,18 +81,19 @@ class BadgeApplicationServiceTest {
             // given
             UUID candidateId = UUID.randomUUID();
             Integer technologyId = 1;
+            QuestionDifficulty difficulty = QuestionDifficulty.BEGINNER;
             UUID assessmentId = UUID.randomUUID();
             BigDecimal finalScore = new BigDecimal("79.99");
 
             Badge badge = new Badge();
             badge.setId(10);
+            badge.setDifficultyLevel(difficulty);
             badge.setMinimumScore(new BigDecimal("80.00"));
 
-            when(badgeRepository.findByTechnologyId(technologyId)).thenReturn(Optional.of(badge));
+            when(badgeRepository.findByTechnologyIdAndDifficultyLevel(technologyId, difficulty)).thenReturn(Optional.of(badge));
 
             // when
-            badgeApplicationService.evaluateAndAssignBadge(candidateId, technologyId, assessmentId, finalScore);
-
+            badgeApplicationService.evaluateAndAssignBadge(candidateId, technologyId, assessmentId, finalScore, difficulty);
             // then
             verify(candidateBadgeRepository, never()).existsByCandidateIdAndBadgeId(any(), any());
             verify(candidateBadgeRepository, never()).save(any());
@@ -103,19 +105,20 @@ class BadgeApplicationServiceTest {
             // given
             UUID candidateId = UUID.randomUUID();
             Integer technologyId = 1;
+            QuestionDifficulty difficulty = QuestionDifficulty.BEGINNER;
             UUID assessmentId = UUID.randomUUID();
             BigDecimal finalScore = new BigDecimal("85.00");
 
             Badge badge = new Badge();
             badge.setId(10);
+            badge.setDifficultyLevel(difficulty);
             badge.setMinimumScore(new BigDecimal("80.00"));
 
-            when(badgeRepository.findByTechnologyId(technologyId)).thenReturn(Optional.of(badge));
+            when(badgeRepository.findByTechnologyIdAndDifficultyLevel(technologyId, difficulty)).thenReturn(Optional.of(badge));
             when(candidateBadgeRepository.existsByCandidateIdAndBadgeId(candidateId, badge.getId())).thenReturn(true);
 
             // when
-            badgeApplicationService.evaluateAndAssignBadge(candidateId, technologyId, assessmentId, finalScore);
-
+            badgeApplicationService.evaluateAndAssignBadge(candidateId, technologyId, assessmentId, finalScore, difficulty);
             // then
             verify(candidateBadgeRepository, times(1)).existsByCandidateIdAndBadgeId(candidateId, badge.getId());
             verify(candidateRepository, never()).getReferenceById(any());
@@ -129,12 +132,14 @@ class BadgeApplicationServiceTest {
             // given
             UUID candidateId = UUID.randomUUID();
             Integer technologyId = 1;
+            QuestionDifficulty difficulty = QuestionDifficulty.ADVANCED;
             UUID assessmentId = UUID.randomUUID();
             BigDecimal finalScore = new BigDecimal("95.00");
 
             Badge badge = new Badge();
             badge.setId(10);
-            badge.setName("Java Expert");
+            badge.setName("Java Advanced");
+            badge.setDifficultyLevel(difficulty);
             badge.setMinimumScore(new BigDecimal("90.00"));
 
             Candidate candidateProxy = new Candidate();
@@ -142,14 +147,13 @@ class BadgeApplicationServiceTest {
             Assessment assessmentProxy = new Assessment();
             assessmentProxy.setId(assessmentId);
 
-            when(badgeRepository.findByTechnologyId(technologyId)).thenReturn(Optional.of(badge));
+            when(badgeRepository.findByTechnologyIdAndDifficultyLevel(technologyId, difficulty)).thenReturn(Optional.of(badge));
             when(candidateBadgeRepository.existsByCandidateIdAndBadgeId(candidateId, badge.getId())).thenReturn(false);
             when(candidateRepository.getReferenceById(candidateId)).thenReturn(candidateProxy);
             when(assessmentRepository.getReferenceById(assessmentId)).thenReturn(assessmentProxy);
 
             // when
-            badgeApplicationService.evaluateAndAssignBadge(candidateId, technologyId, assessmentId, finalScore);
-
+            badgeApplicationService.evaluateAndAssignBadge(candidateId, technologyId, assessmentId, finalScore, difficulty);
             // then
             verify(candidateBadgeRepository).save(candidateBadgeCaptor.capture());
             CandidateBadge savedCandidateBadge = candidateBadgeCaptor.getValue();
@@ -210,8 +214,8 @@ class BadgeApplicationServiceTest {
 
             // when & then
             assertThatThrownBy(() -> badgeApplicationService.getCandidateBadges(requesterEmail))
-                    .isInstanceOf(AccessDeniedException.class)
-                    .hasMessage("Operação inválida. Você não é o proprietário deste registro.");
+                .isInstanceOf(AccessDeniedException.class)
+                .hasMessage("Operação inválida. Você não é o proprietário deste registro.");
         }
     }
 

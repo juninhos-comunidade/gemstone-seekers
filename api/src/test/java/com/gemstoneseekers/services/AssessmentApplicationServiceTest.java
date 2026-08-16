@@ -380,8 +380,12 @@ class AssessmentApplicationServiceTest {
 
         Question question1 = new Question();
         question1.setId(1L);
+        question1.setDifficultyLevel(QuestionDifficulty.BEGINNER);
+
         Question question2 = new Question();
         question2.setId(2L);
+        question2.setDifficultyLevel(QuestionDifficulty.ADVANCED);
+
 
         QuestionOption correctOption = new QuestionOption();
         correctOption.setId(11L);
