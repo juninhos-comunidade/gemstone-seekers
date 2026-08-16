@@ -1,8 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { setAuthToken, setUserRole } from "@/lib/api/auth";
-import { getCandidateProfile } from "@/lib/api/candidate/getCandidateProfile";
+import { setAuthToken, setUserRole, UserRole } from "@/lib/api/auth";
 import { httpClient } from "@/lib/api/client";
 import { ApiError } from "@/lib/api/errors";
 
@@ -17,6 +16,8 @@ export interface LoginResponse {
   result?: {
     refreshToken?: string;
     accessToken?: string;
+    registrationCompleted?: boolean;
+    role?: UserRole | null;
   };
 }
 
@@ -43,7 +44,7 @@ export function useLogin() {
 
   return useMutation({
     mutationFn: loginRequest,
-    onSuccess: async (data) => {
+    onSuccess: (data) => {
       if (!data || data.success === false) {
         toast.error(data?.message ?? "Erro ao fazer login");
         return;
@@ -58,30 +59,23 @@ export function useLogin() {
 
       setAuthToken(token);
 
-      try {
-        const profile = await getCandidateProfile();
-        const role = profile?.candidate?.user?.role;
-        const registrationCompleted = Boolean(profile?.candidate?.id);
+      const role = data.result?.role;
+      const registrationCompleted = data.result?.registrationCompleted;
 
-        if (role === "CANDIDATE" || role === "RECRUITER") {
-          setUserRole(role);
-        }
-
-        toast.success(data.message || "Login realizado com sucesso!");
-        if (!registrationCompleted) {
-          router.push("/role");
-          return;
-        }
-
-        router.push(
-          role === "RECRUITER"
-            ? "/recruiter/dashboard"
-            : "/candidate/dashboard",
-        );
-      } catch {
-        toast.success(data.message || "Login realizado com sucesso!");
-        router.push("/role");
+      if (role === "CANDIDATE" || role === "RECRUITER") {
+        setUserRole(role);
       }
+
+      toast.success(data.message || "Login realizado com sucesso!");
+
+      if (!registrationCompleted) {
+        router.push("/role");
+        return;
+      }
+
+      router.push(
+        role === "RECRUITER" ? "/recruiter/dashboard" : "/candidate/dashboard",
+      );
     },
     onError: (error: Error) => {
       if (isTimeoutOrNetworkError(error)) {
