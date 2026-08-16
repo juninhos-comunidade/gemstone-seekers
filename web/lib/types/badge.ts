@@ -16,14 +16,9 @@ export interface CandidateBadge {
 }
 
 export interface CandidateBadgeResponse {
-  id: number;
-  name: string;
-  description?: string;
-  minimumScore?: number;
-  technologyId?: number;
+  badgeName: string;
   technologyName?: string;
-  technologyCategory?: string;
-  testId?: string;
-  testScore?: number;
+  description?: string;
+  scoreAchieved?: number;
   earnedAt: string;
 }

@@ -1,5 +1,4 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { MOCK_CANDIDATE_BADGES } from "@/lib/mocks/badgeMock";
 
 const mockUseQuery = vi.fn();
 const mockHttpGet = vi.fn();
@@ -24,8 +23,10 @@ describe("badges api module", () => {
     it("returns result array when httpClient.get succeeds", async () => {
       const apiData = [
         {
-          id: 1,
-          name: "Test Badge",
+          badgeName: "Test Badge",
+          technologyName: "TypeScript",
+          description: "Test description",
+          scoreAchieved: 10.0,
           earnedAt: "2026-08-01T00:00:00Z",
         },
       ];
@@ -34,7 +35,7 @@ describe("badges api module", () => {
       const { getCandidateBadges } = await import("./badges");
       const data = await getCandidateBadges();
 
-      expect(mockHttpGet).toHaveBeenCalledWith("/candidates/me/badges");
+      expect(mockHttpGet).toHaveBeenCalledWith("/badges/me");
       expect(data).toEqual(apiData);
     });
 
@@ -44,16 +45,18 @@ describe("badges api module", () => {
       const { getCandidateBadges } = await import("./badges");
       const data = await getCandidateBadges();
 
+      expect(mockHttpGet).toHaveBeenCalledWith("/badges/me");
       expect(data).toEqual([]);
     });
 
-    it("returns MOCK_CANDIDATE_BADGES fallback when httpClient.get fails", async () => {
-      mockHttpGet.mockRejectedValue(new Error("Network Error"));
+    it("throws error when httpClient.get fails", async () => {
+      const error = new Error("Network Error");
+      mockHttpGet.mockRejectedValue(error);
 
       const { getCandidateBadges } = await import("./badges");
-      const data = await getCandidateBadges();
 
-      expect(data).toEqual(MOCK_CANDIDATE_BADGES);
+      await expect(getCandidateBadges()).rejects.toThrow("Network Error");
+      expect(mockHttpGet).toHaveBeenCalledWith("/badges/me");
     });
   });
 
@@ -67,7 +70,7 @@ describe("badges api module", () => {
       mockHttpGet.mockResolvedValue({ result: [] });
       const result = await query.queryFn();
 
-      expect(mockHttpGet).toHaveBeenCalledWith("/candidates/me/badges");
+      expect(mockHttpGet).toHaveBeenCalledWith("/badges/me");
       expect(result).toEqual([]);
     });
   });

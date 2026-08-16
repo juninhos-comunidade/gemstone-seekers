@@ -1,7 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { FaAward, FaCalendarAlt, FaCheckCircle, FaCode } from "react-icons/fa";
+import {
+  FaAward,
+  FaCalendarAlt,
+  FaCheckCircle,
+  FaCode,
+  FaExclamationTriangle,
+} from "react-icons/fa";
 import { useCandidateBadgesQuery } from "@/lib/api/badges/badges";
 import {
   Card,
@@ -16,7 +22,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { cn } from "@/lib/utils";
 
 export default function BadgesPage() {
-  const { data: badges = [], isLoading } = useCandidateBadgesQuery();
+  const { data: badges = [], isLoading, isError } = useCandidateBadgesQuery();
 
   const formatDate = (dateString: string) => {
     try {
@@ -36,6 +42,35 @@ export default function BadgesPage() {
     return (
       <div className="flex h-64 items-center justify-center">
         <Spinner className="text-primary size-8" />
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-foreground text-2xl font-bold tracking-tight md:text-3xl">
+            Minhas Badges
+          </h1>
+          <p className="text-muted-foreground mt-1 text-sm">
+            Acompanhe todas as conquistas e insígnias obtidas em seus testes de
+            conhecimento.
+          </p>
+        </div>
+
+        <Card className="border-destructive/30 bg-destructive/5 flex flex-col items-center justify-center p-8 text-center sm:p-12">
+          <div className="bg-destructive/10 text-destructive flex size-16 items-center justify-center rounded-full">
+            <FaExclamationTriangle className="size-8" />
+          </div>
+          <CardTitle className="text-foreground mt-4 text-xl font-semibold">
+            Erro ao carregar badges
+          </CardTitle>
+          <CardDescription className="mt-2 max-w-md text-sm">
+            Não foi possível recuperar suas badges no momento. Verifique sua
+            conexão ou tente novamente mais tarde.
+          </CardDescription>
+        </Card>
       </div>
     );
   }
@@ -79,7 +114,7 @@ export default function BadgesPage() {
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {badges.map((badgeItem) => (
             <Card
-              key={badgeItem.id}
+              key={`${badgeItem.badgeName}-${badgeItem.earnedAt}`}
               className="group hover:border-primary/50 relative flex flex-col justify-between overflow-hidden transition-all duration-200 hover:shadow-md"
             >
               <CardHeader className="pb-3">
@@ -94,7 +129,7 @@ export default function BadgesPage() {
                   )}
                 </div>
                 <CardTitle className="text-foreground mt-3 text-lg font-bold">
-                  {badgeItem.name}
+                  {badgeItem.badgeName}
                 </CardTitle>
                 {badgeItem.description && (
                   <CardDescription className="line-clamp-3 text-xs leading-relaxed">
@@ -105,14 +140,14 @@ export default function BadgesPage() {
 
               <CardContent className="pt-0">
                 <div className="border-border/60 bg-muted/30 mt-2 space-y-2 rounded-lg border p-3 text-xs">
-                  {badgeItem.testScore !== undefined && (
+                  {badgeItem.scoreAchieved !== undefined && (
                     <div className="flex items-center justify-between">
                       <span className="text-muted-foreground flex items-center gap-1.5 font-medium">
                         <FaCheckCircle className="size-3.5 text-emerald-500" />
                         Pontuação Obtida
                       </span>
                       <span className="text-foreground font-bold">
-                        {badgeItem.testScore.toFixed(1)}%
+                        {badgeItem.scoreAchieved.toFixed(1)}%
                       </span>
                     </div>
                   )}

@@ -16,8 +16,9 @@ describe("Badges Page", () => {
     mockUseCandidateBadgesQuery.mockReturnValue({
       data: undefined,
       isLoading: true,
+      isError: false,
       error: null,
-    } as ReturnType<typeof useCandidateBadgesQuery>);
+    } as unknown as ReturnType<typeof useCandidateBadgesQuery>);
 
     render(<BadgesPage />);
 
@@ -28,17 +29,17 @@ describe("Badges Page", () => {
     mockUseCandidateBadgesQuery.mockReturnValue({
       data: [
         {
-          id: 1,
-          name: "React Specialist",
+          badgeName: "React Specialist",
           description: "Domínio em React e Hooks.",
           technologyName: "React",
-          testScore: 90.0,
+          scoreAchieved: 90.0,
           earnedAt: "2026-07-15T14:30:00Z",
         },
       ],
       isLoading: false,
+      isError: false,
       error: null,
-    } as ReturnType<typeof useCandidateBadgesQuery>);
+    } as unknown as ReturnType<typeof useCandidateBadgesQuery>);
 
     render(<BadgesPage />);
 
@@ -50,20 +51,21 @@ describe("Badges Page", () => {
     expect(screen.getByText("React")).toBeInTheDocument();
     expect(screen.getByText("90.0%")).toBeInTheDocument();
     expect(screen.getByText("Pontuação Obtida")).toBeInTheDocument();
+    expect(screen.getByText("15/07/2026")).toBeInTheDocument();
   });
 
-  it("renders badge without optional fields (no tech name, no description, no test score) and handles invalid date fallback", () => {
+  it("renders badge without optional fields (no tech name, no description, no scoreAchieved) and handles invalid date fallback", () => {
     mockUseCandidateBadgesQuery.mockReturnValue({
       data: [
         {
-          id: 2,
-          name: "General Achievement",
+          badgeName: "General Achievement",
           earnedAt: "invalid-date-string",
         },
       ],
       isLoading: false,
+      isError: false,
       error: null,
-    } as ReturnType<typeof useCandidateBadgesQuery>);
+    } as unknown as ReturnType<typeof useCandidateBadgesQuery>);
 
     render(<BadgesPage />);
 
@@ -76,8 +78,9 @@ describe("Badges Page", () => {
     mockUseCandidateBadgesQuery.mockReturnValue({
       data: undefined,
       isLoading: false,
+      isError: false,
       error: null,
-    } as ReturnType<typeof useCandidateBadgesQuery>);
+    } as unknown as ReturnType<typeof useCandidateBadgesQuery>);
 
     render(<BadgesPage />);
 
@@ -89,5 +92,23 @@ describe("Badges Page", () => {
     expect(
       screen.getByRole("link", { name: /ir para testes/i }),
     ).toHaveAttribute("href", "/candidate/dashboard/tests");
+  });
+
+  it("renders error state when isError is true", () => {
+    mockUseCandidateBadgesQuery.mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      isError: true,
+      error: new Error("Network Error"),
+    } as unknown as ReturnType<typeof useCandidateBadgesQuery>);
+
+    render(<BadgesPage />);
+
+    expect(screen.getByText("Erro ao carregar badges")).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "Não foi possível recuperar suas badges no momento. Verifique sua conexão ou tente novamente mais tarde.",
+      ),
+    ).toBeInTheDocument();
   });
 });
