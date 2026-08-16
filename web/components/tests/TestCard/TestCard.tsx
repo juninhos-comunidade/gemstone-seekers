@@ -1,8 +1,13 @@
+"use client";
+
 import { Icon } from "@iconify/react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { techIcons, defaultIcon } from "@/lib/icons/techIcons";
-import Link from "next/link";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { startAssessment } from "@/lib/api/assessments";
+import type { AssessmentDifficulty } from "@/lib/types/assessment";
 
 type TestCardProps = {
   id: string;
@@ -24,6 +29,26 @@ export function TestCard({
   difficulty = "BEGINNER",
 }: TestCardProps) {
   const icon = techIcons[Tech] || defaultIcon;
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleStartTest = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      // Tenta iniciar o assessment para verificar se há testes disponíveis
+      await startAssessment(Tech, difficulty as AssessmentDifficulty);
+
+      // Se sucesso, redireciona para a página do teste
+      router.push(`/candidate/test/${id}?difficulty=${difficulty}`);
+    } catch {
+      setError("Esta tecnologia não possui testes disponíveis no momento.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <Card className="max-w-sm">
@@ -41,9 +66,12 @@ export function TestCard({
           <span>•</span>
           <span>{Nivel}</span>
         </div>
-        <Link href={`/candidate/test/${id}?difficulty=${difficulty}`}>
-          <Button className="w-full">Começar</Button>
-        </Link>
+
+        {error && <p className="text-destructive text-sm">{error}</p>}
+
+        <Button className="w-full" onClick={handleStartTest} disabled={loading}>
+          {loading ? "Verificando..." : "Começar"}
+        </Button>
       </CardContent>
     </Card>
   );

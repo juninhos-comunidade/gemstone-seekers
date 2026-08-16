@@ -1,6 +1,7 @@
-import { render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { describe, expect, it, vi, beforeEach } from "vitest";
 import { TestCard } from "./TestCard";
+import { startAssessment } from "@/lib/api/assessments";
 
 vi.mock("@iconify/react", () => ({
   Icon: ({ icon, className }: { icon: string; className?: string }) => (
@@ -8,7 +9,21 @@ vi.mock("@iconify/react", () => ({
   ),
 }));
 
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({
+    push: vi.fn(),
+  }),
+}));
+
+vi.mock("@/lib/api/assessments", () => ({
+  startAssessment: vi.fn(),
+}));
+
 describe("TestCard", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
   it("renders test title, description, metadata and action", () => {
     render(
       <TestCard
@@ -28,12 +43,7 @@ describe("TestCard", () => {
     ).toBeInTheDocument();
     expect(screen.getByText(/10 questões/i)).toBeInTheDocument();
     expect(screen.getByText(/^iniciante$/i)).toBeInTheDocument();
-    const startLink = screen.getByRole("link", { name: /começar/i });
-    expect(startLink).toBeInTheDocument();
-    expect(startLink).toHaveAttribute(
-      "href",
-      "/candidate/test/react-iniciantes?difficulty=BEGINNER",
-    );
+    expect(screen.getByRole("button", { name: /começar/i })).toBeInTheDocument();
   });
 
   it("uses mapped technology icon when available", () => {
@@ -70,5 +80,53 @@ describe("TestCard", () => {
       "data-icon",
       "mdi:code-tags",
     );
+  });
+
+  it("shows loading state when starting test", async () => {
+    vi.mocked(startAssessment).mockImplementation(() => new Promise(() => {}));
+
+    render(
+      <TestCard
+        id="react-test"
+        Tech="React"
+        Titulo="React Test"
+        Descricao="Test description"
+        NumQuestoes={10}
+        Nivel="iniciante"
+        difficulty="BEGINNER"
+      />,
+    );
+
+    const startButton = screen.getByRole("button", { name: /começar/i });
+    fireEvent.click(startButton);
+
+    await waitFor(() => {
+      expect(screen.getByText(/verificando\.\.\./i)).toBeInTheDocument();
+    });
+  });
+
+  it("shows error message when technology has no tests", async () => {
+    vi.mocked(startAssessment).mockRejectedValue(new Error("No tests available"));
+
+    render(
+      <TestCard
+        id="tech-sem-testes"
+        Tech="Tecnologia Sem Testes"
+        Titulo="Teste Sem Testes"
+        Descricao="Test description"
+        NumQuestoes={10}
+        Nivel="iniciante"
+        difficulty="BEGINNER"
+      />,
+    );
+
+    const startButton = screen.getByRole("button", { name: /começar/i });
+    fireEvent.click(startButton);
+
+    await waitFor(() => {
+      expect(
+        screen.getByText(/esta tecnologia não possui testes disponíveis no momento\./i),
+      ).toBeInTheDocument();
+    });
   });
 });
