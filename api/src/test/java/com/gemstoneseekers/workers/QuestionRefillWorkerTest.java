@@ -99,13 +99,13 @@ class QuestionRefillWorkerTest {
         StockProjection advanced = createMockProjection(2, QuestionDifficulty.ADVANCED, 12L);
         when(questionRepository.getQuestionStockReport()).thenReturn(List.of(beginner, intermediate, advanced));
         AiQuestionBatchResponse aiResponse = new AiQuestionBatchResponse(List.of());
-        when(aiService.generateQuestions("Python", QuestionDifficulty.BEGINNER, 10)).thenReturn(aiResponse);
+        when(aiService.generateQuestions("Python", QuestionDifficulty.BEGINNER, 12)).thenReturn(aiResponse);
 
         worker.executeRefillJob();
 
-        verify(aiService, times(2)).generateQuestions("Python", QuestionDifficulty.BEGINNER, 10);
-        verify(questionService, times(2)).saveAiGeneratedBatch(pythonTech, QuestionDifficulty.BEGINNER, aiResponse);
-        verify(sleeper, times(2)).sleep(5000);
+        verify(aiService, times(1)).generateQuestions("Python", QuestionDifficulty.BEGINNER, 12);
+        verify(questionService, times(1)).saveAiGeneratedBatch(pythonTech, QuestionDifficulty.BEGINNER, aiResponse);
+        verify(sleeper, times(1)).sleep(5000);
         verify(aiService, never()).generateQuestions("Python", QuestionDifficulty.INTERMEDIATE, 10);
         verify(aiService, never()).generateQuestions("Python", QuestionDifficulty.ADVANCED, 10);
     }
@@ -121,12 +121,12 @@ class QuestionRefillWorkerTest {
         when(technologyRepository.findAll()).thenReturn(List.of(javaTech, pythonTech));
         StockProjection javaStock = createMockProjection(1, QuestionDifficulty.BEGINNER, 0L);
         when(questionRepository.getQuestionStockReport()).thenReturn(List.of(javaStock));
-        when(aiService.generateQuestions("Java", QuestionDifficulty.BEGINNER, 10)).thenThrow(new AiGenerationException(
+        when(aiService.generateQuestions("Java", QuestionDifficulty.BEGINNER, 12)).thenThrow(new AiGenerationException(
                 "AI quota exceeded"));
 
         assertDoesNotThrow(() -> worker.executeRefillJob());
 
-        verify(aiService, times(1)).generateQuestions("Java", QuestionDifficulty.BEGINNER, 10);
+        verify(aiService, times(1)).generateQuestions("Java", QuestionDifficulty.BEGINNER, 12);
         verify(aiService, never()).generateQuestions("Python", QuestionDifficulty.BEGINNER, 10);
         verify(questionService, never()).saveAiGeneratedBatch(any(), any(), any());
     }
@@ -140,13 +140,13 @@ class QuestionRefillWorkerTest {
         StockProjection stock = createMockProjection(1, QuestionDifficulty.BEGINNER, 0L);
         when(questionRepository.getQuestionStockReport()).thenReturn(List.of(stock));
         AiQuestionBatchResponse aiResponse = new AiQuestionBatchResponse(List.of());
-        when(aiService.generateQuestions("Java", QuestionDifficulty.BEGINNER, 10)).thenReturn(aiResponse);
+        when(aiService.generateQuestions("Java", QuestionDifficulty.BEGINNER, 12)).thenReturn(aiResponse);
         doThrow(new DataAccessException("DB connection lost") {
         }).when(questionService).saveAiGeneratedBatch(any(), any(), any());
 
         assertDoesNotThrow(() -> worker.executeRefillJob());
 
-        verify(aiService, times(1)).generateQuestions("Java", QuestionDifficulty.BEGINNER, 10);
+        verify(aiService, times(1)).generateQuestions("Java", QuestionDifficulty.BEGINNER, 12);
         verify(questionService, times(1)).saveAiGeneratedBatch(any(), any(), any());
         verify(sleeper, never()).sleep(anyInt());
     }
@@ -160,12 +160,12 @@ class QuestionRefillWorkerTest {
         StockProjection stock = createMockProjection(1, QuestionDifficulty.BEGINNER, 0L);
         when(questionRepository.getQuestionStockReport()).thenReturn(List.of(stock));
         AiQuestionBatchResponse aiResponse = new AiQuestionBatchResponse(List.of());
-        when(aiService.generateQuestions("Java", QuestionDifficulty.BEGINNER, 10)).thenReturn(aiResponse);
+        when(aiService.generateQuestions("Java", QuestionDifficulty.BEGINNER, 12)).thenReturn(aiResponse);
         doThrow(new InterruptedException()).when(sleeper).sleep(5000);
 
         worker.executeRefillJob();
 
-        verify(aiService, times(1)).generateQuestions("Java", QuestionDifficulty.BEGINNER, 10);
+        verify(aiService, times(1)).generateQuestions("Java", QuestionDifficulty.BEGINNER, 12);
         verify(questionService, times(1)).saveAiGeneratedBatch(any(), any(), any());
         assertThat(Thread.currentThread().isInterrupted()).isTrue();
         Thread.interrupted();
