@@ -55,6 +55,9 @@ public class AuthService {
         if (user.getRole() != null) {
             throw new ConflictException("Registration already completed");
         }
+        if (userRepository.existsByDocumentNumberAndDocumentType(request.documentNumber(), request.documentType())) {
+            throw new ConflictException("Document already in use by another account");
+        }
 
         Company company = null;
         if (request.role() == UserRole.RECRUITER) {
