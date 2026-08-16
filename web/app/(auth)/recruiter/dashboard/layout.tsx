@@ -16,11 +16,6 @@ export default function Layout({
       href: "/recruiter/dashboard/jobs",
       icon: "briefcase" as const,
     },
-    {
-      label: "Radar",
-      href: "/candidate/dashboard/radar",
-      icon: "LuRadar" as const,
-    },
   ];
 
   return (

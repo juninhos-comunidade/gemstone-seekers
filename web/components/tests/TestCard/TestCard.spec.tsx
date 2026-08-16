@@ -1,6 +1,8 @@
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi, beforeEach } from "vitest";
 import { TestCard } from "./TestCard";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { useStartAssessmentMutation } from "@/lib/api/assessments";
 
 vi.mock("@iconify/react", () => ({
   Icon: ({ icon, className }: { icon: string; className?: string }) => (
@@ -8,7 +10,37 @@ vi.mock("@iconify/react", () => ({
   ),
 }));
 
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({
+    push: vi.fn(),
+  }),
+}));
+
+vi.mock("@/lib/api/assessments", () => ({
+  useStartAssessmentMutation: vi.fn(),
+}));
+
+function createWrapper() {
+  const queryClient = new QueryClient({
+    defaultOptions: { mutations: { retry: false } },
+  });
+  const Wrapper = ({ children }: { children: React.ReactNode }) => (
+    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+  );
+  return Wrapper;
+}
+
 describe("TestCard", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    // Mock padrão para os testes básicos
+    vi.mocked(useStartAssessmentMutation).mockReturnValue({
+      mutate: vi.fn(),
+      isPending: false,
+      error: null,
+    } as ReturnType<typeof useStartAssessmentMutation>);
+  });
+
   it("renders test title, description, metadata and action", () => {
     render(
       <TestCard
@@ -20,6 +52,7 @@ describe("TestCard", () => {
         Nivel="iniciante"
         difficulty="BEGINNER"
       />,
+      { wrapper: createWrapper() },
     );
 
     expect(screen.getByText(/react para iniciantes/i)).toBeInTheDocument();
@@ -28,12 +61,9 @@ describe("TestCard", () => {
     ).toBeInTheDocument();
     expect(screen.getByText(/10 questões/i)).toBeInTheDocument();
     expect(screen.getByText(/^iniciante$/i)).toBeInTheDocument();
-    const startLink = screen.getByRole("link", { name: /começar/i });
-    expect(startLink).toBeInTheDocument();
-    expect(startLink).toHaveAttribute(
-      "href",
-      "/candidate/test/react-iniciantes?difficulty=BEGINNER",
-    );
+    expect(
+      screen.getByRole("button", { name: /começar/i }),
+    ).toBeInTheDocument();
   });
 
   it("uses mapped technology icon when available", () => {
@@ -46,6 +76,7 @@ describe("TestCard", () => {
         NumQuestoes={15}
         Nivel="intermediario"
       />,
+      { wrapper: createWrapper() },
     );
 
     expect(screen.getByTestId("tech-icon")).toHaveAttribute(
@@ -64,11 +95,62 @@ describe("TestCard", () => {
         NumQuestoes={8}
         Nivel="iniciante"
       />,
+      { wrapper: createWrapper() },
     );
 
     expect(screen.getByTestId("tech-icon")).toHaveAttribute(
       "data-icon",
       "mdi:code-tags",
     );
+  });
+
+  it("shows loading state when starting test", async () => {
+    vi.mocked(useStartAssessmentMutation).mockReturnValue({
+      mutate: vi.fn(),
+      isPending: true,
+      error: null,
+    } as ReturnType<typeof useStartAssessmentMutation>);
+
+    render(
+      <TestCard
+        id="react-test"
+        Tech="React"
+        Titulo="React Test"
+        Descricao="Test description"
+        NumQuestoes={10}
+        Nivel="iniciante"
+        difficulty="BEGINNER"
+      />,
+      { wrapper: createWrapper() },
+    );
+
+    expect(screen.getByText(/verificando\.\.\./i)).toBeInTheDocument();
+  });
+
+  it("shows error message when technology has no tests", async () => {
+    vi.mocked(useStartAssessmentMutation).mockReturnValue({
+      mutate: vi.fn(),
+      isPending: false,
+      error: new Error("No tests available"),
+    } as ReturnType<typeof useStartAssessmentMutation>);
+
+    render(
+      <TestCard
+        id="tech-sem-testes"
+        Tech="Tecnologia Sem Testes"
+        Titulo="Teste Sem Testes"
+        Descricao="Test description"
+        NumQuestoes={10}
+        Nivel="iniciante"
+        difficulty="BEGINNER"
+      />,
+      { wrapper: createWrapper() },
+    );
+
+    expect(
+      screen.getByText(
+        /esta tecnologia não possui testes disponíveis no momento\./i,
+      ),
+    ).toBeInTheDocument();
   });
 });

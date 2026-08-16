@@ -1,8 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { useRouter } from "next/navigation";
-import { getAuthToken } from "@/lib/api/auth";
-import { httpClient } from "@/lib/api/client";
+import { getAuthToken, getUserRole } from "@/lib/api/auth";
 import { toast } from "sonner";
 import Role from "./page";
 
@@ -32,13 +31,8 @@ vi.mock("react-hook-form", () => ({
 
 vi.mock("@/lib/api/auth", () => ({
   getAuthToken: vi.fn(),
+  getUserRole: vi.fn(),
   setUserRole: vi.fn(),
-}));
-
-vi.mock("@/lib/api/client", () => ({
-  httpClient: {
-    get: vi.fn(),
-  },
 }));
 
 vi.mock("sonner", () => ({
@@ -49,7 +43,7 @@ vi.mock("sonner", () => ({
 
 const mockUseRouter = vi.mocked(useRouter);
 const mockGetAuthToken = vi.mocked(getAuthToken);
-const mockHttpClientGet = vi.mocked(httpClient.get);
+const mockGetUserRole = vi.mocked(getUserRole);
 const mockToastError = vi.mocked(toast.error);
 
 const mockRouter = {
@@ -69,11 +63,9 @@ describe("Role Selection Page - form interactions", () => {
     mockHandleSubmit.mockImplementation(
       (callback) => () => callback({ role: "candidate" }),
     );
-    // Seed a valid auth state so the effect resolves before form assertions.
+    // Seed a valid auth state with no role so the form renders.
     mockGetAuthToken.mockReturnValue("valid-token");
-    mockHttpClientGet.mockResolvedValue({
-      result: { registrationCompleted: false },
-    });
+    mockGetUserRole.mockReturnValue(null);
   });
 
   it("should renders role selection cards for recruiter and candidate", async () => {
@@ -184,8 +176,6 @@ describe("Role Selection Page - form interactions", () => {
     isSubmittingMock = true;
 
     render(<Role />);
-    // Auth check must complete (checkingAuth → false) before the form renders.
-    // With isSubmitting=true the buttons show "Selecionando..." instead of "Selecionar".
     await waitFor(() =>
       expect(screen.getAllByText("Selecionando...")).toHaveLength(2),
     );
@@ -208,6 +198,7 @@ describe("Role Selection Page - auth check effect", () => {
 
   it("redirects to /login when there is no token", async () => {
     mockGetAuthToken.mockReturnValue(null);
+    mockGetUserRole.mockReturnValue(null);
 
     render(<Role />);
 
@@ -216,11 +207,9 @@ describe("Role Selection Page - auth check effect", () => {
     );
   });
 
-  it("redirects to /recruiter/dashboard when registration is complete and role is RECRUITER", async () => {
+  it("redirects to /recruiter/dashboard when user has role RECRUITER", async () => {
     mockGetAuthToken.mockReturnValue("valid-token");
-    mockHttpClientGet.mockResolvedValue({
-      result: { registrationCompleted: true, role: "RECRUITER" },
-    });
+    mockGetUserRole.mockReturnValue("RECRUITER");
 
     render(<Role />);
 
@@ -229,11 +218,9 @@ describe("Role Selection Page - auth check effect", () => {
     );
   });
 
-  it("redirects to /candidate/dashboard when registration is complete and role is not RECRUITER", async () => {
+  it("redirects to /candidate/dashboard when user has role CANDIDATE", async () => {
     mockGetAuthToken.mockReturnValue("valid-token");
-    mockHttpClientGet.mockResolvedValue({
-      result: { registrationCompleted: true, role: "CANDIDATE" },
-    });
+    mockGetUserRole.mockReturnValue("CANDIDATE");
 
     render(<Role />);
 
@@ -242,11 +229,9 @@ describe("Role Selection Page - auth check effect", () => {
     );
   });
 
-  it("stops checking and shows the form when registration is not complete", async () => {
+  it("stops checking and shows the form when user has no role", async () => {
     mockGetAuthToken.mockReturnValue("valid-token");
-    mockHttpClientGet.mockResolvedValue({
-      result: { registrationCompleted: false },
-    });
+    mockGetUserRole.mockReturnValue(null);
 
     render(<Role />);
 
@@ -256,19 +241,5 @@ describe("Role Selection Page - auth check effect", () => {
       ).toBeInTheDocument(),
     );
     expect(mockRouter.replace).not.toHaveBeenCalled();
-  });
-
-  it("shows the form when the /profile request fails", async () => {
-    mockGetAuthToken.mockReturnValue("valid-token");
-    mockHttpClientGet.mockRejectedValue(new Error("network error"));
-
-    render(<Role />);
-
-    await waitFor(() =>
-      expect(
-        screen.getByRole("heading", { name: "Recrutador" }),
-      ).toBeInTheDocument(),
-    );
-    expect(mockRouter.replace).not.toHaveBeenCalledWith("/login");
   });
 });
