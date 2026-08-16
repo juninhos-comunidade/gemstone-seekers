@@ -26,7 +26,6 @@ import {
   Banknote,
   FilePenLine,
   Trash2,
-  Eye,
   CheckCircle2,
   XCircle,
   AlertTriangle,
@@ -204,15 +203,6 @@ export function RecruiterJobCard({ job }: RecruiterJobCardProps) {
         </Dialog>
 
         <div className="flex items-center gap-2">
-          <Link
-            href={`/candidate/dashboard/jobs/${job.id}`}
-            className={cn(
-              buttonVariants({ variant: "ghost", size: "sm" }),
-              "h-7 gap-1 px-2.5 text-xs",
-            )}
-          >
-            <Eye className="size-3.5" /> Visualizar
-          </Link>
           <Link
             href={`/recruiter/dashboard/jobs/${job.id}/edit`}
             className={cn(
