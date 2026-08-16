@@ -58,7 +58,8 @@ class DomainRepositoryTest {
         cfg.addAnnotatedClass(QuestionOption.class);
         cfg.addAnnotatedClass(com.gemstoneseekers.models.Assessment.class);
         cfg.addAnnotatedClass(CandidateAnswer.class);
-
+        cfg.addAnnotatedClass(CandidateBadge.class);
+        cfg.addAnnotatedClass(Badge.class);
         sessionFactory = cfg.buildSessionFactory();
     }
 

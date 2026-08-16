@@ -38,7 +38,7 @@ class GlobalExceptionHandlerTest {
         HttpHeaders headers = new HttpHeaders();
 
         ResponseEntity<Object> response = handler.handleMethodArgumentNotValid(ex, headers, HttpStatus.BAD_REQUEST,
-            request);
+                request);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
         assertThat(response.getBody()).isNotNull();
@@ -123,7 +123,7 @@ class GlobalExceptionHandlerTest {
         HttpHeaders headers = new HttpHeaders();
 
         ResponseEntity<Object> response = handler.handleHttpMessageNotReadable(ex, headers, HttpStatus.BAD_REQUEST,
-            request);
+                request);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
         assertThat(response.getBody()).isNotNull();
@@ -135,12 +135,12 @@ class GlobalExceptionHandlerTest {
     @Test
     void shouldHandleHttpRequestMethodNotSupported() {
         org.springframework.web.HttpRequestMethodNotSupportedException ex = new org.springframework.web.HttpRequestMethodNotSupportedException(
-            "POST");
+                "POST");
         WebRequest request = mock(WebRequest.class);
         HttpHeaders headers = new HttpHeaders();
 
         ResponseEntity<Object> response = handler.handleHttpRequestMethodNotSupported(ex, headers,
-            HttpStatus.METHOD_NOT_ALLOWED, request);
+                HttpStatus.METHOD_NOT_ALLOWED, request);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.METHOD_NOT_ALLOWED);
         assertThat(response.getBody()).isNotNull();
@@ -182,7 +182,7 @@ class GlobalExceptionHandlerTest {
     @Test
     void shouldHandleDataIntegrityViolation() {
         org.springframework.dao.DataIntegrityViolationException ex = new org.springframework.dao.DataIntegrityViolationException(
-            "FK constraint fail");
+                "FK constraint fail");
 
         ResponseEntity<BaseResponse<Void>> response = handler.handleDataIntegrityViolation(ex);
 

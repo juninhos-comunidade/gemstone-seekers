@@ -111,8 +111,8 @@ public class QuestionRefillWorker {
 
             } catch (DataAccessException e) {
                 if (log.isErrorEnabled()) {
-                    log.error("[WORKER] Unexpected infrastructure error processing {}. Skipping to next technology.", tech
-                            .getName(), e);
+                    log.error("[WORKER] Unexpected infrastructure error processing {}. Skipping to next technology.",
+                            tech.getName(), e);
                 }
             }
         }
@@ -127,22 +127,24 @@ public class QuestionRefillWorker {
                     0L);
 
             while (currentStock < MINIMUM_STOCK_THRESHOLD) {
+                int amountToRequest = (int) (MINIMUM_STOCK_THRESHOLD - currentStock);
+
                 if (log.isWarnEnabled()) {
-                    log.warn("[WORKER] Low stock for {} ({}). Current: {}. Target: {}. Triggering AI.", tech.getName(),
-                            difficulty, currentStock, MINIMUM_STOCK_THRESHOLD);
+                    log.warn("[WORKER] Low stock for {} ({}). Current: {}. Defict: {}. Triggering AI.", tech.getName(),
+                            difficulty, currentStock, amountToRequest);
                 }
 
                 AiQuestionBatchResponse aiResponse = aiService.generateQuestions(tech.getName(), difficulty,
-                        BATCH_SIZE);
+                        amountToRequest);
 
                 questionService.saveAiGeneratedBatch(tech, difficulty, aiResponse);
 
                 if (log.isInfoEnabled()) {
-                    log.info("[WORKER] Successfully generated and saved {} questions for {} ({}).", BATCH_SIZE, tech
+                    log.info("[WORKER] Successfully generated and saved {} questions for {} ({}).", amountToRequest, tech
                             .getName(), difficulty);
                 }
 
-                currentStock += BATCH_SIZE;
+                currentStock += amountToRequest;
 
                 try {
                     sleeper.sleep(RATE_LIMIT_DELAY_MS);
