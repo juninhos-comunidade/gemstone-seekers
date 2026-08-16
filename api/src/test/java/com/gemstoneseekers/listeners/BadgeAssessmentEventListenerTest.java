@@ -47,10 +47,8 @@ class BadgeAssessmentEventListenerTest {
     @Test
     @DisplayName("Should call badge application service when assessment is completed")
     void handleAssessmentCompleted_shouldCallBadgeApplicationService() {
-        // when
         listener.handleAssessmentCompleted(event);
 
-        // then
         verify(badgeApplicationService).evaluateAndAssignBadge(
                 event.candidateId(),
                 event.technologyId(),
@@ -64,12 +62,10 @@ class BadgeAssessmentEventListenerTest {
     @MethodSource("exceptionProvider")
     @DisplayName("Should handle exceptions from badge service and not propagate them")
     void handleAssessmentCompleted_shouldHandleExceptions(RuntimeException exception) {
-        // given
         doThrow(exception).when(badgeApplicationService).evaluateAndAssignBadge(
                 any(UUID.class), any(Integer.class), any(UUID.class), any(BigDecimal.class),
             any(QuestionDifficulty.class));
 
-        // when & then
         assertThatCode(() -> listener.handleAssessmentCompleted(event))
                 .doesNotThrowAnyException();
     }

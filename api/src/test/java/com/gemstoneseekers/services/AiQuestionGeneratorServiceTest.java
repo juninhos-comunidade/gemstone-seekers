@@ -48,7 +48,6 @@ class AiQuestionGeneratorServiceTest {
     @Test
     @DisplayName("generateQuestions should return questions on successful API call")
     void generateQuestions_onSuccess_shouldReturnQuestions() {
-        // given
         String technologyName = "Java";
         QuestionDifficulty difficulty = QuestionDifficulty.INTERMEDIATE;
         int amount = 2;
@@ -68,14 +67,10 @@ class AiQuestionGeneratorServiceTest {
                 }
                 """;
 
-        // A captura do argumento é feita aqui, dentro do when()
         when(chatClient.prompt().user(promptCaptor.capture()).call().content()).thenReturn(jsonResponse);
 
-        // when
         AiQuestionBatchResponse result = aiQuestionGeneratorService.generateQuestions(technologyName, difficulty, amount);
 
-        // then
-        // A verificação é feita no valor capturado, sem usar verify() para a captura.
         String capturedPrompt = promptCaptor.getValue();
         assertThat(capturedPrompt).contains("gerar 2 questões")
                                   .contains("'Java'")
@@ -94,10 +89,8 @@ class AiQuestionGeneratorServiceTest {
     @ValueSource(strings = {"", "  "})
     @DisplayName("generateQuestions should throw AiGenerationException for null or blank response")
     void generateQuestions_whenResponseIsNullOrBlank_shouldThrowException(String apiResponse) {
-        // given
         when(chatClient.prompt().user(anyString()).call().content()).thenReturn(apiResponse);
 
-        // when & then
         assertThatThrownBy(() -> aiQuestionGeneratorService.generateQuestions("Java", QuestionDifficulty.BEGINNER, 1))
                 .isInstanceOf(AiGenerationException.class)
                 .hasMessage("A API retornou um payload nulo ou vazio.");
@@ -106,10 +99,8 @@ class AiQuestionGeneratorServiceTest {
     @Test
     @DisplayName("generateQuestions should wrap AI exceptions in AiGenerationException")
     void generateQuestions_whenAiApiFails_shouldWrapException() {
-        // given
         when(chatClient.prompt().user(anyString()).call()).thenThrow(new TransientAiException("API is unavailable"));
 
-        // when & then
         assertThatThrownBy(() -> aiQuestionGeneratorService.generateQuestions("Java", QuestionDifficulty.BEGINNER, 1))
                 .isInstanceOf(AiGenerationException.class)
                 .hasMessage("AI content generation failed due to upstream error.")

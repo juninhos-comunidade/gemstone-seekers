@@ -625,8 +625,6 @@ class AssessmentApplicationServiceTest {
         verify(assessmentRepository).findAll(specCaptor.capture(), any(Sort.class));
         Specification<Assessment> capturedSpec = specCaptor.getValue();
 
-        // Não podemos testar o Specification diretamente, mas podemos verificar que ele foi criado e passado.
-        // Um teste de integração para AssessmentSpecifications já garante a lógica interna.
         assertThat(capturedSpec).isNotNull();
     }
 
