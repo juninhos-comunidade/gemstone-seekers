@@ -38,8 +38,8 @@ public class AuthController {
     public ResponseEntity<BaseResponse<RegisterResponse>> register(@Valid @RequestBody RegisterRequest request) {
         User user = authService.register(request);
         RegisterResponse response = userMapper.toRegisterResponse(user);
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(new BaseResponse<>(true, "User registered successfully", response, null));
+        return ResponseEntity.status(HttpStatus.CREATED).body(new BaseResponse<>(true, "User registered successfully",
+                response, null));
     }
 
     @PatchMapping("/complete-registration")
@@ -47,8 +47,8 @@ public class AuthController {
             @AuthenticationPrincipal UserDetails userDetails, @Valid @RequestBody CompleteRegistrationRequest request) {
         User user = authService.completeRegistration(userDetails.getUsername(), request);
         CompleteRegistrationResponse response = userMapper.toCompleteRegistrationResponse(user);
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(new BaseResponse<>(true, "Registration completed successfully", response, null));
+        return ResponseEntity.status(HttpStatus.OK).body(new BaseResponse<>(true, "Registration completed successfully",
+                response, null));
     }
 
     @PostMapping("/login")
@@ -60,7 +60,7 @@ public class AuthController {
     @PostMapping("/refresh")
     public ResponseEntity<BaseResponse<LoginResponse>> refresh(@Valid @RequestBody RefreshTokenRequest request) {
         LoginResponse response = authService.refreshToken(request.refreshToken());
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(new BaseResponse<>(true, "Token refreshed successfully", response, null));
+        return ResponseEntity.status(HttpStatus.OK).body(new BaseResponse<>(true, "Token refreshed successfully",
+                response, null));
     }
 }

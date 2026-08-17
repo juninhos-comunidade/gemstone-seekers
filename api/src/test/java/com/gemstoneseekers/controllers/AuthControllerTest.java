@@ -63,8 +63,8 @@ class AuthControllerTest {
 
         when(authService.register(request)).thenThrow(new ConflictException("Email already in use"));
 
-        assertThatThrownBy(() -> authController.register(request)).isInstanceOf(ConflictException.class)
-                .hasMessage("Email already in use");
+        assertThatThrownBy(() -> authController.register(request)).isInstanceOf(ConflictException.class).hasMessage(
+                "Email already in use");
     }
 
     @Test
@@ -91,8 +91,8 @@ class AuthControllerTest {
         when(authService.completeRegistration(email, request)).thenReturn(updatedUser);
         when(userMapper.toCompleteRegistrationResponse(updatedUser)).thenReturn(expectedResponse);
 
-        ResponseEntity<BaseResponse<CompleteRegistrationResponse>> response = authController
-                .completeRegistration(userDetails, request);
+        ResponseEntity<BaseResponse<CompleteRegistrationResponse>> response = authController.completeRegistration(
+                userDetails, request);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
@@ -109,11 +109,11 @@ class AuthControllerTest {
         UserDetails userDetails = mock(UserDetails.class);
         when(userDetails.getUsername()).thenReturn(email);
 
-        when(authService.completeRegistration(email, request))
-                .thenThrow(new ConflictException("Registration already completed"));
+        when(authService.completeRegistration(email, request)).thenThrow(new ConflictException(
+                "Registration already completed"));
 
-        assertThatThrownBy(() -> authController.completeRegistration(userDetails, request))
-                .isInstanceOf(ConflictException.class).hasMessage("Registration already completed");
+        assertThatThrownBy(() -> authController.completeRegistration(userDetails, request)).isInstanceOf(
+                ConflictException.class).hasMessage("Registration already completed");
     }
 
     @Test
@@ -127,15 +127,15 @@ class AuthControllerTest {
 
         when(authService.completeRegistration(email, request)).thenThrow(new EntityNotFoundException("User", email));
 
-        assertThatThrownBy(() -> authController.completeRegistration(userDetails, request))
-                .isInstanceOf(EntityNotFoundException.class);
+        assertThatThrownBy(() -> authController.completeRegistration(userDetails, request)).isInstanceOf(
+                EntityNotFoundException.class);
     }
 
     @Test
     void shouldReturnOkWithTokensOnSuccessfulLogin() {
         LoginRequest request = new LoginRequest("john@example.com", "plainPassword123");
 
-        LoginResponse expectedResponse = new LoginResponse("access-token", "refresh-token", true);
+        LoginResponse expectedResponse = new LoginResponse("access-token", "refresh-token", true, "CANDIDATE");
 
         when(authService.login(request)).thenReturn(expectedResponse);
 
@@ -153,15 +153,15 @@ class AuthControllerTest {
 
         when(authService.login(request)).thenThrow(new AccessDeniedException("Invalid email or password"));
 
-        assertThatThrownBy(() -> authController.login(request)).isInstanceOf(AccessDeniedException.class)
-                .hasMessage("Invalid email or password");
+        assertThatThrownBy(() -> authController.login(request)).isInstanceOf(AccessDeniedException.class).hasMessage(
+                "Invalid email or password");
     }
 
     @Test
     void shouldReturnOkWithNewTokensOnSuccessfulRefresh() {
         RefreshTokenRequest request = new RefreshTokenRequest("valid.refresh.token");
 
-        LoginResponse expectedResponse = new LoginResponse("new-access-token", "new-refresh-token", true);
+        LoginResponse expectedResponse = new LoginResponse("new-access-token", "new-refresh-token", true, "CANDIDATE");
 
         when(authService.refreshToken("valid.refresh.token")).thenReturn(expectedResponse);
 
@@ -177,10 +177,10 @@ class AuthControllerTest {
     void shouldPropagateAccessDeniedExceptionWhenRefreshTokenIsInvalid() {
         RefreshTokenRequest request = new RefreshTokenRequest("invalid.refresh.token");
 
-        when(authService.refreshToken("invalid.refresh.token"))
-                .thenThrow(new AccessDeniedException("Invalid refresh token"));
+        when(authService.refreshToken("invalid.refresh.token")).thenThrow(new AccessDeniedException(
+                "Invalid refresh token"));
 
-        assertThatThrownBy(() -> authController.refresh(request)).isInstanceOf(AccessDeniedException.class)
-                .hasMessage("Invalid refresh token");
+        assertThatThrownBy(() -> authController.refresh(request)).isInstanceOf(AccessDeniedException.class).hasMessage(
+                "Invalid refresh token");
     }
 }

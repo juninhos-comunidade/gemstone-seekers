@@ -165,8 +165,8 @@ class AddressServiceTest {
         AddressRequest request = new AddressRequest("01000-000", "Main Street", "100", "Center", "Apt 12", null);
         when(candidateRepository.findByUserEmail(email)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> addressService.updateAddressInfoByEmail(email, request))
-                .isInstanceOf(EntityNotFoundException.class).hasMessage("Candidate with id " + email + " not found");
+        assertThatThrownBy(() -> addressService.updateAddressInfoByEmail(email, request)).isInstanceOf(
+                EntityNotFoundException.class).hasMessage("Candidate with id " + email + " not found");
         verifyNoInteractions(addressMapper, addressRepository, countryService, stateService, cityService);
     }
 }

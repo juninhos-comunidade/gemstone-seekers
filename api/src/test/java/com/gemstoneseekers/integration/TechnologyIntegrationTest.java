@@ -33,10 +33,9 @@ class TechnologyIntegrationTest {
 
     @BeforeAll
     static void setup() {
-        context = new SpringApplicationBuilder(GemstoneSeekersApplication.class).run(
-                "--spring.datasource.url=" + postgres.getJdbcUrl(),
-                "--spring.datasource.username=" + postgres.getUsername(),
-                "--spring.datasource.password=" + postgres.getPassword(), "--server.port=0",
+        context = new SpringApplicationBuilder(GemstoneSeekersApplication.class).run("--spring.profiles.active=test",
+                "--spring.datasource.url=" + postgres.getJdbcUrl(), "--spring.datasource.username=" + postgres
+                        .getUsername(), "--spring.datasource.password=" + postgres.getPassword(), "--server.port=0",
                 "--jwt.secret=e93afb5d9ffc2f656b9039f768011829be9a88b539671e8aab8d347949a4da67",
                 "--jwt.access-token.expiration=86400000", "--jwt.refresh-token.expiration=604800000");
         Integer resolvedPort = context.getEnvironment().getProperty("local.server.port", Integer.class);
@@ -70,8 +69,8 @@ class TechnologyIntegrationTest {
                     "email": "john@example.com",
                     "password": "plainPassword123"
                 }""";
-        given().contentType(ContentType.JSON).body(registerBody).when().post("/api/v1/auth/register").then()
-                .statusCode(201);
+        given().contentType(ContentType.JSON).body(registerBody).when().post("/api/v1/auth/register").then().statusCode(
+                201);
 
         String loginBody = """
                 {
@@ -90,8 +89,8 @@ class TechnologyIntegrationTest {
     @Test
     void shouldReturnTechnologiesWithJwt() {
         String accessToken = getAccessToken();
-        given().contentType(ContentType.JSON).header("Authorization", "Bearer " + accessToken).when()
-                .get("/api/v1/technologies").then().statusCode(200).body("success", equalTo(true))
-                .body("result", notNullValue()).body("result.size()", greaterThan(0));
+        given().contentType(ContentType.JSON).header("Authorization", "Bearer " + accessToken).when().get(
+                "/api/v1/technologies").then().statusCode(200).body("success", equalTo(true)).body("result",
+                        notNullValue()).body("result.size()", greaterThan(0));
     }
 }

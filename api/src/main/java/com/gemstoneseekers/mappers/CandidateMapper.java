@@ -33,12 +33,10 @@ public class CandidateMapper {
         UserResponse userResponse = userMapper.toUserResponse(candidate.getUser());
 
         return new CandidateResponse(candidate.getId(), userResponse, candidate.getPhone(), candidate.getSummary(),
-                candidateLinkMapper.toResponseList(candidate.getLinks()),
-                experienceMapper.toResponseList(candidate.getExperiences()),
-                educationMapper.toResponseList(candidate.getEducations()),
-                certificationMapper.toResponseList(candidate.getCertifications()),
-                projectMapper.toResponseList(candidate.getProjects()),
-                candidateLanguageMapper.toResponseList(candidate.getLanguages()));
+                candidateLinkMapper.toResponseList(candidate.getLinks()), experienceMapper.toResponseList(candidate
+                        .getExperiences()), educationMapper.toResponseList(candidate.getEducations()),
+                certificationMapper.toResponseList(candidate.getCertifications()), projectMapper.toResponseList(
+                        candidate.getProjects()), candidateLanguageMapper.toResponseList(candidate.getLanguages()));
     }
 
     public void updateEntityFromRequest(UserRequest request, Candidate candidate) {

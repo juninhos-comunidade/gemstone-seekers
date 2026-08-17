@@ -31,10 +31,6 @@ describe("Candidate Dashboard Layout", () => {
         <div>Conteúdo do dashboard</div>
       </Layout>,
     );
-
-    expect(screen.getByTestId("dashboard-header")).toHaveTextContent(
-      "candidate - Dashboard,Vagas,Testes,Radar",
-    );
     expect(screen.getByTestId("side-menu")).toHaveTextContent(
       "Dashboard,Vagas,Testes,Radar",
     );

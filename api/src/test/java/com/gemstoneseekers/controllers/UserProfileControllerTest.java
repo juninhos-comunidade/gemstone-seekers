@@ -132,8 +132,8 @@ class UserProfileControllerTest {
     void shouldAddCandidateExperienceAndReturnUpdatedProfile() {
         String email = "candidate@example.com";
         UserDetails userDetails = userDetails(email);
-        ExperienceRequest request = new ExperienceRequest("Developer", "Company", LocalDate.of(2022, 1, 1),
-                LocalDate.of(2023, 1, 1), false, "Worked on backend services");
+        ExperienceRequest request = new ExperienceRequest("Developer", "Company", LocalDate.of(2022, 1, 1), LocalDate
+                .of(2023, 1, 1), false, "Worked on backend services");
         CandidateProfileResponse profile = candidateProfile();
         when(userProfileService.getCandidateProfileByUserEmail(email)).thenReturn(profile);
 
@@ -153,8 +153,8 @@ class UserProfileControllerTest {
     void shouldAddEducationAndReturnUpdatedProfile() {
         String email = "candidate@example.com";
         UserDetails userDetails = userDetails(email);
-        EducationRequest request = new EducationRequest("University", "Computer Science", "Bachelor",
-                LocalDate.of(2018, 1, 1), LocalDate.of(2022, 1, 1));
+        EducationRequest request = new EducationRequest("University", "Computer Science", "Bachelor", LocalDate.of(2018,
+                1, 1), LocalDate.of(2022, 1, 1));
         CandidateProfileResponse profile = candidateProfile();
         when(userProfileService.getCandidateProfileByUserEmail(email)).thenReturn(profile);
 
@@ -173,8 +173,8 @@ class UserProfileControllerTest {
     void shouldAddCertificationAndReturnUpdatedProfile() {
         String email = "candidate@example.com";
         UserDetails userDetails = userDetails(email);
-        CertificationRequest request = new CertificationRequest("AWS", "Amazon", LocalDate.of(2024, 1, 1),
-                LocalDate.of(2027, 1, 1), "https://example.com/cert");
+        CertificationRequest request = new CertificationRequest("AWS", "Amazon", LocalDate.of(2024, 1, 1), LocalDate.of(
+                2027, 1, 1), "https://example.com/cert");
         CandidateProfileResponse profile = candidateProfile();
         when(userProfileService.getCandidateProfileByUserEmail(email)).thenReturn(profile);
 
@@ -213,8 +213,8 @@ class UserProfileControllerTest {
     void shouldAddProjectAndReturnUpdatedProfile() {
         String email = "candidate@example.com";
         UserDetails userDetails = userDetails(email);
-        ProjectRequest request = new ProjectRequest("Portfolio", "Personal site", "https://example.com",
-                LocalDate.of(2024, 1, 1), LocalDate.of(2024, 12, 31));
+        ProjectRequest request = new ProjectRequest("Portfolio", "Personal site", "https://example.com", LocalDate.of(
+                2024, 1, 1), LocalDate.of(2024, 12, 31));
         CandidateProfileResponse profile = candidateProfile();
         when(userProfileService.getCandidateProfileByUserEmail(email)).thenReturn(profile);
 
@@ -257,8 +257,8 @@ class UserProfileControllerTest {
         CandidateProfileResponse profile = candidateProfile();
         when(userProfileService.getCandidateProfileByUserEmail(email)).thenReturn(profile);
 
-        ResponseEntity<BaseResponse<CandidateProfileResponse>> response = controller
-                .deleteCandidateExperience(userDetails, experienceId);
+        ResponseEntity<BaseResponse<CandidateProfileResponse>> response = controller.deleteCandidateExperience(
+                userDetails, experienceId);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
@@ -277,8 +277,8 @@ class UserProfileControllerTest {
         CandidateProfileResponse profile = candidateProfile();
         when(userProfileService.getCandidateProfileByUserEmail(email)).thenReturn(profile);
 
-        ResponseEntity<BaseResponse<CandidateProfileResponse>> response = controller
-                .deleteCandidateEducation(userDetails, educationId);
+        ResponseEntity<BaseResponse<CandidateProfileResponse>> response = controller.deleteCandidateEducation(
+                userDetails, educationId);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
@@ -297,8 +297,8 @@ class UserProfileControllerTest {
         CandidateProfileResponse profile = candidateProfile();
         when(userProfileService.getCandidateProfileByUserEmail(email)).thenReturn(profile);
 
-        ResponseEntity<BaseResponse<CandidateProfileResponse>> response = controller
-                .deleteCandidateCertification(userDetails, certificationId);
+        ResponseEntity<BaseResponse<CandidateProfileResponse>> response = controller.deleteCandidateCertification(
+                userDetails, certificationId);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
@@ -358,8 +358,8 @@ class UserProfileControllerTest {
     private static CandidateProfileResponse candidateProfile() {
         UserResponse user = new UserResponse(UUID.randomUUID(), "John Doe", "candidate@example.com", UserRole.CANDIDATE,
                 "CPF", "12345678900");
-        CandidateResponse candidate = new CandidateResponse(UUID.randomUUID(), user, "11999999999", "Summary",
-                List.of(), List.of(), List.of(), List.of(), List.of(), List.of());
+        CandidateResponse candidate = new CandidateResponse(UUID.randomUUID(), user, "11999999999", "Summary", List
+                .of(), List.of(), List.of(), List.of(), List.of(), List.of());
         AddressResponse address = new AddressResponse(UUID.randomUUID(), null, "01000-000", "Main Street", "100",
                 "Center", "Apt 12");
         return new CandidateProfileResponse(candidate, address);

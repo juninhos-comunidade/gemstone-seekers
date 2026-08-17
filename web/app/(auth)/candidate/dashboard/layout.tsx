@@ -1,4 +1,3 @@
-import { DashboardHeader } from "@/components/DashboardHeader/DashboardHeader";
 import { SideMenu } from "@/components/SideMenu/SideMenu";
 
 export default function Layout({
@@ -27,16 +26,19 @@ export default function Layout({
       href: "/candidate/dashboard/radar",
       icon: "LuRadar" as const,
     },
+    {
+      label: "Badges",
+      href: "/candidate/dashboard/badges",
+      icon: "award" as const,
+    },
   ];
 
   return (
     <main className="flex min-h-screen flex-col">
-      <DashboardHeader role="candidate" menuItems={menuItems} />
       <div className="flex flex-1">
         <SideMenu items={menuItems} />
-
-        <section className="mt-16 w-full p-4 md:ml-72 md:p-6">
-          {children}
+        <section className="mt-16 w-full md:ml-72">
+          <div className="mx-auto w-full max-w-7xl p-4 md:p-6">{children}</div>
         </section>
       </div>
     </main>

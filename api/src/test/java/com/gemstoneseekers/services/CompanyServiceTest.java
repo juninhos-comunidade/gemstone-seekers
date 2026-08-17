@@ -56,8 +56,8 @@ class CompanyServiceTest {
         CompanyRequest request = new CompanyRequest("Tech Corp", "12345678000190");
         when(companyRepository.existsByCnpjAndDeletedAtIsNull("12345678000190")).thenReturn(true);
 
-        assertThatThrownBy(() -> companyService.create(request)).isInstanceOf(ConflictException.class)
-                .hasMessage("CNPJ already in use");
+        assertThatThrownBy(() -> companyService.create(request)).isInstanceOf(ConflictException.class).hasMessage(
+                "CNPJ already in use");
         verify(companyRepository, never()).save(any());
     }
 
@@ -149,8 +149,8 @@ class CompanyServiceTest {
         when(companyRepository.findByIdAndDeletedAtIsNull(id)).thenReturn(Optional.of(existing));
         when(companyRepository.existsByCnpjAndDeletedAtIsNull("12345678000190")).thenReturn(true);
 
-        assertThatThrownBy(() -> companyService.update(id, request)).isInstanceOf(ConflictException.class)
-                .hasMessage("CNPJ already in use");
+        assertThatThrownBy(() -> companyService.update(id, request)).isInstanceOf(ConflictException.class).hasMessage(
+                "CNPJ already in use");
         verify(companyRepository, never()).save(any());
     }
 

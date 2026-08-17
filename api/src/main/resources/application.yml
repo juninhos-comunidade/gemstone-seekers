@@ -16,7 +16,6 @@ spring:
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
-
   flyway:
     enabled: true
     locations:
@@ -35,7 +34,13 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
     show-sql: false
-
+  ai:
+    google:
+      genai:
+        api-key: ${GEMINI_API_KEY}
+        chat:
+          temperature: 0.7
+          model: gemini-3.5-flash
 server:
   port: ${SERVER_PORT:8080}
 

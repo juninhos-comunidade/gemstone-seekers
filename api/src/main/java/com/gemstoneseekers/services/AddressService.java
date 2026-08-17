@@ -44,8 +44,8 @@ public class AddressService {
     @Transactional
     public void updateAddressInfoByEmail(String email, AddressRequest request) {
 
-        Candidate candidate = candidateRepository.findByUserEmail(email)
-                .orElseThrow(() -> new EntityNotFoundException("Candidate", email));
+        Candidate candidate = candidateRepository.findByUserEmail(email).orElseThrow(() -> new EntityNotFoundException(
+                "Candidate", email));
 
         Address address = Optional.ofNullable(candidate.getAddress()).orElseGet(Address::new);
 

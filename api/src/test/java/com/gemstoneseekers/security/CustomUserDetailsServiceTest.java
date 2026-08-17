@@ -60,7 +60,7 @@ class CustomUserDetailsServiceTest {
     void shouldThrowUsernameNotFoundExceptionWhenUserDoesNotExist() {
         when(userRepository.findByEmail("unknown@example.com")).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> userDetailsService.loadUserByUsername("unknown@example.com"))
-                .isInstanceOf(UsernameNotFoundException.class).hasMessageContaining("unknown@example.com");
+        assertThatThrownBy(() -> userDetailsService.loadUserByUsername("unknown@example.com")).isInstanceOf(
+                UsernameNotFoundException.class).hasMessageContaining("unknown@example.com");
     }
 }

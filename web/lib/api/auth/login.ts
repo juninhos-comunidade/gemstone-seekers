@@ -1,29 +1,42 @@
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { setAuthToken } from "@/lib/api/auth";
+import { setAuthToken, setUserRole, UserRole } from "@/lib/api/auth";
 import { httpClient } from "@/lib/api/client";
+import { ApiError } from "@/lib/api/errors";
 
-interface LoginData {
+export interface LoginData {
   email: string;
   password: string;
 }
 
-interface LoginResponse {
-  success: boolean;
+export interface LoginResponse {
   message?: string;
-  token?: string;
-  accessToken?: string;
+  success: boolean;
   result?: {
-    token?: string;
+    refreshToken?: string;
     accessToken?: string;
-    role?: "CANDIDATE" | "RECRUITER";
     registrationCompleted?: boolean;
+    role?: UserRole | null;
   };
 }
 
-async function loginRequest(data: LoginData): Promise<LoginResponse> {
+export async function loginRequest(data: LoginData): Promise<LoginResponse> {
   return httpClient.post<LoginResponse>("/auth/login", data);
+}
+
+function isTimeoutOrNetworkError(error?: Error | unknown): boolean {
+  if (!error || typeof error !== "object") return false;
+  const message =
+    "message" in error &&
+    typeof (error as { message?: unknown }).message === "string"
+      ? (error as { message: string }).message.toLowerCase()
+      : "";
+  return (
+    message.includes("timeout") ||
+    message.includes("network") ||
+    message.includes("econnaborted")
+  );
 }
 
 export function useLogin() {
@@ -31,28 +44,32 @@ export function useLogin() {
 
   return useMutation({
     mutationFn: loginRequest,
-    onSuccess: (result) => {
-      const token =
-        result?.result?.token ??
-        result?.token ??
-        result?.accessToken ??
-        result?.result?.accessToken;
-
-      if (token) {
-        setAuthToken(token);
+    onSuccess: (data) => {
+      if (!data || data.success === false) {
+        toast.error(data?.message ?? "Erro ao fazer login");
+        return;
       }
 
-      const role = result?.result?.role;
-      const registrationCompleted = result?.result?.registrationCompleted;
+      const token = data.result?.accessToken;
 
-      toast.success("Login realizado com sucesso!");
+      if (!token) {
+        toast.error("Não foi possível autenticar. Tente novamente.");
+        return;
+      }
+
+      setAuthToken(token);
+
+      const role = data.result?.role;
+      const registrationCompleted = data.result?.registrationCompleted;
+
+      if (role === "CANDIDATE" || role === "RECRUITER") {
+        setUserRole(role);
+      }
+
+      toast.success(data.message || "Login realizado com sucesso!");
 
       if (!registrationCompleted) {
-        router.push(
-          role === "RECRUITER"
-            ? "/signup/role/recruiter"
-            : "/signup/role/candidate",
-        );
+        router.push("/role");
         return;
       }
 
@@ -61,7 +78,17 @@ export function useLogin() {
       );
     },
     onError: (error: Error) => {
-      toast.error(error.message ?? "Erro ao fazer login");
+      if (isTimeoutOrNetworkError(error)) {
+        const msg =
+          "O servidor está iniciando, isso pode levar até 1 minuto. Tente novamente.";
+        toast.error(msg);
+        return;
+      }
+      if (error instanceof ApiError) {
+        toast.error(error.message);
+      } else {
+        toast.error(error?.message || "Ocorreu um erro ao realizar o login.");
+      }
     },
   });
 }
