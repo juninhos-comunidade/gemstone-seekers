@@ -15,7 +15,7 @@
 
     <groupId>com.gemstoneseekers</groupId>
     <artifactId>gemstone-seekers-api</artifactId>
-    <version>0.2.0</version>
+    <version>0.3.0</version>
     <name>Gemstone Seekers API</name>
     <description
     >Knowledge validation and categorization system for recruitment processes</description>
